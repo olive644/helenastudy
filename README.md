@@ -1,10 +1,10 @@
 # HelenaStudy
 
-Assistente de planejamento de aulas de inglês da marca Oli.
+Central de estudos, foco e rotina da marca Oli.
 
-O HelenaStudy transforma tema, nível, duração e abordagem pedagógica em uma
-estrutura de aula editável. A primeira fase funciona localmente e não possui
-autenticação, integração com IA ou armazenamento remoto.
+O HelenaStudy reúne agenda, tarefas, hábitos, cronômetro, anotações e planejamento de aulas em um
+único espaço. A base atual funciona localmente e não possui autenticação, integração com IA ou
+armazenamento remoto.
 
 ## Desenvolvimento
 

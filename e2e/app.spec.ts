@@ -1,21 +1,46 @@
 import { expect, test } from "@playwright/test";
 
-test("cria o primeiro rascunho sem login", async ({ page }) => {
+test.beforeEach(async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /sua próxima aula/i })).toBeVisible();
-  await page.getByRole("button", { name: /criar primeira aula/i }).click();
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+});
+
+test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }) => {
+  await expect(page.getByRole("heading", { name: /organize seu dia de estudos/i })).toBeVisible();
+  await expect(page.getByAltText(/helena, a gata preta/i)).toHaveAttribute("src", "/helena.svg");
+
+  await page.getByRole("button", { name: "Agenda", exact: true }).click();
+  await page.getByLabel(/o que precisa ser feito/i).fill("Revisar Simple Past");
+  await page.getByRole("button", { name: /adicionar tarefa/i }).click();
+  await page.getByRole("button", { name: "Hoje", exact: true }).click();
+  await expect(page.getByText("Revisar Simple Past")).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText("Revisar Simple Past")).toBeVisible();
+});
+
+test("preserva o criador de planos de aula", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "O atalho mobile fica na tela Hoje.");
+  await page.getByRole("button", { name: /planos de aula/i }).click();
   await page.getByLabel(/tema da aula/i).fill("Simple Past");
   await page.getByLabel(/perfil da turma/i).fill("Adultos iniciantes");
-  await page.getByRole("button", { name: /montar estrutura/i }).click();
+  await page.getByRole("button", { name: /criar rascunho/i }).click();
   await expect(page.getByRole("heading", { name: "Simple Past" })).toBeVisible();
-  await expect(page.getByText("Adultos iniciantes")).toBeVisible();
   await expect(page.getByText("Warm-up")).toBeVisible();
 });
 
-test("mantém o conteúdo dentro da tela no celular", async ({ page }, testInfo) => {
+test("mantém os módulos acessíveis e sem rolagem horizontal no celular", async ({
+  page,
+}, testInfo) => {
   test.skip(testInfo.project.name !== "mobile", "Contrato específico da navegação móvel.");
-  await page.goto("/");
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
-  expect(overflow).toBe(false);
-  await expect(page.getByRole("navigation", { name: "Navegação móvel" })).toBeVisible();
+  const navigation = page.getByRole("navigation", { name: "Navegação móvel" });
+  await expect(navigation).toBeVisible();
+  await expect(navigation.getByRole("button")).toHaveCount(5);
+
+  for (const label of ["Agenda", "Foco", "Hábitos", "Notas", "Hoje"]) {
+    await navigation.getByRole("button", { name: label, exact: true }).click();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
+    expect(overflow).toBe(false);
+  }
 });

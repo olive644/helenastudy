@@ -2,26 +2,29 @@
 
 ## Proposta
 
-O HelenaStudy é o segundo aplicativo da marca Oli. Ele ajuda professores de inglês a transformar
-tema, nível, duração e abordagem pedagógica em uma estrutura de aula clara e editável.
+O HelenaStudy é o segundo aplicativo da marca Oli. Ele reúne organização, foco, rotina e
+aprendizado em um único espaço, preservando o planejador de aulas de inglês como uma ferramenta do
+produto.
 
-**Promessa:** Planeje sua aula. A Helena organiza o restante.
+**Promessa:** Estude, organize e avance com a Helena.
 
 ## Público inicial
 
-- professores de inglês;
-- professores particulares;
-- pequenas escolas e cursos livres.
+- estudantes que desejam organizar rotina e matérias;
+- professores de inglês e professores particulares;
+- pessoas que precisam reunir tarefas, foco, hábitos e anotações.
 
-## Fluxo do primeiro produto
+## Fluxo atual
 
-1. Informar tema, nível CEFR, perfil da turma e duração.
-2. Escolher uma abordagem de apresentação.
-3. Montar localmente uma estrutura com objetivo, warm-up, apresentação, prática, produção e tarefa.
-4. Revisar o resultado na interface.
+1. Consultar tarefas, agenda, hábitos e minutos de foco na tela Hoje.
+2. Criar matérias, tarefas e compromissos na Agenda.
+3. Registrar sessões no cronômetro de Foco.
+4. Criar e marcar Hábitos diários.
+5. Escrever anotações nos Cadernos.
+6. Montar planos de aula pelo fluxo determinístico existente.
 
-Nesta fase, “montar” significa aplicar uma estrutura determinística no navegador. Não há IA,
-conta, banco ou sincronização remota.
+Todos esses dados compartilham um workspace local versionado. Não há IA, conta, banco ou
+sincronização remota.
 
 ## Arquitetura atual
 
@@ -32,6 +35,17 @@ conta, banco ou sincronização remota.
 - Playwright para fluxos desktop e mobile;
 - GitHub Actions para qualidade, auditoria, segredos, análise estática e CodeQL.
 
+## Etapas do produto
+
+1. **Núcleo local:** Hoje, Agenda, Foco, Hábitos, Cadernos e planos de aula.
+2. **Sistema de estudos:** biblioteca, flashcards, revisão espaçada, questionários e metas.
+3. **Helena inteligente:** tutor, explicações, resumos e planos personalizados.
+4. **Aplicativo mobile:** notificações, sincronização e controle nativo de tempo de tela.
+
+As etapas 2 a 4 entram em mudanças próprias. IA e armazenamento remoto exigem consentimento,
+modelo de ameaça e documentação do fluxo de dados. O bloqueio de outros aplicativos não deve ser
+simulado em uma aplicação web.
+
 ## Identidade
 
 - preto: `#17151C`;
@@ -40,8 +54,9 @@ conta, banco ou sincronização remota.
 - lavanda: `#E9E2FF`;
 - creme: `#FFF8ED`.
 
-Helena é a gata preta de olhos amarelos que orienta o fluxo. A assinatura `by Oli` liga o produto
-ao ecossistema sem copiar a identidade visual do OliQualidade.
+Helena é a gata preta de olhos amarelos que orienta o fluxo. O aplicativo usa a silhueta
+assimétrica original em `public/helena.svg`, sem redesenhar a personagem como um gato genérico. A
+assinatura `by Oli` liga o produto ao ecossistema sem copiar a identidade visual do OliQualidade.
 
 ## Fora do escopo desta fase
 
@@ -51,6 +66,8 @@ ao ecossistema sem copiar a identidade visual do OliQualidade.
 - upload e leitura de PDF/livros;
 - pagamentos;
 - exportação final em PDF ou slides;
-- acompanhamento de alunos.
+- acompanhamento de alunos;
+- bloqueio de outros aplicativos;
+- notificações nativas.
 
 Cada item entra apenas quando o fluxo local básico estiver validado.
