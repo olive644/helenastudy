@@ -32,3 +32,21 @@ A direção foi simplificada para fundo neutro, painéis planos, bordas discreta
 tipografia de sistema e textos mais diretos. A fala da mascote e os elementos decorativos foram
 removidos. `public/helena.svg` agora preserva a silhueta irregular, os olhos amarelos e as pupilas
 do desenho original fornecido para a marca.
+
+## 4. Fundação da central de estudos
+
+O escopo foi ampliado por decisão de produto: o planejador de aulas permanece, mas passa a fazer
+parte de uma central pessoal de estudos e rotina. A primeira entrega adiciona:
+
+- tela Hoje derivada de tarefas, agenda, hábitos e sessões de foco;
+- criação de matérias compartilhadas pelos demais módulos;
+- criação e conclusão de tarefas;
+- compromissos com data e horário;
+- cronômetro de 25 ou 50 minutos e registro da sessão realizada;
+- hábitos diários marcáveis;
+- cadernos com edição e salvamento automático;
+- workspace local compartilhado, validado e versionado.
+
+Os dados são salvos em `localStorage` e a interface informa esse limite. Não existe conta, nuvem,
+IA, notificação nativa ou bloqueio real de aplicativos. O aviso do módulo Foco deixa explícito que
+o modo sem distrações depende de uma futura versão mobile.
