@@ -12,7 +12,8 @@ test("cria o primeiro rascunho sem login", async ({ page }) => {
   await expect(page.getByText("Warm-up")).toBeVisible();
 });
 
-test("mantém o conteúdo dentro da tela no celular", async ({ page }) => {
+test("mantém o conteúdo dentro da tela no celular", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile", "Contrato específico da navegação móvel.");
   await page.goto("/");
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
   expect(overflow).toBe(false);
