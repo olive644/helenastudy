@@ -2,11 +2,12 @@ import { expect, test } from "@playwright/test";
 
 test("cria o primeiro rascunho sem login", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /sua próxima aula/i })).toBeVisible();
-  await page.getByRole("button", { name: /criar primeira aula/i }).click();
+  await expect(page.getByRole("heading", { name: /o que você vai ensinar hoje/i })).toBeVisible();
+  await expect(page.getByAltText(/helena, a gata preta/i)).toHaveAttribute("src", "/helena.svg");
+  await page.getByRole("button", { name: /criar plano de aula/i }).click();
   await page.getByLabel(/tema da aula/i).fill("Simple Past");
   await page.getByLabel(/perfil da turma/i).fill("Adultos iniciantes");
-  await page.getByRole("button", { name: /montar estrutura/i }).click();
+  await page.getByRole("button", { name: /criar rascunho/i }).click();
   await expect(page.getByRole("heading", { name: "Simple Past" })).toBeVisible();
   await expect(page.getByText("Adultos iniciantes")).toBeVisible();
   await expect(page.getByText("Warm-up")).toBeVisible();

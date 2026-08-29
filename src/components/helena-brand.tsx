@@ -5,7 +5,7 @@ type HelenaBrandProps = {
 export function HelenaBrand({ compact = false }: HelenaBrandProps) {
   return (
     <div className="brand" aria-label="HelenaStudy, by Oli">
-      <img className="brand__mark" src="/helena-mark.svg" alt="" width="48" height="48" />
+      <img className="brand__mark" src="/helena.svg" alt="" width="48" height="52" />
       {!compact && (
         <div className="brand__copy">
           <strong>

@@ -1,16 +1,5 @@
 import { useState, type FormEvent } from "react";
-import {
-  ArrowLeft,
-  BookOpen,
-  CheckCircle2,
-  Clock3,
-  FileText,
-  GraduationCap,
-  Home,
-  Layers3,
-  Library,
-  Plus,
-} from "lucide-react";
+import { ArrowLeft, Clock3, FileText, GraduationCap, Home, Library, Plus } from "lucide-react";
 import { HelenaBrand } from "./components/helena-brand";
 import { createLessonDraft } from "./domain/create-lesson-draft";
 import {
@@ -42,7 +31,7 @@ function Sidebar({ view, onNavigate }: { view: View; onNavigate: (view: View) =>
           type="button"
           onClick={() => onNavigate("home")}
         >
-          <Home size={20} />
+          <Home size={19} />
           Início
         </button>
         <button
@@ -50,18 +39,18 @@ function Sidebar({ view, onNavigate }: { view: View; onNavigate: (view: View) =>
           type="button"
           onClick={() => onNavigate("builder")}
         >
-          <FileText size={20} />
-          Planejar aula
+          <FileText size={19} />
+          Planos de aula
         </button>
         <button className="nav-item" type="button" disabled>
-          <Library size={20} />
-          Biblioteca
-          <span className="soon-badge">Em breve</span>
+          <Library size={19} />
+          Materiais
+          <span className="soon-badge">Depois</span>
         </button>
       </nav>
       <div className="sidebar__footer">
-        <span>Produto da marca</span>
-        <strong>Oli</strong>
+        <span>HelenaStudy</span>
+        <small>um produto Oli</small>
       </div>
     </aside>
   );
@@ -77,7 +66,7 @@ function MobileNavigation({ view, onNavigate }: { view: View; onNavigate: (view:
         type="button"
         onClick={() => onNavigate("home")}
       >
-        <Home size={21} />
+        <Home size={20} />
         <span>Início</span>
       </button>
       <button
@@ -87,83 +76,122 @@ function MobileNavigation({ view, onNavigate }: { view: View; onNavigate: (view:
         type="button"
         onClick={() => onNavigate("builder")}
       >
-        <Plus size={22} />
-        <span>Nova aula</span>
+        <FileText size={20} />
+        <span>Planos</span>
       </button>
       <button className="mobile-nav__item" type="button" disabled>
-        <Library size={21} />
-        <span>Biblioteca</span>
+        <Library size={20} />
+        <span>Materiais</span>
       </button>
     </nav>
+  );
+}
+
+function PageHeader() {
+  return (
+    <header className="page-header">
+      <div className="page-header__brand">
+        <HelenaBrand />
+      </div>
+      <span className="local-note">Os dados ficam neste dispositivo</span>
+    </header>
   );
 }
 
 function HomeView({ onCreate }: { onCreate: () => void }) {
   return (
     <main className="main-content" id="main-content">
-      <header className="topbar">
-        <div className="topbar__mobile-brand">
-          <HelenaBrand />
-        </div>
-        <span className="local-badge">Primeira versão · modo local</span>
-      </header>
+      <PageHeader />
 
-      <section className="hero" aria-labelledby="hero-title">
-        <div className="hero__content">
-          <span className="eyebrow">Planejamento de aulas de inglês</span>
-          <h1 id="hero-title">Sua próxima aula começa com uma boa estrutura.</h1>
-          <p>
-            Informe o tema, a turma e o tempo disponível. A Helena organiza um ponto de partida para
-            você revisar e adaptar.
-          </p>
+      <section className="welcome" aria-labelledby="welcome-title">
+        <div className="welcome__copy">
+          <span className="section-label">Início</span>
+          <h1 id="welcome-title">O que você vai ensinar hoje?</h1>
+          <p>Organize o conteúdo e monte um primeiro rascunho da aula.</p>
           <button className="primary-button" type="button" onClick={onCreate}>
-            <Plus size={20} />
-            Criar primeira aula
+            <Plus size={19} />
+            Criar plano de aula
           </button>
-          <small>Sem cadastro e sem envio de dados nesta fase.</small>
         </div>
-        <div className="hero__mascot" aria-hidden="true">
-          <div className="mascot-card">
-            <img src="/helena-mark.svg" alt="" width="176" height="176" />
-            <span className="mascot-card__bubble">Vamos organizar?</span>
-          </div>
-        </div>
+        <img
+          className="welcome__helena"
+          src="/helena.svg"
+          alt="Helena, a gata preta de olhos amarelos"
+          width="210"
+          height="240"
+        />
       </section>
 
-      <section className="foundation" aria-labelledby="foundation-title">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">Como funciona</span>
-            <h2 id="foundation-title">Da ideia ao plano em três passos</h2>
+      <div className="home-grid">
+        <section className="plain-panel" aria-labelledby="start-title">
+          <div className="panel-heading">
+            <div>
+              <span className="section-label">Primeiro passo</span>
+              <h2 id="start-title">Comece com o básico</h2>
+            </div>
+            <span className="panel-number">01</span>
           </div>
-        </div>
-        <div className="step-grid">
-          <article className="step-card">
-            <div className="step-card__icon step-card__icon--yellow">
-              <BookOpen size={23} />
+          <p className="panel-intro">
+            Tema, nível da turma e duração já são suficientes para criar uma estrutura inicial.
+          </p>
+          <dl className="definition-list">
+            <div>
+              <dt>Conteúdo</dt>
+              <dd>O assunto principal da aula</dd>
             </div>
-            <span>01</span>
-            <h3>Defina o conteúdo</h3>
-            <p>Tema, nível CEFR, perfil da turma e objetivo principal.</p>
-          </article>
-          <article className="step-card">
-            <div className="step-card__icon step-card__icon--violet">
-              <Layers3 size={23} />
+            <div>
+              <dt>Turma</dt>
+              <dd>Nível CEFR e perfil dos alunos</dd>
             </div>
-            <span>02</span>
-            <h3>Monte a estrutura</h3>
-            <p>Warm-up, apresentação, prática, produção e homework.</p>
-          </article>
-          <article className="step-card">
-            <div className="step-card__icon step-card__icon--dark">
-              <CheckCircle2 size={23} />
+            <div>
+              <dt>Tempo</dt>
+              <dd>De 30 a 120 minutos</dd>
             </div>
-            <span>03</span>
-            <h3>Revise com liberdade</h3>
-            <p>O professor mantém o controle sobre cada decisão pedagógica.</p>
-          </article>
-        </div>
-      </section>
+          </dl>
+          <button className="text-button" type="button" onClick={onCreate}>
+            Abrir planejamento <span aria-hidden="true">→</span>
+          </button>
+        </section>
+
+        <section className="plain-panel" aria-labelledby="structure-title">
+          <div className="panel-heading">
+            <div>
+              <span className="section-label">Estrutura sugerida</span>
+              <h2 id="structure-title">Uma aula completa</h2>
+            </div>
+          </div>
+          <ol className="lesson-outline">
+            <li>
+              <span>01</span>
+              <div>
+                <strong>Warm-up</strong>
+                <small>Retomar conhecimentos da turma</small>
+              </div>
+            </li>
+            <li>
+              <span>02</span>
+              <div>
+                <strong>Apresentação</strong>
+                <small>Introduzir o conteúdo em contexto</small>
+              </div>
+            </li>
+            <li>
+              <span>03</span>
+              <div>
+                <strong>Prática e produção</strong>
+                <small>Usar o inglês com mais autonomia</small>
+              </div>
+            </li>
+            <li>
+              <span>04</span>
+              <div>
+                <strong>Homework</strong>
+                <small>Continuar o aprendizado depois da aula</small>
+              </div>
+            </li>
+          </ol>
+        </section>
+      </div>
     </main>
   );
 }
@@ -171,25 +199,18 @@ function HomeView({ onCreate }: { onCreate: () => void }) {
 function DraftPreview({ draft }: { draft: LessonDraft | null }) {
   if (!draft) {
     return (
-      <aside className="preview-card preview-card--empty" aria-live="polite">
-        <div className="preview-card__empty-icon">
-          <GraduationCap size={28} />
-        </div>
-        <h2>Sua estrutura aparecerá aqui</h2>
-        <p>Preencha os dados essenciais e clique em “Montar estrutura”.</p>
-        <ul>
-          <li>Objetivo da aula</li>
-          <li>Distribuição do tempo</li>
-          <li>Cinco etapas pedagógicas</li>
-        </ul>
+      <aside className="preview preview--empty" aria-live="polite">
+        <GraduationCap size={26} aria-hidden="true" />
+        <h2>Rascunho da aula</h2>
+        <p>Preencha os campos ao lado para visualizar a distribuição do tempo e das atividades.</p>
       </aside>
     );
   }
 
   return (
-    <aside className="preview-card" aria-live="polite" aria-labelledby="draft-title">
-      <div className="preview-card__header">
-        <span>Rascunho local</span>
+    <aside className="preview" aria-live="polite" aria-labelledby="draft-title">
+      <div className="preview__topline">
+        <span>Rascunho</span>
         <div className="draft-meta">
           <span>{draft.level}</span>
           <span>
@@ -199,14 +220,14 @@ function DraftPreview({ draft }: { draft: LessonDraft | null }) {
       </div>
       <h2 id="draft-title">{draft.title}</h2>
       <p className="draft-audience">{draft.audience}</p>
-      <div className="objective-box">
+      <div className="objective">
         <span>Objetivo</span>
         <p>{draft.objective}</p>
       </div>
       <ol className="timeline">
-        {draft.sections.map((section) => (
+        {draft.sections.map((section, index) => (
           <li key={section.kind}>
-            <div className="timeline__marker" />
+            <span className="timeline__number">{String(index + 1).padStart(2, "0")}</span>
             <div className="timeline__content">
               <div>
                 <strong>{section.title}</strong>
@@ -217,10 +238,9 @@ function DraftPreview({ draft }: { draft: LessonDraft | null }) {
           </li>
         ))}
       </ol>
-      <div className="preview-note">
-        Esta é uma estrutura determinística. A edição detalhada e a geração por IA entrarão em
-        etapas futuras.
-      </div>
+      <p className="preview__footnote">
+        Estrutura criada localmente. Você ainda poderá editar cada etapa em uma próxima versão.
+      </p>
     </aside>
   );
 }
@@ -236,6 +256,7 @@ function BuilderView({ onBack }: { onBack: () => void }) {
 
   return (
     <main className="main-content builder" id="main-content">
+      <PageHeader />
       <header className="builder__header">
         <button
           className="back-button"
@@ -243,23 +264,20 @@ function BuilderView({ onBack }: { onBack: () => void }) {
           onClick={onBack}
           aria-label="Voltar ao início"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={19} />
         </button>
         <div>
-          <span className="eyebrow">Novo planejamento</span>
-          <h1>Comece pelo essencial</h1>
-          <p>Esses dados serão usados somente no seu navegador nesta versão.</p>
+          <span className="section-label">Planejamento</span>
+          <h1>Novo plano de aula</h1>
+          <p>Preencha apenas o que fizer sentido para a sua turma.</p>
         </div>
       </header>
 
       <div className="builder-grid">
         <form className="lesson-form" onSubmit={submit}>
-          <div className="form-section-heading">
-            <span>1</span>
-            <div>
-              <h2>Contexto da aula</h2>
-              <p>O mínimo necessário para montar uma primeira estrutura.</p>
-            </div>
+          <div className="form-heading">
+            <h2>Informações da aula</h2>
+            <span>* campo obrigatório</span>
           </div>
 
           <label className="field field--full">
@@ -330,7 +348,7 @@ function BuilderView({ onBack }: { onBack: () => void }) {
           </label>
 
           <fieldset className="method-fieldset">
-            <legend>Abordagem de apresentação</legend>
+            <legend>Como apresentar o conteúdo</legend>
             <div className="method-grid">
               {METHODOLOGIES.map((methodology) => (
                 <label className="method-option" key={methodology}>
@@ -348,8 +366,7 @@ function BuilderView({ onBack }: { onBack: () => void }) {
           </fieldset>
 
           <button className="primary-button primary-button--wide" type="submit">
-            <Layers3 size={20} />
-            Montar estrutura
+            Criar rascunho
           </button>
         </form>
         <DraftPreview draft={draft} />

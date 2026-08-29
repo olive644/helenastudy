@@ -21,3 +21,14 @@ A primeira execução da CI rodou o teste chamado “mantém o conteúdo dentro 
 dois projetos do Playwright. O fluxo mobile passou, mas o mesmo teste exigiu a barra móvel no
 desktop e falhou corretamente. O contrato passou a ser explicitamente restrito ao projeto
 `mobile`; a verificação de overflow e a presença da navegação continuam obrigatórias no iPhone.
+
+## 3. Redução da aparência artificial e retorno ao desenho original
+
+A primeira interface usava gradientes de fundo, transparências, sombras grandes, muitos cartões
+arredondados e uma releitura genérica da cabeça da mascote. O conjunto parecia uma demonstração
+gerada, não uma ferramenta de trabalho.
+
+A direção foi simplificada para fundo neutro, painéis planos, bordas discretas, cantos pequenos,
+tipografia de sistema e textos mais diretos. A fala da mascote e os elementos decorativos foram
+removidos. `public/helena.svg` agora preserva a silhueta irregular, os olhos amarelos e as pupilas
+do desenho original fornecido para a marca.

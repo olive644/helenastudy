@@ -40,8 +40,9 @@ conta, banco ou sincronização remota.
 - lavanda: `#E9E2FF`;
 - creme: `#FFF8ED`.
 
-Helena é a gata preta de olhos amarelos que orienta o fluxo. A assinatura `by Oli` liga o produto
-ao ecossistema sem copiar a identidade visual do OliQualidade.
+Helena é a gata preta de olhos amarelos que orienta o fluxo. O aplicativo usa a silhueta
+assimétrica original em `public/helena.svg`, sem redesenhar a personagem como um gato genérico. A
+assinatura `by Oli` liga o produto ao ecossistema sem copiar a identidade visual do OliQualidade.
 
 ## Fora do escopo desta fase
 
