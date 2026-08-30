@@ -11,6 +11,12 @@ Plano de aula
   -> dados validados do formulário
   -> gerador determinístico
   -> visualização local
+
+Futura Helena inteligente
+  -> seleção explícita de fontes + consentimento
+  -> cliente same-origin /api/helena
+  -> handler e adaptador de provedor no servidor
+  -> resposta limitada e validada
 ```
 
 `WorkspaceState` é a fonte única para matérias, tarefas, compromissos, hábitos, anotações, sessões
@@ -28,9 +34,17 @@ KiB para o conjunto.
 O gerador de planos continua independente da interface e da central de estudos. Uma futura IA
 poderá implementar outra estratégia sem substituir o fluxo determinístico existente.
 
+A fronteira da futura IA está descrita em [`AI_BACKEND.md`](AI_BACKEND.md). O contrato rejeita
+campos desconhecidos e não aceita o workspace completo. A chave do provedor pertence exclusivamente
+ao ambiente do servidor. O handler usa `Request` e `Response` web para continuar independente do
+runtime de hospedagem; os adaptadores de provedor, identificação e rate limit ainda precisam ser
+escolhidos antes da ativação.
+
 ## Limites
 
 - `src/domain`: regras, modelos do workspace e gerador de plano de aula;
+- `src/ai`: contrato compartilhado e limites da futura integração;
+- `src/backend`: fronteira HTTP portável, sem provedor ou segredo configurado;
 - `src/data`: persistência e validação da fronteira local;
 - `src/hooks`: ligação entre React e o domínio;
 - `src/components`: componentes visuais reutilizáveis;

@@ -42,12 +42,18 @@ sincronização remota.
 1. **Núcleo local — concluído:** Hoje, Agenda, Foco, Hábitos, Cadernos e planos de aula.
 2. **Sistema de estudos — concluído:** biblioteca, flashcards, revisão programada, questionários e
    metas.
-3. **Helena inteligente:** tutor, explicações, resumos e planos personalizados.
+3. **Helena inteligente — fundação definida:** contrato, consentimento e fronteira segura do
+   backend estão prontos; provedor e interface ainda não estão ativados. Depois entram tutor,
+   explicações, resumos e planos personalizados.
 4. **Aplicativo mobile:** notificações, sincronização e controle nativo de tempo de tela.
 
 As etapas 2 a 4 entram em mudanças próprias. IA e armazenamento remoto exigem consentimento,
 modelo de ameaça e documentação do fluxo de dados. O bloqueio de outros aplicativos não deve ser
 simulado em uma aplicação web.
+
+A definição do backend de IA está em [`AI_BACKEND.md`](AI_BACKEND.md). O contrato envia somente
+fontes escolhidas pela pessoa e exige consentimento a cada solicitação. Nenhuma chave pode existir
+no bundle do navegador.
 
 ## Identidade
 
