@@ -67,3 +67,21 @@ entrega adiciona:
 Não há geração por IA nem leitura automática de arquivos. Links só são abertos quando usam HTTP ou
 HTTPS. O novo orçamento separa a entrada inicial de módulos assíncronos, mantendo limites de 220
 KiB inicial e 300 KiB total.
+
+## 6. Definição segura do backend de IA
+
+A terceira etapa começa pela fronteira de segurança, sem ativar uma IA na interface. A entrega
+define:
+
+- contrato versionado para tutoria, explicação, resumo e plano de estudos;
+- seleção explícita de fontes, sem serializar o workspace completo;
+- consentimento obrigatório por solicitação e retenção inicial `none`;
+- cliente restrito a `/api/helena` na mesma origem;
+- handler portável com validação de origem, tipo, tamanho e limite de uso;
+- interfaces independentes para provedor, identificação e rate limit;
+- respostas e erros limitados, sem detalhes internos;
+- modelo de ameaça e requisitos prévios à ativação.
+
+Não existe provedor conectado, segredo versionado ou chamada externa. A interface continua sem
+afirmar que oferece IA. A ativação depende de uma nova mudança com runtime, provedor, política de
+retenção, orçamento e implantação aprovados.
