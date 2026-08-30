@@ -1,4 +1,3 @@
-import { Check } from "lucide-react";
 import type { Dispatch } from "react";
 import {
   minutesFocusedOn,
@@ -103,7 +102,7 @@ export function TodayView({ workspace, dispatch, onNavigate }: TodayViewProps) {
                     aria-label={`Concluir ${task.title}`}
                     onClick={() => dispatch({ type: "task/toggled", id: task.id })}
                   >
-                    <Check size={14} />
+                    <span aria-hidden="true">✓</span>
                   </button>
                   <div>
                     <strong>{task.title}</strong>
@@ -167,6 +166,20 @@ export function TodayView({ workspace, dispatch, onNavigate }: TodayViewProps) {
             <span>
               <strong>Plano de aula</strong>
               <small>Organizar conteúdo</small>
+            </span>
+          </button>
+          <button type="button" onClick={() => onNavigate("learn")}>
+            <b className="quick-action-index">04</b>
+            <span>
+              <strong>Revisar</strong>
+              <small>Flashcards e questões</small>
+            </span>
+          </button>
+          <button type="button" onClick={() => onNavigate("library")}>
+            <b className="quick-action-index">05</b>
+            <span>
+              <strong>Biblioteca</strong>
+              <small>Materiais e cartões</small>
             </span>
           </button>
         </section>

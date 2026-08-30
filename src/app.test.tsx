@@ -64,14 +64,31 @@ describe("App", () => {
     expect(screen.getByText("Preparar apresentação")).toBeTruthy();
   });
 
-  it("preserva o criador de planos de aula", () => {
+  it("preserva o criador de planos de aula", async () => {
     render(<App />);
     navigate("Planos de aula");
-    fireEvent.change(screen.getByLabelText(/tema da aula/i), {
+    fireEvent.change(await screen.findByLabelText(/tema da aula/i), {
       target: { value: "Simple Past" },
     });
     fireEvent.click(screen.getByRole("button", { name: /criar rascunho/i }));
     expect(screen.getByRole("heading", { name: "Simple Past" })).toBeTruthy();
     expect(screen.getByText("Warm-up")).toBeTruthy();
+  });
+
+  it("cria e revisa um flashcard local", async () => {
+    render(<App />);
+    navigate("Biblioteca");
+    const front = await screen.findByLabelText("Frente");
+    fireEvent.change(front, { target: { value: "Improve" } });
+    fireEvent.change(screen.getByLabelText("Verso"), { target: { value: "Melhorar" } });
+    fireEvent.click(screen.getByRole("button", { name: /criar flashcard/i }));
+    expect(screen.getByText("Improve")).toBeTruthy();
+
+    navigate("Aprender");
+    expect(await screen.findByRole("heading", { name: "Improve" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /mostrar resposta/i }));
+    expect(screen.getByRole("heading", { name: "Melhorar" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Fácil" }));
+    expect(screen.getByText(/revisão em dia/i)).toBeTruthy();
   });
 });

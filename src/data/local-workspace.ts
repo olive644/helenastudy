@@ -1,6 +1,12 @@
 import {
   WORKSPACE_VERSION,
   createInitialWorkspace,
+  type FocusSession,
+  type Habit,
+  type StudyEvent,
+  type StudyNote,
+  type StudyTask,
+  type Subject,
   type WorkspaceState,
 } from "../domain/workspace";
 
@@ -75,9 +81,73 @@ function isFocusSession(value: unknown): boolean {
   );
 }
 
-export function isWorkspaceState(value: unknown): value is WorkspaceState {
-  if (!isRecord(value) || value["version"] !== WORKSPACE_VERSION) return false;
+function isMaterial(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isString(value["id"]) &&
+    isString(value["subjectId"]) &&
+    isString(value["title"]) &&
+    (value["kind"] === "link" || value["kind"] === "text") &&
+    isString(value["content"]) &&
+    isString(value["createdAt"])
+  );
+}
 
+function isFlashcard(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isString(value["id"]) &&
+    isString(value["subjectId"]) &&
+    isString(value["front"]) &&
+    isString(value["back"]) &&
+    typeof value["intervalDays"] === "number" &&
+    Number.isInteger(value["intervalDays"]) &&
+    value["intervalDays"] >= 0 &&
+    isString(value["nextReview"])
+  );
+}
+
+function isGoal(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isString(value["id"]) &&
+    isString(value["subjectId"]) &&
+    isString(value["title"]) &&
+    typeof value["targetMinutes"] === "number" &&
+    Number.isFinite(value["targetMinutes"]) &&
+    value["targetMinutes"] > 0 &&
+    isString(value["deadline"]) &&
+    typeof value["completed"] === "boolean"
+  );
+}
+
+function isQuizAttempt(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isString(value["id"]) &&
+    isString(value["subjectId"]) &&
+    typeof value["correct"] === "number" &&
+    Number.isInteger(value["correct"]) &&
+    typeof value["total"] === "number" &&
+    Number.isInteger(value["total"]) &&
+    value["correct"] >= 0 &&
+    value["total"] > 0 &&
+    value["correct"] <= value["total"] &&
+    isString(value["completedAt"])
+  );
+}
+
+type LegacyWorkspace = {
+  version: 1;
+  subjects: Subject[];
+  tasks: StudyTask[];
+  events: StudyEvent[];
+  habits: Habit[];
+  notes: StudyNote[];
+  focusSessions: FocusSession[];
+};
+
+function hasCoreCollections(value: Record<string, unknown>): boolean {
   return (
     Array.isArray(value["subjects"]) &&
     value["subjects"].length > 0 &&
@@ -95,13 +165,46 @@ export function isWorkspaceState(value: unknown): value is WorkspaceState {
   );
 }
 
+function isLegacyWorkspace(value: unknown): value is LegacyWorkspace {
+  return isRecord(value) && value["version"] === 1 && hasCoreCollections(value);
+}
+
+export function isWorkspaceState(value: unknown): value is WorkspaceState {
+  if (!isRecord(value) || value["version"] !== WORKSPACE_VERSION) return false;
+
+  return (
+    hasCoreCollections(value) &&
+    Array.isArray(value["materials"]) &&
+    value["materials"].every(isMaterial) &&
+    Array.isArray(value["flashcards"]) &&
+    value["flashcards"].every(isFlashcard) &&
+    Array.isArray(value["goals"]) &&
+    value["goals"].every(isGoal) &&
+    Array.isArray(value["quizAttempts"]) &&
+    value["quizAttempts"].every(isQuizAttempt)
+  );
+}
+
+function migrateLegacyWorkspace(legacy: LegacyWorkspace): WorkspaceState {
+  return {
+    ...legacy,
+    version: WORKSPACE_VERSION,
+    materials: [],
+    flashcards: [],
+    goals: [],
+    quizAttempts: [],
+  };
+}
+
 export function loadWorkspace(storage: Pick<Storage, "getItem">): WorkspaceState {
   const serialized = storage.getItem(WORKSPACE_STORAGE_KEY);
   if (!serialized) return createInitialWorkspace();
 
   try {
     const parsed: unknown = JSON.parse(serialized);
-    return isWorkspaceState(parsed) ? parsed : createInitialWorkspace();
+    if (isWorkspaceState(parsed)) return parsed;
+    if (isLegacyWorkspace(parsed)) return migrateLegacyWorkspace(parsed);
+    return createInitialWorkspace();
   } catch {
     return createInitialWorkspace();
   }
