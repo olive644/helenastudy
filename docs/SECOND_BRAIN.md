@@ -21,7 +21,9 @@ produto.
 3. Registrar sessões no cronômetro de Foco.
 4. Criar e marcar Hábitos diários.
 5. Escrever anotações nos Cadernos.
-6. Montar planos de aula pelo fluxo determinístico existente.
+6. Guardar links, textos e flashcards por matéria na Biblioteca.
+7. Revisar cartões, responder questionários locais e acompanhar metas em Aprender.
+8. Montar planos de aula pelo fluxo determinístico existente.
 
 Todos esses dados compartilham um workspace local versionado. Não há IA, conta, banco ou
 sincronização remota.
@@ -37,8 +39,9 @@ sincronização remota.
 
 ## Etapas do produto
 
-1. **Núcleo local:** Hoje, Agenda, Foco, Hábitos, Cadernos e planos de aula.
-2. **Sistema de estudos:** biblioteca, flashcards, revisão espaçada, questionários e metas.
+1. **Núcleo local — concluído:** Hoje, Agenda, Foco, Hábitos, Cadernos e planos de aula.
+2. **Sistema de estudos — concluído:** biblioteca, flashcards, revisão programada, questionários e
+   metas.
 3. **Helena inteligente:** tutor, explicações, resumos e planos personalizados.
 4. **Aplicativo mobile:** notificações, sincronização e controle nativo de tempo de tela.
 
@@ -63,7 +66,7 @@ assinatura `by Oli` liga o produto ao ecossistema sem copiar a identidade visual
 - login e cadastro;
 - banco de dados e colaboração;
 - geração por IA;
-- upload e leitura de PDF/livros;
+- upload e leitura automática de PDF/livros;
 - pagamentos;
 - exportação final em PDF ou slides;
 - acompanhamento de alunos;

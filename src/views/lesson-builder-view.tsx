@@ -1,4 +1,3 @@
-import { ArrowLeft, Clock3 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
 import { createLessonDraft } from "../domain/create-lesson-draft";
@@ -38,9 +37,7 @@ function DraftPreview({ draft }: { draft: LessonDraft | null }) {
         <span>Rascunho</span>
         <div className="draft-meta">
           <span>{draft.level}</span>
-          <span>
-            <Clock3 size={14} /> {draft.duration} min
-          </span>
+          <span>{draft.duration} min</span>
         </div>
       </div>
       <h2 id="draft-title">{draft.title}</h2>
@@ -89,7 +86,7 @@ export function LessonBuilderView({ onBack }: { onBack: () => void }) {
           onClick={onBack}
           aria-label="Voltar para Hoje"
         >
-          <ArrowLeft size={19} />
+          <span aria-hidden="true">←</span>
         </button>
         <div>
           <span className="section-label">Planejamento</span>
@@ -193,3 +190,5 @@ export function LessonBuilderView({ onBack }: { onBack: () => void }) {
     </main>
   );
 }
+
+export default LessonBuilderView;

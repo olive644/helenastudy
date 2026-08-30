@@ -19,4 +19,24 @@ describe("local workspace", () => {
     window.localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(malformed));
     expect(loadWorkspace(window.localStorage)).toEqual(createInitialWorkspace());
   });
+
+  it("migra o workspace v1 preservando os dados existentes", () => {
+    const current = createInitialWorkspace();
+    const legacy = {
+      version: 1,
+      subjects: current.subjects,
+      tasks: current.tasks,
+      events: current.events,
+      habits: current.habits,
+      notes: current.notes,
+      focusSessions: current.focusSessions,
+    };
+    window.localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(legacy));
+
+    const migrated = loadWorkspace(window.localStorage);
+    expect(migrated.version).toBe(2);
+    expect(migrated.subjects).toEqual(current.subjects);
+    expect(migrated.flashcards).toEqual([]);
+    expect(migrated.materials).toEqual([]);
+  });
 });

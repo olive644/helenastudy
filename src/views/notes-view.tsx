@@ -1,4 +1,3 @@
-import { Plus } from "lucide-react";
 import { useState, type Dispatch } from "react";
 import { PageHeader } from "../components/app-navigation";
 import type { WorkspaceAction, WorkspaceState } from "../domain/workspace";
@@ -64,7 +63,7 @@ export function NotesView({ workspace, dispatch }: NotesViewProps) {
             </select>
           </label>
           <button className="primary-button" type="button" onClick={createNote}>
-            <Plus size={17} /> Nova anotação
+            <span aria-hidden="true">+</span> Nova anotação
           </button>
         </div>
       </header>

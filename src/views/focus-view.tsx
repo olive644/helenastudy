@@ -1,4 +1,3 @@
-import { Pause, Play } from "lucide-react";
 import { useEffect, useState, type Dispatch } from "react";
 import { PageHeader } from "../components/app-navigation";
 import {
@@ -121,7 +120,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
               type="button"
               onClick={() => setRunning((current) => !current)}
             >
-              {running ? <Pause size={18} /> : <Play size={18} />}
+              <span aria-hidden="true">{running ? "Ⅱ" : "▶"}</span>
               {running ? "Pausar" : elapsedSeconds > 0 ? "Continuar" : "Começar"}
             </button>
             <button

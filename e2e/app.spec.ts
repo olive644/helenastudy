@@ -30,6 +30,22 @@ test("preserva o criador de planos de aula", async ({ page }, testInfo) => {
   await expect(page.getByText("Warm-up")).toBeVisible();
 });
 
+test("cria um flashcard e conclui a revisão", async ({ page }) => {
+  const quickActions = page.getByRole("region", { name: "Ações rápidas" });
+  await quickActions.getByRole("button", { name: /biblioteca/i }).click();
+  await page.getByLabel("Frente").fill("Improve");
+  await page.getByLabel("Verso").fill("Melhorar");
+  await page.getByRole("button", { name: /criar flashcard/i }).click();
+
+  await page.getByRole("button", { name: "Hoje", exact: true }).click();
+  await quickActions.getByRole("button", { name: /revisar/i }).click();
+  await expect(page.getByRole("heading", { name: "Improve" })).toBeVisible();
+  await page.getByRole("button", { name: /mostrar resposta/i }).click();
+  await expect(page.getByRole("heading", { name: "Melhorar" })).toBeVisible();
+  await page.getByRole("button", { name: "Fácil" }).click();
+  await expect(page.getByText(/revisão em dia/i)).toBeVisible();
+});
+
 test("mantém os módulos acessíveis e sem rolagem horizontal no celular", async ({
   page,
 }, testInfo) => {

@@ -1,4 +1,3 @@
-import { CalendarDays, Check, Plus } from "lucide-react";
 import { useState, type Dispatch, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
 import { toDateKey, type WorkspaceAction, type WorkspaceState } from "../domain/workspace";
@@ -93,7 +92,7 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
               />
             </label>
             <button className="icon-button" type="submit" aria-label="Adicionar matéria">
-              <Plus size={17} />
+              <span aria-hidden="true">+</span>
             </button>
           </form>
         </section>
@@ -135,7 +134,7 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
               </select>
             </label>
             <button className="primary-button" type="submit">
-              <Plus size={17} /> Adicionar tarefa
+              <span aria-hidden="true">+</span> Adicionar tarefa
             </button>
           </form>
         </section>
@@ -188,7 +187,7 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
               </select>
             </label>
             <button className="secondary-button" type="submit">
-              <CalendarDays size={17} /> Adicionar compromisso
+              Adicionar compromisso
             </button>
           </form>
         </section>
@@ -214,7 +213,7 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
                     aria-label={`${task.completed ? "Reabrir" : "Concluir"} ${task.title}`}
                     onClick={() => dispatch({ type: "task/toggled", id: task.id })}
                   >
-                    <Check size={14} />
+                    <span aria-hidden="true">✓</span>
                   </button>
                   <div>
                     <strong>{task.title}</strong>

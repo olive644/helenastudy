@@ -1,7 +1,7 @@
-import { BookOpen, CalendarDays, CheckCircle2, Clock3, Home, NotebookPen } from "lucide-react";
 import { HelenaBrand } from "./helena-brand";
 
-export type AppView = "today" | "planner" | "focus" | "habits" | "notes" | "lesson-builder";
+export type AppView =
+  "today" | "planner" | "focus" | "habits" | "notes" | "lesson-builder" | "learn" | "library";
 
 type NavigationProps = {
   view: AppView;
@@ -9,11 +9,11 @@ type NavigationProps = {
 };
 
 const PRIMARY_ITEMS = [
-  { view: "today", label: "Hoje", icon: Home },
-  { view: "planner", label: "Agenda", icon: CalendarDays },
-  { view: "focus", label: "Foco", icon: Clock3 },
-  { view: "habits", label: "Hábitos", icon: CheckCircle2 },
-  { view: "notes", label: "Cadernos", icon: NotebookPen },
+  { view: "today", label: "Hoje", symbol: "H" },
+  { view: "planner", label: "Agenda", symbol: "A" },
+  { view: "focus", label: "Foco", symbol: "F" },
+  { view: "habits", label: "Hábitos", symbol: "✓" },
+  { view: "notes", label: "Cadernos", symbol: "C" },
 ] as const;
 
 export function Sidebar({ view, onNavigate }: NavigationProps) {
@@ -22,7 +22,6 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
       <HelenaBrand />
       <nav className="sidebar__nav" aria-label="Navegação principal">
         {PRIMARY_ITEMS.map((item) => {
-          const Icon = item.icon;
           return (
             <button
               className={view === item.view ? "nav-item nav-item--active" : "nav-item"}
@@ -30,7 +29,9 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
               onClick={() => onNavigate(item.view)}
               key={item.view}
             >
-              <Icon size={18} />
+              <span className="nav-symbol" aria-hidden="true">
+                {item.symbol}
+              </span>
               {item.label}
             </button>
           );
@@ -41,18 +42,30 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
           type="button"
           onClick={() => onNavigate("lesson-builder")}
         >
-          <BookOpen size={18} />
+          <span className="nav-symbol" aria-hidden="true">
+            P
+          </span>
           Planos de aula
         </button>
-        <button className="nav-item" type="button" disabled>
-          <span className="nav-symbol">A</span>
+        <button
+          className={view === "learn" ? "nav-item nav-item--active" : "nav-item"}
+          type="button"
+          onClick={() => onNavigate("learn")}
+        >
+          <span className="nav-symbol" aria-hidden="true">
+            A
+          </span>
           Aprender
-          <span className="soon-badge">Depois</span>
         </button>
-        <button className="nav-item" type="button" disabled>
-          <span className="nav-symbol">B</span>
+        <button
+          className={view === "library" ? "nav-item nav-item--active" : "nav-item"}
+          type="button"
+          onClick={() => onNavigate("library")}
+        >
+          <span className="nav-symbol" aria-hidden="true">
+            B
+          </span>
           Biblioteca
-          <span className="soon-badge">Depois</span>
         </button>
       </nav>
       <div className="sidebar__footer">
@@ -67,7 +80,6 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
   return (
     <nav className="mobile-nav" aria-label="Navegação móvel">
       {PRIMARY_ITEMS.map((item) => {
-        const Icon = item.icon;
         return (
           <button
             className={
@@ -77,7 +89,9 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
             onClick={() => onNavigate(item.view)}
             key={item.view}
           >
-            <Icon size={19} />
+            <span className="mobile-nav-symbol" aria-hidden="true">
+              {item.symbol}
+            </span>
             <span>{item.label === "Cadernos" ? "Notas" : item.label}</span>
           </button>
         );

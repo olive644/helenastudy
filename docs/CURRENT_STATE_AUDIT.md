@@ -50,3 +50,20 @@ parte de uma central pessoal de estudos e rotina. A primeira entrega adiciona:
 Os dados são salvos em `localStorage` e a interface informa esse limite. Não existe conta, nuvem,
 IA, notificação nativa ou bloqueio real de aplicativos. O aviso do módulo Foco deixa explícito que
 o modo sem distrações depende de uma futura versão mobile.
+
+## 5. Sistema local de estudos
+
+A segunda etapa amplia o workspace para a versão 2 e migra automaticamente dados da versão 1. A
+entrega adiciona:
+
+- Biblioteca com links e textos cadastrados manualmente;
+- flashcards vinculados a matérias;
+- revisão programada com opções Errei, Difícil e Fácil;
+- questionários determinísticos criados a partir dos próprios cartões;
+- metas relacionadas aos minutos registrados no módulo Foco;
+- histórico local de resultados de questionários;
+- carregamento sob demanda de Biblioteca, Aprender e planos de aula.
+
+Não há geração por IA nem leitura automática de arquivos. Links só são abertos quando usam HTTP ou
+HTTPS. O novo orçamento separa a entrada inicial de módulos assíncronos, mantendo limites de 220
+KiB inicial e 300 KiB total.

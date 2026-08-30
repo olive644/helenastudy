@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createInitialWorkspace, minutesFocusedOn, workspaceReducer } from "./workspace";
+import {
+  createInitialWorkspace,
+  dueFlashcards,
+  minutesFocusedOn,
+  workspaceReducer,
+} from "./workspace";
 
 describe("workspaceReducer", () => {
   it("conecta tarefas e sessões de foco ao espaço de estudos", () => {
@@ -49,5 +54,28 @@ describe("workspaceReducer", () => {
       date: "2026-08-29",
     });
     expect(unchecked.habits[0]?.completedDates).toEqual([]);
+  });
+
+  it("agenda revisões de flashcards conforme a dificuldade", () => {
+    const withCard = workspaceReducer(createInitialWorkspace(), {
+      type: "flashcard/added",
+      subjectId: "subject-english",
+      front: "Improve",
+      back: "Melhorar",
+      createdOn: "2026-08-30",
+    });
+    const card = withCard.flashcards[0];
+    expect(dueFlashcards(withCard, "2026-08-30")).toHaveLength(1);
+    if (!card) return;
+
+    const reviewed = workspaceReducer(withCard, {
+      type: "flashcard/reviewed",
+      id: card.id,
+      rating: "easy",
+      reviewedOn: "2026-08-30",
+    });
+    expect(reviewed.flashcards[0]?.intervalDays).toBe(3);
+    expect(reviewed.flashcards[0]?.nextReview).toBe("2026-09-02");
+    expect(dueFlashcards(reviewed, "2026-08-30")).toHaveLength(0);
   });
 });

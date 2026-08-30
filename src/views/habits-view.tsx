@@ -1,4 +1,3 @@
-import { Check, Plus } from "lucide-react";
 import { useState, type Dispatch, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
 import { toDateKey, type WorkspaceAction, type WorkspaceState } from "../domain/workspace";
@@ -45,7 +44,7 @@ export function HabitsView({ workspace, dispatch }: HabitsViewProps) {
               />
             </label>
             <button className="primary-button" type="submit">
-              <Plus size={17} /> Adicionar hábito
+              <span aria-hidden="true">+</span> Adicionar hábito
             </button>
           </form>
         </section>
@@ -76,7 +75,7 @@ export function HabitsView({ workspace, dispatch }: HabitsViewProps) {
                       onClick={() => dispatch({ type: "habit/toggled", id: habit.id, date: today })}
                     >
                       <span className="habit-check">
-                        <Check size={16} />
+                        <span aria-hidden="true">✓</span>
                       </span>
                       <span>
                         <strong>{habit.title}</strong>
