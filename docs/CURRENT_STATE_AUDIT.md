@@ -208,3 +208,18 @@ Não há backend, conta, dados públicos, ranking global ou autoridade remota ne
 de estado e transporte ficam separadas para permitir uma futura implementação online com validação
 no servidor, expiração, rate limit e retenção documentada. O Bingo está preparado como atividade no
 lobby, mas sorteio, cartelas distintas e validação sincronizada permanecem para uma próxima entrega.
+
+## 13. Experiência de estudo renovada
+
+O painel e a navegação adotam uma hierarquia inspirada em aplicativos de revisão como SimpleStudy:
+próxima ação evidente, atalhos de prática, progresso diário visível e cartões fáceis de reconhecer.
+A referência é apenas de experiência; cores, componentes, textos e iconografia continuam próprios.
+
+A identidade HelenaStudy permanece baseada em preto, amarelo, violeta e na mascote original. A nova
+família de ícones usa traço consistente e pequenos acentos da marca, sem substituir a Helena por uma
+identidade genérica. As animações são curtas, comunicam mudança de estado e são removidas quando o
+sistema solicita redução de movimento.
+
+No celular, a navegação flutua acima do conteúdo, os atalhos aparecem em uma grade de toque amplo e
+o painel mantém resumo, prioridades e início rápido sem rolagem horizontal. Nenhum fluxo, dado local
+ou contrato de domínio foi alterado pelo redesign.

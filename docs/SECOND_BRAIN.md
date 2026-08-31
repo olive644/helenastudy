@@ -35,6 +35,8 @@ sincronização remota.
 - React 19 e TypeScript estrito;
 - Vite para desenvolvimento e build;
 - CSS próprio, mobile-first e sem fonte externa;
+- interface com hierarquia de próxima ação, cartões de progresso, ícones próprios em traço e
+  movimentos curtos compatíveis com `prefers-reduced-motion`;
 - Vitest e Testing Library para unidade/componente;
 - Playwright para fluxos desktop e mobile;
 - GitHub Actions para qualidade, auditoria, segredos, análise estática e CodeQL.
