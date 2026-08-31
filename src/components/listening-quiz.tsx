@@ -1,5 +1,5 @@
 import { Check, Gauge, Headphones, Play, RotateCcw, Square, Volume2, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { Flashcard } from "../domain/workspace";
 import {
   buildListeningDeck,
@@ -83,6 +83,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   useEffect(() => {
     const player = new NaturalVoicePlayer(setNaturalState);
     naturalPlayerRef.current = player;
+    player.preload();
     return () => player.dispose();
   }, []);
 
@@ -102,7 +103,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
     };
   }, [initialDeck]);
 
-  function playAudio() {
+  const playAudio = useCallback(() => {
     if (!card) return;
     setAudioUnavailable(false);
     if (voiceEngine === "natural") {
@@ -120,7 +121,13 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
       rate: speechRate,
       onUnavailable: () => setAudioUnavailable(true),
     });
-  }
+  }, [card, naturalVoice, selectedVoice, speechRate, voiceEngine]);
+
+  useEffect(() => {
+    if (state !== "answering") return;
+    const timer = window.setTimeout(playAudio, 0);
+    return () => window.clearTimeout(timer);
+  }, [playAudio, state]);
 
   function beginRound() {
     const filtered =
@@ -131,6 +138,13 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
           );
     const nextDeck = createListeningRound(filtered, roundLimit);
     if (nextDeck.length === 0) return;
+    if (voiceEngine === "natural") {
+      naturalPlayerRef.current?.prepare(
+        nextDeck.slice(0, 3).map((item) => item.front),
+        naturalVoice,
+        speechRate,
+      );
+    }
     setDeck(nextDeck);
     setIndex(0);
     setCorrect(0);
@@ -160,6 +174,13 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
     if (index + 1 >= deck.length) {
       setState("finished");
       return;
+    }
+    if (voiceEngine === "natural") {
+      naturalPlayerRef.current?.prepare(
+        deck.slice(index + 1, index + 4).map((item) => item.front),
+        naturalVoice,
+        speechRate,
+      );
     }
     setIndex((value) => value + 1);
     setAnswer("");
@@ -314,9 +335,9 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
             {voiceEngine === "natural" && (
               <p className="listening-model-state" role="status">
                 {naturalState.status === "idle"
-                  ? "O Kokoro será baixado no primeiro teste e ficará armazenado no navegador."
+                  ? "Preparando o Kokoro em segundo plano…"
                   : naturalState.status === "loading"
-                    ? `Carregando voz${naturalState.progress === undefined ? "…" : `: ${naturalState.progress}%`}`
+                    ? `Baixando a voz em segundo plano${naturalState.progress === undefined ? "…" : `: ${naturalState.progress}%`}`
                     : naturalState.status === "error"
                       ? naturalState.message
                       : naturalState.status === "generating"

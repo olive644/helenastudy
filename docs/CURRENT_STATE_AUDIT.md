@@ -186,8 +186,11 @@ e fica no cache do navegador quando permitido. O texto continua sendo processado
 não é enviado a um provedor de TTS.
 
 O Piper anterior falhava ao localizar o backend WASM empacotado. A implementação atual isola o
-Kokoro em um worker, usa o backend WASM quantizado para limitar download e memória e ignora respostas
-antigas quando a seleção muda. Se o worker, o modelo ou o áudio falhar, a melhor voz do dispositivo é
+Kokoro em um worker, usa o backend WASM quantizado para limitar download e memória, inicia o download
+assim que a tela de escuta é aberta e prepara em segundo plano as três próximas palavras. Os áudios
+gerados são reutilizados por texto, voz e velocidade durante a sessão, e respostas antigas são ignoradas
+quando a seleção muda. Ao terminar a contagem, a palavra é pronunciada automaticamente. Se o worker,
+o modelo ou o áudio falhar, a melhor voz do dispositivo é
 acionada automaticamente. O orçamento separa os aproximadamente 2,2 MiB do worker e 20,6 MiB do
 runtime WASM do JavaScript inicial; os pesos do modelo continuam sob demanda.
 
