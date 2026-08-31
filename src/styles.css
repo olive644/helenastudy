@@ -1153,28 +1153,6 @@ body {
   }
 }
 
-/* Navigation glyph guard: later rules must not turn the line icons into empty tiles. */
-.sidebar__nav {
-  overflow-x: hidden;
-}
-
-.navigation-icon > .navigation-icon__glyph {
-  display: block;
-  width: 70%;
-  height: 70%;
-  overflow: visible;
-}
-
-.navigation-icon > .navigation-icon__glyph > .navigation-icon__stroke,
-.sidebar .nav-item--active .navigation-icon > .navigation-icon__glyph > .navigation-icon__stroke {
-  fill: none;
-  stroke: var(--ink);
-  stroke-width: 2.25;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
-}
-
 /* Helena editorial: menos efeito de template, mais caderno de estudos. */
 body {
   background: #faf7f0;
@@ -4956,4 +4934,46 @@ select {
     width: calc(100% - 264px);
     margin-left: 264px;
   }
+}
+
+/* Final visual contract: icons stay legible and the student-space shortcuts stay yellow. */
+.sidebar__nav {
+  overflow-x: hidden;
+}
+
+.view-heading--today::before {
+  content: none;
+}
+
+.quick-actions > button:hover,
+.quick-actions > button:focus-visible {
+  background: #fff8e7;
+  box-shadow: inset 0 -3px 0 var(--yellow);
+  transform: none;
+}
+
+.quick-action-icon,
+.quick-actions > button:hover .quick-action-icon,
+.quick-actions > button:focus-visible .quick-action-icon {
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  background: var(--yellow);
+  transform: none;
+}
+
+.navigation-icon > .navigation-icon__glyph {
+  display: block;
+  width: 70%;
+  height: 70%;
+  overflow: visible;
+}
+
+.navigation-icon > .navigation-icon__glyph > .navigation-icon__stroke,
+.sidebar .nav-item--active .navigation-icon > .navigation-icon__glyph > .navigation-icon__stroke {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }

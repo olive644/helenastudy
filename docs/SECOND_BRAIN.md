@@ -46,6 +46,51 @@ sincronização remota.
   automaticamente após a contagem e repetir sem nova síntese;
 - BroadcastChannel como transporte explícito do protótipo de Sala local.
 
+## Mapa mental vivo
+
+Este diagrama funciona como a rede de navegação do repositório: parte da experiência HelenaStudy e
+liga cada área do produto à sua base técnica e às garantias de qualidade.
+
+```mermaid
+flowchart LR
+  HS[HelenaStudy] --> UX[Experiência]
+  HS --> DATA[Workspace local]
+  HS --> STUDY[Estudo]
+  HS --> ORG[Organização]
+  HS --> QUALITY[Qualidade]
+  HS -. evolução segura .-> INTEL[Helena inteligente]
+
+  UX --> TODAY[Espaço do aluno]
+  UX --> NAV[Navegação responsiva]
+  UX --> BRAND[Helena e identidade visual]
+
+  DATA --> DOMAIN[Domínio e reducer]
+  DATA --> STORAGE[Persistência versionada]
+  DATA --> ROOM[Sala local via BroadcastChannel]
+
+  STUDY --> FOCUS[Foco]
+  STUDY --> LIB[Biblioteca e flashcards]
+  STUDY --> PRACTICE[Quizzes e bingo]
+  PRACTICE --> LISTEN[Escuta com Kokoro e cache]
+
+  ORG --> PLAN[Agenda e tarefas]
+  ORG --> HABITS[Hábitos]
+  ORG --> NOTES[Cadernos]
+  ORG --> LESSON[Planos de aula]
+
+  QUALITY --> UNIT[Vitest e Testing Library]
+  QUALITY --> E2E[Playwright desktop e mobile]
+  QUALITY --> CI[GitHub Actions e CodeQL]
+
+  INTEL --> CONSENT[Consentimento por solicitação]
+  INTEL --> BACKEND[Backend sem chave no navegador]
+  INTEL --> SOURCES[Somente fontes escolhidas]
+```
+
+Ao alterar uma área, atualize o nó correspondente e os fluxos ligados a ele. Detalhes de produto
+continuam em [`PRODUCT_MIND_MAP.md`](PRODUCT_MIND_MAP.md); este mapa serve como visão executiva do
+sistema completo.
+
 ## Etapas do produto
 
 1. **Núcleo local concluído:** Espaço do aluno, Agenda, Foco, Hábitos, Cadernos e planos de aula.
@@ -74,9 +119,9 @@ no bundle do navegador.
 
 Helena é a gata preta de olhos amarelos que orienta o fluxo. O aplicativo usa a silhueta
 assimétrica original em `public/helena.svg`, sem redesenhar a personagem como um gato genérico. O
-nome exibido na interface é somente HelenaStudy. As abas usam uma família própria de ícones SVG:
-formas assimétricas e pontas inspiradas na silhueta da Helena, corpo na cor do contexto e detalhes
-amarelos. Não são usados pacotes de ícones genéricos na navegação.
+nome exibido na interface é somente HelenaStudy. A navegação usa uma família própria de ícones SVG
+lineares, com selos amarelos e traços pretos para manter contraste e consistência sem carregar um
+pacote de ícones adicional.
 
 ## Fora do escopo desta fase
 
