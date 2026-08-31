@@ -180,7 +180,26 @@ em inglês, sem duplicar termos. As respostas aceitam a palavra ou expressão ou
 principal e equivalentes cadastrados. Os filtros Fácil, Médio e Difícil continuam sendo calculados
 pela base local de frequência, com os mesmos fallbacks já documentados.
 
-A pronúncia usa a Web Speech API do navegador. O aplicativo prioriza automaticamente vozes inglesas
-com indicação de maior naturalidade e permite escolher outra voz disponível e os ritmos Devagar,
-Natural ou Rápida. Nenhum áudio ou conteúdo é enviado a um serviço externo e nenhuma dependência foi
-adicionada; a qualidade final depende das vozes instaladas pelo navegador e pelo sistema operacional.
+A pronúncia passa a oferecer Kokoro 82M quantizado em `q4`, executado localmente em Web Worker com
+WASM. O pacote `kokoro-js` e os pesos usam licença Apache 2.0. O download do menor modelo fica em
+aproximadamente 86 MB e só começa por ação explícita dentro do quiz. O progresso real é exibido e o
+cache do Transformers.js é usado quando o navegador permite. O texto da atividade não é enviado a
+um provedor de TTS. A Web Speech API permanece como fallback imediato e recebe um nome honesto na
+interface.
+
+As rodadas agora são embaralhadas sem repetição e aceitam 5, 10, 15 ou todas as palavras. O catálogo
+pedagógico tipado separa as 30 palavras do componente, com dificuldade, categoria e traduções
+equivalentes. O feedback correto e incorreto possui ícones, textos e ações distintos, e uma trava
+impede que a mesma submissão altere a pontuação duas vezes.
+
+## 12. Modo Sala local
+
+O primeiro Modo Sala é deliberadamente local. O professor cria um código temporário, escolhe Quiz de
+escuta ou Bingo, dificuldade e quantidade de perguntas. Participantes em outras abas da mesma origem
+entram com nome temporário e recebem o estado por `BroadcastChannel`. A interface diz explicitamente
+que isso não funciona pela internet.
+
+Não há backend, conta, dados públicos, ranking global ou autoridade remota nesta fase. As interfaces
+de estado e transporte ficam separadas para permitir uma futura implementação online com validação
+no servidor, expiração, rate limit e retenção documentada. O Bingo está preparado como atividade no
+lobby, mas sorteio, cartelas distintas e validação sincronizada permanecem para uma próxima entrega.
