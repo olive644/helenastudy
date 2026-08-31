@@ -15,7 +15,9 @@ describe("feedback do quiz de escuta", () => {
   function reachAnswer() {
     render(<ListeningQuiz flashcards={[]} />);
     fireEvent.click(screen.getByRole("button", { name: /iniciar escuta/i }));
-    act(() => vi.advanceTimersByTime(2200));
+    for (let step = 0; step < 3; step += 1) {
+      act(() => vi.advanceTimersByTime(700));
+    }
   }
 
   it("nunca apresenta uma resposta errada como acerto", () => {
