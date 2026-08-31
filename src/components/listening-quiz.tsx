@@ -6,6 +6,7 @@ import {
   normalizeListeningAnswer,
   type ListeningCard,
 } from "../domain/listening-quiz";
+import { classifyWordDifficulty, type WordDifficulty } from "../data/word-difficulty";
 
 function speak(text: string, onUnavailable: () => void) {
   if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
@@ -20,6 +21,14 @@ function speak(text: string, onUnavailable: () => void) {
 }
 
 type RoundState = "ready" | "countdown" | "answering" | "feedback" | "finished";
+type DifficultyFilter = "mixed" | WordDifficulty;
+
+const DIFFICULTY_LABELS: Record<DifficultyFilter, string> = {
+  mixed: "Misto",
+  easy: "Fácil",
+  medium: "Médio",
+  hard: "Difícil",
+};
 
 export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[] }) {
   const initialDeck = useMemo(() => buildListeningDeck(flashcards), [flashcards]);
@@ -32,6 +41,9 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   const [missed, setMissed] = useState<ListeningCard[]>([]);
   const [wasCorrect, setWasCorrect] = useState(false);
   const [audioUnavailable, setAudioUnavailable] = useState(false);
+  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("mixed");
+  const [difficultyById, setDifficultyById] = useState<Record<string, WordDifficulty>>({});
+  const [classifying, setClassifying] = useState(true);
   const answerRef = useRef<HTMLInputElement>(null);
   const card = deck[index];
 
@@ -49,6 +61,22 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   }, [state]);
 
   useEffect(() => () => window.speechSynthesis?.cancel(), []);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all(
+      initialDeck.map(
+        async (item) => [item.id, (await classifyWordDifficulty(item.front)).difficulty] as const,
+      ),
+    ).then((entries) => {
+      if (!active) return;
+      setDifficultyById(Object.fromEntries(entries));
+      setClassifying(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [initialDeck]);
 
   function playAudio() {
     if (!card) return;
@@ -95,6 +123,20 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
     setState("ready");
   }
 
+  function selectDifficulty(filter: DifficultyFilter) {
+    const cards =
+      filter === "mixed"
+        ? initialDeck
+        : initialDeck.filter((item) => difficultyById[item.id] === filter);
+    if (cards.length === 0) return;
+    setDifficultyFilter(filter);
+    restart(cards);
+  }
+
+  function countDifficulty(filter: WordDifficulty): number {
+    return initialDeck.filter((item) => difficultyById[item.id] === filter).length;
+  }
+
   if (!card) return null;
 
   if (state === "finished") {
@@ -135,6 +177,26 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
         <span>{correct} acertos</span>
       </div>
 
+      {state === "ready" && (
+        <div className="listening-difficulty" aria-label="Dificuldade do vocabulário">
+          {(Object.keys(DIFFICULTY_LABELS) as DifficultyFilter[]).map((filter) => {
+            const count = filter === "mixed" ? initialDeck.length : countDifficulty(filter);
+            return (
+              <button
+                className={difficultyFilter === filter ? "is-active" : undefined}
+                type="button"
+                disabled={classifying || count === 0}
+                aria-pressed={difficultyFilter === filter}
+                onClick={() => selectDifficulty(filter)}
+                key={filter}
+              >
+                {DIFFICULTY_LABELS[filter]} <small>{classifying ? "…" : count}</small>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {state === "countdown" ? (
         <div className="listening-stage listening-stage--countdown" aria-live="polite">
           <span className="listening-digital">{countdown || "•"}</span>
@@ -169,7 +231,10 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
             <>
               <span className="section-label">Quiz de pronúncia</span>
               <h3>Ouça e descubra a palavra.</h3>
-              <p>A resposta pode ser em português ou em inglês.</p>
+              <p>
+                Nível {DIFFICULTY_LABELS[difficultyFilter].toLocaleLowerCase("pt-BR")}. A resposta
+                pode ser em português ou em inglês.
+              </p>
               <button className="primary-button" type="button" onClick={beginRound}>
                 <Play size={17} /> Iniciar escuta
               </button>
