@@ -23,7 +23,9 @@ produto.
 5. Escrever, desenhar ou anexar uma digitalização nos Cadernos.
 6. Guardar links, textos e flashcards por matéria na Biblioteca.
 7. Revisar flashcards, responder Quizzes, completar Bingos e acompanhar metas em Praticar.
-8. Montar planos de aula pelo fluxo determinístico existente.
+8. Praticar escuta em rodadas curtas com voz natural local opcional e fallback do dispositivo.
+9. Criar uma Sala local e sincronizar o lobby entre abas do mesmo navegador.
+10. Montar planos de aula pelo fluxo determinístico existente.
 
 Todos esses dados compartilham um workspace local versionado. Não há IA, conta, banco ou
 sincronização remota.
@@ -36,6 +38,8 @@ sincronização remota.
 - Vitest e Testing Library para unidade/componente;
 - Playwright para fluxos desktop e mobile;
 - GitHub Actions para qualidade, auditoria, segredos, análise estática e CodeQL.
+- Kokoro.js carregado somente pelo worker do quiz, com modelo quantizado baixado sob demanda;
+- BroadcastChannel como transporte explícito do protótipo de Sala local.
 
 ## Etapas do produto
 
