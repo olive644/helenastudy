@@ -18,6 +18,24 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
+test("mantém os atalhos amarelos e remove o sol decorativo", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "Contrato visual da página inicial desktop.");
+  const quickActions = page.getByRole("region", { name: "Ferramentas do Espaço do aluno" });
+  const icons = quickActions.locator(".quick-action-icon");
+
+  await expect(icons).toHaveCount(5);
+  await expect(icons.first()).toHaveCSS("background-color", "rgb(255, 201, 74)");
+  await expect(icons.first()).toHaveCSS("color", "rgb(23, 21, 28)");
+
+  await quickActions.getByRole("button", { name: /iniciar foco/i }).hover();
+  await expect(icons.first()).toHaveCSS("background-color", "rgb(255, 201, 74)");
+
+  const heroDecoration = await page
+    .locator(".view-heading--today")
+    .evaluate((element) => getComputedStyle(element, "::before").content);
+  expect(heroDecoration).toBe("none");
+});
+
 test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }, testInfo) => {
   await expect(page.getByRole("heading", { name: "Espaço do aluno" })).toBeVisible();
   await expect(page.getByAltText(/helena, a gata preta/i)).toHaveAttribute("src", "/helena.svg");
