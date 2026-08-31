@@ -1,5 +1,13 @@
 # Auditoria do estado atual
 
+## Redesign visual completo
+
+- A aplicação passa a usar uma linguagem visual de “mesa de estudos”, com base creme, navegação preta e destaques violeta e amarelo.
+- A navegação reutiliza os ícones autorais já existentes e mantém a silhueta da Helena em todos os módulos.
+- Foram adicionadas transições curtas para navegação, painéis, ações rápidas e abertura do menu móvel, sempre respeitando `prefers-reduced-motion`.
+- O ícone de Planos de aula recebeu uma nova geometria interna para impedir o corte da letra A em tamanhos reduzidos.
+- A alteração é exclusivamente visual e preserva os fluxos, dados locais e funcionalidades existentes.
+
 ## 1. Fundação inicial: 2026-08-29
 
 O repositório nasceu contendo apenas um README. A primeira base estabelece:

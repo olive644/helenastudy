@@ -839,6 +839,371 @@ p {
   }
 }
 
+/* Redesign 2026: uma mesa de estudos calma, tátil e reconhecível. */
+:root {
+  --page: #fff8ed;
+  --surface: #fffdf8;
+  --soft: #f7f2e9;
+  --lavender: #e9e2ff;
+  --line: #e4ddcf;
+  --line-strong: #cfc5b5;
+  --shadow-soft: 0 12px 32px rgb(23 21 28 / 7%);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body {
+  background:
+    linear-gradient(rgb(114 87 232 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(114 87 232 / 3%) 1px, transparent 1px), var(--page);
+  background-size: 32px 32px;
+}
+
+.sidebar {
+  width: 264px;
+  padding: 1.35rem 1rem 1rem;
+  border-right: 0;
+  color: #fff;
+  background: var(--ink);
+}
+
+.sidebar .brand {
+  min-height: 68px;
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+}
+
+.sidebar .brand__mark {
+  width: 42px;
+  height: 48px;
+  filter: drop-shadow(0 5px 10px rgb(0 0 0 / 24%));
+  transition: transform 360ms var(--ease-out);
+}
+
+.sidebar .brand:hover .brand__mark {
+  transform: rotate(-3deg) translateY(-2px);
+}
+
+.sidebar .brand__copy strong {
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.sidebar .brand__copy strong span {
+  color: var(--yellow);
+}
+
+.sidebar__nav {
+  margin-top: 1.35rem;
+  gap: 1.15rem;
+}
+
+.sidebar .nav-section__label {
+  padding-left: 0.72rem;
+  color: rgb(255 255 255 / 45%);
+}
+
+.sidebar .nav-item {
+  padding-inline: 0.72rem;
+  color: rgb(255 255 255 / 68%);
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    transform 180ms var(--ease-out);
+}
+
+.sidebar .nav-item::before {
+  display: none;
+}
+
+.sidebar .nav-item:not(:disabled):hover {
+  color: #fff;
+  background: rgb(255 255 255 / 8%);
+  transform: translateX(2px);
+}
+
+.sidebar .nav-item--active {
+  color: var(--ink);
+  background: var(--yellow);
+}
+
+.sidebar .nav-item--active .navigation-icon__accent {
+  fill: var(--violet);
+}
+
+.sidebar__footer {
+  border-top-color: rgb(255 255 255 / 12%);
+}
+
+.sidebar__footer strong {
+  color: #fff;
+}
+
+.sidebar__footer small {
+  color: rgb(255 255 255 / 52%);
+}
+
+.main-content {
+  animation: page-enter 420ms var(--ease-out) both;
+}
+
+.page-header {
+  position: sticky;
+  z-index: 5;
+  top: 0;
+  margin-inline: -0.35rem;
+  padding: 0.45rem 0.35rem;
+  background: rgb(255 248 237 / 90%);
+  backdrop-filter: blur(10px);
+}
+
+.view-heading {
+  position: relative;
+}
+
+.view-heading:not(.view-heading--today)::after {
+  display: block;
+  width: 54px;
+  height: 5px;
+  margin-top: 1.1rem;
+  border-radius: 99px;
+  background: var(--yellow);
+  content: "";
+}
+
+.view-heading--today {
+  overflow: hidden;
+  border: 0;
+  border-radius: 24px;
+  background: var(--ink);
+  box-shadow: var(--shadow-soft);
+}
+
+.view-heading--today::after {
+  position: absolute;
+  top: -72px;
+  right: -58px;
+  width: 250px;
+  height: 250px;
+  border: 52px solid rgb(255 201 74 / 18%);
+  border-radius: 50%;
+  content: "";
+}
+
+.view-heading--today h1,
+.view-heading--today > div > p {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+}
+
+.view-heading--today .section-label {
+  color: var(--yellow);
+}
+
+.today-helena {
+  z-index: 1;
+  transform-origin: bottom center;
+  animation: helena-arrives 650ms 120ms var(--ease-out) both;
+  filter: drop-shadow(0 12px 15px rgb(0 0 0 / 28%));
+}
+
+.metric-row article,
+.module-panel,
+.plain-panel,
+.lesson-form,
+.preview,
+.notes-layout,
+.quick-actions,
+.focus-card {
+  box-shadow: 0 1px 0 rgb(23 21 28 / 3%);
+  transition:
+    border-color 180ms ease,
+    box-shadow 220ms ease,
+    transform 220ms var(--ease-out);
+}
+
+.metric-row article:hover,
+.module-panel:hover,
+.plain-panel:hover {
+  border-color: #cfc3fa;
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-2px);
+}
+
+.metric-row article {
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-row article::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 42%;
+  height: 4px;
+  border-radius: 99px 0 0;
+  background: var(--yellow);
+  content: "";
+}
+
+.quick-actions > button {
+  position: relative;
+  isolation: isolate;
+  transition:
+    color 180ms ease,
+    background 180ms ease;
+}
+
+.quick-actions > button::after {
+  position: absolute;
+  z-index: -1;
+  inset: auto 0 0;
+  height: 0;
+  background: var(--lavender);
+  content: "";
+  transition: height 220ms var(--ease-out);
+}
+
+.quick-actions > button:hover::after,
+.quick-actions > button:focus-visible::after {
+  height: 100%;
+}
+
+.quick-actions > button:hover .quick-action-icon {
+  color: #fff;
+  background: var(--violet);
+  transform: rotate(-4deg) scale(1.05);
+}
+
+.quick-action-icon {
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    transform 220ms var(--ease-out);
+}
+
+.navigation-icon[data-icon="lesson"] {
+  overflow: visible;
+}
+
+.navigation-icon[data-icon="lesson"] .navigation-icon__accent {
+  transform: translateY(-0.15px);
+  transform-origin: center;
+}
+
+.primary-button,
+.secondary-button,
+.icon-button,
+.back-button,
+.check-button,
+.link-button {
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms var(--ease-out);
+}
+
+.primary-button:hover:not(:disabled),
+.secondary-button:hover:not(:disabled),
+.icon-button:hover:not(:disabled),
+.back-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.mobile-more-sheet {
+  animation: sheet-enter 280ms var(--ease-out) both;
+}
+
+.mobile-more-backdrop {
+  animation: fade-in 180ms ease both;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes helena-arrives {
+  from {
+    opacity: 0;
+    transform: translateY(18px) rotate(3deg);
+  }
+}
+
+@keyframes sheet-enter {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (min-width: 900px) {
+  .main-content {
+    width: calc(100% - 264px);
+    margin-left: 264px;
+  }
+}
+
+@media (max-width: 899px) {
+  .page-header {
+    top: env(safe-area-inset-top);
+  }
+
+  .mobile-nav {
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    background: rgb(255 253 248 / 96%);
+    box-shadow: 0 -8px 30px rgb(23 21 28 / 8%);
+    backdrop-filter: blur(12px);
+  }
+}
+
+@media (max-width: 599px) {
+  body {
+    background-size: 24px 24px;
+  }
+
+  .view-heading--today {
+    border-radius: 18px;
+  }
+
+  .today-helena {
+    width: 88px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-content,
+  .today-helena,
+  .mobile-more-sheet,
+  .mobile-more-backdrop {
+    animation: none;
+  }
+
+  .sidebar .brand__mark,
+  .sidebar .nav-item,
+  .metric-row article,
+  .module-panel,
+  .plain-panel,
+  .quick-action-icon,
+  .quick-actions > button::after,
+  .primary-button,
+  .secondary-button,
+  .icon-button,
+  .back-button {
+    transition: none;
+  }
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
