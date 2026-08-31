@@ -4864,7 +4864,8 @@ select {
     width: 100%;
     min-height: 48px;
     padding: 0.65rem 0.75rem;
-    color: rgb(255 255 255 / 72%);
+    color: rgb(255 255 255 / 86%);
+    font-weight: 720;
   }
 
   .sidebar .nav-item::before {
@@ -4872,40 +4873,49 @@ select {
   }
 
   .sidebar .nav-item:not(:disabled):hover {
-    color: #fff;
-    background: rgb(255 255 255 / 9%);
-  }
-
-  .sidebar .nav-item--active {
     color: var(--ink);
     background: var(--yellow);
   }
 
+  .sidebar .nav-item--active {
+    color: var(--ink);
+    background: var(--violet);
+  }
+
   .sidebar .navigation-icon {
-    width: 27px;
-    height: 27px;
-    min-width: 27px;
-    overflow: visible;
+    display: grid;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    place-items: center;
+    border: 2px solid var(--ink);
+    border-radius: 9px;
+    color: var(--ink);
+    background: var(--yellow);
+    box-shadow: 0 2px 0 var(--ink);
   }
 
-  .sidebar .navigation-icon__base {
-    fill: currentColor;
+  .sidebar .navigation-icon svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
-  .sidebar .navigation-icon__accent {
-    fill: var(--yellow);
+  .sidebar .navigation-icon svg path,
+  .sidebar .nav-item--active .navigation-icon svg path {
+    fill: none;
+    stroke: currentColor;
   }
 
-  .sidebar .navigation-icon__detail {
-    fill: var(--ink);
+  .sidebar .nav-item:not(:disabled):hover .navigation-icon {
+    transform: translateY(-1px);
   }
 
-  .sidebar .nav-item--active .navigation-icon__base {
-    fill: var(--ink);
-  }
-
-  .sidebar .nav-item--active .navigation-icon__accent {
-    fill: var(--violet);
+  .sidebar .nav-item--active .navigation-icon {
+    background: var(--violet);
   }
 
   .sidebar__footer {
