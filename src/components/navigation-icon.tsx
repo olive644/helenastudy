@@ -32,8 +32,8 @@ const ICON_PATHS: Record<NavigationIconName, string> = {
 export function NavigationIcon({ name }: NavigationIconProps) {
   return (
     <span className="navigation-icon" data-icon={name} aria-hidden="true">
-      <svg viewBox="0 0 24 24">
-        <path d={ICON_PATHS[name]} />
+      <svg className="navigation-icon__glyph" viewBox="0 0 24 24" focusable="false">
+        <path className="navigation-icon__stroke" d={ICON_PATHS[name]} />
       </svg>
     </span>
   );

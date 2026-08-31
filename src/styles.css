@@ -1153,6 +1153,28 @@ body {
   }
 }
 
+/* Navigation glyph guard: later rules must not turn the line icons into empty tiles. */
+.sidebar__nav {
+  overflow-x: hidden;
+}
+
+.navigation-icon > .navigation-icon__glyph {
+  display: block;
+  width: 70%;
+  height: 70%;
+  overflow: visible;
+}
+
+.navigation-icon > .navigation-icon__glyph > .navigation-icon__stroke,
+.sidebar .nav-item--active .navigation-icon > .navigation-icon__glyph > .navigation-icon__stroke {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
 /* Helena editorial: menos efeito de template, mais caderno de estudos. */
 body {
   background: #faf7f0;
@@ -4907,7 +4929,7 @@ select {
   .sidebar .navigation-icon svg path,
   .sidebar .nav-item--active .navigation-icon svg path {
     fill: none;
-    stroke: currentColor;
+    stroke: var(--ink);
   }
 
   .sidebar .nav-item:not(:disabled):hover .navigation-icon {
