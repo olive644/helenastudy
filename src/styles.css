@@ -1229,12 +1229,19 @@ body {
 .listening-difficulty {
   display: flex;
   overflow-x: auto;
+  gap: 0.45rem;
+  scrollbar-width: thin;
+}
+
+.listening-controls {
+  display: grid;
   padding: 0.7rem 0.8rem;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  gap: 0.45rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.8rem;
   background: #fffdfa;
-  scrollbar-width: thin;
 }
 
 .listening-difficulty button {
@@ -1277,6 +1284,41 @@ body {
 .listening-difficulty button:disabled {
   cursor: wait;
   opacity: 0.48;
+}
+
+.listening-voice-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.listening-voice-controls label {
+  display: flex;
+  min-height: 38px;
+  padding: 0 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted);
+  background: var(--surface);
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.listening-voice-controls select {
+  max-width: 142px;
+  min-height: 34px;
+  padding: 0 1.3rem 0 0.2rem;
+  border: 0;
+  color: var(--ink);
+  background: transparent;
+  font: inherit;
+}
+
+.listening-voice-controls select:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 1px;
 }
 
 .listening-stage {
@@ -1535,6 +1577,31 @@ body {
   .listening-stage {
     min-height: 350px;
     padding: 1.2rem;
+  }
+
+  .listening-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .listening-voice-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .listening-voice-controls label {
+    justify-content: space-between;
+  }
+
+  .listening-voice-controls label > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .listening-voice-controls select {
+    width: 100%;
   }
 
   .listening-answer > div {
