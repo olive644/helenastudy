@@ -181,10 +181,11 @@ principal e equivalentes cadastrados. Os filtros Fácil, Médio e Difícil conti
 pela base local de frequência, com os mesmos fallbacks já documentados.
 
 A pronúncia passa a oferecer Kokoro 82M quantizado em `q4`, executado localmente em Web Worker com
-WASM. O pacote `kokoro-js` e os pesos usam licença Apache 2.0. O download do menor modelo fica em
-aproximadamente 86 MB e só começa por ação explícita dentro do quiz. O progresso real é exibido e o
-cache do Transformers.js é usado quando o navegador permite. O texto da atividade não é enviado a
-um provedor de TTS. A Web Speech API permanece como fallback imediato e recebe um nome honesto na
+WASM. O Kokoro.js e os pesos usam licença Apache 2.0. O módulo ESM é fixado na versão 1.2.1 e
+carregado do jsDelivr somente por ação explícita; ele não entra no bundle nem instala as dependências
+Node do Transformers.js. O download do menor modelo fica em aproximadamente 86 MB. O progresso real
+é exibido e o cache do navegador é usado quando permitido. O texto da atividade não é enviado a um
+provedor de TTS. A Web Speech API permanece como fallback imediato e recebe um nome honesto na
 interface.
 
 As rodadas agora são embaralhadas sem repetição e aceitam 5, 10, 15 ou todas as palavras. O catálogo
