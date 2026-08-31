@@ -24,7 +24,7 @@ export function LocalRoom() {
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
-  const channelRef = useRef<BroadcastChannel>();
+  const channelRef = useRef<BroadcastChannel | undefined>(undefined);
 
   useEffect(() => () => channelRef.current?.close(), []);
 
