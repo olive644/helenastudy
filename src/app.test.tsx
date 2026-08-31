@@ -108,6 +108,16 @@ describe("App", () => {
     expect(screen.getByRole("status").textContent).toMatch(/bingo/i);
   });
 
+  it("abre o quiz de escuta com vocabulário inicial", async () => {
+    render(<App />);
+    navigate("Quizzes e bingo");
+    fireEvent.click(await screen.findByRole("button", { name: "Escuta" }));
+
+    expect(screen.getByRole("heading", { name: /ouça e descubra a palavra/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /iniciar escuta/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /ouvir novamente/i })).toBeTruthy();
+  });
+
   it("mantém dados após remontar o aplicativo", () => {
     const firstRender = render(<App />);
     navigate("Agenda");

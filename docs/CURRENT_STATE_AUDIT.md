@@ -1,5 +1,19 @@
 # Auditoria do estado atual
 
+## Correção da navegação desktop
+
+- A barra lateral desktop mantém o fundo preto definido no redesign, mesmo após as camadas legadas de CSS.
+- Os ícones autorais recebem dimensões fixas e cores específicas no desktop para evitar encolhimento e deformação.
+- O estado ativo usa fundo amarelo, base preta e detalhe violeta; o comportamento móvel permanece inalterado.
+
+## Quiz de escuta e pronúncia
+
+- A área Praticar agora oferece uma sessão de escuta baseada nos flashcards da matéria selecionada.
+- Quando não há flashcards suficientes, um conjunto inicial de lugares em inglês mantém a atividade utilizável.
+- Cada rodada pronuncia o termo com a Web Speech API, apresenta uma contagem regressiva, aceita respostas em inglês ou português e revela o resultado somente após a tentativa.
+- Termos errados podem formar uma nova sessão de reforço, sem envio de áudio ou conteúdo a serviços externos.
+- A experiência oferece feedback textual e respeita `prefers-reduced-motion`.
+
 ## Redesign visual completo
 
 - A aplicação passa a usar uma linguagem visual de “mesa de estudos”, com base creme, navegação preta e destaques violeta e amarelo.
