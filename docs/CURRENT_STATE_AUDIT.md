@@ -180,13 +180,18 @@ em inglês, sem duplicar termos. As respostas aceitam a palavra ou expressão ou
 principal e equivalentes cadastrados. Os filtros Fácil, Médio e Difícil continuam sendo calculados
 pela base local de frequência, com os mesmos fallbacks já documentados.
 
-A pronúncia passa a oferecer Kokoro 82M quantizado em `q4`, executado localmente em Web Worker com
-WASM. O Kokoro.js e os pesos usam licença Apache 2.0. O módulo ESM é fixado na versão 1.2.1 e
-carregado do jsDelivr somente por ação explícita; ele não entra no bundle nem instala as dependências
-Node do Transformers.js. O download do menor modelo fica em aproximadamente 86 MB. O progresso real
-é exibido e o cache do navegador é usado quando permitido. O texto da atividade não é enviado a um
-provedor de TTS. A Web Speech API permanece como fallback imediato e recebe um nome honesto na
-interface.
+A pronúncia passa a oferecer Piper TTS executado localmente com WebAssembly. A integração usa
+`@mintplex-labs/piper-tts-web` 1.0.5, pacote MIT mantido e publicado em agosto de 2026, com runtime de
+aproximadamente 500 kB antes da minificação. Os modelos Piper possuem licenças próprias registradas
+no catálogo e as vozes selecionadas nesta tela são modelos médios de aproximadamente 60 MB. A carga
+só começa por ação explícita, o progresso real é exibido e os modelos ficam no OPFS quando o
+navegador permite. O texto da atividade não é enviado a um provedor de TTS. A Web Speech API
+permanece como fallback imediato e recebe um nome honesto na interface.
+
+No build de produção, o worker opcional mede aproximadamente 176 kB e o ONNX Runtime WASM mede
+13,3 MiB; ambos ficam fora da entrada inicial e só são solicitados ao ativar a voz neural. O orçamento
+de performance mede separadamente a aplicação, o worker e o WASM para impedir que esse isolamento
+mascare crescimento do código principal.
 
 As rodadas agora são embaralhadas sem repetição e aceitam 5, 10, 15 ou todas as palavras. O catálogo
 pedagógico tipado separa as 30 palavras do componente, com dificuldade, categoria e traduções
