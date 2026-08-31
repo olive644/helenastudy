@@ -23,4 +23,20 @@ describe("seleção de voz inglesa", () => {
     });
     expect(natural).toBeGreaterThan(generic);
   });
+
+  it("reconhece as vozes naturais recentes do Edge", () => {
+    const ava = voiceQualityScore({
+      default: false,
+      lang: "en-US",
+      localService: false,
+      name: "Microsoft Ava Online (Natural) - English (United States)",
+    });
+    const legacy = voiceQualityScore({
+      default: true,
+      lang: "en-US",
+      localService: true,
+      name: "Microsoft David Desktop",
+    });
+    expect(ava).toBeGreaterThan(legacy);
+  });
 });
