@@ -3,6 +3,8 @@ import type { Flashcard } from "../domain/workspace";
 import {
   acceptedListeningAnswers,
   buildListeningDeck,
+  createListeningRound,
+  isListeningAnswerCorrect,
   normalizeListeningAnswer,
 } from "../domain/listening-quiz";
 
@@ -42,5 +44,30 @@ describe("quiz de escuta", () => {
         acceptedAnswers: ["Viagem"],
       }),
     ).toEqual(["journey", "jornada", "viagem"]);
+  });
+
+  it("embaralha a rodada sem repetir palavras", () => {
+    const deck = buildListeningDeck([]);
+    const round = createListeningRound(deck, 10, () => 0.42);
+    expect(round).toHaveLength(10);
+    expect(new Set(round.map((item) => item.id)).size).toBe(10);
+  });
+
+  it("respeita os limites de cinco, quinze e todas", () => {
+    const deck = buildListeningDeck([]);
+    expect(createListeningRound(deck, 5)).toHaveLength(5);
+    expect(createListeningRound(deck, 15)).toHaveLength(15);
+    expect(createListeningRound(deck, "all")).toHaveLength(30);
+  });
+
+  it("aceita equivalências, acentos e pontuação sem aproximação semântica", () => {
+    const journey = {
+      id: "journey",
+      front: "Journey",
+      back: "Jornada",
+      acceptedAnswers: ["Viagem"],
+    };
+    expect(isListeningAnswerCorrect(journey, "  VIÁGEM! ")).toBe(true);
+    expect(isListeningAnswerCorrect(journey, "viajante")).toBe(false);
   });
 });
