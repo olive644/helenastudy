@@ -1153,6 +1153,208 @@ body {
   }
 }
 
+/* Helena editorial: menos efeito de template, mais caderno de estudos. */
+body {
+  background: #faf7f0;
+}
+
+.main-content {
+  animation: none;
+}
+
+.page-header {
+  background: rgb(250 247 240 / 94%);
+  backdrop-filter: blur(10px);
+}
+
+.view-heading--today {
+  min-height: 228px;
+  border: 1px solid var(--line-strong);
+  border-top: 7px solid var(--yellow);
+  border-radius: 8px 24px 8px 8px;
+  color: var(--ink);
+  background: #eee9ff;
+  box-shadow: 7px 7px 0 #dfd7fb;
+}
+
+.view-heading--today::before {
+  right: 2.2rem;
+  bottom: 1.4rem;
+  width: 84px;
+  height: 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--yellow);
+  box-shadow: none;
+  transform: rotate(-3deg);
+}
+
+.view-heading--today h1,
+.view-heading--today .section-label {
+  color: var(--ink);
+}
+
+.view-heading--today > div > p {
+  color: #5d5765;
+}
+
+.today-hero-actions button {
+  border-color: var(--line-strong);
+  border-radius: 5px;
+  color: var(--ink);
+  background: #fffdf9;
+}
+
+.today-hero-actions button:hover {
+  color: #fff;
+  background: var(--ink);
+}
+
+.today-hero-actions .today-hero-primary,
+.today-hero-actions .today-hero-primary:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+  background: var(--yellow);
+}
+
+.today-helena {
+  filter: drop-shadow(6px 8px 0 rgb(114 87 232 / 16%));
+  animation: none;
+}
+
+.metric-row article {
+  min-height: 104px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+.metric-row article::before {
+  width: 8px;
+  height: 100%;
+  border-radius: 0;
+}
+
+.metric-row article:hover {
+  box-shadow: 4px 4px 0 var(--metric-tint, var(--lavender));
+  transform: translate(-2px, -2px);
+}
+
+.module-panel,
+.plain-panel,
+.lesson-form,
+.preview,
+.notes-layout,
+.focus-card {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  box-shadow: none;
+}
+
+.module-panel:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.quick-actions {
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+  gap: 0;
+}
+
+.quick-actions > button,
+.quick-actions > button:last-child {
+  min-height: 90px;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.quick-actions > button:hover,
+.quick-actions > button:focus-visible {
+  background: #f2edff;
+  box-shadow: inset 0 -4px 0 var(--violet);
+  transform: none;
+}
+
+.quick-action-icon {
+  border: 1px solid #d9d0fa;
+  border-radius: 5px;
+}
+
+.quick-actions > button:hover .quick-action-icon {
+  transform: rotate(-3deg);
+}
+
+.navigation-icon path,
+.sidebar .navigation-icon path,
+.sidebar .nav-item--active .navigation-icon path {
+  stroke: none;
+}
+
+.navigation-icon .navigation-icon__base,
+.sidebar .navigation-icon .navigation-icon__base,
+.sidebar .nav-item--active .navigation-icon__base {
+  fill: currentcolor;
+}
+
+.navigation-icon .navigation-icon__accent,
+.sidebar .navigation-icon .navigation-icon__accent {
+  fill: var(--yellow);
+}
+
+.navigation-icon .navigation-icon__detail,
+.sidebar .navigation-icon .navigation-icon__detail {
+  fill: var(--ink);
+}
+
+.sidebar .nav-item--active .navigation-icon__accent {
+  fill: var(--violet);
+}
+
+.primary-button {
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+@media (min-width: 900px) {
+  .sidebar {
+    background: var(--ink);
+  }
+
+  .sidebar .nav-item {
+    border-radius: 6px;
+  }
+
+  .sidebar .nav-item:not(:disabled):hover {
+    transform: none;
+  }
+
+  .sidebar .nav-item--active {
+    box-shadow: 4px 4px 0 #8c70ef;
+  }
+}
+
+@media (max-width: 599px) {
+  .view-heading--today {
+    border-radius: 7px 20px 7px 7px;
+    box-shadow: 5px 5px 0 #dfd7fb;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions > button,
+  .quick-actions > button:last-child {
+    min-height: 82px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
 /* SimpleStudy-inspired learning experience, with HelenaStudy identity. */
 :root {
   --page: #f7f5fc;

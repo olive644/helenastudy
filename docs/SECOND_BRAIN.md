@@ -35,13 +35,13 @@ sincronização remota.
 - React 19 e TypeScript estrito;
 - Vite para desenvolvimento e build;
 - CSS próprio, mobile-first e sem fonte externa;
-- interface com hierarquia de próxima ação, cartões de progresso, ícones próprios em traço e
+- interface com hierarquia de próxima ação, cartões de progresso, ícones ilustrados preenchidos e
   movimentos curtos compatíveis com `prefers-reduced-motion`;
 - Vitest e Testing Library para unidade/componente;
 - Playwright para fluxos desktop e mobile;
 - GitHub Actions para qualidade, auditoria, segredos, análise estática e CodeQL.
-- Piper TTS carregado em uma única thread compatível com hospedagem estática, com modelos de alta
-  qualidade armazenados no OPFS sob demanda;
+- Kokoro-82M quantizado carregado em worker via WASM para reduzir memória e ampliar compatibilidade,
+  com modelo e vozes armazenados no cache do navegador sob demanda;
 - BroadcastChannel como transporte explícito do protótipo de Sala local.
 
 ## Etapas do produto

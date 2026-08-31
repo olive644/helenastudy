@@ -6,16 +6,16 @@ export type NaturalVoiceState = {
   message?: string;
 };
 
-export const PIPER_VOICES = [
-  { id: "en_US-lessac-high", label: "Lessac, inglês americano" },
-  { id: "en_GB-cori-high", label: "Cori, inglês britânico" },
-  { id: "en_US-ryan-high", label: "Ryan, inglês americano" },
+export const KOKORO_VOICES = [
+  { id: "af_heart", label: "Heart, inglês americano" },
+  { id: "af_bella", label: "Bella, inglês americano" },
+  { id: "bf_emma", label: "Emma, inglês britânico" },
 ] as const;
 
 type NaturalVoiceWorkerMessage =
   | { type: "progress"; progress?: number; requestId?: number }
   | { type: "ready"; requestId?: number }
-  | { type: "audio"; audio: Blob; speed: number; requestId: number }
+  | { type: "audio"; audio: Blob; requestId: number }
   | { type: "error"; message?: string; requestId?: number };
 
 export class NaturalVoicePlayer {
@@ -23,10 +23,12 @@ export class NaturalVoicePlayer {
   private audio: HTMLAudioElement | undefined;
   private audioUrl: string | undefined;
   private requestId = 0;
+  private fallback: (() => void) | undefined;
 
   constructor(private readonly onState: (state: NaturalVoiceState) => void) {}
 
-  generate(text: string, voice: string, speed: number): void {
+  generate(text: string, voice: string, speed: number, fallback?: () => void): void {
+    this.fallback = fallback;
     if (!this.worker) {
       if (!("Worker" in window) || !("Audio" in window)) {
         this.onState({
@@ -35,7 +37,7 @@ export class NaturalVoicePlayer {
         });
         return;
       }
-      this.worker = new Worker(new URL("../workers/piper-tts.worker.ts", import.meta.url), {
+      this.worker = new Worker(new URL("../workers/kokoro-tts.worker.ts", import.meta.url), {
         type: "module",
       });
       this.worker.addEventListener("message", (event: MessageEvent<NaturalVoiceWorkerMessage>) => {
@@ -49,19 +51,21 @@ export class NaturalVoicePlayer {
         } else if (event.data.type === "ready") {
           this.onState({ status: "generating" });
         } else if (event.data.type === "audio") {
-          void this.playBlob(event.data.audio, event.data.speed, event.data.requestId);
+          void this.playBlob(event.data.audio, event.data.requestId);
         } else if (event.data.type === "error") {
           this.onState({
             status: "error",
-            message: event.data.message ?? "Falha na voz neural.",
+            message: event.data.message ?? "Não foi possível iniciar a voz Kokoro.",
           });
+          this.playFallback();
         }
       });
       this.worker.addEventListener("error", () => {
         this.onState({
           status: "error",
-          message: "A voz neural ficou sem memória ou não pôde iniciar.",
+          message: "A voz Kokoro não pôde iniciar neste dispositivo.",
         });
+        this.playFallback();
       });
     }
 
@@ -85,11 +89,16 @@ export class NaturalVoicePlayer {
     this.worker = undefined;
   }
 
-  private async playBlob(blob: Blob, speed: number, requestId: number) {
+  private playFallback(): void {
+    const fallback = this.fallback;
+    this.fallback = undefined;
+    fallback?.();
+  }
+
+  private async playBlob(blob: Blob, requestId: number) {
     if (requestId !== this.requestId) return;
     const audioUrl = URL.createObjectURL(blob);
     const audio = new Audio(audioUrl);
-    audio.playbackRate = speed;
     audio.addEventListener(
       "ended",
       () => {

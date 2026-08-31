@@ -180,17 +180,16 @@ em inglês, sem duplicar termos. As respostas aceitam a palavra ou expressão ou
 principal e equivalentes cadastrados. Os filtros Fácil, Médio e Difícil continuam sendo calculados
 pela base local de frequência, com os mesmos fallbacks já documentados.
 
-A pronúncia neural usa Piper TTS local com três modelos de alta qualidade: Lessac e Ryan em inglês
-americano e Cori em inglês britânico. Cada modelo possui aproximadamente 115 MB, é baixado somente
-quando selecionado e fica no OPFS quando o navegador permite. O texto continua sendo processado no
-dispositivo e não é enviado a um provedor de TTS.
+A pronúncia neural usa Kokoro-82M local com três vozes selecionadas pela qualidade: Heart e Bella em
+inglês americano e Emma em inglês britânico. O modelo quantizado é baixado somente quando selecionado
+e fica no cache do navegador quando permitido. O texto continua sendo processado no dispositivo e
+não é enviado a um provedor de TTS.
 
-A falha das três vozes vinha da inicialização multithread do ONNX Runtime em hospedagem sem os
-cabeçalhos de isolamento exigidos por `SharedArrayBuffer`. O worker agora inicializa o runtime com
-uma única thread antes do carregamento dinâmico da biblioteca, baixa diretamente a voz escolhida e
-ignora respostas antigas quando a seleção muda. A voz do dispositivo permanece como fallback.
-O orçamento do worker foi atualizado para 300 KiB porque o bundle corrigido mede aproximadamente
-274 KiB; o limite separado continua impedindo que esse custo opcional entre no JavaScript inicial.
+O Piper anterior falhava ao localizar o backend WASM empacotado. A implementação atual isola o
+Kokoro em um worker, usa o backend WASM quantizado para limitar download e memória e ignora respostas
+antigas quando a seleção muda. Se o worker, o modelo ou o áudio falhar, a melhor voz do dispositivo é
+acionada automaticamente. O orçamento separa os aproximadamente 2,2 MiB do worker e 20,6 MiB do
+runtime WASM do JavaScript inicial; os pesos do modelo continuam sob demanda.
 
 As rodadas agora são embaralhadas sem repetição e aceitam 5, 10, 15 ou todas as palavras. O catálogo
 pedagógico tipado separa as 30 palavras do componente, com dificuldade, categoria e traduções
