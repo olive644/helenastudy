@@ -65,7 +65,9 @@ no bundle do navegador.
 
 Helena é a gata preta de olhos amarelos que orienta o fluxo. O aplicativo usa a silhueta
 assimétrica original em `public/helena.svg`, sem redesenhar a personagem como um gato genérico. O
-nome exibido na interface é somente HelenaStudy.
+nome exibido na interface é somente HelenaStudy. As abas usam uma família própria de ícones SVG:
+formas assimétricas e pontas inspiradas na silhueta da Helena, corpo na cor do contexto e detalhes
+amarelos. Não são usados pacotes de ícones genéricos na navegação.
 
 ## Fora do escopo desta fase
 

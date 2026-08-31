@@ -30,6 +30,26 @@ describe("App", () => {
     expect(screen.queryByRole("dialog", { name: "Mais ferramentas" })).toBeNull();
   });
 
+  it("usa a iconografia própria da Helena em todas as abas", () => {
+    render(<App />);
+    const navigation = screen.getByRole("navigation", { name: "Navegação principal" });
+    const icons = [
+      ["Espaço do aluno", "today"],
+      ["Agenda", "planner"],
+      ["Foco", "focus"],
+      ["Quizzes e bingo", "learn"],
+      ["Biblioteca", "library"],
+      ["Hábitos", "habits"],
+      ["Cadernos", "notes"],
+      ["Planos de aula", "lesson"],
+    ] as const;
+
+    icons.forEach(([label, icon]) => {
+      const button = within(navigation).getByRole("button", { name: label });
+      expect(button.querySelector(`[data-icon="${icon}"]`)).toBeTruthy();
+    });
+  });
+
   it("cria uma tarefa, mostra no Espaço do aluno e permite concluí-la", () => {
     render(<App />);
     navigate("Agenda");

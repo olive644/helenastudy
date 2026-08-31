@@ -2520,6 +2520,20 @@ select {
 .navigation-icon {
   display: block;
   flex: 0 0 auto;
+  overflow: visible;
+  color: inherit;
+}
+
+.navigation-icon__base {
+  fill: currentColor;
+}
+
+.navigation-icon__accent {
+  fill: var(--yellow);
+}
+
+.navigation-icon__detail {
+  fill: var(--ink);
 }
 
 .sidebar__footer {
