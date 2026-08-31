@@ -57,7 +57,7 @@ export const PRODUCT_MODULES = [
   {
     id: "learn",
     name: "Revisão e quizzes",
-    purpose: "Revisar flashcards, responder quizzes locais e acompanhar metas.",
+    purpose: "Revisar flashcards, praticar escuta, responder quizzes locais e acompanhar metas.",
     status: "available",
     entryView: "learn",
   },

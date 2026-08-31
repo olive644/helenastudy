@@ -1,6 +1,7 @@
 import { Check, Plus } from "lucide-react";
 import { useState, type Dispatch, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
+import { ListeningQuiz } from "../components/listening-quiz";
 import {
   buildBingoLabels,
   dueFlashcards,
@@ -240,7 +241,7 @@ function BingoSession({ workspace, dispatch, subjectId }: LearnViewProps & { sub
 export function LearnView({ workspace, dispatch }: LearnViewProps) {
   const defaultSubject = workspace.subjects[0];
   const [subjectId, setSubjectId] = useState(defaultSubject?.id ?? "");
-  const [mode, setMode] = useState<"review" | "quiz" | "bingo">("review");
+  const [mode, setMode] = useState<"review" | "quiz" | "listening" | "bingo">("review");
   const [goalTitle, setGoalTitle] = useState("");
   const [targetMinutes, setTargetMinutes] = useState(300);
   const [deadline, setDeadline] = useState(toDateKey(new Date()));
@@ -285,6 +286,13 @@ export function LearnView({ workspace, dispatch }: LearnViewProps) {
             <h2 id="study-mode-title">Sessão de estudo</h2>
             <div className="mode-switch">
               <button
+                className={mode === "listening" ? "is-active" : undefined}
+                type="button"
+                onClick={() => setMode("listening")}
+              >
+                Escuta
+              </button>
+              <button
                 className={mode === "review" ? "is-active" : undefined}
                 type="button"
                 onClick={() => setMode("review")}
@@ -320,6 +328,13 @@ export function LearnView({ workspace, dispatch }: LearnViewProps) {
               workspace={workspace}
               dispatch={dispatch}
               subjectId={selectedSubject.id}
+            />
+          ) : mode === "listening" ? (
+            <ListeningQuiz
+              key={`listening-${selectedSubject.id}`}
+              flashcards={workspace.flashcards.filter(
+                (card) => card.subjectId === selectedSubject.id,
+              )}
             />
           ) : (
             <BingoSession

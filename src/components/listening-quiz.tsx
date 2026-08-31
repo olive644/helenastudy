@@ -1,0 +1,203 @@
+import { Check, Play, RotateCcw, Volume2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import type { Flashcard } from "../domain/workspace";
+import {
+  buildListeningDeck,
+  normalizeListeningAnswer,
+  type ListeningCard,
+} from "../domain/listening-quiz";
+
+function speak(text: string, onUnavailable: () => void) {
+  if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+    onUnavailable();
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  utterance.rate = 0.82;
+  window.speechSynthesis.speak(utterance);
+}
+
+type RoundState = "ready" | "countdown" | "answering" | "feedback" | "finished";
+
+export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[] }) {
+  const initialDeck = useMemo(() => buildListeningDeck(flashcards), [flashcards]);
+  const [deck, setDeck] = useState(initialDeck);
+  const [index, setIndex] = useState(0);
+  const [state, setState] = useState<RoundState>("ready");
+  const [countdown, setCountdown] = useState(3);
+  const [answer, setAnswer] = useState("");
+  const [correct, setCorrect] = useState(0);
+  const [missed, setMissed] = useState<ListeningCard[]>([]);
+  const [wasCorrect, setWasCorrect] = useState(false);
+  const [audioUnavailable, setAudioUnavailable] = useState(false);
+  const answerRef = useRef<HTMLInputElement>(null);
+  const card = deck[index];
+
+  useEffect(() => {
+    if (state !== "countdown") return;
+    const timer = window.setTimeout(() => {
+      if (countdown <= 1) setState("answering");
+      else setCountdown((value) => value - 1);
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [countdown, state]);
+
+  useEffect(() => {
+    if (state === "answering") answerRef.current?.focus();
+  }, [state]);
+
+  useEffect(() => () => window.speechSynthesis?.cancel(), []);
+
+  function playAudio() {
+    if (!card) return;
+    setAudioUnavailable(false);
+    speak(card.front, () => setAudioUnavailable(true));
+  }
+
+  function beginRound() {
+    setAnswer("");
+    setWasCorrect(false);
+    setCountdown(3);
+    setState("countdown");
+    playAudio();
+  }
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!card || !answer.trim()) return;
+    const accepted = [card.back, card.front].some(
+      (value) => normalizeListeningAnswer(value) === normalizeListeningAnswer(answer),
+    );
+    setWasCorrect(accepted);
+    if (accepted) setCorrect((value) => value + 1);
+    else setMissed((items) => [...items, card]);
+    setState("feedback");
+  }
+
+  function nextRound() {
+    if (index + 1 >= deck.length) {
+      setState("finished");
+      return;
+    }
+    setIndex((value) => value + 1);
+    setState("ready");
+  }
+
+  function restart(cards = initialDeck) {
+    window.speechSynthesis?.cancel();
+    setDeck(cards);
+    setIndex(0);
+    setCorrect(0);
+    setMissed([]);
+    setAnswer("");
+    setState("ready");
+  }
+
+  if (!card) return null;
+
+  if (state === "finished") {
+    return (
+      <div className="listening-finish" role="status">
+        <span className="listening-finish__score">
+          {correct}/{deck.length}
+        </span>
+        <div>
+          <span className="section-label">Sessão concluída</span>
+          <h3>{missed.length === 0 ? "Você reconheceu todas!" : "Boa prática. Vamos reforçar?"}</h3>
+          <p>
+            {missed.length === 0
+              ? "Seu ouvido acompanhou todo o vocabulário desta rodada."
+              : `${missed.length} ${missed.length === 1 ? "termo precisa" : "termos precisam"} de mais uma escuta.`}
+          </p>
+        </div>
+        <div className="listening-finish__actions">
+          {missed.length > 0 && (
+            <button className="primary-button" type="button" onClick={() => restart(missed)}>
+              <RotateCcw size={17} /> Repetir erros
+            </button>
+          )}
+          <button className="secondary-button" type="button" onClick={() => restart()}>
+            Nova sessão
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`listening-quiz is-${state}`}>
+      <div className="listening-topline">
+        <span>
+          Escuta {index + 1} de {deck.length}
+        </span>
+        <span>{correct} acertos</span>
+      </div>
+
+      {state === "countdown" ? (
+        <div className="listening-stage listening-stage--countdown" aria-live="polite">
+          <span className="listening-digital">{countdown || "•"}</span>
+          <small>{countdown ? "Prepare sua resposta" : "Agora responda"}</small>
+        </div>
+      ) : state === "feedback" ? (
+        <div
+          className={`listening-stage listening-stage--feedback ${wasCorrect ? "is-correct" : "is-wrong"}`}
+          aria-live="polite"
+        >
+          <span className="listening-result-icon">
+            <Check size={30} />
+          </span>
+          <small>{wasCorrect ? "Você reconheceu" : "Resposta correta"}</small>
+          <strong>{card.front}</strong>
+          <p>{card.back}</p>
+          <button className="listening-next" type="button" onClick={nextRound}>
+            {index + 1 === deck.length ? "Ver resultado" : "Próxima escuta"}
+          </button>
+        </div>
+      ) : (
+        <div className="listening-stage">
+          <button
+            className="listening-speaker"
+            type="button"
+            onClick={playAudio}
+            aria-label="Ouvir novamente"
+          >
+            <Volume2 size={30} />
+          </button>
+          {state === "ready" ? (
+            <>
+              <span className="section-label">Quiz de pronúncia</span>
+              <h3>Ouça e descubra a palavra.</h3>
+              <p>A resposta pode ser em português ou em inglês.</p>
+              <button className="primary-button" type="button" onClick={beginRound}>
+                <Play size={17} /> Iniciar escuta
+              </button>
+            </>
+          ) : (
+            <form className="listening-answer" onSubmit={submit}>
+              <label htmlFor="listening-answer">O que você ouviu?</label>
+              <div>
+                <input
+                  ref={answerRef}
+                  id="listening-answer"
+                  value={answer}
+                  onChange={(event) => setAnswer(event.target.value)}
+                  autoComplete="off"
+                  required
+                />
+                <button type="submit">Confirmar</button>
+              </div>
+            </form>
+          )}
+          {audioUnavailable && (
+            <p className="listening-audio-note" role="alert">
+              Este navegador não oferece voz. Use outro navegador ou leia a dica: começa com “
+              {card.front.charAt(0)}”.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
