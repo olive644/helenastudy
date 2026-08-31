@@ -6,29 +6,29 @@ export type NaturalVoiceState = {
   message?: string;
 };
 
-export const KOKORO_VOICES = [
-  { id: "af_heart", label: "Heart, inglês americano" },
-  { id: "af_sky", label: "Sky, inglês americano" },
-  { id: "bf_emma", label: "Emma, inglês britânico" },
+export const PIPER_VOICES = [
+  { id: "en_US-hfc_female-medium", label: "HFC feminina, inglês americano" },
+  { id: "en_US-lessac-medium", label: "Lessac, inglês americano" },
+  { id: "en_GB-alba-medium", label: "Alba, inglês britânico" },
 ] as const;
 
 type NaturalVoiceWorkerMessage =
   | { type: "progress"; progress?: number }
   | { type: "ready" }
-  | { type: "audio"; samples: Float32Array; sampleRate: number; requestId: number }
+  | { type: "audio"; audio: Blob; speed: number; requestId: number }
   | { type: "error"; message?: string };
 
 export class NaturalVoicePlayer {
   private worker: Worker | undefined;
-  private context: AudioContext | undefined;
-  private source: AudioBufferSourceNode | undefined;
+  private audio: HTMLAudioElement | undefined;
+  private audioUrl: string | undefined;
   private requestId = 0;
 
   constructor(private readonly onState: (state: NaturalVoiceState) => void) {}
 
   load(): void {
     if (this.worker) return;
-    if (!("Worker" in window) || !("AudioContext" in window)) {
+    if (!("Worker" in window) || !("Audio" in window)) {
       this.onState({
         status: "error",
         message: "A voz natural não é compatível com este navegador.",
@@ -36,7 +36,7 @@ export class NaturalVoicePlayer {
       return;
     }
     this.onState({ status: "loading", progress: 0 });
-    this.worker = new Worker(new URL("../workers/kokoro-tts.worker.ts", import.meta.url), {
+    this.worker = new Worker(new URL("../workers/piper-tts.worker.ts", import.meta.url), {
       type: "module",
     });
     this.worker.addEventListener("message", (event: MessageEvent<NaturalVoiceWorkerMessage>) => {
@@ -50,7 +50,7 @@ export class NaturalVoicePlayer {
       } else if (type === "ready") {
         this.onState({ status: "ready" });
       } else if (type === "audio") {
-        void this.playSamples(event.data.samples, event.data.sampleRate, event.data.requestId);
+        void this.playBlob(event.data.audio, event.data.speed, event.data.requestId);
       } else if (type === "error") {
         this.onState({
           status: "error",
@@ -79,8 +79,10 @@ export class NaturalVoicePlayer {
   }
 
   stop(): void {
-    this.source?.stop();
-    this.source = undefined;
+    this.audio?.pause();
+    this.audio = undefined;
+    if (this.audioUrl) URL.revokeObjectURL(this.audioUrl);
+    this.audioUrl = undefined;
     this.requestId += 1;
   }
 
@@ -88,21 +90,24 @@ export class NaturalVoicePlayer {
     this.stop();
     this.worker?.terminate();
     this.worker = undefined;
-    void this.context?.close();
   }
 
-  private async playSamples(samples: Float32Array, sampleRate: number, requestId: number) {
+  private async playBlob(blob: Blob, speed: number, requestId: number) {
     if (requestId !== this.requestId) return;
-    this.context ??= new AudioContext();
-    await this.context.resume();
-    const buffer = this.context.createBuffer(1, samples.length, sampleRate);
-    buffer.copyToChannel(new Float32Array(samples), 0);
-    const source = this.context.createBufferSource();
-    source.buffer = buffer;
-    source.connect(this.context.destination);
-    source.addEventListener("ended", () => this.onState({ status: "ready" }), { once: true });
-    this.source = source;
+    const audioUrl = URL.createObjectURL(blob);
+    const audio = new Audio(audioUrl);
+    audio.playbackRate = speed;
+    audio.addEventListener(
+      "ended",
+      () => {
+        URL.revokeObjectURL(audioUrl);
+        this.onState({ status: "ready" });
+      },
+      { once: true },
+    );
+    this.audioUrl = audioUrl;
+    this.audio = audio;
     this.onState({ status: "playing" });
-    source.start();
+    await audio.play();
   }
 }
