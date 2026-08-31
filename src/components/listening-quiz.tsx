@@ -9,7 +9,7 @@ import {
 } from "../domain/listening-quiz";
 import { classifyWordDifficulty, type WordDifficulty } from "../data/word-difficulty";
 import { rankEnglishVoices, SPEECH_RATE_OPTIONS, speakEnglish } from "../data/speech-voice";
-import { KOKORO_VOICES, NaturalVoicePlayer, type NaturalVoiceState } from "../data/listening-audio";
+import { PIPER_VOICES, NaturalVoicePlayer, type NaturalVoiceState } from "../data/listening-audio";
 
 type RoundState = "ready" | "countdown" | "answering" | "feedback" | "finished";
 type DifficultyFilter = "mixed" | WordDifficulty;
@@ -42,7 +42,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   const [speechRate, setSpeechRate] = useState(0.86);
   const [roundLimit, setRoundLimit] = useState<RoundLimit>(10);
   const [voiceEngine, setVoiceEngine] = useState<VoiceEngine>("browser");
-  const [naturalVoice, setNaturalVoice] = useState<string>(KOKORO_VOICES[0].id);
+  const [naturalVoice, setNaturalVoice] = useState<string>(PIPER_VOICES[0].id);
   const [naturalState, setNaturalState] = useState<NaturalVoiceState>({ status: "idle" });
   const [submittedAnswer, setSubmittedAnswer] = useState("");
   const answerRef = useRef<HTMLInputElement>(null);
@@ -299,7 +299,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
                 aria-pressed={voiceEngine === "natural"}
                 onClick={enableNaturalVoice}
               >
-                Voz natural local <small>download de cerca de 86 MB</small>
+                Voz neural local <small>modelo médio, cerca de 60 MB</small>
               </button>
               <button
                 type="button"
@@ -330,7 +330,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
                     value={naturalVoice}
                     onChange={(event) => setNaturalVoice(event.target.value)}
                   >
-                    {KOKORO_VOICES.map((voice) => (
+                    {PIPER_VOICES.map((voice) => (
                       <option value={voice.id} key={voice.id}>
                         {voice.label}
                       </option>
