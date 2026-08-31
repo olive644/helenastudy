@@ -40,8 +40,10 @@ sincronização remota.
 - Vitest e Testing Library para unidade/componente;
 - Playwright para fluxos desktop e mobile;
 - GitHub Actions para qualidade, auditoria, segredos, análise estática e CodeQL.
-- Kokoro-82M quantizado carregado em worker via WASM para reduzir memória e ampliar compatibilidade,
-  com modelo e vozes armazenados no cache do navegador sob demanda;
+- Kokoro-82M quantizado carregado antecipadamente em worker via WASM para reduzir memória e ampliar
+  compatibilidade, com modelo e vozes armazenados no cache do navegador;
+- pré-geração das três próximas palavras e cache de áudio por texto, voz e velocidade para o quiz falar
+  automaticamente após a contagem e repetir sem nova síntese;
 - BroadcastChannel como transporte explícito do protótipo de Sala local.
 
 ## Etapas do produto
