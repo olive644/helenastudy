@@ -1,5 +1,11 @@
 # Auditoria do estado atual
 
+## Correção da navegação desktop
+
+- A barra lateral desktop mantém o fundo preto definido no redesign, mesmo após as camadas legadas de CSS.
+- Os ícones autorais recebem dimensões fixas e cores específicas no desktop para evitar encolhimento e deformação.
+- O estado ativo usa fundo amarelo, base preta e detalhe violeta; o comportamento móvel permanece inalterado.
+
 ## Quiz de escuta e pronúncia
 
 - A área Praticar agora oferece uma sessão de escuta baseada nos flashcards da matéria selecionada.

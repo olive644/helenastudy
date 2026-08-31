@@ -3755,3 +3755,102 @@ select {
     border-right: 0;
   }
 }
+
+/* Desktop navigation guard: keep this as the final cascade layer. */
+@media (min-width: 900px) {
+  .sidebar {
+    width: 264px;
+    padding: 1.35rem 1rem 1rem;
+    border-right: 0;
+    color: #fff;
+    background: var(--ink);
+  }
+
+  .sidebar > .brand {
+    min-height: 68px;
+    padding: 0.55rem 0.65rem;
+    border-bottom: 1px solid rgb(255 255 255 / 12%);
+  }
+
+  .sidebar .brand__mark {
+    width: 42px;
+    height: 48px;
+  }
+
+  .sidebar .brand__copy strong {
+    color: #fff;
+  }
+
+  .sidebar .brand__copy strong span {
+    color: var(--yellow);
+  }
+
+  .sidebar .nav-section__label {
+    color: rgb(255 255 255 / 48%);
+  }
+
+  .sidebar .nav-item {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.65rem 0.75rem;
+    color: rgb(255 255 255 / 72%);
+  }
+
+  .sidebar .nav-item::before {
+    display: none;
+  }
+
+  .sidebar .nav-item:not(:disabled):hover {
+    color: #fff;
+    background: rgb(255 255 255 / 9%);
+  }
+
+  .sidebar .nav-item--active {
+    color: var(--ink);
+    background: var(--yellow);
+  }
+
+  .sidebar .navigation-icon {
+    width: 27px;
+    height: 27px;
+    min-width: 27px;
+    overflow: visible;
+  }
+
+  .sidebar .navigation-icon__base {
+    fill: currentColor;
+  }
+
+  .sidebar .navigation-icon__accent {
+    fill: var(--yellow);
+  }
+
+  .sidebar .navigation-icon__detail {
+    fill: var(--ink);
+  }
+
+  .sidebar .nav-item--active .navigation-icon__base {
+    fill: var(--ink);
+  }
+
+  .sidebar .nav-item--active .navigation-icon__accent {
+    fill: var(--violet);
+  }
+
+  .sidebar__footer {
+    border-top-color: rgb(255 255 255 / 12%);
+  }
+
+  .sidebar__footer strong {
+    color: #fff;
+  }
+
+  .sidebar__footer small {
+    color: rgb(255 255 255 / 52%);
+  }
+
+  .main-content {
+    width: calc(100% - 264px);
+    margin-left: 264px;
+  }
+}
