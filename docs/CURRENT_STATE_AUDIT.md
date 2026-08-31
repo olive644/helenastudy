@@ -99,3 +99,17 @@ demonstração de IA.
 
 A assinatura visível da marca secundária foi removida a pedido do proprietário. O nome exibido é
 somente HelenaStudy, sem alterar a origem ou as regras de engenharia do repositório.
+
+## 8. Fundação do Espaço do aluno
+
+A tela inicial passa a se chamar **Espaço do aluno** no desktop e usa o rótulo curto **Espaço** na
+barra móvel. O conteúdo continua derivado do mesmo workspace local, preservando tarefas, agenda,
+hábitos, foco e materiais já existentes.
+
+Um catálogo tipado separa módulos disponíveis, fundações técnicas e recursos planejados. Os atalhos
+da tela inicial são gerados apenas para ferramentas funcionais. O mapa mental e o roadmap registram
+vestibulares, banco de questões, documentos, OCR, mapas conectados, cultura, bingo e Helena
+inteligente sem apresentá-los como recursos prontos.
+
+Esta fase não adiciona dependências. React, TypeScript e CSS existentes atendem à mudança; futuras
+bibliotecas ou linguagens exigirão justificativa, auditoria e medição na fase correspondente.

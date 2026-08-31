@@ -16,7 +16,7 @@ produto.
 
 ## Fluxo atual
 
-1. Consultar tarefas, agenda, hábitos e minutos de foco na tela Hoje.
+1. Consultar tarefas, agenda, hábitos e minutos de foco no Espaço do aluno.
 2. Criar matérias, tarefas e compromissos na Agenda.
 3. Registrar sessões no cronômetro de Foco.
 4. Criar e marcar Hábitos diários.
@@ -39,7 +39,7 @@ sincronização remota.
 
 ## Etapas do produto
 
-1. **Núcleo local concluído:** Hoje, Agenda, Foco, Hábitos, Cadernos e planos de aula.
+1. **Núcleo local concluído:** Espaço do aluno, Agenda, Foco, Hábitos, Cadernos e planos de aula.
 2. **Sistema de estudos concluído:** biblioteca, flashcards, revisão programada, questionários e
    metas.
 3. **Helena inteligente com fundação definida:** contrato, consentimento e fronteira segura do
@@ -80,3 +80,6 @@ nome exibido na interface é somente HelenaStudy.
 - notificações nativas.
 
 Cada item entra apenas quando o fluxo local básico estiver validado.
+
+O mapa completo do produto está em [`PRODUCT_MIND_MAP.md`](PRODUCT_MIND_MAP.md), e a ordem de
+implementação com critérios técnicos está em [`IMPLEMENTATION_ROADMAP.md`](IMPLEMENTATION_ROADMAP.md).

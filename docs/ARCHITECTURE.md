@@ -21,7 +21,11 @@ Futura Helena inteligente
 
 `WorkspaceState` é a fonte única para matérias, tarefas, compromissos, hábitos, anotações, sessões
 de foco, materiais, flashcards, metas e resultados de questionários. Os módulos não mantêm bancos
-paralelos. A tela Hoje e o módulo Aprender derivam seus resumos desse estado compartilhado.
+paralelos. O Espaço do aluno e o módulo Aprender derivam seus resumos desse estado compartilhado.
+
+`src/product/module-catalog.ts` registra o estado dos módulos sem acoplar planejamento a uma
+promessa visível. Somente módulos `available` podem fornecer atalhos executáveis. Módulos
+`foundation` possuem apenas uma base técnica; módulos `planned` existem no mapa e no roadmap.
 
 O armazenamento possui uma versão explícita e rejeita conteúdo inválido. A versão 2 migra o estado
 da versão 1 sem apagar dados. A implementação local pode ser substituída por um repositório remoto
@@ -48,7 +52,8 @@ escolhidos antes da ativação.
 - `src/data`: persistência e validação da fronteira local;
 - `src/hooks`: ligação entre React e o domínio;
 - `src/components`: componentes visuais reutilizáveis;
-- `src/views`: experiências de Hoje, Agenda, Foco, Hábitos, Cadernos e planos de aula;
+- `src/product`: catálogo tipado e decisões de composição do produto;
+- `src/views`: experiências do Espaço do aluno, Agenda, Foco, Hábitos, Cadernos e planos de aula;
 - `src/app.tsx`: roteamento local e composição da aplicação;
 - `src/styles.css`: tokens e layout responsivo;
 - `e2e`: contratos visíveis ao usuário.

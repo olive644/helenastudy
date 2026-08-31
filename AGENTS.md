@@ -34,4 +34,5 @@ Estas regras herdam o padrão de engenharia do OliQualidade e valem para todo o 
 - Registrar decisões arquiteturais e mudanças de estado em `docs/CURRENT_STATE_AUDIT.md`.
 - Atualizar `docs/SECOND_BRAIN.md` quando o fluxo, a arquitetura ou os comandos mudarem.
 - Usar nomes honestos: recursos simulados ou locais não podem ser apresentados como IA, sincronização ou persistência em nuvem.
-- Manter o escopo inicial centrado em planejamento de aulas de inglês para professores.
+- Manter o Espaço do aluno como início da experiência e integrar novos módulos ao workspace
+  compartilhado. O planejador de aulas de inglês permanece como ferramenta existente.

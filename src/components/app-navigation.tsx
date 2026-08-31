@@ -21,7 +21,7 @@ const NAVIGATION_SECTIONS: readonly { label: string; items: readonly NavigationI
   {
     label: "Principal",
     items: [
-      { view: "today", label: "Hoje", icon: "today" },
+      { view: "today", label: "Espaço do aluno", mobileLabel: "Espaço", icon: "today" },
       { view: "planner", label: "Agenda", icon: "planner" },
     ],
   },
@@ -44,7 +44,7 @@ const NAVIGATION_SECTIONS: readonly { label: string; items: readonly NavigationI
 ];
 
 const MOBILE_ITEMS: readonly NavigationItem[] = [
-  { view: "today", label: "Hoje", icon: "today" },
+  { view: "today", label: "Espaço do aluno", mobileLabel: "Espaço", icon: "today" },
   { view: "planner", label: "Agenda", icon: "planner" },
   { view: "focus", label: "Foco", icon: "focus" },
   { view: "learn", label: "Aprender", icon: "learn" },
