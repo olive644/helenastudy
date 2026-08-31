@@ -1,4 +1,4 @@
-# HelenaStudy — Second Brain
+# HelenaStudy: Second Brain
 
 ## Proposta
 
@@ -39,10 +39,10 @@ sincronização remota.
 
 ## Etapas do produto
 
-1. **Núcleo local — concluído:** Hoje, Agenda, Foco, Hábitos, Cadernos e planos de aula.
-2. **Sistema de estudos — concluído:** biblioteca, flashcards, revisão programada, questionários e
+1. **Núcleo local concluído:** Hoje, Agenda, Foco, Hábitos, Cadernos e planos de aula.
+2. **Sistema de estudos concluído:** biblioteca, flashcards, revisão programada, questionários e
    metas.
-3. **Helena inteligente — fundação definida:** contrato, consentimento e fronteira segura do
+3. **Helena inteligente com fundação definida:** contrato, consentimento e fronteira segura do
    backend estão prontos; provedor e interface ainda não estão ativados. Depois entram tutor,
    explicações, resumos e planos personalizados.
 4. **Aplicativo mobile:** notificações, sincronização e controle nativo de tempo de tela.
@@ -64,8 +64,8 @@ no bundle do navegador.
 - creme: `#FFF8ED`.
 
 Helena é a gata preta de olhos amarelos que orienta o fluxo. O aplicativo usa a silhueta
-assimétrica original em `public/helena.svg`, sem redesenhar a personagem como um gato genérico. A
-assinatura `by Oli` liga o produto ao ecossistema sem copiar a identidade visual do OliQualidade.
+assimétrica original em `public/helena.svg`, sem redesenhar a personagem como um gato genérico. O
+nome exibido na interface é somente HelenaStudy.
 
 ## Fora do escopo desta fase
 

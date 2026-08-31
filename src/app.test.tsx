@@ -11,8 +11,23 @@ describe("App", () => {
   it("apresenta a central local com a Helena original", () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: /organize seu dia de estudos/i })).toBeTruthy();
-    expect(screen.getByText(/salvo somente neste dispositivo/i)).toBeTruthy();
+    expect(screen.getByText(/dados salvos neste dispositivo/i)).toBeTruthy();
     expect(screen.getByAltText(/helena, a gata preta/i).getAttribute("src")).toBe("/helena.svg");
+    expect(screen.queryByText(/by oli/i)).toBeNull();
+  });
+
+  it("organiza as ferramentas secundárias no menu móvel", () => {
+    render(<App />);
+    const mobileNavigation = screen.getByRole("navigation", { name: "Navegação móvel" });
+    expect(within(mobileNavigation).getAllByRole("button")).toHaveLength(5);
+    fireEvent.click(within(mobileNavigation).getByRole("button", { name: "Mais" }));
+
+    const moreMenu = screen.getByRole("dialog", { name: "Mais ferramentas" });
+    fireEvent.click(within(moreMenu).getByRole("button", { name: "Hábitos" }));
+    expect(
+      screen.getByRole("heading", { name: /consistência antes de intensidade/i }),
+    ).toBeTruthy();
+    expect(screen.queryByRole("dialog", { name: "Mais ferramentas" })).toBeNull();
   });
 
   it("cria uma tarefa, mostra em Hoje e permite concluí-la", () => {

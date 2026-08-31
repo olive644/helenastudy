@@ -1,6 +1,6 @@
 # Auditoria do estado atual
 
-## 1. Fundação inicial — 2026-08-29
+## 1. Fundação inicial: 2026-08-29
 
 O repositório nasceu contendo apenas um README. A primeira base estabelece:
 
@@ -85,3 +85,17 @@ define:
 Não existe provedor conectado, segredo versionado ou chamada externa. A interface continua sem
 afirmar que oferece IA. A ativação depende de uma nova mudança com runtime, provedor, política de
 retenção, orçamento e implantação aprovados.
+
+## 7. Redesign de conforto e navegação
+
+A navegação e a hierarquia visual foram reorganizadas sem alterar o domínio ou a persistência. A
+entrega mantém a paleta original e o SVG da Helena, mas reduz títulos excessivos, melhora tamanhos
+de toque, espaçamento, leitura de formulários e clareza dos estados ativos.
+
+No desktop, os módulos ficam agrupados em Principal, Estudar e Organizar. No celular, a barra
+inferior prioriza Hoje, Agenda, Foco e Aprender; as demais ferramentas ficam em um painel Mais com
+acesso direto. A interface não usa gradientes, vidro, neon ou elementos decorativos que simulem uma
+demonstração de IA.
+
+A assinatura visível da marca secundária foi removida a pedido do proprietário. O nome exibido é
+somente HelenaStudy, sem alterar a origem ou as regras de engenharia do repositório.

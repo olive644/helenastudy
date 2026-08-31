@@ -54,8 +54,18 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
   await expect(navigation).toBeVisible();
   await expect(navigation.getByRole("button")).toHaveCount(5);
 
-  for (const label of ["Agenda", "Foco", "Hábitos", "Notas", "Hoje"]) {
+  for (const label of ["Agenda", "Foco", "Aprender", "Hoje"]) {
     await navigation.getByRole("button", { name: label, exact: true }).click();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
+    expect(overflow).toBe(false);
+  }
+
+  for (const label of ["Hábitos", "Notas", "Biblioteca", "Planos de aula"]) {
+    await navigation.getByRole("button", { name: "Mais", exact: true }).click();
+    const more = page.getByRole("dialog", { name: "Mais ferramentas" });
+    await expect(more).toBeVisible();
+    await more.getByRole("button", { name: label, exact: true }).click();
+    await expect(more).toBeHidden();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
     expect(overflow).toBe(false);
   }
