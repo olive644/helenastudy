@@ -38,8 +38,8 @@ sincronização remota.
 - Vitest e Testing Library para unidade/componente;
 - Playwright para fluxos desktop e mobile;
 - GitHub Actions para qualidade, auditoria, segredos, análise estática e CodeQL.
-- Kokoro.js 1.2.1 carregado do jsDelivr somente pelo worker e por consentimento, sem entrar no bundle,
-  com modelo quantizado baixado sob demanda;
+- Piper TTS carregado somente pelo worker e por consentimento, com modelo neural armazenado no OPFS
+  sob demanda;
 - BroadcastChannel como transporte explícito do protótipo de Sala local.
 
 ## Etapas do produto
