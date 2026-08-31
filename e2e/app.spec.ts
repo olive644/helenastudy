@@ -7,13 +7,13 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }) => {
-  await expect(page.getByRole("heading", { name: /organize seu dia de estudos/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Espaço do aluno" })).toBeVisible();
   await expect(page.getByAltText(/helena, a gata preta/i)).toHaveAttribute("src", "/helena.svg");
 
   await page.getByRole("button", { name: "Agenda", exact: true }).click();
   await page.getByLabel(/o que precisa ser feito/i).fill("Revisar Simple Past");
   await page.getByRole("button", { name: /adicionar tarefa/i }).click();
-  await page.getByRole("button", { name: "Hoje", exact: true }).click();
+  await page.getByRole("button", { name: "Espaço do aluno", exact: true }).click();
   await expect(page.getByText("Revisar Simple Past")).toBeVisible();
 
   await page.reload();
@@ -21,7 +21,7 @@ test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }) =
 });
 
 test("preserva o criador de planos de aula", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "O atalho mobile fica na tela Hoje.");
+  test.skip(testInfo.project.name !== "desktop", "O atalho mobile fica no Espaço do aluno.");
   await page.getByRole("button", { name: /planos de aula/i }).click();
   await page.getByLabel(/tema da aula/i).fill("Simple Past");
   await page.getByLabel(/perfil da turma/i).fill("Adultos iniciantes");
@@ -31,13 +31,13 @@ test("preserva o criador de planos de aula", async ({ page }, testInfo) => {
 });
 
 test("cria um flashcard e conclui a revisão", async ({ page }) => {
-  const quickActions = page.getByRole("region", { name: "Ações rápidas" });
+  const quickActions = page.getByRole("region", { name: "Ferramentas do Espaço do aluno" });
   await quickActions.getByRole("button", { name: /biblioteca/i }).click();
   await page.getByLabel("Frente").fill("Improve");
   await page.getByLabel("Verso").fill("Melhorar");
   await page.getByRole("button", { name: /criar flashcard/i }).click();
 
-  await page.getByRole("button", { name: "Hoje", exact: true }).click();
+  await page.getByRole("button", { name: "Espaço do aluno", exact: true }).click();
   await quickActions.getByRole("button", { name: /revisar/i }).click();
   await expect(page.getByRole("heading", { name: "Improve" })).toBeVisible();
   await page.getByRole("button", { name: /mostrar resposta/i }).click();
@@ -54,7 +54,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
   await expect(navigation).toBeVisible();
   await expect(navigation.getByRole("button")).toHaveCount(5);
 
-  for (const label of ["Agenda", "Foco", "Aprender", "Hoje"]) {
+  for (const label of ["Agenda", "Foco", "Aprender", "Espaço"]) {
     await navigation.getByRole("button", { name: label, exact: true }).click();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
     expect(overflow).toBe(false);

@@ -27,3 +27,7 @@ npm run verify
 
 O contexto do produto e as decisões técnicas ficam em
 [`docs/SECOND_BRAIN.md`](docs/SECOND_BRAIN.md).
+
+O [mapa mental do produto](docs/PRODUCT_MIND_MAP.md) conecta todas as áreas planejadas. O
+[roadmap de implementação](docs/IMPLEMENTATION_ROADMAP.md) separa as entregas em fases e registra
+quando uma biblioteca ou linguagem adicional pode ser avaliada.

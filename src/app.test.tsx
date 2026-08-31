@@ -10,7 +10,7 @@ function navigate(label: string) {
 describe("App", () => {
   it("apresenta a central local com a Helena original", () => {
     render(<App />);
-    expect(screen.getByRole("heading", { name: /organize seu dia de estudos/i })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Espaço do aluno" })).toBeTruthy();
     expect(screen.getByText(/dados salvos neste dispositivo/i)).toBeTruthy();
     expect(screen.getByAltText(/helena, a gata preta/i).getAttribute("src")).toBe("/helena.svg");
     expect(screen.queryByText(/by oli/i)).toBeNull();
@@ -30,7 +30,7 @@ describe("App", () => {
     expect(screen.queryByRole("dialog", { name: "Mais ferramentas" })).toBeNull();
   });
 
-  it("cria uma tarefa, mostra em Hoje e permite concluí-la", () => {
+  it("cria uma tarefa, mostra no Espaço do aluno e permite concluí-la", () => {
     render(<App />);
     navigate("Agenda");
     fireEvent.change(screen.getByLabelText(/o que precisa ser feito/i), {
@@ -38,7 +38,7 @@ describe("App", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /adicionar tarefa/i }));
 
-    navigate("Hoje");
+    navigate("Espaço do aluno");
     expect(screen.getByText("Revisar phrasal verbs")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /concluir revisar phrasal verbs/i }));
     expect(screen.queryByText("Revisar phrasal verbs")).toBeNull();

@@ -2360,12 +2360,13 @@ select {
   background: var(--lavender);
 }
 
-.quick-action-index {
+.quick-action-icon {
   display: grid;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
   border-radius: 8px;
+  color: var(--violet-dark);
   background: var(--lavender);
   place-items: center;
 }

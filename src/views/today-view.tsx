@@ -7,6 +7,8 @@ import {
 } from "../domain/workspace";
 import type { AppView } from "../components/app-navigation";
 import { PageHeader } from "../components/app-navigation";
+import { NavigationIcon } from "../components/navigation-icon";
+import { STUDENT_SPACE_TOOLS } from "../product/module-catalog";
 
 type TodayViewProps = {
   workspace: WorkspaceState;
@@ -42,8 +44,8 @@ export function TodayView({ workspace, dispatch, onNavigate }: TodayViewProps) {
       <header className="view-heading view-heading--today">
         <div>
           <span className="section-label">{formatLongDate(now)}</span>
-          <h1>Organize seu dia de estudos.</h1>
-          <p>Tarefas, foco, hábitos e anotações reunidos no mesmo lugar.</p>
+          <h1>Espaço do aluno</h1>
+          <p>Veja suas prioridades e escolha o próximo passo sem sair do seu fluxo.</p>
         </div>
         <img
           className="today-helena"
@@ -146,42 +148,18 @@ export function TodayView({ workspace, dispatch, onNavigate }: TodayViewProps) {
           )}
         </section>
 
-        <section className="quick-actions" aria-label="Ações rápidas">
-          <button type="button" onClick={() => onNavigate("focus")}>
-            <b className="quick-action-index">01</b>
-            <span>
-              <strong>Iniciar foco</strong>
-              <small>Abrir cronômetro</small>
-            </span>
-          </button>
-          <button type="button" onClick={() => onNavigate("notes")}>
-            <b className="quick-action-index">02</b>
-            <span>
-              <strong>Nova anotação</strong>
-              <small>Abrir cadernos</small>
-            </span>
-          </button>
-          <button type="button" onClick={() => onNavigate("lesson-builder")}>
-            <b className="quick-action-index">03</b>
-            <span>
-              <strong>Plano de aula</strong>
-              <small>Organizar conteúdo</small>
-            </span>
-          </button>
-          <button type="button" onClick={() => onNavigate("learn")}>
-            <b className="quick-action-index">04</b>
-            <span>
-              <strong>Revisar</strong>
-              <small>Flashcards e questões</small>
-            </span>
-          </button>
-          <button type="button" onClick={() => onNavigate("library")}>
-            <b className="quick-action-index">05</b>
-            <span>
-              <strong>Biblioteca</strong>
-              <small>Materiais e cartões</small>
-            </span>
-          </button>
+        <section className="quick-actions" aria-label="Ferramentas do Espaço do aluno">
+          {STUDENT_SPACE_TOOLS.map((tool) => (
+            <button type="button" onClick={() => onNavigate(tool.view)} key={tool.view}>
+              <b className="quick-action-icon">
+                <NavigationIcon name={tool.icon} />
+              </b>
+              <span>
+                <strong>{tool.title}</strong>
+                <small>{tool.description}</small>
+              </span>
+            </button>
+          ))}
         </section>
       </div>
     </main>
