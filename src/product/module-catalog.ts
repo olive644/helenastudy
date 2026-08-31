@@ -88,8 +88,15 @@ export const PRODUCT_MODULES = [
   },
   {
     id: "scanner",
-    name: "Digitalização e OCR",
-    purpose: "Capturar documentos com revisão humana antes de salvar o texto.",
+    name: "Digitalização",
+    purpose: "Fotografar, realçar e anexar páginas a uma anotação local.",
+    status: "available",
+    entryView: "notes",
+  },
+  {
+    id: "ocr",
+    name: "Reconhecimento de texto",
+    purpose: "Extrair texto de digitalizações com revisão humana antes de salvar.",
     status: "planned",
   },
   {
@@ -114,7 +121,8 @@ export const PRODUCT_MODULES = [
     id: "bingo",
     name: "Bingo de estudos",
     purpose: "Transformar revisão e metas em atividades leves e opcionais.",
-    status: "planned",
+    status: "available",
+    entryView: "learn",
   },
 ] as const satisfies readonly ProductModule[];
 
@@ -134,7 +142,7 @@ export const STUDENT_SPACE_TOOLS = [
     description: "Abrir agenda",
     icon: "planner",
   },
-  { view: "learn", title: "Revisar", description: "Flashcards e quizzes", icon: "learn" },
+  { view: "learn", title: "Quizzes e bingo", description: "Praticar e revisar", icon: "learn" },
   {
     view: "library",
     title: "Consultar materiais",

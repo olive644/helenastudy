@@ -2,7 +2,9 @@ import { Check, Plus } from "lucide-react";
 import { useState, type Dispatch, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
 import {
+  buildBingoLabels,
   dueFlashcards,
+  hasBingo,
   minutesFocusedForSubject,
   toDateKey,
   type FlashcardRating,
@@ -173,10 +175,72 @@ function QuizSession({ workspace, dispatch, subjectId }: LearnViewProps & { subj
   );
 }
 
+function BingoSession({ workspace, dispatch, subjectId }: LearnViewProps & { subjectId: string }) {
+  const board = workspace.bingoBoards.find((item) => item.subjectId === subjectId);
+  const fronts = workspace.flashcards
+    .filter((card) => card.subjectId === subjectId)
+    .map((card) => card.front);
+
+  function createBoard() {
+    dispatch({
+      type: "bingo/created",
+      subjectId,
+      labels: buildBingoLabels(fronts),
+      createdAt: new Date().toISOString(),
+    });
+  }
+
+  if (!board)
+    return (
+      <div className="study-finished bingo-intro">
+        <h3>Seu bingo de estudos</h3>
+        <p>Complete uma linha, coluna ou diagonal. Os cartões da matéria entram como desafios.</p>
+        <button className="primary-button" type="button" onClick={createBoard}>
+          Criar bingo
+        </button>
+      </div>
+    );
+
+  const completed = board.cells.filter((cell) => cell.completed).length;
+  const won = hasBingo(board);
+
+  return (
+    <div className="bingo-session">
+      <div className="study-progress">
+        <span>{completed}/9 desafios concluídos</span>
+        <button className="link-button" type="button" onClick={createBoard}>
+          Novo bingo
+        </button>
+      </div>
+      {won && (
+        <div className="bingo-success" role="status">
+          <Check size={18} /> Bingo! Você completou uma sequência.
+        </div>
+      )}
+      <div className="bingo-grid" role="group" aria-label="Cartela de bingo">
+        {board.cells.map((cell) => (
+          <button
+            className={cell.completed ? "is-complete" : undefined}
+            type="button"
+            aria-pressed={cell.completed}
+            onClick={() =>
+              dispatch({ type: "bingo/cell-toggled", boardId: board.id, cellId: cell.id })
+            }
+            key={cell.id}
+          >
+            <Check size={16} />
+            <span>{cell.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function LearnView({ workspace, dispatch }: LearnViewProps) {
   const defaultSubject = workspace.subjects[0];
   const [subjectId, setSubjectId] = useState(defaultSubject?.id ?? "");
-  const [mode, setMode] = useState<"review" | "quiz">("review");
+  const [mode, setMode] = useState<"review" | "quiz" | "bingo">("review");
   const [goalTitle, setGoalTitle] = useState("");
   const [targetMinutes, setTargetMinutes] = useState(300);
   const [deadline, setDeadline] = useState(toDateKey(new Date()));
@@ -199,11 +263,9 @@ export function LearnView({ workspace, dispatch }: LearnViewProps) {
       <PageHeader />
       <header className="view-heading view-heading--with-action">
         <div>
-          <span className="section-label">Aprender</span>
+          <span className="section-label">Praticar</span>
           <h1>Pratique para lembrar.</h1>
-          <p>
-            Revise cartões, responda questões e acompanhe metas usando somente seus dados locais.
-          </p>
+          <p>Use flashcards, quizzes e bingo com conteúdo salvo no seu próprio espaço.</p>
         </div>
         <label className="view-select">
           <span>Matéria</span>
@@ -227,14 +289,21 @@ export function LearnView({ workspace, dispatch }: LearnViewProps) {
                 type="button"
                 onClick={() => setMode("review")}
               >
-                Revisão
+                Flashcards
               </button>
               <button
                 className={mode === "quiz" ? "is-active" : undefined}
                 type="button"
                 onClick={() => setMode("quiz")}
               >
-                Questionário
+                Quizzes
+              </button>
+              <button
+                className={mode === "bingo" ? "is-active" : undefined}
+                type="button"
+                onClick={() => setMode("bingo")}
+              >
+                Bingo
               </button>
             </div>
           </div>
@@ -245,9 +314,15 @@ export function LearnView({ workspace, dispatch }: LearnViewProps) {
               dispatch={dispatch}
               subjectId={selectedSubject.id}
             />
-          ) : (
+          ) : mode === "quiz" ? (
             <QuizSession
               key={`quiz-${selectedSubject.id}`}
+              workspace={workspace}
+              dispatch={dispatch}
+              subjectId={selectedSubject.id}
+            />
+          ) : (
+            <BingoSession
               workspace={workspace}
               dispatch={dispatch}
               subjectId={selectedSubject.id}

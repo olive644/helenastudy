@@ -24,4 +24,15 @@ describe("catálogo de módulos", () => {
       expect(availableViews.has(tool.view)).toBe(true);
     }
   });
+
+  it("marca digitalização e bingo como recursos disponíveis", () => {
+    expect(PRODUCT_MODULES.find((module) => module.id === "scanner")).toMatchObject({
+      status: "available",
+      entryView: "notes",
+    });
+    expect(PRODUCT_MODULES.find((module) => module.id === "bingo")).toMatchObject({
+      status: "available",
+      entryView: "learn",
+    });
+  });
 });

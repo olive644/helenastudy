@@ -8,18 +8,18 @@ pequena o bastante para revisão.
 
 ## Fases
 
-| Fase | Entrega principal                       | Dependências prováveis                              | Critério de saída                                           |
-| ---- | --------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------- |
-| 1    | Espaço do aluno e catálogo de módulos   | React e TypeScript atuais                           | início claro, navegação consistente e estados honestos      |
-| 2    | Planner semanal, checklist e cronograma | sem dependência obrigatória                         | tarefas ligadas a matérias e blocos semanais persistidos    |
-| 3    | Banco de questões e vestibulares        | parser próprio; importação só após análise jurídica | filtros, respostas, correção e caderno de erros testados    |
-| 4    | Documentos e notas rápidas              | avaliar TipTap ou Lexical                           | edição acessível, salvamento e histórico local              |
-| 5    | Digitalização e OCR                     | avaliar serviço isolado ou OCR em worker            | captura, recorte, revisão humana e exclusão segura          |
-| 6    | Mapas de conteúdo                       | avaliar React Flow                                  | blocos conectáveis, teclado, toque e exportação estruturada |
-| 7    | Relógio flip e foco avançado            | CSS e Web Workers antes de novas libs               | cronômetro resiliente e sem falsa promessa de bloqueio web  |
-| 8    | Helena inteligente                      | backend aprovado e contrato existente               | fontes citadas, consentimento, limites e observabilidade    |
-| 9    | Cultura, bingo e trilhas                | domínio próprio                                     | conteúdo autoral, acessível e ligado ao progresso           |
-| 10   | Conta, sincronização e comunidade       | backend, autenticação e moderação                   | ameaça revisada, privacidade e recuperação de dados         |
+| Fase | Entrega principal                           | Dependências prováveis                              | Critério de saída                                           |
+| ---- | ------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------- |
+| 1    | Espaço do aluno e catálogo de módulos       | React e TypeScript atuais                           | início claro, navegação consistente e estados honestos      |
+| 2    | Planner semanal, checklist e cronograma     | sem dependência obrigatória                         | tarefas ligadas a matérias e blocos semanais persistidos    |
+| 3    | Banco de questões e vestibulares            | parser próprio; importação só após análise jurídica | filtros, respostas, correção e caderno de erros testados    |
+| 4    | Documentos e notas rápidas                  | avaliar TipTap ou Lexical                           | edição acessível, salvamento e histórico local              |
+| 5    | Digitalização local entregue; OCR pendente  | avaliar serviço isolado ou OCR em worker            | captura e desenho locais; OCR exige revisão humana          |
+| 6    | Mapas de conteúdo                           | avaliar React Flow                                  | blocos conectáveis, teclado, toque e exportação estruturada |
+| 7    | Relógio flip e foco avançado                | CSS e Web Workers antes de novas libs               | cronômetro resiliente e sem falsa promessa de bloqueio web  |
+| 8    | Helena inteligente                          | backend aprovado e contrato existente               | fontes citadas, consentimento, limites e observabilidade    |
+| 9    | Bingo entregue; cultura e trilhas pendentes | domínio próprio                                     | conteúdo autoral, acessível e ligado ao progresso           |
+| 10   | Conta, sincronização e comunidade           | backend, autenticação e moderação                   | ameaça revisada, privacidade e recuperação de dados         |
 
 ## Decisões de tecnologia
 

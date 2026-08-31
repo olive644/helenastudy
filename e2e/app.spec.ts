@@ -66,7 +66,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
   await expect(navigation).toBeVisible();
   await expect(navigation.getByRole("button")).toHaveCount(5);
 
-  for (const label of ["Agenda", "Foco", "Aprender", "Espaço"]) {
+  for (const label of ["Agenda", "Foco", "Praticar", "Espaço"]) {
     await navigation.getByRole("button", { name: label, exact: true }).click();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
     expect(overflow).toBe(false);
@@ -81,4 +81,28 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
     expect(overflow).toBe(false);
   }
+});
+
+test("abre digitalização, escrita à mão e completa um bingo", async ({ page }, testInfo) => {
+  const quickActions = page.getByRole("region", { name: "Ferramentas do Espaço do aluno" });
+  await quickActions.getByRole("button", { name: /nova anotação/i }).click();
+  await page.getByRole("button", { name: /nova anotação/i }).click();
+
+  await page.getByRole("button", { name: "Digitalizar" }).click();
+  await expect(page.getByRole("dialog", { name: "Digitalizar documento" })).toBeVisible();
+  await page.getByRole("button", { name: "Fechar", exact: true }).click();
+
+  await page.getByRole("button", { name: "Escrever à mão" }).click();
+  await expect(page.getByRole("dialog", { name: "Escrever à mão" })).toBeVisible();
+  await page.getByRole("button", { name: "Fechar", exact: true }).click();
+
+  await studentSpaceButton(page, testInfo.project.name).click();
+  await quickActions.getByRole("button", { name: /quizzes e bingo/i }).click();
+  await page.getByRole("button", { name: "Bingo" }).click();
+  await page.getByRole("button", { name: "Criar bingo" }).click();
+  const board = page.getByRole("group", { name: "Cartela de bingo" });
+  const cells = board.getByRole("button");
+  await expect(cells).toHaveCount(9);
+  for (let index = 0; index < 3; index += 1) await cells.nth(index).click();
+  await expect(page.getByRole("status")).toContainText("Bingo");
 });

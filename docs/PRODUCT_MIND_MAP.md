@@ -26,7 +26,8 @@ mindmap
       Biblioteca
       Documentos
       Notas rápidas
-      Digitalização e OCR
+      Digitalização local
+      OCR planejado
       Mapas conectados
     Aprendizagem
       Flashcards

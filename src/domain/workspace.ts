@@ -1,4 +1,4 @@
-export const WORKSPACE_VERSION = 2 as const;
+export const WORKSPACE_VERSION = 3 as const;
 
 export type Subject = {
   id: string;
@@ -34,6 +34,15 @@ export type StudyNote = {
   content: string;
   subjectId: string;
   updatedAt: string;
+  assets: NoteAsset[];
+};
+
+export type NoteAsset = {
+  id: string;
+  kind: "scan" | "drawing";
+  name: string;
+  dataUrl: string;
+  createdAt: string;
 };
 
 export type FocusSession = {
@@ -80,6 +89,19 @@ export type QuizAttempt = {
   completedAt: string;
 };
 
+export type BingoCell = {
+  id: string;
+  label: string;
+  completed: boolean;
+};
+
+export type BingoBoard = {
+  id: string;
+  subjectId: string;
+  cells: BingoCell[];
+  createdAt: string;
+};
+
 export type WorkspaceState = {
   version: typeof WORKSPACE_VERSION;
   subjects: Subject[];
@@ -92,6 +114,7 @@ export type WorkspaceState = {
   flashcards: Flashcard[];
   goals: StudyGoal[];
   quizAttempts: QuizAttempt[];
+  bingoBoards: BingoBoard[];
 };
 
 export type WorkspaceAction =
@@ -103,6 +126,15 @@ export type WorkspaceAction =
   | { type: "habit/toggled"; id: string; date: string }
   | { type: "note/added"; subjectId: string; updatedAt: string }
   | { type: "note/updated"; id: string; title: string; content: string; updatedAt: string }
+  | {
+      type: "note/asset-added";
+      noteId: string;
+      kind: NoteAsset["kind"];
+      name: string;
+      dataUrl: string;
+      createdAt: string;
+    }
+  | { type: "note/asset-removed"; noteId: string; assetId: string; updatedAt: string }
   | {
       type: "focus/recorded";
       subjectId: string;
@@ -144,7 +176,9 @@ export type WorkspaceAction =
       correct: number;
       total: number;
       completedAt: string;
-    };
+    }
+  | { type: "bingo/created"; subjectId: string; labels: string[]; createdAt: string }
+  | { type: "bingo/cell-toggled"; boardId: string; cellId: string };
 
 function createId(prefix: string): string {
   const suffix = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
@@ -171,6 +205,7 @@ export function createInitialWorkspace(): WorkspaceState {
     flashcards: [],
     goals: [],
     quizAttempts: [],
+    bingoBoards: [],
   };
 }
 
@@ -259,9 +294,45 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
             content: "",
             subjectId: action.subjectId,
             updatedAt: action.updatedAt,
+            assets: [],
           },
           ...state.notes,
         ],
+      };
+    case "note/asset-added":
+      return {
+        ...state,
+        notes: state.notes.map((note) =>
+          note.id === action.noteId
+            ? {
+                ...note,
+                updatedAt: action.createdAt,
+                assets: [
+                  ...note.assets,
+                  {
+                    id: createId("asset"),
+                    kind: action.kind,
+                    name: action.name,
+                    dataUrl: action.dataUrl,
+                    createdAt: action.createdAt,
+                  },
+                ],
+              }
+            : note,
+        ),
+      };
+    case "note/asset-removed":
+      return {
+        ...state,
+        notes: state.notes.map((note) =>
+          note.id === action.noteId
+            ? {
+                ...note,
+                updatedAt: action.updatedAt,
+                assets: note.assets.filter((asset) => asset.id !== action.assetId),
+              }
+            : note,
+        ),
       };
     case "note/updated":
       return {
@@ -376,7 +447,76 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
           },
         ],
       };
+    case "bingo/created":
+      return {
+        ...state,
+        bingoBoards: [
+          {
+            id: createId("bingo"),
+            subjectId: action.subjectId,
+            createdAt: action.createdAt,
+            cells: action.labels.slice(0, 9).map((label) => ({
+              id: createId("bingo-cell"),
+              label,
+              completed: false,
+            })),
+          },
+          ...state.bingoBoards.filter((board) => board.subjectId !== action.subjectId),
+        ],
+      };
+    case "bingo/cell-toggled":
+      return {
+        ...state,
+        bingoBoards: state.bingoBoards.map((board) =>
+          board.id === action.boardId
+            ? {
+                ...board,
+                cells: board.cells.map((cell) =>
+                  cell.id === action.cellId ? { ...cell, completed: !cell.completed } : cell,
+                ),
+              }
+            : board,
+        ),
+      };
   }
+}
+
+const DEFAULT_BINGO_PROMPTS = [
+  "Estude por 25 minutos",
+  "Revise cinco flashcards",
+  "Faça uma anotação curta",
+  "Explique um conceito em voz alta",
+  "Conclua uma tarefa pendente",
+  "Revise um erro antigo",
+  "Organize o material da matéria",
+  "Faça uma pausa sem tela",
+  "Planeje o próximo estudo",
+] as const;
+
+export function buildBingoLabels(flashcardFronts: readonly string[]): string[] {
+  const fromCards = flashcardFronts
+    .map((front) => front.trim())
+    .filter((front, index, values) => front.length > 0 && values.indexOf(front) === index)
+    .map((front) => `Revise: ${front}`);
+
+  return [...fromCards, ...DEFAULT_BINGO_PROMPTS].slice(0, 9);
+}
+
+export function hasBingo(board: BingoBoard): boolean {
+  if (board.cells.length !== 9) return false;
+  const completed = board.cells.map((cell) => cell.completed);
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ] as const;
+
+  return lines.some((line) => line.every((index) => completed[index]));
 }
 
 export function minutesFocusedOn(state: WorkspaceState, dateKey: string): number {

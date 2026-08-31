@@ -29,7 +29,7 @@ const NAVIGATION_SECTIONS: readonly { label: string; items: readonly NavigationI
     label: "Estudar",
     items: [
       { view: "focus", label: "Foco", icon: "focus" },
-      { view: "learn", label: "Aprender", icon: "learn" },
+      { view: "learn", label: "Quizzes e bingo", mobileLabel: "Praticar", icon: "learn" },
       { view: "library", label: "Biblioteca", icon: "library" },
     ],
   },
@@ -47,7 +47,7 @@ const MOBILE_ITEMS: readonly NavigationItem[] = [
   { view: "today", label: "Espaço do aluno", mobileLabel: "Espaço", icon: "today" },
   { view: "planner", label: "Agenda", icon: "planner" },
   { view: "focus", label: "Foco", icon: "focus" },
-  { view: "learn", label: "Aprender", icon: "learn" },
+  { view: "learn", label: "Quizzes e bingo", mobileLabel: "Praticar", icon: "learn" },
 ];
 
 const MORE_ITEMS = NAVIGATION_SECTIONS.flatMap((section) => section.items).filter(
