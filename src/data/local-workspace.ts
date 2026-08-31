@@ -1,8 +1,12 @@
 import {
   WORKSPACE_VERSION,
   createInitialWorkspace,
+  type Flashcard,
   type FocusSession,
   type Habit,
+  type QuizAttempt,
+  type StudyGoal,
+  type StudyMaterial,
   type StudyEvent,
   type StudyNote,
   type StudyTask,
@@ -11,6 +15,7 @@ import {
 } from "../domain/workspace";
 
 export const WORKSPACE_STORAGE_KEY = "helenastudy.workspace.v1";
+export const MAX_NOTE_ASSET_DATA_URL_LENGTH = 1_000_000;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -58,7 +63,7 @@ function isHabit(value: unknown): boolean {
   );
 }
 
-function isNote(value: unknown): boolean {
+function isLegacyNote(value: unknown): boolean {
   return (
     isRecord(value) &&
     isString(value["id"]) &&
@@ -66,6 +71,28 @@ function isNote(value: unknown): boolean {
     isString(value["content"]) &&
     isString(value["subjectId"]) &&
     isString(value["updatedAt"])
+  );
+}
+
+function isNoteAsset(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isString(value["id"]) &&
+    (value["kind"] === "scan" || value["kind"] === "drawing") &&
+    isString(value["name"]) &&
+    isString(value["dataUrl"]) &&
+    /^data:image\/(?:jpeg|png|webp);base64,/.test(value["dataUrl"]) &&
+    value["dataUrl"].length <= MAX_NOTE_ASSET_DATA_URL_LENGTH &&
+    isString(value["createdAt"])
+  );
+}
+
+function isNote(value: unknown): boolean {
+  return (
+    isLegacyNote(value) &&
+    isRecord(value) &&
+    Array.isArray(value["assets"]) &&
+    value["assets"].every(isNoteAsset)
   );
 }
 
@@ -137,17 +164,48 @@ function isQuizAttempt(value: unknown): boolean {
   );
 }
 
+function isBingoBoard(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isString(value["id"]) &&
+    isString(value["subjectId"]) &&
+    isString(value["createdAt"]) &&
+    Array.isArray(value["cells"]) &&
+    value["cells"].length === 9 &&
+    value["cells"].every(
+      (cell) =>
+        isRecord(cell) &&
+        isString(cell["id"]) &&
+        isString(cell["label"]) &&
+        typeof cell["completed"] === "boolean",
+    )
+  );
+}
+
+type LegacyStudyNote = Omit<StudyNote, "assets">;
+
 type LegacyWorkspace = {
   version: 1;
   subjects: Subject[];
   tasks: StudyTask[];
   events: StudyEvent[];
   habits: Habit[];
-  notes: StudyNote[];
+  notes: LegacyStudyNote[];
   focusSessions: FocusSession[];
 };
 
-function hasCoreCollections(value: Record<string, unknown>): boolean {
+type WorkspaceV2 = Omit<LegacyWorkspace, "version"> & {
+  version: 2;
+  materials: StudyMaterial[];
+  flashcards: Flashcard[];
+  goals: StudyGoal[];
+  quizAttempts: QuizAttempt[];
+};
+
+function hasCoreCollections(
+  value: Record<string, unknown>,
+  noteValidator: (note: unknown) => boolean,
+): boolean {
   return (
     Array.isArray(value["subjects"]) &&
     value["subjects"].length > 0 &&
@@ -159,21 +217,20 @@ function hasCoreCollections(value: Record<string, unknown>): boolean {
     Array.isArray(value["habits"]) &&
     value["habits"].every(isHabit) &&
     Array.isArray(value["notes"]) &&
-    value["notes"].every(isNote) &&
+    value["notes"].every(noteValidator) &&
     Array.isArray(value["focusSessions"]) &&
     value["focusSessions"].every(isFocusSession)
   );
 }
 
 function isLegacyWorkspace(value: unknown): value is LegacyWorkspace {
-  return isRecord(value) && value["version"] === 1 && hasCoreCollections(value);
+  return isRecord(value) && value["version"] === 1 && hasCoreCollections(value, isLegacyNote);
 }
 
-export function isWorkspaceState(value: unknown): value is WorkspaceState {
-  if (!isRecord(value) || value["version"] !== WORKSPACE_VERSION) return false;
-
+function isWorkspaceV2(value: unknown): value is WorkspaceV2 {
+  if (!isRecord(value) || value["version"] !== 2) return false;
   return (
-    hasCoreCollections(value) &&
+    hasCoreCollections(value, isLegacyNote) &&
     Array.isArray(value["materials"]) &&
     value["materials"].every(isMaterial) &&
     Array.isArray(value["flashcards"]) &&
@@ -185,14 +242,47 @@ export function isWorkspaceState(value: unknown): value is WorkspaceState {
   );
 }
 
+export function isWorkspaceState(value: unknown): value is WorkspaceState {
+  if (!isRecord(value) || value["version"] !== WORKSPACE_VERSION) return false;
+
+  return (
+    hasCoreCollections(value, isNote) &&
+    Array.isArray(value["materials"]) &&
+    value["materials"].every(isMaterial) &&
+    Array.isArray(value["flashcards"]) &&
+    value["flashcards"].every(isFlashcard) &&
+    Array.isArray(value["goals"]) &&
+    value["goals"].every(isGoal) &&
+    Array.isArray(value["quizAttempts"]) &&
+    value["quizAttempts"].every(isQuizAttempt) &&
+    Array.isArray(value["bingoBoards"]) &&
+    value["bingoBoards"].every(isBingoBoard)
+  );
+}
+
+function migrateNotes(notes: LegacyStudyNote[]): StudyNote[] {
+  return notes.map((note) => ({ ...note, assets: [] }));
+}
+
 function migrateLegacyWorkspace(legacy: LegacyWorkspace): WorkspaceState {
   return {
     ...legacy,
     version: WORKSPACE_VERSION,
+    notes: migrateNotes(legacy.notes),
     materials: [],
     flashcards: [],
     goals: [],
     quizAttempts: [],
+    bingoBoards: [],
+  };
+}
+
+function migrateWorkspaceV2(workspace: WorkspaceV2): WorkspaceState {
+  return {
+    ...workspace,
+    version: WORKSPACE_VERSION,
+    notes: migrateNotes(workspace.notes),
+    bingoBoards: [],
   };
 }
 
@@ -203,6 +293,7 @@ export function loadWorkspace(storage: Pick<Storage, "getItem">): WorkspaceState
   try {
     const parsed: unknown = JSON.parse(serialized);
     if (isWorkspaceState(parsed)) return parsed;
+    if (isWorkspaceV2(parsed)) return migrateWorkspaceV2(parsed);
     if (isLegacyWorkspace(parsed)) return migrateLegacyWorkspace(parsed);
     return createInitialWorkspace();
   } catch {

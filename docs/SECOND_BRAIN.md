@@ -20,9 +20,9 @@ produto.
 2. Criar matérias, tarefas e compromissos na Agenda.
 3. Registrar sessões no cronômetro de Foco.
 4. Criar e marcar Hábitos diários.
-5. Escrever anotações nos Cadernos.
+5. Escrever, desenhar ou anexar uma digitalização nos Cadernos.
 6. Guardar links, textos e flashcards por matéria na Biblioteca.
-7. Revisar cartões, responder questionários locais e acompanhar metas em Aprender.
+7. Revisar flashcards, responder Quizzes, completar Bingos e acompanhar metas em Praticar.
 8. Montar planos de aula pelo fluxo determinístico existente.
 
 Todos esses dados compartilham um workspace local versionado. Não há IA, conta, banco ou
@@ -40,8 +40,8 @@ sincronização remota.
 ## Etapas do produto
 
 1. **Núcleo local concluído:** Espaço do aluno, Agenda, Foco, Hábitos, Cadernos e planos de aula.
-2. **Sistema de estudos concluído:** biblioteca, flashcards, revisão programada, questionários e
-   metas.
+2. **Sistema de estudos em evolução:** biblioteca, flashcards, revisão programada, quizzes, bingo,
+   metas, digitalização local e escrita à mão estão funcionais. OCR e banco de questões ainda não.
 3. **Helena inteligente com fundação definida:** contrato, consentimento e fronteira segura do
    backend estão prontos; provedor e interface ainda não estão ativados. Depois entram tutor,
    explicações, resumos e planos personalizados.

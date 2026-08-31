@@ -113,3 +113,22 @@ inteligente sem apresentá-los como recursos prontos.
 
 Esta fase não adiciona dependências. React, TypeScript e CSS existentes atendem à mudança; futuras
 bibliotecas ou linguagens exigirão justificativa, auditoria e medição na fase correspondente.
+
+## 9. Digitalização, escrita à mão, quizzes e bingo
+
+Os Cadernos passam a oferecer duas ferramentas locais. **Digitalizar** abre a câmera traseira em
+navegadores compatíveis ou permite escolher uma imagem, girar, realçar o contraste e anexar o
+resultado à anotação. **Escrever à mão** oferece uma tela sensível a mouse, caneta e toque, com cor,
+espessura e limpeza antes de salvar.
+
+As imagens são processadas no navegador, não são enviadas para serviços externos e ficam limitadas
+a 1 MB por item. A digitalização atual não executa OCR; reconhecimento de texto continua planejado
+para uma mudança com modelo de ameaça e estratégia de processamento próprios.
+
+O módulo antes chamado Aprender passa a aparecer como **Quizzes e bingo** no desktop e **Praticar**
+no celular. Flashcards, Quizzes e Bingo são modos explícitos da sessão. A cartela 3 por 3 combina
+desafios gerais com flashcards da matéria, salva o progresso no workspace e reconhece linhas,
+colunas e diagonais.
+
+O workspace evolui para a versão 3 e migra automaticamente as versões 1 e 2. Nenhuma dependência
+foi adicionada; Canvas, Pointer Events e captura de arquivo do navegador atendem à primeira versão.

@@ -2,9 +2,9 @@
 
 Central de estudos, foco e rotina da marca Oli.
 
-O HelenaStudy reúne agenda, tarefas, hábitos, cronômetro, anotações, materiais, flashcards,
-questionários e planejamento de aulas em um único espaço. A base atual funciona localmente e não
-possui autenticação, integração com IA ou armazenamento remoto.
+O HelenaStudy reúne agenda, tarefas, hábitos, cronômetro, anotações, digitalizações, escrita à mão,
+materiais, flashcards, quizzes, bingo e planejamento de aulas em um único espaço. A base atual
+funciona localmente e não possui autenticação, integração com IA ou armazenamento remoto.
 
 A fronteira segura da futura Helena inteligente já possui contrato e testes, mas permanece sem
 provedor conectado. Consulte [`docs/AI_BACKEND.md`](docs/AI_BACKEND.md) para o fluxo de dados, o

@@ -44,7 +44,7 @@ describe("App", () => {
     expect(screen.queryByText("Revisar phrasal verbs")).toBeNull();
   });
 
-  it("cria hábito e anotação usando o mesmo espaço local", () => {
+  it("cria hábito e anotação usando o mesmo espaço local", async () => {
     render(<App />);
     navigate("Hábitos");
     fireEvent.change(screen.getByLabelText(/nome do hábito/i), {
@@ -56,7 +56,7 @@ describe("App", () => {
     expect(habitButton.getAttribute("aria-pressed")).toBe("true");
 
     navigate("Cadernos");
-    fireEvent.click(screen.getByRole("button", { name: /nova anotação/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /nova anotação/i }));
     fireEvent.change(screen.getByLabelText(/título da anotação/i), {
       target: { value: "Vocabulário" },
     });
@@ -64,6 +64,28 @@ describe("App", () => {
       target: { value: "Improve: melhorar" },
     });
     expect(screen.getByDisplayValue("Improve: melhorar")).toBeTruthy();
+  });
+
+  it("oferece digitalização e escrita à mão dentro de uma anotação", async () => {
+    render(<App />);
+    navigate("Cadernos");
+    fireEvent.click(await screen.findByRole("button", { name: /nova anotação/i }));
+
+    expect(await screen.findByRole("button", { name: "Digitalizar" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Escrever à mão" })).toBeTruthy();
+  });
+
+  it("cria e completa uma linha no bingo de estudos", async () => {
+    render(<App />);
+    navigate("Quizzes e bingo");
+    fireEvent.click(await screen.findByRole("button", { name: "Bingo" }));
+    fireEvent.click(screen.getByRole("button", { name: "Criar bingo" }));
+
+    const board = screen.getByRole("group", { name: "Cartela de bingo" });
+    const cells = within(board).getAllByRole("button");
+    expect(cells).toHaveLength(9);
+    cells.slice(0, 3).forEach((cell) => fireEvent.click(cell));
+    expect(screen.getByRole("status").textContent).toMatch(/bingo/i);
   });
 
   it("mantém dados após remontar o aplicativo", () => {
@@ -99,7 +121,7 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: /criar flashcard/i }));
     expect(screen.getByText("Improve")).toBeTruthy();
 
-    navigate("Aprender");
+    navigate("Quizzes e bingo");
     expect(await screen.findByRole("heading", { name: "Improve" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /mostrar resposta/i }));
     expect(screen.getByRole("heading", { name: "Melhorar" })).toBeTruthy();

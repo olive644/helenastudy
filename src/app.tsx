@@ -3,13 +3,13 @@ import { MobileNavigation, Sidebar, type AppView } from "./components/app-naviga
 import { useWorkspace } from "./hooks/use-workspace";
 import { FocusView } from "./views/focus-view";
 import { HabitsView } from "./views/habits-view";
-import { NotesView } from "./views/notes-view";
 import { PlannerView } from "./views/planner-view";
 import { TodayView } from "./views/today-view";
 
 const LearnView = lazy(() => import("./views/learn-view"));
 const LibraryView = lazy(() => import("./views/library-view"));
 const LessonBuilderView = lazy(() => import("./views/lesson-builder-view"));
+const NotesView = lazy(() => import("./views/notes-view"));
 
 export function App() {
   const [view, setView] = useState<AppView>("today");

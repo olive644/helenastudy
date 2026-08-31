@@ -27,11 +27,13 @@ paralelos. O Espaço do aluno e o módulo Aprender derivam seus resumos desse es
 promessa visível. Somente módulos `available` podem fornecer atalhos executáveis. Módulos
 `foundation` possuem apenas uma base técnica; módulos `planned` existem no mapa e no roadmap.
 
-O armazenamento possui uma versão explícita e rejeita conteúdo inválido. A versão 2 migra o estado
-da versão 1 sem apagar dados. A implementação local pode ser substituída por um repositório remoto
-no futuro sem mudar as regras do domínio.
+O armazenamento possui uma versão explícita e rejeita conteúdo inválido. A versão 3 migra os
+estados das versões 1 e 2 sem apagar tarefas, notas ou materiais. Digitalizações e desenhos são
+reduzidos no navegador, limitados a 1 MB por imagem e vinculados à anotação. A implementação local
+pode ser substituída por um repositório remoto no futuro sem mudar as regras do domínio.
 
-Biblioteca, Aprender e o planejador de aulas são carregados sob demanda. O manifesto do Vite
+Biblioteca, Quizzes e bingo e o planejador de aulas são carregados sob demanda. As ferramentas de
+captura do Caderno também usam um chunk separado. O manifesto do Vite
 permite medir separadamente o JavaScript inicial e o total assíncrono: 220 KiB para a entrada e 300
 KiB para o conjunto.
 

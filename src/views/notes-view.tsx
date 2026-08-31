@@ -1,6 +1,8 @@
-import { useState, type Dispatch } from "react";
+import { lazy, Suspense, useState, type Dispatch } from "react";
 import { PageHeader } from "../components/app-navigation";
 import type { WorkspaceAction, WorkspaceState } from "../domain/workspace";
+
+const NoteCaptureTools = lazy(() => import("../components/note-capture-tools"));
 
 type NotesViewProps = {
   workspace: WorkspaceState;
@@ -39,6 +41,18 @@ export function NotesView({ workspace, dispatch }: NotesViewProps) {
     });
   }
 
+  function saveAsset(kind: "scan" | "drawing", name: string, dataUrl: string) {
+    if (!activeNote) return;
+    dispatch({
+      type: "note/asset-added",
+      noteId: activeNote.id,
+      kind,
+      name,
+      dataUrl,
+      createdAt: new Date().toISOString(),
+    });
+  }
+
   return (
     <main className="main-content" id="main-content">
       <PageHeader />
@@ -46,7 +60,7 @@ export function NotesView({ workspace, dispatch }: NotesViewProps) {
         <div>
           <span className="section-label">Cadernos</span>
           <h1>Escreva antes de esquecer.</h1>
-          <p>Anotações rápidas e textos maiores ficam salvos automaticamente.</p>
+          <p>Digite, digitalize uma página ou escreva à mão no mesmo caderno.</p>
         </div>
         <div className="new-note-action">
           <label>
@@ -88,7 +102,12 @@ export function NotesView({ workspace, dispatch }: NotesViewProps) {
                 key={note.id}
               >
                 <strong>{note.title || "Sem título"}</strong>
-                <span>{note.content || "Anotação vazia"}</span>
+                <span>
+                  {note.content ||
+                    (note.assets.length > 0
+                      ? `${note.assets.length} imagem${note.assets.length === 1 ? "" : "s"}`
+                      : "Anotação vazia")}
+                </span>
               </button>
             ))
           )}
@@ -101,6 +120,9 @@ export function NotesView({ workspace, dispatch }: NotesViewProps) {
                 <span>{activeSubject.name}</span>
                 <small>Salva automaticamente</small>
               </div>
+              <Suspense fallback={<span className="capture-loading">Abrindo ferramentas…</span>}>
+                <NoteCaptureTools onSave={saveAsset} />
+              </Suspense>
               <input
                 className="note-title-input"
                 aria-label="Título da anotação"
@@ -113,6 +135,40 @@ export function NotesView({ workspace, dispatch }: NotesViewProps) {
                 onChange={(event) => updateNote(activeNote.title, event.target.value)}
                 placeholder="Comece a escrever..."
               />
+              {activeNote.assets.length > 0 && (
+                <section className="note-assets" aria-label="Imagens da anotação">
+                  <h2>Imagens</h2>
+                  <div>
+                    {activeNote.assets.map((asset) => (
+                      <figure key={asset.id}>
+                        <img src={asset.dataUrl} alt={asset.name} />
+                        <figcaption>
+                          <span>
+                            <strong>{asset.name}</strong>
+                            <small>
+                              {asset.kind === "scan" ? "Digitalização" : "Escrita à mão"}
+                            </small>
+                          </span>
+                          <button
+                            type="button"
+                            aria-label={`Remover ${asset.name}`}
+                            onClick={() =>
+                              dispatch({
+                                type: "note/asset-removed",
+                                noteId: activeNote.id,
+                                assetId: asset.id,
+                                updatedAt: new Date().toISOString(),
+                              })
+                            }
+                          >
+                            Remover
+                          </button>
+                        </figcaption>
+                      </figure>
+                    ))}
+                  </div>
+                </section>
+              )}
             </>
           ) : (
             <div className="note-editor__empty">
@@ -127,3 +183,5 @@ export function NotesView({ workspace, dispatch }: NotesViewProps) {
     </main>
   );
 }
+
+export default NotesView;

@@ -34,9 +34,39 @@ describe("local workspace", () => {
     window.localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(legacy));
 
     const migrated = loadWorkspace(window.localStorage);
-    expect(migrated.version).toBe(2);
+    expect(migrated.version).toBe(3);
     expect(migrated.subjects).toEqual(current.subjects);
     expect(migrated.flashcards).toEqual([]);
     expect(migrated.materials).toEqual([]);
+    expect(migrated.bingoBoards).toEqual([]);
+  });
+
+  it("migra o workspace v2 adicionando imagens e bingos sem perder os dados", () => {
+    const current = createInitialWorkspace();
+    const legacy = {
+      ...current,
+      version: 2,
+      notes: [
+        {
+          id: "note-old",
+          title: "Resumo antigo",
+          content: "Conteúdo preservado",
+          subjectId: "subject-english",
+          updatedAt: "2026-08-30T10:00:00.000Z",
+        },
+      ],
+    };
+    const workspaceV2: Record<string, unknown> = { ...legacy };
+    delete workspaceV2["bingoBoards"];
+    window.localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(workspaceV2));
+
+    const migrated = loadWorkspace(window.localStorage);
+    expect(migrated.version).toBe(3);
+    expect(migrated.notes[0]).toMatchObject({
+      title: "Resumo antigo",
+      content: "Conteúdo preservado",
+      assets: [],
+    });
+    expect(migrated.bingoBoards).toEqual([]);
   });
 });
