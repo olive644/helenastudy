@@ -1,61 +1,20 @@
 import type { Flashcard } from "./workspace";
+import { LISTENING_VOCABULARY, type PedagogicalDifficulty } from "../data/listening-vocabulary";
 
 export type ListeningCard = Pick<Flashcard, "id" | "front" | "back"> & {
   acceptedAnswers?: readonly string[];
+  difficulty?: PedagogicalDifficulty;
+  category?: string;
 };
 
-const STARTER_DECK: readonly ListeningCard[] = [
-  { id: "starter-school", front: "School", back: "Escola" },
-  { id: "starter-family", front: "Family", back: "Família" },
-  { id: "starter-friend", front: "Friend", back: "Amigo", acceptedAnswers: ["Amiga"] },
-  { id: "starter-water", front: "Water", back: "Água" },
-  { id: "starter-house", front: "House", back: "Casa" },
-  { id: "starter-library", front: "Library", back: "Biblioteca" },
-  { id: "starter-kitchen", front: "Kitchen", back: "Cozinha" },
-  { id: "starter-weather", front: "Weather", back: "Clima", acceptedAnswers: ["Tempo"] },
-  { id: "starter-journey", front: "Journey", back: "Jornada", acceptedAnswers: ["Viagem"] },
-  { id: "starter-answer", front: "Answer", back: "Resposta" },
-  { id: "starter-knowledge", front: "Knowledge", back: "Conhecimento" },
-  { id: "starter-language", front: "Language", back: "Idioma", acceptedAnswers: ["Língua"] },
-  { id: "starter-thought", front: "Thought", back: "Pensamento" },
-  { id: "starter-purpose", front: "Purpose", back: "Propósito", acceptedAnswers: ["Objetivo"] },
-  { id: "starter-courage", front: "Courage", back: "Coragem" },
-  { id: "starter-improve", front: "Improve", back: "Melhorar" },
-  { id: "starter-achieve", front: "Achieve", back: "Alcançar", acceptedAnswers: ["Conquistar"] },
-  { id: "starter-behavior", front: "Behavior", back: "Comportamento" },
-  { id: "starter-awareness", front: "Awareness", back: "Consciência" },
-  { id: "starter-although", front: "Although", back: "Embora" },
-  { id: "starter-throughout", front: "Throughout", back: "Ao longo de" },
-  { id: "starter-likelihood", front: "Likelihood", back: "Probabilidade" },
-  { id: "starter-nevertheless", front: "Nevertheless", back: "No entanto" },
-  {
-    id: "starter-straightforward",
-    front: "Straightforward",
-    back: "Direto",
-    acceptedAnswers: ["Simples", "Claro"],
-  },
-  {
-    id: "starter-thoroughly",
-    front: "Thoroughly",
-    back: "Completamente",
-    acceptedAnswers: ["Minuciosamente"],
-  },
-  {
-    id: "starter-entrepreneur",
-    front: "Entrepreneur",
-    back: "Empreendedor",
-    acceptedAnswers: ["Empreendedora"],
-  },
-  { id: "starter-acknowledge", front: "Acknowledge", back: "Reconhecer" },
-  {
-    id: "starter-misleading",
-    front: "Misleading",
-    back: "Enganoso",
-    acceptedAnswers: ["Enganosa"],
-  },
-  { id: "starter-sustainability", front: "Sustainability", back: "Sustentabilidade" },
-  { id: "starter-unprecedented", front: "Unprecedented", back: "Sem precedentes" },
-];
+const STARTER_DECK: readonly ListeningCard[] = LISTENING_VOCABULARY.map((item) => ({
+  id: `starter-${item.id}`,
+  front: item.english,
+  back: item.translation,
+  acceptedAnswers: item.acceptedAnswers,
+  difficulty: item.difficulty,
+  category: item.category,
+}));
 
 export function normalizeListeningAnswer(value: string): string {
   return value
@@ -75,6 +34,32 @@ export function buildListeningDeck(flashcards: readonly Flashcard[]): ListeningC
   const seen = new Set(personal.map((card) => normalizeListeningAnswer(card.front)));
   const starter = STARTER_DECK.filter((card) => !seen.has(normalizeListeningAnswer(card.front)));
   return [...personal, ...starter];
+}
+
+export function shuffleListeningDeck(
+  cards: readonly ListeningCard[],
+  random: () => number = Math.random,
+): ListeningCard[] {
+  const shuffled = cards.slice();
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const target = Math.floor(random() * (index + 1));
+    [shuffled[index], shuffled[target]] = [shuffled[target], shuffled[index]];
+  }
+  return shuffled;
+}
+
+export function createListeningRound(
+  cards: readonly ListeningCard[],
+  limit: number | "all",
+  random: () => number = Math.random,
+): ListeningCard[] {
+  const shuffled = shuffleListeningDeck(cards, random);
+  return limit === "all" ? shuffled : shuffled.slice(0, Math.max(0, limit));
+}
+
+export function isListeningAnswerCorrect(card: ListeningCard, answer: string): boolean {
+  const normalized = normalizeListeningAnswer(answer);
+  return normalized.length > 0 && acceptedListeningAnswers(card).includes(normalized);
 }
 
 export function acceptedListeningAnswers(card: ListeningCard): string[] {
