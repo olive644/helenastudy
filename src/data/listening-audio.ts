@@ -12,6 +12,12 @@ export const KOKORO_VOICES = [
   { id: "bf_emma", label: "Emma, inglês britânico" },
 ] as const;
 
+type NaturalVoiceWorkerMessage =
+  | { type: "progress"; progress?: number }
+  | { type: "ready" }
+  | { type: "audio"; samples: Float32Array; sampleRate: number; requestId: number }
+  | { type: "error"; message?: string };
+
 export class NaturalVoicePlayer {
   private worker: Worker | undefined;
   private context: AudioContext | undefined;
@@ -33,22 +39,22 @@ export class NaturalVoicePlayer {
     this.worker = new Worker(new URL("../workers/kokoro-tts.worker.ts", import.meta.url), {
       type: "module",
     });
-    this.worker.addEventListener("message", (event: MessageEvent<Record<string, unknown>>) => {
+    this.worker.addEventListener("message", (event: MessageEvent<NaturalVoiceWorkerMessage>) => {
       const type = event.data.type;
       if (type === "progress") {
-        this.onState({ status: "loading", progress: event.data.progress as number | undefined });
+        this.onState(
+          event.data.progress === undefined
+            ? { status: "loading" }
+            : { status: "loading", progress: event.data.progress },
+        );
       } else if (type === "ready") {
         this.onState({ status: "ready" });
       } else if (type === "audio") {
-        void this.playSamples(
-          event.data.samples as Float32Array,
-          event.data.sampleRate as number,
-          event.data.requestId as number,
-        );
+        void this.playSamples(event.data.samples, event.data.sampleRate, event.data.requestId);
       } else if (type === "error") {
         this.onState({
           status: "error",
-          message: String(event.data.message ?? "Falha na voz natural."),
+          message: event.data.message ?? "Falha na voz natural.",
         });
       }
     });
@@ -90,7 +96,7 @@ export class NaturalVoicePlayer {
     this.context ??= new AudioContext();
     await this.context.resume();
     const buffer = this.context.createBuffer(1, samples.length, sampleRate);
-    buffer.copyToChannel(samples, 0);
+    buffer.copyToChannel(new Float32Array(samples), 0);
     const source = this.context.createBufferSource();
     source.buffer = buffer;
     source.connect(this.context.destination);
