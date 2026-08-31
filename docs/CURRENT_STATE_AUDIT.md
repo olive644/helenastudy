@@ -172,3 +172,15 @@ as pontas e os olhos amarelos derivados da silhueta original da Helena.
 Os ícones são componentes locais, herdam a cor do estado ativo e não dependem de imagens geradas,
 fontes de ícones ou novos pacotes. Os rótulos textuais continuam visíveis e responsáveis pelo nome
 acessível de cada aba.
+
+## 11. Vocabulário e voz do quiz de escuta
+
+O quiz de escuta combina os flashcards do aluno com um conjunto local de 30 palavras e expressões
+em inglês, sem duplicar termos. As respostas aceitam a palavra ou expressão ouvida, a tradução
+principal e equivalentes cadastrados. Os filtros Fácil, Médio e Difícil continuam sendo calculados
+pela base local de frequência, com os mesmos fallbacks já documentados.
+
+A pronúncia usa a Web Speech API do navegador. O aplicativo prioriza automaticamente vozes inglesas
+com indicação de maior naturalidade e permite escolher outra voz disponível e os ritmos Devagar,
+Natural ou Rápida. Nenhum áudio ou conteúdo é enviado a um serviço externo e nenhuma dependência foi
+adicionada; a qualidade final depende das vozes instaladas pelo navegador e pelo sistema operacional.

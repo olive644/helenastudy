@@ -1,24 +1,14 @@
-import { Check, Play, RotateCcw, Volume2 } from "lucide-react";
+import { Check, Gauge, Play, RotateCcw, Volume2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { Flashcard } from "../domain/workspace";
 import {
+  acceptedListeningAnswers,
   buildListeningDeck,
   normalizeListeningAnswer,
   type ListeningCard,
 } from "../domain/listening-quiz";
 import { classifyWordDifficulty, type WordDifficulty } from "../data/word-difficulty";
-
-function speak(text: string, onUnavailable: () => void) {
-  if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
-    onUnavailable();
-    return;
-  }
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  utterance.rate = 0.82;
-  window.speechSynthesis.speak(utterance);
-}
+import { rankEnglishVoices, SPEECH_RATE_OPTIONS, speakEnglish } from "../data/speech-voice";
 
 type RoundState = "ready" | "countdown" | "answering" | "feedback" | "finished";
 type DifficultyFilter = "mixed" | WordDifficulty;
@@ -44,8 +34,13 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("mixed");
   const [difficultyById, setDifficultyById] = useState<Record<string, WordDifficulty>>({});
   const [classifying, setClassifying] = useState(true);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [voiceUri, setVoiceUri] = useState("");
+  const [speechRate, setSpeechRate] = useState(0.86);
   const answerRef = useRef<HTMLInputElement>(null);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | undefined>(undefined);
   const card = deck[index];
+  const selectedVoice = voices.find((voice) => voice.voiceURI === voiceUri) ?? voices[0];
 
   useEffect(() => {
     if (state !== "countdown") return;
@@ -60,7 +55,20 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
     if (state === "answering") answerRef.current?.focus();
   }, [state]);
 
-  useEffect(() => () => window.speechSynthesis?.cancel(), []);
+  useEffect(() => {
+    if (!("speechSynthesis" in window)) return;
+    const updateVoices = () => {
+      const ranked = rankEnglishVoices(window.speechSynthesis.getVoices());
+      setVoices(ranked);
+      setVoiceUri((current) => current || ranked[0]?.voiceURI || "");
+    };
+    updateVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", updateVoices);
+    return () => {
+      window.speechSynthesis.removeEventListener("voiceschanged", updateVoices);
+      window.speechSynthesis.cancel();
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -81,7 +89,11 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   function playAudio() {
     if (!card) return;
     setAudioUnavailable(false);
-    speak(card.front, () => setAudioUnavailable(true));
+    utteranceRef.current = speakEnglish(card.front, {
+      voice: selectedVoice,
+      rate: speechRate,
+      onUnavailable: () => setAudioUnavailable(true),
+    });
   }
 
   function beginRound() {
@@ -95,9 +107,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!card || !answer.trim()) return;
-    const accepted = [card.back, card.front].some(
-      (value) => normalizeListeningAnswer(value) === normalizeListeningAnswer(answer),
-    );
+    const accepted = acceptedListeningAnswers(card).includes(normalizeListeningAnswer(answer));
     setWasCorrect(accepted);
     if (accepted) setCorrect((value) => value + 1);
     else setMissed((items) => [...items, card]);
@@ -178,22 +188,55 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
       </div>
 
       {state === "ready" && (
-        <div className="listening-difficulty" aria-label="Dificuldade do vocabulário">
-          {(Object.keys(DIFFICULTY_LABELS) as DifficultyFilter[]).map((filter) => {
-            const count = filter === "mixed" ? initialDeck.length : countDifficulty(filter);
-            return (
-              <button
-                className={difficultyFilter === filter ? "is-active" : undefined}
-                type="button"
-                disabled={classifying || count === 0}
-                aria-pressed={difficultyFilter === filter}
-                onClick={() => selectDifficulty(filter)}
-                key={filter}
+        <div className="listening-controls">
+          <div className="listening-difficulty" aria-label="Dificuldade do vocabulário">
+            {(Object.keys(DIFFICULTY_LABELS) as DifficultyFilter[]).map((filter) => {
+              const count = filter === "mixed" ? initialDeck.length : countDifficulty(filter);
+              return (
+                <button
+                  className={difficultyFilter === filter ? "is-active" : undefined}
+                  type="button"
+                  disabled={classifying || count === 0}
+                  aria-pressed={difficultyFilter === filter}
+                  onClick={() => selectDifficulty(filter)}
+                  key={filter}
+                >
+                  {DIFFICULTY_LABELS[filter]} <small>{classifying ? "…" : count}</small>
+                </button>
+              );
+            })}
+          </div>
+          <div className="listening-voice-controls">
+            <label>
+              <Volume2 size={15} aria-hidden="true" />
+              <span>Voz</span>
+              <select value={voiceUri} onChange={(event) => setVoiceUri(event.target.value)}>
+                {voices.length === 0 ? (
+                  <option value="">Voz do navegador</option>
+                ) : (
+                  voices.map((voice) => (
+                    <option value={voice.voiceURI} key={voice.voiceURI}>
+                      {voice.name.replace(/Microsoft|Google/g, "").trim()}
+                    </option>
+                  ))
+                )}
+              </select>
+            </label>
+            <label>
+              <Gauge size={15} aria-hidden="true" />
+              <span>Ritmo</span>
+              <select
+                value={speechRate}
+                onChange={(event) => setSpeechRate(Number(event.target.value))}
               >
-                {DIFFICULTY_LABELS[filter]} <small>{classifying ? "…" : count}</small>
-              </button>
-            );
-          })}
+                {SPEECH_RATE_OPTIONS.map((option) => (
+                  <option value={option.value} key={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
       )}
 
