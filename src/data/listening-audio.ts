@@ -7,16 +7,16 @@ export type NaturalVoiceState = {
 };
 
 export const PIPER_VOICES = [
-  { id: "en_US-hfc_female-medium", label: "HFC feminina, inglês americano" },
-  { id: "en_US-lessac-medium", label: "Lessac, inglês americano" },
-  { id: "en_GB-alba-medium", label: "Alba, inglês britânico" },
+  { id: "en_US-lessac-high", label: "Lessac, inglês americano" },
+  { id: "en_GB-cori-high", label: "Cori, inglês britânico" },
+  { id: "en_US-ryan-high", label: "Ryan, inglês americano" },
 ] as const;
 
 type NaturalVoiceWorkerMessage =
-  | { type: "progress"; progress?: number }
-  | { type: "ready" }
+  | { type: "progress"; progress?: number; requestId?: number }
+  | { type: "ready"; requestId?: number }
   | { type: "audio"; audio: Blob; speed: number; requestId: number }
-  | { type: "error"; message?: string };
+  | { type: "error"; message?: string; requestId?: number };
 
 export class NaturalVoicePlayer {
   private worker: Worker | undefined;
@@ -26,55 +26,48 @@ export class NaturalVoicePlayer {
 
   constructor(private readonly onState: (state: NaturalVoiceState) => void) {}
 
-  load(): void {
-    if (this.worker) return;
-    if (!("Worker" in window) || !("Audio" in window)) {
-      this.onState({
-        status: "error",
-        message: "A voz natural não é compatível com este navegador.",
-      });
-      return;
-    }
-    this.onState({ status: "loading", progress: 0 });
-    this.worker = new Worker(new URL("../workers/piper-tts.worker.ts", import.meta.url), {
-      type: "module",
-    });
-    this.worker.addEventListener("message", (event: MessageEvent<NaturalVoiceWorkerMessage>) => {
-      const type = event.data.type;
-      if (type === "progress") {
-        this.onState(
-          event.data.progress === undefined
-            ? { status: "loading" }
-            : { status: "loading", progress: event.data.progress },
-        );
-      } else if (type === "ready") {
-        this.onState({ status: "ready" });
-      } else if (type === "audio") {
-        void this.playBlob(event.data.audio, event.data.speed, event.data.requestId);
-      } else if (type === "error") {
-        this.onState({
-          status: "error",
-          message: event.data.message ?? "Falha na voz natural.",
-        });
-      }
-    });
-    this.worker.addEventListener("error", () => {
-      this.onState({
-        status: "error",
-        message: "A voz natural ficou sem memória ou não pôde iniciar.",
-      });
-    });
-    this.worker.postMessage({ type: "load" });
-  }
-
   generate(text: string, voice: string, speed: number): void {
     if (!this.worker) {
-      this.load();
-      if (!this.worker) return;
+      if (!("Worker" in window) || !("Audio" in window)) {
+        this.onState({
+          status: "error",
+          message: "A voz neural não é compatível com este navegador.",
+        });
+        return;
+      }
+      this.worker = new Worker(new URL("../workers/piper-tts.worker.ts", import.meta.url), {
+        type: "module",
+      });
+      this.worker.addEventListener("message", (event: MessageEvent<NaturalVoiceWorkerMessage>) => {
+        if (event.data.requestId !== undefined && event.data.requestId !== this.requestId) return;
+        if (event.data.type === "progress") {
+          this.onState(
+            event.data.progress === undefined
+              ? { status: "loading" }
+              : { status: "loading", progress: event.data.progress },
+          );
+        } else if (event.data.type === "ready") {
+          this.onState({ status: "generating" });
+        } else if (event.data.type === "audio") {
+          void this.playBlob(event.data.audio, event.data.speed, event.data.requestId);
+        } else if (event.data.type === "error") {
+          this.onState({
+            status: "error",
+            message: event.data.message ?? "Falha na voz neural.",
+          });
+        }
+      });
+      this.worker.addEventListener("error", () => {
+        this.onState({
+          status: "error",
+          message: "A voz neural ficou sem memória ou não pôde iniciar.",
+        });
+      });
     }
+
     this.stop();
     this.requestId += 1;
-    this.onState({ status: "generating" });
+    this.onState({ status: "loading", progress: 0 });
     this.worker.postMessage({ type: "generate", requestId: this.requestId, text, voice, speed });
   }
 
@@ -108,6 +101,11 @@ export class NaturalVoicePlayer {
     this.audioUrl = audioUrl;
     this.audio = audio;
     this.onState({ status: "playing" });
-    await audio.play();
+    try {
+      await audio.play();
+    } catch {
+      URL.revokeObjectURL(audioUrl);
+      this.onState({ status: "error", message: "O navegador bloqueou a reprodução do áudio." });
+    }
   }
 }
