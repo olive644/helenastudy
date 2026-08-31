@@ -1226,6 +1226,59 @@ body {
   text-transform: uppercase;
 }
 
+.listening-difficulty {
+  display: flex;
+  overflow-x: auto;
+  padding: 0.7rem 0.8rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  gap: 0.45rem;
+  background: #fffdfa;
+  scrollbar-width: thin;
+}
+
+.listening-difficulty button {
+  display: inline-flex;
+  min-width: max-content;
+  min-height: 38px;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  background: var(--surface);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.listening-difficulty button small {
+  display: grid;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: inherit;
+  background: var(--soft);
+  font-size: 0.61rem;
+  place-items: center;
+}
+
+.listening-difficulty button.is-active {
+  color: var(--ink);
+  border-color: var(--yellow);
+  background: var(--yellow);
+}
+
+.listening-difficulty button.is-active small {
+  color: #fff;
+  background: var(--ink);
+}
+
+.listening-difficulty button:disabled {
+  cursor: wait;
+  opacity: 0.48;
+}
+
 .listening-stage {
   position: relative;
   display: flex;

@@ -1,5 +1,13 @@
 # Auditoria do estado atual
 
+## Dificuldade automática do vocabulário
+
+- O quiz de escuta classifica palavras como fáceis, médias ou difíceis usando frequência Zipf.
+- Uma base inglesa compacta é carregada somente ao abrir a atividade; o pacote Python completo não entra no bundle do navegador.
+- Palavras ausentes consultam a Datamuse e ficam em cache local. Se a rede falhar, uma estimativa determinística mantém a atividade disponível.
+- O script `scripts/generate-word-frequency.py` reproduz a base de 10 mil palavras com `wordfreq==3.1.1` em ambiente de desenvolvimento.
+- O aluno pode escolher nível misto, fácil, médio ou difícil antes da rodada.
+
 ## Correção da navegação desktop
 
 - A barra lateral desktop mantém o fundo preto definido no redesign, mesmo após as camadas legadas de CSS.
