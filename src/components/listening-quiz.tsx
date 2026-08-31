@@ -41,7 +41,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   const [voiceUri, setVoiceUri] = useState("");
   const [speechRate, setSpeechRate] = useState(0.86);
   const [roundLimit, setRoundLimit] = useState<RoundLimit>(10);
-  const [voiceEngine, setVoiceEngine] = useState<VoiceEngine>("browser");
+  const [voiceEngine, setVoiceEngine] = useState<VoiceEngine>("natural");
   const [naturalVoice, setNaturalVoice] = useState<string>(PIPER_VOICES[0].id);
   const [naturalState, setNaturalState] = useState<NaturalVoiceState>({ status: "idle" });
   const [submittedAnswer, setSubmittedAnswer] = useState("");
@@ -199,11 +199,6 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
     );
   }
 
-  function enableNaturalVoice() {
-    setVoiceEngine("natural");
-    naturalPlayerRef.current?.load();
-  }
-
   if (!card) return null;
 
   if (state === "finished") {
@@ -297,9 +292,9 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
                 type="button"
                 className={voiceEngine === "natural" ? "is-active" : undefined}
                 aria-pressed={voiceEngine === "natural"}
-                onClick={enableNaturalVoice}
+                onClick={() => setVoiceEngine("natural")}
               >
-                Voz neural local <small>modelo médio, cerca de 60 MB</small>
+                Voz neural local <small>alta qualidade, cerca de 115 MB</small>
               </button>
               <button
                 type="button"
@@ -307,18 +302,20 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
                 aria-pressed={voiceEngine === "browser"}
                 onClick={() => setVoiceEngine("browser")}
               >
-                Voz básica do dispositivo <small>fallback imediato</small>
+                Voz do dispositivo <small>fallback imediato</small>
               </button>
             </div>
             {voiceEngine === "natural" && (
               <p className="listening-model-state" role="status">
                 {naturalState.status === "idle"
-                  ? "A voz só será baixada quando você ativá-la."
+                  ? "O modelo da voz escolhida será baixado no primeiro teste."
                   : naturalState.status === "loading"
-                    ? `Carregando modelo${naturalState.progress === undefined ? "…" : `: ${naturalState.progress}%`}`
+                    ? `Carregando voz${naturalState.progress === undefined ? "…" : `: ${naturalState.progress}%`}`
                     : naturalState.status === "error"
-                      ? `${naturalState.message} O fallback continua disponível.`
-                      : "Modelo pronto e armazenado pelo cache do navegador quando permitido."}
+                      ? `${naturalState.message} A voz do dispositivo continua disponível.`
+                      : naturalState.status === "generating"
+                        ? "Preparando a pronúncia…"
+                        : "Voz pronta e armazenada pelo navegador quando permitido."}
               </p>
             )}
             <div className="listening-voice-controls">

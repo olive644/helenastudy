@@ -6,7 +6,13 @@ export const SPEECH_RATE_OPTIONS = [
 
 const PREMIUM_HINTS = [
   "natural",
+  "ava",
+  "andrew",
+  "emma",
+  "brian",
+  "serena",
   "google us english",
+  "google uk english",
   "samantha",
   "aria",
   "jenny",
