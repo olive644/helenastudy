@@ -132,3 +132,13 @@ colunas e diagonais.
 
 O workspace evolui para a versão 3 e migra automaticamente as versões 1 e 2. Nenhuma dependência
 foi adicionada; Canvas, Pointer Events e captura de arquivo do navegador atendem à primeira versão.
+
+## 10. Iconografia própria da HelenaStudy
+
+A navegação desktop, a barra inferior mobile e o painel Mais passam a compartilhar uma família de
+ícones SVG criada para o produto. Cada módulo mantém um símbolo reconhecível, mas usa a assimetria,
+as pontas e os olhos amarelos derivados da silhueta original da Helena.
+
+Os ícones são componentes locais, herdam a cor do estado ativo e não dependem de imagens geradas,
+fontes de ícones ou novos pacotes. Os rótulos textuais continuam visíveis e responsáveis pelo nome
+acessível de cada aba.

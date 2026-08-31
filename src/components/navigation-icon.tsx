@@ -14,46 +14,110 @@ type NavigationIconProps = {
   name: NavigationIconName;
 };
 
-const ICON_PATHS: Record<NavigationIconName, readonly string[]> = {
-  today: ["M3.5 10.5 12 3.8l8.5 6.7", "M5.8 9.3v10.2h12.4V9.3M9.5 19.5v-6h5v6"],
+type IconLayer = "base" | "accent" | "detail";
+
+type IconShape = {
+  d: string;
+  layer?: IconLayer;
+};
+
+const ICON_SHAPES: Record<NavigationIconName, readonly IconShape[]> = {
+  today: [
+    {
+      d: "M4.2 6.5 7.7 3.9l4.4 1.9 4.7-2.2 2.9 4.2-.2 8.8c-.1 3.2-2.2 5.4-5.3 5.4H9.6c-3.3 0-5.5-2.1-5.3-5.3z",
+    },
+    {
+      d: "M7.4 11.6a3 3 0 1 0 6 0 3 3 0 0 0-6 0m7 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0",
+      layer: "accent",
+    },
+    {
+      d: "M9.8 9.4c.7 0 1 1 2.2 0v4.4c0 .8-.3 1.4-1.1 1.4s-1.1-.6-1.1-1.4zm7 0c.7 0 1 1 2.2 0v4.4c0 .8-.3 1.4-1.1 1.4s-1.1-.6-1.1-1.4z",
+      layer: "detail",
+    },
+  ],
   planner: [
-    "M5.5 5.5h13a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2",
-    "M7.5 3.5v4M16.5 3.5v4M3.5 10h17M7.5 14h3M13.5 14h3M7.5 17.5h3",
+    {
+      d: "M4 7.4 7.2 4l4.7 1.8L16.6 4 20 7.5v11.1c0 1.5-1.2 2.7-2.7 2.7H6.7A2.7 2.7 0 0 1 4 18.6z",
+    },
+    {
+      d: "M6.5 9h11v2.2h-11zm1 4.2h3v2.8h-3zm4.5 0h4.5V16H12zm-4.5 4h3v2h-3z",
+      layer: "accent",
+    },
   ],
-  focus: ["M19.5 13a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0", "M9 2.8h6M12 5.5V3M12 13l3.2-2.1"],
+  focus: [
+    { d: "M5 8.1 8.2 5l3.8 1.5L16 5l3 3.2a8.4 8.4 0 1 1-14-.1" },
+    { d: "M11 9h2v4.6l3 1.8-1.1 1.7-3.9-2.4zM9 2.5h6v2H9z", layer: "accent" },
+  ],
   learn: [
-    "M4 5.5c3.2-.7 5.8.1 8 2.2v12c-2.2-2.1-4.8-2.9-8-2.2z",
-    "M20 5.5c-3.2-.7-5.8.1-8 2.2v12c2.2-2.1 4.8-2.9 8-2.2z",
+    { d: "M3.5 6.5 6.8 4l5.1 2.1L17 4l3.5 2.5v12.8l-8.6 2.5-8.4-2.5z" },
+    {
+      d: "M6.5 8.4h4v4h-4zm5.8 0h5.2v1.8h-5.2zm0 2.8h4.1V13h-4.1zm-5.8 3.3h4v4h-4zm5.8.1h5.2v1.8h-5.2zm0 2.8h3.2v1.8h-3.2z",
+      layer: "accent",
+    },
   ],
-  habits: ["M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0", "m8 12 2.6 2.6L16.5 9"],
-  notes: ["M6 3.5h10l3 3v14H6z", "M15.5 3.5v4h3.5M9 11h6M9 14.5h6M9 18h4"],
-  library: ["M4 5.5h6v14H4zM10 5.5h6v14h-6zM16 7l3.3-1 2.2 13.4-3.3.6z"],
+  habits: [
+    {
+      d: "M4.4 7.4 7.6 4 12 5.8 16.6 4l3 3.5.2 7.8c0 4.1-3.3 6.7-7.8 7.2-4.5-.5-7.8-3.1-7.8-7.2z",
+    },
+    { d: "m7.7 13.3 2.5-2.4 2 2.1 4.2-4 1.7 1.8-5.9 5.8z", layer: "accent" },
+  ],
+  notes: [
+    {
+      d: "M4.5 6.6 7.8 4 12 5.8 16.3 4l3.2 2.7v12c0 1.8-1.4 3.2-3.2 3.2H7.7a3.2 3.2 0 0 1-3.2-3.2z",
+    },
+    { d: "M7.5 10h9v1.8h-9zm0 3.5h7v1.8h-7zm0 3.5h4.5v1.8H7.5z", layer: "accent" },
+  ],
+  library: [
+    {
+      d: "M3.5 7 6.2 4.5 9 6v14.5H3.5zm6.3-.8L12.5 4l2.8 2.2v14.3H9.8zm6.3.7L19.2 4l3 2.4-2.3 14.2-5-.8z",
+    },
+    {
+      d: "M5.5 9h1.6v7H5.5zm6-1h1.6v7h-1.6zm6.3 1.1 1.7.3-1.2 7-1.7-.3z",
+      layer: "accent",
+    },
+  ],
   lesson: [
-    "M5 4h11.5A2.5 2.5 0 0 1 19 6.5V20H7.5A2.5 2.5 0 0 1 5 17.5z",
-    "M5 17.5A2.5 2.5 0 0 1 7.5 15H19M9 8h6M9 11h4",
+    {
+      d: "M4.3 6.6 7.5 4l4.4 1.8L16.5 4l3.2 2.7v13.1c-2.7-.5-5.3.1-7.7 2.2-2.4-2.1-5-2.7-7.7-2.2z",
+    },
+    {
+      d: "m8.1 16.9 3-7.8h1.8l3 7.8h-2.2l-.6-1.8h-3.9l-.6 1.8zm1.7-3.6h2.7l-1.3-3.7z",
+      layer: "accent",
+    },
   ],
   more: [
-    "M7.4 6A1.4 1.4 0 1 1 4.6 6a1.4 1.4 0 0 1 2.8 0M19.4 6a1.4 1.4 0 1 1-2.8 0 1.4 1.4 0 0 1 2.8 0M7.4 18a1.4 1.4 0 1 1-2.8 0 1.4 1.4 0 0 1 2.8 0M19.4 18a1.4 1.4 0 1 1-2.8 0 1.4 1.4 0 0 1 2.8 0",
+    {
+      d: "M4.2 7.2 7.5 4l4.5 1.8L16.5 4l3.3 3.3-.2 9.8c-.1 3-2.1 4.9-5 4.9H9.3c-3.1 0-5.1-2-5-5z",
+    },
+    {
+      d: "M7.2 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0m5.7 0a2 2 0 1 0 4 0 2 2 0 0 0-4 0",
+      layer: "accent",
+    },
+    { d: "M8.7 10.5h1v3h-1zm5.7 0h1v3h-1z", layer: "detail" },
   ],
-  close: ["m6 6 12 12M18 6 6 18"],
+  close: [
+    {
+      d: "M4.7 7.2 7.8 4 12 5.7 16.4 4l2.9 3.3-.2 9.8c-.1 3-2.1 4.9-5 4.9H9.4c-3 0-5-2-4.9-5z",
+    },
+    {
+      d: "m8.4 10 1.5-1.5 2.2 2.2 2.2-2.2 1.5 1.5-2.2 2.2 2.2 2.2-1.5 1.5-2.2-2.2-2.2 2.2-1.5-1.5 2.2-2.2z",
+      layer: "accent",
+    },
+  ],
 };
 
 export function NavigationIcon({ name }: NavigationIconProps) {
   return (
     <svg
       className="navigation-icon"
-      width="21"
-      height="21"
+      data-icon={name}
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
       aria-hidden="true"
     >
-      {ICON_PATHS[name].map((path) => (
-        <path d={path} key={path} />
+      {ICON_SHAPES[name].map(({ d, layer = "base" }) => (
+        <path className={`navigation-icon__${layer}`} d={d} key={d} />
       ))}
     </svg>
   );
