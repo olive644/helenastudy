@@ -11,9 +11,9 @@ const STARTER_DECK: readonly ListeningCard[] = LISTENING_VOCABULARY.map((item) =
   id: `starter-${item.id}`,
   front: item.english,
   back: item.translation,
-  acceptedAnswers: item.acceptedAnswers,
   difficulty: item.difficulty,
   category: item.category,
+  ...(item.acceptedAnswers ? { acceptedAnswers: item.acceptedAnswers } : {}),
 }));
 
 export function normalizeListeningAnswer(value: string): string {
@@ -43,7 +43,11 @@ export function shuffleListeningDeck(
   const shuffled = cards.slice();
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
     const target = Math.floor(random() * (index + 1));
-    [shuffled[index], shuffled[target]] = [shuffled[target], shuffled[index]];
+    const current = shuffled[index];
+    const destination = shuffled[target];
+    if (!current || !destination) continue;
+    shuffled[index] = destination;
+    shuffled[target] = current;
   }
   return shuffled;
 }
