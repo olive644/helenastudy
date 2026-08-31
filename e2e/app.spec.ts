@@ -98,7 +98,7 @@ test("abre digitalização, escrita à mão e completa um bingo", async ({ page 
 
   await studentSpaceButton(page, testInfo.project.name).click();
   await quickActions.getByRole("button", { name: /quizzes e bingo/i }).click();
-  await page.getByRole("button", { name: "Bingo" }).click();
+  await page.getByRole("button", { name: "Bingo", exact: true }).click();
   await page.getByRole("button", { name: "Criar bingo" }).click();
   const board = page.getByRole("group", { name: "Cartela de bingo" });
   const cells = board.getByRole("button");
