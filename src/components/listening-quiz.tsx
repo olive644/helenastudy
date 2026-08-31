@@ -9,7 +9,7 @@ import {
 } from "../domain/listening-quiz";
 import { classifyWordDifficulty, type WordDifficulty } from "../data/word-difficulty";
 import { rankEnglishVoices, SPEECH_RATE_OPTIONS, speakEnglish } from "../data/speech-voice";
-import { PIPER_VOICES, NaturalVoicePlayer, type NaturalVoiceState } from "../data/listening-audio";
+import { KOKORO_VOICES, NaturalVoicePlayer, type NaturalVoiceState } from "../data/listening-audio";
 
 type RoundState = "ready" | "countdown" | "answering" | "feedback" | "finished";
 type DifficultyFilter = "mixed" | WordDifficulty;
@@ -42,7 +42,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   const [speechRate, setSpeechRate] = useState(0.86);
   const [roundLimit, setRoundLimit] = useState<RoundLimit>(10);
   const [voiceEngine, setVoiceEngine] = useState<VoiceEngine>("natural");
-  const [naturalVoice, setNaturalVoice] = useState<string>(PIPER_VOICES[0].id);
+  const [naturalVoice, setNaturalVoice] = useState<string>(KOKORO_VOICES[0].id);
   const [naturalState, setNaturalState] = useState<NaturalVoiceState>({ status: "idle" });
   const [submittedAnswer, setSubmittedAnswer] = useState("");
   const answerRef = useRef<HTMLInputElement>(null);
@@ -106,7 +106,13 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
     if (!card) return;
     setAudioUnavailable(false);
     if (voiceEngine === "natural") {
-      naturalPlayerRef.current?.generate(card.front, naturalVoice, speechRate);
+      naturalPlayerRef.current?.generate(card.front, naturalVoice, speechRate, () => {
+        utteranceRef.current = speakEnglish(card.front, {
+          voice: selectedVoice,
+          rate: speechRate,
+          onUnavailable: () => setAudioUnavailable(true),
+        });
+      });
       return;
     }
     utteranceRef.current = speakEnglish(card.front, {
@@ -294,7 +300,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
                 aria-pressed={voiceEngine === "natural"}
                 onClick={() => setVoiceEngine("natural")}
               >
-                Voz neural local <small>alta qualidade, cerca de 115 MB</small>
+                Voz Kokoro <small>natural, local e privada</small>
               </button>
               <button
                 type="button"
@@ -308,11 +314,11 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
             {voiceEngine === "natural" && (
               <p className="listening-model-state" role="status">
                 {naturalState.status === "idle"
-                  ? "O modelo da voz escolhida será baixado no primeiro teste."
+                  ? "O Kokoro será baixado no primeiro teste e ficará armazenado no navegador."
                   : naturalState.status === "loading"
                     ? `Carregando voz${naturalState.progress === undefined ? "…" : `: ${naturalState.progress}%`}`
                     : naturalState.status === "error"
-                      ? `${naturalState.message} A voz do dispositivo continua disponível.`
+                      ? naturalState.message
                       : naturalState.status === "generating"
                         ? "Preparando a pronúncia…"
                         : "Voz pronta e armazenada pelo navegador quando permitido."}
@@ -327,7 +333,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
                     value={naturalVoice}
                     onChange={(event) => setNaturalVoice(event.target.value)}
                   >
-                    {PIPER_VOICES.map((voice) => (
+                    {KOKORO_VOICES.map((voice) => (
                       <option value={voice.id} key={voice.id}>
                         {voice.label}
                       </option>

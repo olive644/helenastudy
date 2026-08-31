@@ -6,8 +6,8 @@ const distDirectory = new URL("../dist/", import.meta.url);
 const assetsDirectory = new URL("../dist/assets/", import.meta.url);
 const MAX_INITIAL_JS_BYTES = 220 * 1024;
 const MAX_TOTAL_JS_BYTES = 300 * 1024;
-const MAX_TTS_WORKER_BYTES = 300 * 1024;
-const MAX_TTS_WASM_BYTES = 14 * 1024 * 1024;
+const MAX_TTS_WORKER_BYTES = 2.25 * 1024 * 1024;
+const MAX_TTS_WASM_BYTES = 22 * 1024 * 1024;
 const manifest = JSON.parse(await readFile(new URL(".vite/manifest.json", distDirectory), "utf8"));
 const entry = Object.values(manifest).find((item) => item.isEntry === true);
 if (!entry?.file) throw new Error("Entrada principal ausente do manifesto do build.");
@@ -21,7 +21,9 @@ const sizes = await Promise.all(
     bytes: (await stat(join(fileURLToPath(assetsDirectory), file))).size,
   })),
 );
-const ttsWorker = sizes.find((item) => item.file.startsWith("piper-tts.worker-"));
+const ttsWorker = sizes.find(
+  (item) => item.file.startsWith("piper-tts.worker-") || item.file.startsWith("kokoro-tts.worker-"),
+);
 const applicationTotal = sizes
   .filter((item) => item !== ttsWorker)
   .reduce((sum, item) => sum + item.bytes, 0);
