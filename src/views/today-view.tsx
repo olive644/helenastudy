@@ -43,9 +43,23 @@ export function TodayView({ workspace, dispatch, onNavigate }: TodayViewProps) {
       <PageHeader />
       <header className="view-heading view-heading--today">
         <div>
-          <span className="section-label">{formatLongDate(now)}</span>
+          <span className="section-label">Seu painel · {formatLongDate(now)}</span>
           <h1>Espaço do aluno</h1>
-          <p>Veja suas prioridades e escolha o próximo passo sem sair do seu fluxo.</p>
+          <p>
+            Seu próximo passo está aqui. Escolha uma prática curta ou organize o que vem depois.
+          </p>
+          <div className="today-hero-actions">
+            <button
+              className="today-hero-primary"
+              type="button"
+              onClick={() => onNavigate("learn")}
+            >
+              <NavigationIcon name="learn" /> Começar prática
+            </button>
+            <button type="button" onClick={() => onNavigate("planner")}>
+              Ver meu dia <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
         <img
           className="today-helena"
