@@ -2,6 +2,7 @@ import { Check, Plus } from "lucide-react";
 import { useState, type Dispatch, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
 import { ListeningQuiz } from "../components/listening-quiz";
+import { LocalRoom } from "../components/local-room";
 import {
   buildBingoLabels,
   dueFlashcards,
@@ -241,7 +242,7 @@ function BingoSession({ workspace, dispatch, subjectId }: LearnViewProps & { sub
 export function LearnView({ workspace, dispatch }: LearnViewProps) {
   const defaultSubject = workspace.subjects[0];
   const [subjectId, setSubjectId] = useState(defaultSubject?.id ?? "");
-  const [mode, setMode] = useState<"review" | "quiz" | "listening" | "bingo">("review");
+  const [mode, setMode] = useState<"review" | "quiz" | "listening" | "bingo" | "room">("review");
   const [goalTitle, setGoalTitle] = useState("");
   const [targetMinutes, setTargetMinutes] = useState(300);
   const [deadline, setDeadline] = useState(toDateKey(new Date()));
@@ -313,6 +314,13 @@ export function LearnView({ workspace, dispatch }: LearnViewProps) {
               >
                 Bingo
               </button>
+              <button
+                className={mode === "room" ? "is-active" : undefined}
+                type="button"
+                onClick={() => setMode("room")}
+              >
+                Modo Sala
+              </button>
             </div>
           </div>
           {mode === "review" ? (
@@ -336,12 +344,14 @@ export function LearnView({ workspace, dispatch }: LearnViewProps) {
                 (card) => card.subjectId === selectedSubject.id,
               )}
             />
-          ) : (
+          ) : mode === "bingo" ? (
             <BingoSession
               workspace={workspace}
               dispatch={dispatch}
               subjectId={selectedSubject.id}
             />
+          ) : (
+            <LocalRoom />
           )}
         </section>
 
