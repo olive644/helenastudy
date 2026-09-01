@@ -4936,7 +4936,7 @@ select {
   }
 }
 
-/* Final visual contract: icons stay legible and the student-space shortcuts stay yellow. */
+/* Final visual contract: icons stay legible and student-space shortcuts remain aligned. */
 .sidebar__nav {
   overflow-x: hidden;
 }
@@ -4947,18 +4947,43 @@ select {
 
 .quick-actions > button:hover,
 .quick-actions > button:focus-visible {
-  background: #fff8e7;
-  box-shadow: inset 0 -3px 0 var(--yellow);
+  background: var(--lavender);
+  box-shadow: none;
   transform: none;
 }
 
-.quick-action-icon,
+.quick-actions > button::after {
+  content: none;
+}
+
+.quick-action-icon {
+  display: grid;
+  border: 1px solid #d9d0fa;
+  color: var(--ink);
+  background: var(--lavender);
+  line-height: 0;
+  place-items: center;
+  transform: none;
+}
+
 .quick-actions > button:hover .quick-action-icon,
 .quick-actions > button:focus-visible .quick-action-icon {
   border: 2px solid var(--ink);
   color: var(--ink);
-  background: var(--yellow);
+  background: var(--violet);
   transform: none;
+}
+
+.quick-action-icon > .navigation-icon {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+}
+
+.quick-action-icon > .navigation-icon > .navigation-icon__glyph {
+  width: 18px;
+  height: 18px;
 }
 
 .navigation-icon > .navigation-icon__glyph {
