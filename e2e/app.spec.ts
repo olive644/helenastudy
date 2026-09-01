@@ -18,17 +18,35 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test("mantém os atalhos amarelos e remove o sol decorativo", async ({ page }, testInfo) => {
+test("centraliza os atalhos, restaura o hover roxo e remove o sol", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "Contrato visual da página inicial desktop.");
   const quickActions = page.getByRole("region", { name: "Ferramentas do Espaço do aluno" });
   const icons = quickActions.locator(".quick-action-icon");
 
   await expect(icons).toHaveCount(5);
-  await expect(icons.first()).toHaveCSS("background-color", "rgb(255, 201, 74)");
+  await expect(icons.first()).toHaveCSS("background-color", "rgb(238, 233, 255)");
   await expect(icons.first()).toHaveCSS("color", "rgb(23, 21, 28)");
+  await page.waitForTimeout(800);
+
+  for (const icon of await icons.all()) {
+    const badgeBox = await icon.boundingBox();
+    const glyphBox = await icon.locator(".navigation-icon__glyph").boundingBox();
+    expect(badgeBox).not.toBeNull();
+    expect(glyphBox).not.toBeNull();
+    expect(
+      Math.abs(badgeBox!.x + badgeBox!.width / 2 - (glyphBox!.x + glyphBox!.width / 2)),
+    ).toBeLessThan(0.6);
+    expect(
+      Math.abs(badgeBox!.y + badgeBox!.height / 2 - (glyphBox!.y + glyphBox!.height / 2)),
+    ).toBeLessThan(0.6);
+  }
 
   await quickActions.getByRole("button", { name: /iniciar foco/i }).hover();
-  await expect(icons.first()).toHaveCSS("background-color", "rgb(255, 201, 74)");
+  await expect(icons.first()).toHaveCSS("background-color", "rgb(114, 87, 232)");
+  await expect(quickActions.getByRole("button", { name: /iniciar foco/i })).toHaveCSS(
+    "background-color",
+    "rgb(238, 233, 255)",
+  );
 
   const heroDecoration = await page
     .locator(".view-heading--today")
