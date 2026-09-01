@@ -5034,3 +5034,301 @@ select {
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
+
+/* Atividade física pronta: mãos de papel usadas como mata-moscas de vocabulário. */
+.swat-activity {
+  margin-bottom: 1rem;
+  padding: clamp(1rem, 3vw, 1.4rem);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  scroll-margin-top: 70px;
+}
+
+.swat-activity__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+  gap: 1rem;
+}
+
+.swat-activity__header h2 {
+  margin: 0.2rem 0 0.3rem;
+  font-size: clamp(1.45rem, 4vw, 2rem);
+  letter-spacing: -0.045em;
+}
+
+.swat-activity__header p {
+  max-width: 620px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.swat-activity__tags {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.swat-activity__tags span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #d8cff8;
+  border-radius: 999px;
+  gap: 0.4rem;
+  color: var(--violet-dark);
+  background: var(--lavender);
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.swat-activity__layout {
+  display: grid;
+  padding-top: 1rem;
+  gap: 1rem;
+}
+
+.swat-activity__instructions {
+  display: grid;
+  gap: 1rem;
+}
+
+.swat-activity__instructions h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.82rem;
+}
+
+.swat-activity__instructions p,
+.swat-activity__instructions li {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.swat-activity__instructions p,
+.swat-activity__instructions ul,
+.swat-activity__instructions ol {
+  margin: 0;
+}
+
+.swat-activity__instructions ul,
+.swat-activity__instructions ol {
+  padding-left: 1.15rem;
+}
+
+.swat-activity__instructions li + li {
+  margin-top: 0.28rem;
+}
+
+.swat-activity__rule {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  padding: 0.8rem;
+  border-left: 4px solid var(--yellow);
+  border-radius: 8px;
+  gap: 0.55rem;
+  color: var(--ink);
+  background: #fff6cf;
+}
+
+.swat-activity__rule p {
+  color: var(--ink);
+}
+
+.swat-activity__print-area {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+}
+
+.swat-print-sheet {
+  padding: 0.8rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.swat-print-sheet > header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--line);
+  gap: 0.75rem;
+}
+
+.swat-print-sheet > header span {
+  color: var(--violet-dark);
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.swat-print-sheet > header h3 {
+  margin: 0.12rem 0 0;
+  font-size: 0.95rem;
+}
+
+.swat-print-sheet > header p {
+  max-width: 180px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.58rem;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.swat-hand-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 0.75rem 0;
+  gap: 0.35rem;
+}
+
+.swat-hand-grid > div {
+  display: grid;
+  aspect-ratio: 0.88;
+  min-width: 0;
+  border: 1px dashed #b9b3aa;
+  border-radius: 8px;
+  place-items: center;
+}
+
+.swat-hand-grid svg {
+  width: 72%;
+  height: 72%;
+  color: var(--ink);
+  fill: none;
+}
+
+.swat-team-lines {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.swat-team-lines > div {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  align-items: center;
+  min-height: 20px;
+  border-bottom: 1px solid #d8d4cc;
+  gap: 0.4rem;
+}
+
+.swat-team-lines span {
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  background: var(--yellow);
+}
+
+.swat-team-lines > div:nth-child(2) span {
+  background: #f8bfd8;
+}
+
+.swat-team-lines > div:nth-child(3) span {
+  background: #aee5e8;
+}
+
+.swat-team-lines > div:nth-child(4) span {
+  background: #d9c4ff;
+}
+
+.swat-team-lines p {
+  margin: 0;
+  color: #77716a;
+  font-size: 0.52rem;
+}
+
+.swat-print-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 0.45rem;
+}
+
+@media (min-width: 900px) {
+  .swat-activity__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.8fr);
+    gap: 1.35rem;
+  }
+}
+
+@media (max-width: 599px) {
+  .swat-activity__header {
+    display: grid;
+  }
+
+  .swat-activity__tags {
+    justify-content: flex-start;
+  }
+
+  .swat-print-sheet > header {
+    align-items: flex-start;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .swat-print-sheet,
+  .swat-print-sheet * {
+    visibility: visible;
+  }
+
+  .swat-print-sheet {
+    position: absolute;
+    inset: 0;
+    width: 190mm;
+    min-height: 277mm;
+    padding: 8mm;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .swat-print-sheet > header h3 {
+    font-size: 18pt;
+  }
+
+  .swat-print-sheet > header span,
+  .swat-print-sheet > header p,
+  .swat-team-lines p {
+    font-size: 9pt;
+  }
+
+  .swat-hand-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4mm;
+  }
+
+  .swat-hand-grid > div {
+    width: auto;
+    height: 70mm;
+    min-height: 0;
+    aspect-ratio: auto;
+    break-inside: avoid;
+  }
+
+  .swat-team-lines > div {
+    min-height: 9mm;
+  }
+}
