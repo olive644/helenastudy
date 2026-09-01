@@ -9,12 +9,13 @@ import {
 } from "../domain/listening-quiz";
 import { classifyWordDifficulty, type WordDifficulty } from "../data/word-difficulty";
 import { rankEnglishVoices, SPEECH_RATE_OPTIONS, speakEnglish } from "../data/speech-voice";
-import { KOKORO_VOICES, NaturalVoicePlayer, type NaturalVoiceState } from "../data/listening-audio";
+import { GEMINI_VOICES, NaturalVoicePlayer, type NaturalVoiceState } from "../data/listening-audio";
+import type { GeminiSpeechVoice } from "../backend/speech-handler";
 
 type RoundState = "ready" | "countdown" | "answering" | "feedback" | "finished";
 type DifficultyFilter = "mixed" | WordDifficulty;
 type RoundLimit = 5 | 10 | 15 | "all";
-type VoiceEngine = "natural" | "browser";
+type VoiceEngine = "gemini" | "browser";
 
 const DIFFICULTY_LABELS: Record<DifficultyFilter, string> = {
   mixed: "Misto",
@@ -41,8 +42,8 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   const [voiceUri, setVoiceUri] = useState("");
   const [speechRate, setSpeechRate] = useState(0.86);
   const [roundLimit, setRoundLimit] = useState<RoundLimit>(10);
-  const [voiceEngine, setVoiceEngine] = useState<VoiceEngine>("natural");
-  const [naturalVoice, setNaturalVoice] = useState<string>(KOKORO_VOICES[0].id);
+  const [voiceEngine, setVoiceEngine] = useState<VoiceEngine>("gemini");
+  const [naturalVoice, setNaturalVoice] = useState<GeminiSpeechVoice>(GEMINI_VOICES[0]!.id);
   const [naturalState, setNaturalState] = useState<NaturalVoiceState>({ status: "idle" });
   const [submittedAnswer, setSubmittedAnswer] = useState("");
   const answerRef = useRef<HTMLInputElement>(null);
@@ -83,7 +84,6 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   useEffect(() => {
     const player = new NaturalVoicePlayer(setNaturalState);
     naturalPlayerRef.current = player;
-    player.preload();
     return () => player.dispose();
   }, []);
 
@@ -106,8 +106,8 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   const playAudio = useCallback(() => {
     if (!card) return;
     setAudioUnavailable(false);
-    if (voiceEngine === "natural") {
-      naturalPlayerRef.current?.generate(card.front, naturalVoice, speechRate, () => {
+    if (voiceEngine === "gemini") {
+      void naturalPlayerRef.current?.generate(card.front, naturalVoice, speechRate, () => {
         utteranceRef.current = speakEnglish(card.front, {
           voice: selectedVoice,
           rate: speechRate,
@@ -138,13 +138,6 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
           );
     const nextDeck = createListeningRound(filtered, roundLimit);
     if (nextDeck.length === 0) return;
-    if (voiceEngine === "natural") {
-      naturalPlayerRef.current?.prepare(
-        nextDeck.slice(0, 3).map((item) => item.front),
-        naturalVoice,
-        speechRate,
-      );
-    }
     setDeck(nextDeck);
     setIndex(0);
     setCorrect(0);
@@ -174,13 +167,6 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
     if (index + 1 >= deck.length) {
       setState("finished");
       return;
-    }
-    if (voiceEngine === "natural") {
-      naturalPlayerRef.current?.prepare(
-        deck.slice(index + 1, index + 4).map((item) => item.front),
-        naturalVoice,
-        speechRate,
-      );
     }
     setIndex((value) => value + 1);
     setAnswer("");
@@ -317,11 +303,11 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
             <div className="listening-engine-choice" role="group" aria-label="Tipo de voz">
               <button
                 type="button"
-                className={voiceEngine === "natural" ? "is-active" : undefined}
-                aria-pressed={voiceEngine === "natural"}
-                onClick={() => setVoiceEngine("natural")}
+                className={voiceEngine === "gemini" ? "is-active" : undefined}
+                aria-pressed={voiceEngine === "gemini"}
+                onClick={() => setVoiceEngine("gemini")}
               >
-                Voz Kokoro <small>natural, local e privada</small>
+                Voz Gemini <small>mais humana e sem download demorado</small>
               </button>
               <button
                 type="button"
@@ -332,29 +318,29 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
                 Voz do dispositivo <small>fallback imediato</small>
               </button>
             </div>
-            {voiceEngine === "natural" && (
+            {voiceEngine === "gemini" && (
               <p className="listening-model-state" role="status">
                 {naturalState.status === "idle"
-                  ? "Preparando o Kokoro em segundo plano…"
-                  : naturalState.status === "loading"
-                    ? `Baixando a voz em segundo plano${naturalState.progress === undefined ? "…" : `: ${naturalState.progress}%`}`
-                    : naturalState.status === "error"
-                      ? naturalState.message
-                      : naturalState.status === "generating"
-                        ? "Preparando a pronúncia…"
-                        : "Voz pronta e armazenada pelo navegador quando permitido."}
+                  ? "O texto da pergunta é enviado ao Google somente quando você pede o áudio."
+                  : naturalState.status === "error"
+                    ? naturalState.message
+                    : naturalState.status === "generating"
+                      ? "Gerando pronúncia com o Gemini…"
+                      : naturalState.status === "playing"
+                        ? "Reproduzindo voz Gemini…"
+                        : "Pronúncia pronta nesta sessão."}
               </p>
             )}
             <div className="listening-voice-controls">
               <label>
                 <Volume2 size={16} aria-hidden="true" />
                 <span>Voz</span>
-                {voiceEngine === "natural" ? (
+                {voiceEngine === "gemini" ? (
                   <select
                     value={naturalVoice}
-                    onChange={(event) => setNaturalVoice(event.target.value)}
+                    onChange={(event) => setNaturalVoice(event.target.value as GeminiSpeechVoice)}
                   >
-                    {KOKORO_VOICES.map((voice) => (
+                    {GEMINI_VOICES.map((voice) => (
                       <option value={voice.id} key={voice.id}>
                         {voice.label}
                       </option>
@@ -392,7 +378,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
                 className="secondary-button listening-test-voice"
                 type="button"
                 onClick={playAudio}
-                disabled={voiceEngine === "natural" && naturalState.status === "loading"}
+                disabled={voiceEngine === "gemini" && naturalState.status === "generating"}
               >
                 <Play size={16} /> Testar voz
               </button>
@@ -458,6 +444,12 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
                 Nível {DIFFICULTY_LABELS[difficultyFilter].toLocaleLowerCase("pt-BR")}. A resposta
                 pode ser em português ou em inglês.
               </p>
+              {voiceEngine === "gemini" && (
+                <small className="listening-privacy-note">
+                  Ao iniciar, você autoriza o envio somente do texto de cada pergunta ao Google para
+                  gerar a pronúncia.
+                </small>
+              )}
               <button className="primary-button" type="button" onClick={beginRound}>
                 <Play size={17} /> Iniciar escuta
               </button>

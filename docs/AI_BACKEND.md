@@ -2,10 +2,20 @@
 
 ## Estado da decisão
 
-A fronteira do backend está definida e implementada como contrato independente de provedor. Não há
-provedor conectado, segredo configurado nem recurso de IA apresentado na interface. Essa separação
-permite revisar privacidade, custo e implantação antes que qualquer conteúdo de estudo saia do
-navegador.
+A fronteira da futura tutora Helena está definida como contrato independente de provedor e permanece
+desativada. Separadamente, o quiz de escuta usa uma integração mínima com Gemini TTS, descrita
+abaixo, que recebe somente o texto curto a ser pronunciado.
+
+## Voz do quiz de escuta
+
+`POST /api/speech` é uma função Vercel same-origin. Ela aceita texto de até 160 caracteres, uma voz
+allowlist, velocidade entre 0,7 e 1,05 e consentimento explícito no corpo. Origem, tamanho e limite de
+uso são validados antes de chamar `gemini-3.1-flash-tts-preview`. O PCM retornado é convertido para
+WAV no servidor e nenhum conteúdo é registrado.
+
+Configure `GEMINI_API_KEY` apenas como variável protegida da Vercel. Sem a chave ou quando o Gemini
+falha, o cliente usa automaticamente a voz em inglês disponível no navegador. O cache de áudio vive
+somente na memória da sessão.
 
 ## Fluxo de dados
 

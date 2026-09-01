@@ -4,7 +4,8 @@ Central de estudos, foco e rotina da marca Oli.
 
 O HelenaStudy reúne agenda, tarefas, hábitos, cronômetro, anotações, digitalizações, escrita à mão,
 materiais, flashcards, quizzes, bingo e planejamento de aulas em um único espaço. A base atual
-funciona localmente e não possui autenticação, integração com IA ou armazenamento remoto.
+funciona localmente, sem autenticação ou armazenamento remoto. A única integração ativa com IA é a
+voz opcional do quiz de escuta, gerada pelo Gemini por uma função segura de servidor.
 
 A fronteira segura da futura Helena inteligente já possui contrato e testes, mas permanece sem
 provedor conectado. Consulte [`docs/AI_BACKEND.md`](docs/AI_BACKEND.md) para o fluxo de dados, o
@@ -30,6 +31,10 @@ Requer Node.js 24 ou superior.
 npm ci
 npm run dev
 ```
+
+Em produção, configure `GEMINI_API_KEY` somente no ambiente da Vercel. A chave nunca deve usar o
+prefixo `VITE_` nem ser enviada ao navegador. Sem a variável, o quiz recorre automaticamente à voz
+instalada no dispositivo.
 
 ## Verificação completa
 

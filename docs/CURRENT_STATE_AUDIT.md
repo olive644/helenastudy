@@ -180,19 +180,15 @@ em inglês, sem duplicar termos. As respostas aceitam a palavra ou expressão ou
 principal e equivalentes cadastrados. Os filtros Fácil, Médio e Difícil continuam sendo calculados
 pela base local de frequência, com os mesmos fallbacks já documentados.
 
-A pronúncia neural usa Kokoro-82M local com três vozes selecionadas pela qualidade: Heart e Bella em
-inglês americano e Emma em inglês britânico. O modelo quantizado é baixado somente quando selecionado
-e fica no cache do navegador quando permitido. O texto continua sendo processado no dispositivo e
-não é enviado a um provedor de TTS.
+A pronúncia neural usa `gemini-3.1-flash-tts-preview` com as vozes Kore, Aoede e Charon. O navegador
+envia somente o texto da pergunta, a voz e a velocidade para `POST /api/speech`; a chave do Gemini
+fica restrita ao ambiente seguro da Vercel. A interface informa esse envio antes do início da rodada.
 
-O Piper anterior falhava ao localizar o backend WASM empacotado. A implementação atual isola o
-Kokoro em um worker, usa o backend WASM quantizado para limitar download e memória, inicia o download
-assim que a tela de escuta é aberta e prepara em segundo plano as três próximas palavras. Os áudios
-gerados são reutilizados por texto, voz e velocidade durante a sessão, e respostas antigas são ignoradas
-quando a seleção muda. Ao terminar a contagem, a palavra é pronunciada automaticamente. Se o worker,
-o modelo ou o áudio falhar, a melhor voz do dispositivo é
-acionada automaticamente. O orçamento separa os aproximadamente 2,2 MiB do worker e 20,6 MiB do
-runtime WASM do JavaScript inicial; os pesos do modelo continuam sob demanda.
+O Kokoro-82M e seu worker foram removidos porque o download e a inicialização locais prejudicavam o
+tempo até a primeira pronúncia. O áudio PCM de 24 kHz devolvido pelo Gemini é encapsulado como WAV no
+servidor e reutilizado por texto, voz e velocidade durante a sessão. Requisições antigas são
+canceladas quando a seleção muda. Se o endpoint, o provedor ou a reprodução falhar, a melhor voz em
+inglês instalada no dispositivo é acionada automaticamente.
 
 As rodadas agora são embaralhadas sem repetição e aceitam 5, 10, 15 ou todas as palavras. O catálogo
 pedagógico tipado separa as 30 palavras do componente, com dificuldade, categoria e traduções
