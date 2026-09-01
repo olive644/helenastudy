@@ -8,7 +8,11 @@ import {
   type ListeningCard,
 } from "../domain/listening-quiz";
 import { classifyWordDifficulty, type WordDifficulty } from "../data/word-difficulty";
-import { findFemaleEnglishVoice, SPEECH_RATE_OPTIONS, speakEnglish } from "../data/speech-voice";
+import {
+  selectFallbackEnglishVoice,
+  SPEECH_RATE_OPTIONS,
+  speakEnglish,
+} from "../data/speech-voice";
 import { NaturalVoicePlayer, type NaturalVoiceState } from "../data/listening-audio";
 
 type RoundState = "ready" | "countdown" | "answering" | "feedback" | "finished";
@@ -83,11 +87,8 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   const playAudio = useCallback(() => {
     if (!card) return;
     void naturalPlayerRef.current?.generate(card.front, speechRate, () => {
-      const voice = findFemaleEnglishVoice(window.speechSynthesis?.getVoices() ?? []);
-      if (!voice) {
-        setNaturalState({ status: "error", message: "Nenhuma voz feminina em inglês disponível." });
-        return;
-      }
+      const voices = window.speechSynthesis?.getVoices() ?? [];
+      const voice = selectFallbackEnglishVoice(voices);
       utteranceRef.current = speakEnglish(card.front, {
         voice,
         rate: speechRate,

@@ -39,7 +39,7 @@ export class NaturalVoicePlayer {
       }
       this.onState({
         status: "error",
-        message: "Gemini indisponível. Usando a voz feminina do dispositivo.",
+        message: "Gemini indisponível. Usando a voz inglesa do dispositivo.",
       });
       fallback?.();
     }

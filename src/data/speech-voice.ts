@@ -66,6 +66,12 @@ export function findFemaleEnglishVoice(
   );
 }
 
+export function selectFallbackEnglishVoice(
+  voices: readonly SpeechSynthesisVoice[],
+): SpeechSynthesisVoice | undefined {
+  return findFemaleEnglishVoice(voices) ?? rankEnglishVoices(voices)[0];
+}
+
 export function speakEnglish(
   text: string,
   options: {
