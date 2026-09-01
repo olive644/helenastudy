@@ -1,105 +1,80 @@
-export type NaturalVoiceStatus = "idle" | "loading" | "ready" | "generating" | "playing" | "error";
+import type { GeminiSpeechVoice } from "../backend/speech-handler";
+
+export type NaturalVoiceStatus = "idle" | "generating" | "playing" | "ready" | "error";
 
 export type NaturalVoiceState = {
   status: NaturalVoiceStatus;
-  progress?: number;
   message?: string;
 };
 
-export const KOKORO_VOICES = [
-  { id: "af_heart", label: "Heart, inglês americano" },
-  { id: "af_bella", label: "Bella, inglês americano" },
-  { id: "bf_emma", label: "Emma, inglês britânico" },
-] as const;
-
-type NaturalVoiceWorkerMessage =
-  | { type: "progress"; progress?: number; requestId?: number }
-  | { type: "model-ready"; requestId?: number }
-  | { type: "generating" | "cache-hit"; requestId: number }
-  | { type: "audio"; audio: Blob; requestId: number }
-  | { type: "error"; message?: string; requestId?: number };
+export const GEMINI_VOICES: readonly { id: GeminiSpeechVoice; label: string }[] = [
+  { id: "Kore", label: "Kore, clara e firme" },
+  { id: "Aoede", label: "Aoede, leve e natural" },
+  { id: "Charon", label: "Charon, calmo e grave" },
+];
 
 export class NaturalVoicePlayer {
-  private worker: Worker | undefined;
   private audio: HTMLAudioElement | undefined;
   private audioUrl: string | undefined;
+  private controller: AbortController | undefined;
   private requestId = 0;
-  private fallback: (() => void) | undefined;
+  private readonly cache = new Map<string, Blob>();
 
   constructor(private readonly onState: (state: NaturalVoiceState) => void) {}
 
-  preload(): void {
-    const worker = this.ensureWorker();
-    if (!worker) return;
-    this.onState({ status: "loading", progress: 0 });
-    worker.postMessage({ type: "preload", requestId: this.requestId });
-  }
-
-  prepare(texts: readonly string[], voice: string, speed: number): void {
-    const worker = this.ensureWorker();
-    if (!worker || texts.length === 0) return;
-    worker.postMessage({ type: "prepare", texts: [...texts], voice, speed });
-  }
-
-  generate(text: string, voice: string, speed: number, fallback?: () => void): void {
-    this.fallback = fallback;
-    const worker = this.ensureWorker();
-    if (!worker) return;
-
+  async generate(
+    text: string,
+    voice: GeminiSpeechVoice,
+    rate: number,
+    fallback?: () => void,
+  ): Promise<void> {
     this.stop();
-    this.requestId += 1;
+    const requestId = this.requestId;
+    const cacheKey = `${voice}:${rate}:${text}`;
     this.onState({ status: "generating" });
-    worker.postMessage({ type: "generate", requestId: this.requestId, text, voice, speed });
-  }
 
-  private ensureWorker(): Worker | undefined {
-    if (this.worker) return this.worker;
-    if (!("Worker" in window) || !("Audio" in window)) {
-      this.onState({
-        status: "error",
-        message: "A voz neural não é compatível com este navegador.",
-      });
-      this.playFallback();
-      return undefined;
-    }
-    this.worker = new Worker(new URL("../workers/kokoro-tts.worker.ts", import.meta.url), {
-      type: "module",
-    });
-    this.worker.addEventListener("message", (event: MessageEvent<NaturalVoiceWorkerMessage>) => {
-      if (event.data.requestId !== undefined && event.data.requestId !== this.requestId) return;
-      if (event.data.type === "progress") {
-        this.onState(
-          event.data.progress === undefined
-            ? { status: "loading" }
-            : { status: "loading", progress: event.data.progress },
-        );
-      } else if (event.data.type === "model-ready") {
-        this.onState({ status: "ready" });
-      } else if (event.data.type === "generating") {
-        this.onState({ status: "generating" });
-      } else if (event.data.type === "cache-hit") {
-        this.onState({ status: "ready" });
-      } else if (event.data.type === "audio") {
-        void this.playBlob(event.data.audio, event.data.requestId);
-      } else if (event.data.type === "error") {
+    try {
+      let blob = this.cache.get(cacheKey);
+      if (!blob) {
+        this.controller = new AbortController();
+        const timeout = window.setTimeout(() => this.controller?.abort(), 6_000);
+        try {
+          const response = await fetch("/api/speech", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text, voice, rate, consent: true }),
+            signal: this.controller.signal,
+          });
+          if (!response.ok) throw new Error("Gemini speech unavailable");
+          blob = await response.blob();
+          this.cache.set(cacheKey, blob);
+        } finally {
+          window.clearTimeout(timeout);
+        }
+      }
+      if (requestId !== this.requestId) return;
+      await this.playBlob(blob, requestId);
+    } catch (error) {
+      if (requestId !== this.requestId) return;
+      if (error instanceof DOMException && error.name === "AbortError") {
         this.onState({
           status: "error",
-          message: event.data.message ?? "Não foi possível iniciar a voz Kokoro.",
+          message: "O Gemini demorou demais. A voz do dispositivo foi usada.",
         });
-        this.playFallback();
+        fallback?.();
+        return;
       }
-    });
-    this.worker.addEventListener("error", () => {
       this.onState({
         status: "error",
-        message: "A voz Kokoro não pôde iniciar neste dispositivo.",
+        message: "Gemini indisponível agora. A voz do dispositivo foi usada.",
       });
-      this.playFallback();
-    });
-    return this.worker;
+      fallback?.();
+    }
   }
 
   stop(): void {
+    this.controller?.abort();
+    this.controller = undefined;
     this.audio?.pause();
     this.audio = undefined;
     if (this.audioUrl) URL.revokeObjectURL(this.audioUrl);
@@ -109,25 +84,17 @@ export class NaturalVoicePlayer {
 
   dispose(): void {
     this.stop();
-    this.worker?.terminate();
-    this.worker = undefined;
+    this.cache.clear();
   }
 
-  private playFallback(): void {
-    const fallback = this.fallback;
-    this.fallback = undefined;
-    fallback?.();
-  }
-
-  private async playBlob(blob: Blob, requestId: number) {
-    if (requestId !== this.requestId) return;
+  private async playBlob(blob: Blob, requestId: number): Promise<void> {
     const audioUrl = URL.createObjectURL(blob);
     const audio = new Audio(audioUrl);
     audio.addEventListener(
       "ended",
       () => {
         URL.revokeObjectURL(audioUrl);
-        this.onState({ status: "ready" });
+        if (requestId === this.requestId) this.onState({ status: "ready" });
       },
       { once: true },
     );

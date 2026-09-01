@@ -23,12 +23,12 @@ produto.
 5. Escrever, desenhar ou anexar uma digitalização nos Cadernos.
 6. Guardar links, textos e flashcards por matéria na Biblioteca.
 7. Revisar flashcards, responder Quizzes, completar Bingos e acompanhar metas em Praticar.
-8. Praticar escuta em rodadas curtas com voz neural local e fallback do dispositivo.
+8. Praticar escuta em rodadas curtas com voz Gemini e fallback do dispositivo.
 9. Criar uma Sala local e sincronizar o lobby entre abas do mesmo navegador.
 10. Montar planos de aula pelo fluxo determinístico existente.
 
-Todos esses dados compartilham um workspace local versionado. Não há IA, conta, banco ou
-sincronização remota.
+Todos esses dados compartilham um workspace local versionado. Não há conta, banco ou sincronização
+remota. Somente o texto da pergunta de escuta sai do dispositivo quando a voz Gemini é usada.
 
 ## Arquitetura atual
 
@@ -40,10 +40,9 @@ sincronização remota.
 - Vitest e Testing Library para unidade/componente;
 - Playwright para fluxos desktop e mobile;
 - GitHub Actions para qualidade, auditoria, segredos, análise estática e CodeQL.
-- Kokoro-82M quantizado carregado antecipadamente em worker via WASM para reduzir memória e ampliar
-  compatibilidade, com modelo e vozes armazenados no cache do navegador;
-- pré-geração das três próximas palavras e cache de áudio por texto, voz e velocidade para o quiz falar
-  automaticamente após a contagem e repetir sem nova síntese;
+- Gemini 3.1 Flash TTS chamado por função same-origin, sem expor a chave no navegador;
+- cache de áudio por texto, voz e velocidade durante a sessão, com fallback imediato para a voz do
+  dispositivo;
 - BroadcastChannel como transporte explícito do protótipo de Sala local.
 
 ## Mapa mental vivo
@@ -71,7 +70,7 @@ flowchart LR
   STUDY --> FOCUS[Foco]
   STUDY --> LIB[Biblioteca e flashcards]
   STUDY --> PRACTICE[Quizzes e bingo]
-  PRACTICE --> LISTEN[Escuta com Kokoro e cache]
+  PRACTICE --> LISTEN[Escuta com Gemini e fallback]
 
   ORG --> PLAN[Agenda e tarefas]
   ORG --> HABITS[Hábitos]

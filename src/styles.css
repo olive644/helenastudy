@@ -2269,6 +2269,13 @@ body {
   color: var(--muted);
 }
 
+.listening-privacy-note {
+  display: block;
+  max-width: 38rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
 .listening-speaker {
   display: grid;
   width: 72px;
