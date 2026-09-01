@@ -75,6 +75,12 @@ export const PRODUCT_MODULES = [
     status: "foundation",
   },
   {
+    id: "activity-bank",
+    name: "Banco de atividades",
+    purpose: "Reunir atividades de prática classificadas por controle, tempo e material.",
+    status: "foundation",
+  },
+  {
     id: "exams",
     name: "Vestibulares e simulados",
     purpose: "Planejar provas, diagnósticos e simulados por edital.",
