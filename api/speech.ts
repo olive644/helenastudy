@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { createGeminiSpeechProvider } from "../src/backend/gemini-speech-provider";
-import { createSpeechHandler } from "../src/backend/speech-handler";
+import { createGeminiSpeechProvider } from "../src/backend/gemini-speech-provider.js";
+import { createSpeechHandler } from "../src/backend/speech-handler.js";
 
 const requests = new Map<string, number[]>();
 
