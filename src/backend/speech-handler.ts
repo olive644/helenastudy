@@ -102,8 +102,19 @@ export function createSpeechHandler(dependencies: SpeechHandlerDependencies) {
           "X-Content-Type-Options": "nosniff",
         },
       });
-    } catch {
-      return jsonError(503, "A voz Gemini está indisponível. Usando a voz do dispositivo.");
+    } catch (error) {
+      const response = jsonError(
+        503,
+        "A voz Gemini está indisponível. Usando a voz do dispositivo.",
+      );
+      if (
+        error instanceof Error &&
+        "providerStatus" in error &&
+        typeof error.providerStatus === "number"
+      ) {
+        response.headers.set("X-Provider-Status", String(error.providerStatus));
+      }
+      return response;
     }
   };
 }
