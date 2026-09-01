@@ -108,6 +108,31 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
     expect(overflow).toBe(false);
   }
 
+  await navigation.getByRole("button", { name: "Mais", exact: true }).click();
+  const toolsDialog = page.getByRole("dialog", { name: "Mais ferramentas" });
+  await expect(toolsDialog).toBeVisible();
+  await page.waitForTimeout(350);
+  const toolItems = toolsDialog.locator(".more-item");
+  await expect(toolItems).toHaveCount(4);
+
+  for (const item of await toolItems.all()) {
+    const iconBox = await item.locator(".navigation-icon").boundingBox();
+    const glyphBox = await item.locator(".navigation-icon__glyph").boundingBox();
+    expect(iconBox).not.toBeNull();
+    expect(glyphBox).not.toBeNull();
+    expect(iconBox!.width).toBe(32);
+    expect(iconBox!.height).toBe(32);
+    expect(glyphBox!.width).toBe(20);
+    expect(glyphBox!.height).toBe(20);
+    expect(glyphBox!.x).toBeGreaterThanOrEqual(iconBox!.x);
+    expect(glyphBox!.y).toBeGreaterThanOrEqual(iconBox!.y);
+    expect(glyphBox!.x + glyphBox!.width).toBeLessThanOrEqual(iconBox!.x + iconBox!.width);
+    expect(glyphBox!.y + glyphBox!.height).toBeLessThanOrEqual(iconBox!.y + iconBox!.height);
+  }
+
+  await toolsDialog.getByRole("button", { name: "Fechar menu" }).click();
+  await expect(toolsDialog).toBeHidden();
+
   for (const label of ["Hábitos", "Notas", "Biblioteca", "Planos de aula"]) {
     await navigation.getByRole("button", { name: "Mais", exact: true }).click();
     const more = page.getByRole("dialog", { name: "Mais ferramentas" });
