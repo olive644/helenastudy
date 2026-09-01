@@ -108,17 +108,12 @@ const ICON_SHAPES: Record<NavigationIconName, readonly IconShape[]> = {
 
 export function NavigationIcon({ name }: NavigationIconProps) {
   return (
-    <svg
-      className="navigation-icon"
-      data-icon={name}
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      {ICON_SHAPES[name].map(({ d, layer = "base" }) => (
-        <path className={`navigation-icon__${layer}`} d={d} key={d} />
-      ))}
-    </svg>
+    <span className="navigation-icon" data-icon={name} aria-hidden="true">
+      <svg className="navigation-icon__glyph" viewBox="0 0 24 24" focusable="false">
+        {ICON_SHAPES[name].map(({ d, layer = "base" }) => (
+          <path className={`navigation-icon__${layer}`} d={d} key={d} />
+        ))}
+      </svg>
+    </span>
   );
 }

@@ -5519,7 +5519,7 @@ body {
 }
 
 .main-content {
-  animation: view-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: view-enter 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .page-header {
@@ -5648,7 +5648,7 @@ body {
   border-radius: 18px 7px 18px 7px;
   background: var(--surface);
   box-shadow: 0 5px 18px rgb(23 21 28 / 4%);
-  animation: panel-enter 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: panel-enter 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .metric-row article::before {
@@ -5707,7 +5707,7 @@ body {
   border-radius: 20px 8px 20px 8px;
   background: var(--surface);
   box-shadow: var(--shadow-soft);
-  animation: panel-enter 360ms 80ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: panel-enter 360ms 80ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .module-panel,
