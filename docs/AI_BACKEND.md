@@ -10,7 +10,7 @@ abaixo, que recebe somente o texto curto a ser pronunciado.
 
 `POST /api/speech` é uma função Vercel same-origin. Ela aceita texto de até 160 caracteres, uma voz
 allowlist, velocidade entre 0,7 e 1,05 e consentimento explícito no corpo. Origem, tamanho e limite de
-uso são validados antes de chamar `gemini-3.1-flash-tts-preview`. O PCM retornado é convertido para
+uso são validados antes de chamar `gemini-2.5-flash-preview-tts`. O PCM retornado é convertido para
 WAV no servidor e nenhum conteúdo é registrado.
 
 Configure `GEMINI_API_KEY` apenas como variável protegida da Vercel. Sem a chave ou quando o Gemini

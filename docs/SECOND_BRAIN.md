@@ -40,7 +40,7 @@ remota. Somente o texto da pergunta de escuta sai do dispositivo quando a voz Ge
 - Vitest e Testing Library para unidade/componente;
 - Playwright para fluxos desktop e mobile;
 - GitHub Actions para qualidade, auditoria, segredos, análise estática e CodeQL.
-- Gemini 3.1 Flash TTS chamado por função same-origin, sem expor a chave no navegador;
+- Gemini 2.5 Flash TTS chamado por função same-origin, sem expor a chave no navegador;
 - cache de áudio por texto, voz e velocidade durante a sessão, com fallback imediato para a voz do
   dispositivo;
 - BroadcastChannel como transporte explícito do protótipo de Sala local.
