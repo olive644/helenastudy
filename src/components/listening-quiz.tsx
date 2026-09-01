@@ -8,7 +8,7 @@ import {
   type ListeningCard,
 } from "../domain/listening-quiz";
 import { classifyWordDifficulty, type WordDifficulty } from "../data/word-difficulty";
-import { SPEECH_RATE_OPTIONS } from "../data/speech-voice";
+import { findFemaleEnglishVoice, SPEECH_RATE_OPTIONS, speakEnglish } from "../data/speech-voice";
 import { NaturalVoicePlayer, type NaturalVoiceState } from "../data/listening-audio";
 
 type RoundState = "ready" | "countdown" | "answering" | "feedback" | "finished";
@@ -41,6 +41,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   const [submittedAnswer, setSubmittedAnswer] = useState("");
   const answerRef = useRef<HTMLInputElement>(null);
   const submittedRef = useRef(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | undefined>(undefined);
   const naturalPlayerRef = useRef<NaturalVoicePlayer | undefined>(undefined);
   const card = deck[index];
 
@@ -81,7 +82,19 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
 
   const playAudio = useCallback(() => {
     if (!card) return;
-    void naturalPlayerRef.current?.generate(card.front, speechRate);
+    void naturalPlayerRef.current?.generate(card.front, speechRate, () => {
+      const voice = findFemaleEnglishVoice(window.speechSynthesis?.getVoices() ?? []);
+      if (!voice) {
+        setNaturalState({ status: "error", message: "Nenhuma voz feminina em inglês disponível." });
+        return;
+      }
+      utteranceRef.current = speakEnglish(card.front, {
+        voice,
+        rate: speechRate,
+        onUnavailable: () =>
+          setNaturalState({ status: "error", message: "A reprodução de voz foi bloqueada." }),
+      });
+    });
   }, [card, speechRate]);
 
   useEffect(() => {
@@ -107,6 +120,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
     setSubmittedAnswer("");
     setWasCorrect(false);
     submittedRef.current = false;
+    naturalPlayerRef.current?.preload(nextDeck[0]!.front, speechRate);
     setCountdown(5);
     setState("countdown");
   }
@@ -133,6 +147,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
     setAnswer("");
     setSubmittedAnswer("");
     submittedRef.current = false;
+    naturalPlayerRef.current?.preload(deck[index + 1]!.front, speechRate);
     setCountdown(5);
     setState("countdown");
   }
@@ -164,6 +179,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   }
 
   function stopAudio() {
+    window.speechSynthesis?.cancel();
     naturalPlayerRef.current?.stop();
     setNaturalState((current) =>
       current.status === "playing" || current.status === "generating"

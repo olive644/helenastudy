@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isEnglishVoice, voiceQualityScore } from "./speech-voice";
+import { findFemaleEnglishVoice, isEnglishVoice, voiceQualityScore } from "./speech-voice";
 
 describe("seleção de voz inglesa", () => {
   it("reconhece variantes regionais do inglês", () => {
@@ -38,5 +38,14 @@ describe("seleção de voz inglesa", () => {
       name: "Microsoft David Desktop",
     });
     expect(ava).toBeGreaterThan(legacy);
+  });
+
+  it("nunca escolhe uma voz masculina como fallback", () => {
+    const voices = [
+      { default: true, lang: "en-US", localService: true, name: "Microsoft David Desktop" },
+      { default: false, lang: "en-US", localService: false, name: "Microsoft Aria Online" },
+    ] as SpeechSynthesisVoice[];
+
+    expect(findFemaleEnglishVoice(voices)?.name).toContain("Aria");
   });
 });
