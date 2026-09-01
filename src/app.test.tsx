@@ -57,16 +57,6 @@ describe("App", () => {
       const button = within(navigation).getByRole("button", { name: label });
       expect(button.querySelector(`[data-icon="${icon}"]`)).toBeTruthy();
     });
-
-    const lessonButton = within(navigation).getByRole("button", { name: "Planos de aula" });
-    expect(lessonButton.querySelector(".navigation-icon__accent-line")).toBeTruthy();
-  });
-
-  it("apresenta o cronômetro em blocos legíveis", () => {
-    render(<App />);
-    navigate("Foco");
-    const timer = screen.getByRole("heading", { name: "25:00" });
-    expect(timer.querySelectorAll(".timer__digit")).toHaveLength(4);
   });
 
   it("cria uma tarefa, mostra no Espaço do aluno e permite concluí-la", () => {

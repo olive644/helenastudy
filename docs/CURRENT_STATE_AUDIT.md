@@ -222,20 +222,6 @@ No celular, a navegação flutua acima do conteúdo, os atalhos aparecem em uma 
 o painel mantém resumo, prioridades e início rápido sem rolagem horizontal. Nenhum fluxo, dado local
 ou contrato de domínio foi alterado pelo redesign.
 
-## 14. Sistema visual e movimento
-
-O redesign amplia a identidade para todas as telas. A navegação desktop usa o preto da marca como
-âncora, enquanto o conteúdo combina creme, superfícies claras, lavanda e amarelo em uma hierarquia
-consistente. Formulários, listas, editor, biblioteca, práticas, modais e o criador de aulas passam a
-compartilhar raios assimétricos, espaçamento, estados de foco e feedback de interação.
-
-O cronômetro recebe blocos inspirados em relógios flip, sem alterar o registro das sessões. O A do
-ícone de planos de aula passa a usar um traço SVG próprio para não ser cortado em tamanhos pequenos.
-
-Entradas de tela, painéis, confirmações, modais e a Helena usam movimentos entre 160 e 380 ms. A
-regra `prefers-reduced-motion` reduz animações e transições para pessoas que ativaram essa
-preferência no sistema. Nenhuma dependência ou imagem gerada foi adicionada.
-
 # Navegação e painel principal
 
 - No desktop, a barra lateral é o ponto único de acesso aos módulos.
