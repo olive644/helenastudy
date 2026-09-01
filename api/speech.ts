@@ -51,10 +51,13 @@ async function toWebRequest(request: VercelRequest): Promise<Request> {
 }
 
 export default async function speech(
-  request: VercelRequest,
-  response: ServerResponse,
-): Promise<void> {
+  request: Request | VercelRequest,
+  response?: ServerResponse,
+): Promise<Response | void> {
+  if (request instanceof Request) return handler(request);
+
   const result = await handler(await toWebRequest(request));
+  if (!response) return result;
   response.statusCode = result.status;
   result.headers.forEach((value, name) => response.setHeader(name, value));
   response.end(Buffer.from(await result.arrayBuffer()));
