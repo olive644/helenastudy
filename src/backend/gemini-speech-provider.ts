@@ -1,4 +1,4 @@
-import type { SpeechProvider, SpeechRequest } from "./speech-handler";
+import type { SpeechProvider, SpeechRequest } from "./speech-handler.js";
 
 const GEMINI_TTS_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
 const GEMINI_TTS_MODEL = "gemini-3.1-flash-tts-preview";
