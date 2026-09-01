@@ -14,6 +14,7 @@ const INITIAL_INPUT: LessonInput = {
   level: "A2",
   duration: 60,
   audience: "",
+  aim: "",
   objective: "",
   methodology: "inductive",
 };
@@ -43,7 +44,11 @@ function DraftPreview({ draft }: { draft: LessonDraft | null }) {
       <h2 id="draft-title">{draft.title}</h2>
       <p className="draft-audience">{draft.audience}</p>
       <div className="objective">
-        <span>Objetivo</span>
+        <span>Aim</span>
+        <p>{draft.aim}</p>
+      </div>
+      <div className="objective">
+        <span>Objective</span>
         <p>{draft.objective}</p>
       </div>
       <ol className="timeline">
@@ -155,7 +160,21 @@ export function LessonBuilderView({ onBack }: { onBack: () => void }) {
             />
           </label>
           <label className="field field--full">
-            <span>Objetivo comunicativo</span>
+            <span>Aim</span>
+            <small className="field-help">O que a aula representa: a intenção pedagógica.</small>
+            <textarea
+              name="aim"
+              value={input.aim}
+              onChange={(event) => setInput({ ...input, aim: event.target.value })}
+              placeholder="Ex.: Ensinar o Simple Past para narrativas curtas"
+              rows={2}
+            />
+          </label>
+          <label className="field field--full">
+            <span>Objective</span>
+            <small className="field-help">
+              O que o aluno consegue fazer na prática, ao final da aula.
+            </small>
             <textarea
               name="objective"
               value={input.objective}

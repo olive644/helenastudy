@@ -543,6 +543,12 @@ p {
   font-weight: 750;
 }
 
+.field-help {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
 .field input,
 .field textarea,
 .field select {

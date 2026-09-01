@@ -19,6 +19,7 @@ export function createLessonDraft(input: LessonInput): LessonDraft {
   const duration = Math.max(30, Math.min(180, Math.round(input.duration)));
   const [warmUp = 1, presentation = 1, practice = 1, production = 1, homework = 1] =
     allocateMinutes(duration);
+  const aim = input.aim.trim() || `Ensinar ${topic} de forma contextualizada para a turma.`;
   const objective =
     input.objective.trim() || `Usar ${topic} em uma situação comunicativa adequada ao nível.`;
 
@@ -61,6 +62,7 @@ export function createLessonDraft(input: LessonInput): LessonDraft {
     level: input.level,
     duration,
     audience: input.audience.trim() || "Turma de inglês",
+    aim,
     objective,
     methodology: input.methodology,
     sections,
