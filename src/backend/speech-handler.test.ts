@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createSpeechHandler, type SpeechHandlerDependencies } from "./speech-handler";
 
 const origin = "https://helena.example";
-const validRequest = { text: "Hello", voice: "Kore", rate: 0.86, consent: true } as const;
+const validRequest = { text: "Hello", rate: 0.86, consent: true } as const;
 
 function dependencies(): SpeechHandlerDependencies {
   return {
@@ -37,6 +37,9 @@ describe("handler da voz Gemini", () => {
     ).toBe(403);
     expect(
       (await createSpeechHandler(deps)(post({ ...validRequest, consent: false }))).status,
+    ).toBe(400);
+    expect(
+      (await createSpeechHandler(deps)(post({ ...validRequest, voice: "Charon" }))).status,
     ).toBe(400);
     expect(deps.provider.synthesize).not.toHaveBeenCalled();
   });

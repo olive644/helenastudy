@@ -1,17 +1,9 @@
-import type { GeminiSpeechVoice } from "../backend/speech-handler";
-
 export type NaturalVoiceStatus = "idle" | "generating" | "playing" | "ready" | "error";
 
 export type NaturalVoiceState = {
   status: NaturalVoiceStatus;
   message?: string;
 };
-
-export const GEMINI_VOICES: readonly { id: GeminiSpeechVoice; label: string }[] = [
-  { id: "Kore", label: "Kore, clara e firme" },
-  { id: "Aoede", label: "Aoede, leve e natural" },
-  { id: "Charon", label: "Charon, calmo e grave" },
-];
 
 export class NaturalVoicePlayer {
   private audio: HTMLAudioElement | undefined;
@@ -22,15 +14,10 @@ export class NaturalVoicePlayer {
 
   constructor(private readonly onState: (state: NaturalVoiceState) => void) {}
 
-  async generate(
-    text: string,
-    voice: GeminiSpeechVoice,
-    rate: number,
-    fallback?: () => void,
-  ): Promise<void> {
+  async generate(text: string, rate: number): Promise<void> {
     this.stop();
     const requestId = this.requestId;
-    const cacheKey = `${voice}:${rate}:${text}`;
+    const cacheKey = `${rate}:${text}`;
     this.onState({ status: "generating" });
 
     try {
@@ -42,7 +29,7 @@ export class NaturalVoicePlayer {
           const response = await fetch("/api/speech", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text, voice, rate, consent: true }),
+            body: JSON.stringify({ text, rate, consent: true }),
             signal: this.controller.signal,
           });
           if (!response.ok) throw new Error("Gemini speech unavailable");
@@ -59,16 +46,14 @@ export class NaturalVoicePlayer {
       if (error instanceof DOMException && error.name === "AbortError") {
         this.onState({
           status: "error",
-          message: "O Gemini demorou demais. A voz do dispositivo foi usada.",
+          message: "O Gemini demorou demais. Tente reproduzir novamente.",
         });
-        fallback?.();
         return;
       }
       this.onState({
         status: "error",
-        message: "Gemini indisponível agora. A voz do dispositivo foi usada.",
+        message: "Gemini indisponível agora. Tente novamente em instantes.",
       });
-      fallback?.();
     }
   }
 

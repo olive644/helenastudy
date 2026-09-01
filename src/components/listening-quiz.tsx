@@ -8,14 +8,12 @@ import {
   type ListeningCard,
 } from "../domain/listening-quiz";
 import { classifyWordDifficulty, type WordDifficulty } from "../data/word-difficulty";
-import { rankEnglishVoices, SPEECH_RATE_OPTIONS, speakEnglish } from "../data/speech-voice";
-import { GEMINI_VOICES, NaturalVoicePlayer, type NaturalVoiceState } from "../data/listening-audio";
-import type { GeminiSpeechVoice } from "../backend/speech-handler";
+import { SPEECH_RATE_OPTIONS } from "../data/speech-voice";
+import { NaturalVoicePlayer, type NaturalVoiceState } from "../data/listening-audio";
 
 type RoundState = "ready" | "countdown" | "answering" | "feedback" | "finished";
 type DifficultyFilter = "mixed" | WordDifficulty;
 type RoundLimit = 5 | 10 | 15 | "all";
-type VoiceEngine = "gemini" | "browser";
 
 const DIFFICULTY_LABELS: Record<DifficultyFilter, string> = {
   mixed: "Misto",
@@ -34,24 +32,17 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   const [correct, setCorrect] = useState(0);
   const [missed, setMissed] = useState<ListeningCard[]>([]);
   const [wasCorrect, setWasCorrect] = useState(false);
-  const [audioUnavailable, setAudioUnavailable] = useState(false);
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("mixed");
   const [difficultyById, setDifficultyById] = useState<Record<string, WordDifficulty>>({});
   const [classifying, setClassifying] = useState(true);
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const [voiceUri, setVoiceUri] = useState("");
   const [speechRate, setSpeechRate] = useState(0.86);
   const [roundLimit, setRoundLimit] = useState<RoundLimit>(10);
-  const [voiceEngine, setVoiceEngine] = useState<VoiceEngine>("gemini");
-  const [naturalVoice, setNaturalVoice] = useState<GeminiSpeechVoice>(GEMINI_VOICES[0]!.id);
   const [naturalState, setNaturalState] = useState<NaturalVoiceState>({ status: "idle" });
   const [submittedAnswer, setSubmittedAnswer] = useState("");
   const answerRef = useRef<HTMLInputElement>(null);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | undefined>(undefined);
   const submittedRef = useRef(false);
   const naturalPlayerRef = useRef<NaturalVoicePlayer | undefined>(undefined);
   const card = deck[index];
-  const selectedVoice = voices.find((voice) => voice.voiceURI === voiceUri) ?? voices[0];
 
   useEffect(() => {
     if (state !== "countdown") return;
@@ -65,21 +56,6 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   useEffect(() => {
     if (state === "answering") answerRef.current?.focus();
   }, [state]);
-
-  useEffect(() => {
-    if (!("speechSynthesis" in window)) return;
-    const updateVoices = () => {
-      const ranked = rankEnglishVoices(window.speechSynthesis.getVoices());
-      setVoices(ranked);
-      setVoiceUri((current) => current || ranked[0]?.voiceURI || "");
-    };
-    updateVoices();
-    window.speechSynthesis.addEventListener("voiceschanged", updateVoices);
-    return () => {
-      window.speechSynthesis.removeEventListener("voiceschanged", updateVoices);
-      window.speechSynthesis.cancel();
-    };
-  }, []);
 
   useEffect(() => {
     const player = new NaturalVoicePlayer(setNaturalState);
@@ -105,23 +81,8 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
 
   const playAudio = useCallback(() => {
     if (!card) return;
-    setAudioUnavailable(false);
-    if (voiceEngine === "gemini") {
-      void naturalPlayerRef.current?.generate(card.front, naturalVoice, speechRate, () => {
-        utteranceRef.current = speakEnglish(card.front, {
-          voice: selectedVoice,
-          rate: speechRate,
-          onUnavailable: () => setAudioUnavailable(true),
-        });
-      });
-      return;
-    }
-    utteranceRef.current = speakEnglish(card.front, {
-      voice: selectedVoice,
-      rate: speechRate,
-      onUnavailable: () => setAudioUnavailable(true),
-    });
-  }, [card, naturalVoice, selectedVoice, speechRate, voiceEngine]);
+    void naturalPlayerRef.current?.generate(card.front, speechRate);
+  }, [card, speechRate]);
 
   useEffect(() => {
     if (state !== "answering") return;
@@ -176,7 +137,6 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   }
 
   function restart(cards = initialDeck) {
-    window.speechSynthesis?.cancel();
     setDeck(cards);
     setIndex(0);
     setCorrect(0);
@@ -203,7 +163,6 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   }
 
   function stopAudio() {
-    window.speechSynthesis?.cancel();
     naturalPlayerRef.current?.stop();
     setNaturalState((current) =>
       current.status === "playing" || current.status === "generating"
@@ -300,66 +259,18 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
             <summary>
               <Headphones size={18} /> Configurações de áudio
             </summary>
-            <div className="listening-engine-choice" role="group" aria-label="Tipo de voz">
-              <button
-                type="button"
-                className={voiceEngine === "gemini" ? "is-active" : undefined}
-                aria-pressed={voiceEngine === "gemini"}
-                onClick={() => setVoiceEngine("gemini")}
-              >
-                Voz Gemini <small>mais humana e sem download demorado</small>
-              </button>
-              <button
-                type="button"
-                className={voiceEngine === "browser" ? "is-active" : undefined}
-                aria-pressed={voiceEngine === "browser"}
-                onClick={() => setVoiceEngine("browser")}
-              >
-                Voz do dispositivo <small>fallback imediato</small>
-              </button>
-            </div>
-            {voiceEngine === "gemini" && (
-              <p className="listening-model-state" role="status">
-                {naturalState.status === "idle"
-                  ? "O texto da pergunta é enviado ao Google somente quando você pede o áudio."
-                  : naturalState.status === "error"
-                    ? naturalState.message
-                    : naturalState.status === "generating"
-                      ? "Gerando pronúncia com o Gemini…"
-                      : naturalState.status === "playing"
-                        ? "Reproduzindo voz Gemini…"
-                        : "Pronúncia pronta nesta sessão."}
-              </p>
-            )}
+            <p className="listening-model-state" role="status">
+              {naturalState.status === "idle"
+                ? "Voz feminina. O texto é enviado ao Google somente quando você pede o áudio."
+                : naturalState.status === "error"
+                  ? naturalState.message
+                  : naturalState.status === "generating"
+                    ? "Gerando pronúncia com o Gemini…"
+                    : naturalState.status === "playing"
+                      ? "Reproduzindo voz feminina…"
+                      : "Pronúncia pronta nesta sessão."}
+            </p>
             <div className="listening-voice-controls">
-              <label>
-                <Volume2 size={16} aria-hidden="true" />
-                <span>Voz</span>
-                {voiceEngine === "gemini" ? (
-                  <select
-                    value={naturalVoice}
-                    onChange={(event) => setNaturalVoice(event.target.value as GeminiSpeechVoice)}
-                  >
-                    {GEMINI_VOICES.map((voice) => (
-                      <option value={voice.id} key={voice.id}>
-                        {voice.label}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <select value={voiceUri} onChange={(event) => setVoiceUri(event.target.value)}>
-                    {voices.length === 0 ? (
-                      <option value="">Fallback indisponível</option>
-                    ) : (
-                      voices.map((voice) => (
-                        <option value={voice.voiceURI} key={voice.voiceURI}>
-                          {voice.name}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                )}
-              </label>
               <label>
                 <Gauge size={16} aria-hidden="true" />
                 <span>Velocidade</span>
@@ -378,7 +289,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
                 className="secondary-button listening-test-voice"
                 type="button"
                 onClick={playAudio}
-                disabled={voiceEngine === "gemini" && naturalState.status === "generating"}
+                disabled={naturalState.status === "generating"}
               >
                 <Play size={16} /> Testar voz
               </button>
@@ -444,12 +355,10 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
                 Nível {DIFFICULTY_LABELS[difficultyFilter].toLocaleLowerCase("pt-BR")}. A resposta
                 pode ser em português ou em inglês.
               </p>
-              {voiceEngine === "gemini" && (
-                <small className="listening-privacy-note">
-                  Ao iniciar, você autoriza o envio somente do texto de cada pergunta ao Google para
-                  gerar a pronúncia.
-                </small>
-              )}
+              <small className="listening-privacy-note">
+                Ao iniciar, você autoriza o envio somente do texto de cada pergunta ao Google para
+                gerar a pronúncia.
+              </small>
               <button className="primary-button" type="button" onClick={beginRound}>
                 <Play size={17} /> Iniciar escuta
               </button>
@@ -469,12 +378,6 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
                 <button type="submit">Confirmar</button>
               </div>
             </form>
-          )}
-          {audioUnavailable && (
-            <p className="listening-audio-note" role="alert">
-              Este navegador não oferece voz. Use outro navegador ou leia a dica: começa com “
-              {card.front.charAt(0)}”.
-            </p>
           )}
         </div>
       )}
