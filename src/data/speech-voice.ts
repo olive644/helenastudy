@@ -21,6 +21,17 @@ const PREMIUM_HINTS = [
   "david",
 ];
 
+const FEMALE_HINTS = [
+  "aria",
+  "jenny",
+  "ava",
+  "emma",
+  "samantha",
+  "zira",
+  "serena",
+  "google us english",
+];
+
 export function isEnglishVoice(voice: Pick<SpeechSynthesisVoice, "lang">): boolean {
   return voice.lang.toLocaleLowerCase("en-US").startsWith("en");
 }
@@ -45,6 +56,14 @@ export function rankEnglishVoices(voices: readonly SpeechSynthesisVoice[]): Spee
     .filter(isEnglishVoice)
     .slice()
     .sort((left, right) => voiceQualityScore(right) - voiceQualityScore(left));
+}
+
+export function findFemaleEnglishVoice(
+  voices: readonly SpeechSynthesisVoice[],
+): SpeechSynthesisVoice | undefined {
+  return rankEnglishVoices(voices).find((voice) =>
+    FEMALE_HINTS.some((hint) => voice.name.toLocaleLowerCase("en-US").includes(hint)),
+  );
 }
 
 export function speakEnglish(
