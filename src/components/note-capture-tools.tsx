@@ -1,5 +1,6 @@
 import { Camera, PenLine, RotateCw, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { createPortal } from "react-dom";
 import { MAX_NOTE_ASSET_DATA_URL_LENGTH } from "../data/local-workspace";
 import type { NoteAsset } from "../domain/workspace";
 
@@ -320,44 +321,46 @@ export function NoteCaptureTools({ onSave }: NoteCaptureToolsProps) {
         </button>
       </div>
 
-      {mode && (
-        <div className="capture-layer">
-          <button
-            className="capture-backdrop"
-            type="button"
-            aria-label="Fechar ferramenta"
-            onClick={() => setMode(null)}
-          />
-          <section
-            className="capture-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="capture-title"
-          >
-            <header>
-              <div>
-                <span>Cadernos</span>
-                <h2 id="capture-title">
-                  {mode === "scan" ? "Digitalizar documento" : "Escrever à mão"}
-                </h2>
-              </div>
-              <button
-                className="sheet-close"
-                type="button"
-                aria-label="Fechar"
-                onClick={() => setMode(null)}
-              >
-                <X size={20} />
-              </button>
-            </header>
-            {mode === "scan" ? (
-              <Scanner onSave={onSave} onClose={() => setMode(null)} />
-            ) : (
-              <DrawingPad onSave={onSave} onClose={() => setMode(null)} />
-            )}
-          </section>
-        </div>
-      )}
+      {mode &&
+        createPortal(
+          <div className="capture-layer">
+            <button
+              className="capture-backdrop"
+              type="button"
+              aria-label="Fechar ferramenta"
+              onClick={() => setMode(null)}
+            />
+            <section
+              className="capture-dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="capture-title"
+            >
+              <header>
+                <div>
+                  <span>Cadernos</span>
+                  <h2 id="capture-title">
+                    {mode === "scan" ? "Digitalizar documento" : "Escrever à mão"}
+                  </h2>
+                </div>
+                <button
+                  className="sheet-close"
+                  type="button"
+                  aria-label="Fechar"
+                  onClick={() => setMode(null)}
+                >
+                  <X size={20} />
+                </button>
+              </header>
+              {mode === "scan" ? (
+                <Scanner onSave={onSave} onClose={() => setMode(null)} />
+              ) : (
+                <DrawingPad onSave={onSave} onClose={() => setMode(null)} />
+              )}
+            </section>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

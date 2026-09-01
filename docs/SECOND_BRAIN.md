@@ -120,7 +120,9 @@ Helena é a gata preta de olhos amarelos que orienta o fluxo. O aplicativo usa a
 assimétrica original em `public/helena.svg`, sem redesenhar a personagem como um gato genérico. O
 nome exibido na interface é somente HelenaStudy. A navegação usa uma família própria de ícones SVG
 lineares, com selos amarelos e traços pretos para manter contraste e consistência sem carregar um
-pacote de ícones adicional.
+pacote de ícones adicional. A interface usa a navegação escura como ponto de apoio, conteúdo em
+creme, superfícies claras e lavanda para contexto. As animações são curtas e reduzidas quando o
+sistema solicita menos movimento.
 
 ## Fora do escopo desta fase
 
