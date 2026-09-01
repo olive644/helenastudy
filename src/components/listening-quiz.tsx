@@ -27,7 +27,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   const [deck, setDeck] = useState(initialDeck);
   const [index, setIndex] = useState(0);
   const [state, setState] = useState<RoundState>("ready");
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(5);
   const [answer, setAnswer] = useState("");
   const [correct, setCorrect] = useState(0);
   const [missed, setMissed] = useState<ListeningCard[]>([]);
@@ -49,7 +49,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
     const timer = window.setTimeout(() => {
       if (countdown <= 1) setState("answering");
       else setCountdown((value) => value - 1);
-    }, 700);
+    }, 1_000);
     return () => window.clearTimeout(timer);
   }, [countdown, state]);
 
@@ -107,7 +107,7 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
     setSubmittedAnswer("");
     setWasCorrect(false);
     submittedRef.current = false;
-    setCountdown(3);
+    setCountdown(5);
     setState("countdown");
   }
 
@@ -133,7 +133,8 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
     setAnswer("");
     setSubmittedAnswer("");
     submittedRef.current = false;
-    setState("answering");
+    setCountdown(5);
+    setState("countdown");
   }
 
   function restart(cards = initialDeck) {
