@@ -27,6 +27,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const [secondsRemaining, setSecondsRemaining] = useState(duration * 60);
   const [running, setRunning] = useState(false);
   const elapsedSeconds = duration * 60 - secondsRemaining;
+  const [timerMinutes, timerSeconds] = formatTimer(secondsRemaining).split(":") as [string, string];
 
   useEffect(() => {
     if (!running) return;
@@ -104,8 +105,29 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
               ))}
             </div>
           </div>
-          <h2 id="focus-timer-title" className="timer" aria-live="polite">
-            {formatTimer(secondsRemaining)}
+          <h2
+            id="focus-timer-title"
+            className={running ? "timer timer--running" : "timer"}
+            aria-label={formatTimer(secondsRemaining)}
+            aria-live="polite"
+          >
+            <span className="timer__group" aria-hidden="true">
+              {[...timerMinutes].map((digit, index) => (
+                <span className="timer__digit" key={`minute-${index}`}>
+                  {digit}
+                </span>
+              ))}
+            </span>
+            <span className="timer__separator" aria-hidden="true">
+              :
+            </span>
+            <span className="timer__group" aria-hidden="true">
+              {[...timerSeconds].map((digit, index) => (
+                <span className="timer__digit" key={`second-${index}`}>
+                  {digit}
+                </span>
+              ))}
+            </span>
           </h2>
           <p className="timer-status">
             {running
