@@ -225,3 +225,10 @@ sistema solicita redução de movimento.
 No celular, a navegação flutua acima do conteúdo, os atalhos aparecem em uma grade de toque amplo e
 o painel mantém resumo, prioridades e início rápido sem rolagem horizontal. Nenhum fluxo, dado local
 ou contrato de domínio foi alterado pelo redesign.
+
+# Navegação e painel principal
+
+- No desktop, a barra lateral é o ponto único de acesso aos módulos.
+- O Espaço do aluno concentra contexto diário, métricas, tarefas e agenda; atalhos que duplicavam a
+  navegação foram removidos.
+- No celular, a navegação inferior e a folha “Mais ferramentas” continuam oferecendo todos os módulos.

@@ -16,6 +16,15 @@ describe("App", () => {
     expect(screen.queryByText(/by oli/i)).toBeNull();
   });
 
+  it("mantém as ferramentas na navegação sem duplicá-las no painel principal", () => {
+    render(<App />);
+    const navigation = screen.getByRole("navigation", { name: "Navegação principal" });
+    const main = screen.getByRole("main");
+
+    expect(within(navigation).getByRole("button", { name: "Cadernos" })).toBeTruthy();
+    expect(within(main).queryByRole("button", { name: "Cadernos" })).toBeNull();
+  });
+
   it("organiza as ferramentas secundárias no menu móvel", () => {
     render(<App />);
     const mobileNavigation = screen.getByRole("navigation", { name: "Navegação móvel" });

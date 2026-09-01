@@ -12,41 +12,44 @@ function studentSpaceButton(page: Page, projectName: string) {
   });
 }
 
+async function navigateToTool(
+  page: Page,
+  projectName: string,
+  desktopLabel: string,
+  mobileLabel: string,
+) {
+  if (projectName === "mobile") {
+    const navigation = page.getByRole("navigation", { name: "Navegação móvel" });
+    await navigation.getByRole("button", { name: "Mais", exact: true }).click();
+    await page
+      .getByRole("dialog", { name: "Mais ferramentas" })
+      .getByRole("button", { name: mobileLabel, exact: true })
+      .click();
+    return;
+  }
+
+  await page
+    .getByRole("navigation", { name: "Navegação principal" })
+    .getByRole("button", { name: desktopLabel, exact: true })
+    .click();
+}
+
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await page.evaluate(() => localStorage.clear());
   await page.reload();
 });
 
-test("centraliza os atalhos, restaura o hover roxo e remove o sol", async ({ page }, testInfo) => {
+test("concentra as ferramentas na navegação lateral", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "Contrato visual da página inicial desktop.");
-  const quickActions = page.getByRole("region", { name: "Ferramentas do Espaço do aluno" });
-  const icons = quickActions.locator(".quick-action-icon");
+  const navigation = page.getByRole("navigation", { name: "Navegação principal" });
 
-  await expect(icons).toHaveCount(5);
-  await expect(icons.first()).toHaveCSS("background-color", "rgb(238, 233, 255)");
-  await expect(icons.first()).toHaveCSS("color", "rgb(23, 21, 28)");
-  await page.waitForTimeout(800);
-
-  for (const icon of await icons.all()) {
-    const badgeBox = await icon.boundingBox();
-    const glyphBox = await icon.locator(".navigation-icon__glyph").boundingBox();
-    expect(badgeBox).not.toBeNull();
-    expect(glyphBox).not.toBeNull();
-    expect(
-      Math.abs(badgeBox!.x + badgeBox!.width / 2 - (glyphBox!.x + glyphBox!.width / 2)),
-    ).toBeLessThan(0.6);
-    expect(
-      Math.abs(badgeBox!.y + badgeBox!.height / 2 - (glyphBox!.y + glyphBox!.height / 2)),
-    ).toBeLessThan(0.6);
-  }
-
-  await quickActions.getByRole("button", { name: /iniciar foco/i }).hover();
-  await expect(icons.first()).toHaveCSS("background-color", "rgb(114, 87, 232)");
-  await expect(quickActions.getByRole("button", { name: /iniciar foco/i })).toHaveCSS(
-    "background-color",
-    "rgb(238, 233, 255)",
+  await expect(navigation.getByRole("button")).toHaveCount(8);
+  await expect(navigation.getByRole("button", { name: "Espaço do aluno" })).toHaveAttribute(
+    "aria-current",
+    "page",
   );
+  await expect(page.getByRole("region", { name: "Ferramentas do Espaço do aluno" })).toHaveCount(0);
 
   const heroDecoration = await page
     .locator(".view-heading--today")
@@ -82,14 +85,21 @@ test("preserva o criador de planos de aula", async ({ page }, testInfo) => {
 });
 
 test("cria um flashcard e conclui a revisão", async ({ page }, testInfo) => {
-  const quickActions = page.getByRole("region", { name: "Ferramentas do Espaço do aluno" });
-  await quickActions.getByRole("button", { name: /biblioteca/i }).click();
+  await navigateToTool(page, testInfo.project.name, "Biblioteca", "Biblioteca");
   await page.getByLabel("Frente").fill("Improve");
   await page.getByLabel("Verso").fill("Melhorar");
   await page.getByRole("button", { name: /criar flashcard/i }).click();
 
   await studentSpaceButton(page, testInfo.project.name).click();
-  await quickActions.getByRole("button", { name: /revisar/i }).click();
+  await page
+    .getByRole("navigation", {
+      name: testInfo.project.name === "mobile" ? "Navegação móvel" : "Navegação principal",
+    })
+    .getByRole("button", {
+      name: testInfo.project.name === "mobile" ? "Praticar" : "Quizzes e bingo",
+      exact: true,
+    })
+    .click();
   await expect(page.getByRole("heading", { name: "Improve" })).toBeVisible();
   await page.getByRole("button", { name: /mostrar resposta/i }).click();
   await expect(page.getByRole("heading", { name: "Melhorar" })).toBeVisible();
@@ -148,8 +158,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
 });
 
 test("abre digitalização, escrita à mão e completa um bingo", async ({ page }, testInfo) => {
-  const quickActions = page.getByRole("region", { name: "Ferramentas do Espaço do aluno" });
-  await quickActions.getByRole("button", { name: /nova anotação/i }).click();
+  await navigateToTool(page, testInfo.project.name, "Cadernos", "Notas");
   await page.getByRole("button", { name: /nova anotação/i }).click();
 
   await page.getByRole("button", { name: "Digitalizar" }).click();
@@ -161,7 +170,15 @@ test("abre digitalização, escrita à mão e completa um bingo", async ({ page 
   await page.getByRole("button", { name: "Fechar", exact: true }).click();
 
   await studentSpaceButton(page, testInfo.project.name).click();
-  await quickActions.getByRole("button", { name: /quizzes e bingo/i }).click();
+  await page
+    .getByRole("navigation", {
+      name: testInfo.project.name === "mobile" ? "Navegação móvel" : "Navegação principal",
+    })
+    .getByRole("button", {
+      name: testInfo.project.name === "mobile" ? "Praticar" : "Quizzes e bingo",
+      exact: true,
+    })
+    .click();
   await page.getByRole("button", { name: "Bingo", exact: true }).click();
   await page.getByRole("button", { name: "Criar bingo" }).click();
   const board = page.getByRole("group", { name: "Cartela de bingo" });

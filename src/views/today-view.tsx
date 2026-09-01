@@ -8,7 +8,6 @@ import {
 import type { AppView } from "../components/app-navigation";
 import { PageHeader } from "../components/app-navigation";
 import { NavigationIcon } from "../components/navigation-icon";
-import { STUDENT_SPACE_TOOLS } from "../product/module-catalog";
 
 type TodayViewProps = {
   workspace: WorkspaceState;
@@ -160,20 +159,6 @@ export function TodayView({ workspace, dispatch, onNavigate }: TodayViewProps) {
               ))}
             </ul>
           )}
-        </section>
-
-        <section className="quick-actions" aria-label="Ferramentas do Espaço do aluno">
-          {STUDENT_SPACE_TOOLS.map((tool) => (
-            <button type="button" onClick={() => onNavigate(tool.view)} key={tool.view}>
-              <b className="quick-action-icon">
-                <NavigationIcon name={tool.icon} />
-              </b>
-              <span>
-                <strong>{tool.title}</strong>
-                <small>{tool.description}</small>
-              </span>
-            </button>
-          ))}
         </section>
       </div>
     </main>
