@@ -6517,6 +6517,7 @@ body {
     width: calc(100% - 1rem);
     max-height: calc(100dvh - 1rem);
     border-radius: 20px 8px 20px 8px;
+    animation-name: sheet-enter;
   }
 
   .bingo-grid button {
