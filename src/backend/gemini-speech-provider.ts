@@ -60,7 +60,9 @@ export function createGeminiSpeechProvider(apiKey: string): SpeechProvider {
         });
         if (!response.ok) {
           console.error(`Gemini TTS respondeu com HTTP ${response.status}.`);
-          throw new Error("Gemini TTS request failed");
+          throw Object.assign(new Error("Gemini TTS request failed"), {
+            providerStatus: response.status,
+          });
         }
         const result = (await response.json()) as GeminiAudioResponse;
         const audio = result.output_audio?.data;
