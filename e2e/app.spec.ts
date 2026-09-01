@@ -71,6 +71,9 @@ test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }, t
 test("preserva o criador de planos de aula", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "O atalho mobile fica no Espaço do aluno.");
   await page.getByRole("button", { name: /planos de aula/i }).click();
+  await expect(page.getByRole("heading", { name: "Mão no vocabulário" })).toBeVisible();
+  await expect(page.getByLabel("Folha com moldes de mãos para imprimir")).toBeVisible();
+  await expect(page.getByRole("img", { name: /molde de mão/i })).toHaveCount(8);
   await page.getByLabel(/tema da aula/i).fill("Simple Past");
   await page.getByLabel(/perfil da turma/i).fill("Adultos iniciantes");
   await page.getByRole("button", { name: /criar rascunho/i }).click();

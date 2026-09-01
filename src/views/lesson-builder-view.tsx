@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
+import { VocabularySwatActivity } from "../components/vocabulary-swat-activity";
 import { createLessonDraft } from "../domain/create-lesson-draft";
 import {
   CEFR_LEVELS,
@@ -94,6 +95,8 @@ export function LessonBuilderView({ onBack }: { onBack: () => void }) {
           <p>Preencha apenas o que fizer sentido para sua turma.</p>
         </div>
       </header>
+
+      <VocabularySwatActivity />
 
       <div className="builder-grid">
         <form className="lesson-form" onSubmit={submit}>
