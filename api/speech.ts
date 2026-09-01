@@ -20,4 +20,6 @@ const handler = createSpeechHandler({
   provider: createGeminiSpeechProvider(process.env["GEMINI_API_KEY"] ?? ""),
 });
 
-export default { fetch: handler };
+export default function speech(request: Request): Promise<Response> {
+  return handler(request);
+}
