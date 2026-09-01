@@ -180,7 +180,7 @@ em inglês, sem duplicar termos. As respostas aceitam a palavra ou expressão ou
 principal e equivalentes cadastrados. Os filtros Fácil, Médio e Difícil continuam sendo calculados
 pela base local de frequência, com os mesmos fallbacks já documentados.
 
-A pronúncia neural usa `gemini-3.1-flash-tts-preview` com as vozes Kore, Aoede e Charon. O navegador
+A pronúncia neural usa `gemini-2.5-flash-preview-tts` com a voz feminina Aoede. O navegador
 envia somente o texto da pergunta, a voz e a velocidade para `POST /api/speech`; a chave do Gemini
 fica restrita ao ambiente seguro da Vercel. A interface informa esse envio antes do início da rodada.
 

@@ -1,6 +1,6 @@
 import type { SpeechProvider, SpeechRequest } from "./speech-handler.js";
 
-const GEMINI_TTS_MODEL = "gemini-3.1-flash-tts-preview";
+const GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts";
 const GEMINI_TTS_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TTS_MODEL}:generateContent`;
 const GEMINI_TTS_VOICE = "Aoede";
 const SAMPLE_RATE = 24_000;
