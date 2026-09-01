@@ -139,3 +139,9 @@ Cada item entra apenas quando o fluxo local básico estiver validado.
 
 O mapa completo do produto está em [`PRODUCT_MIND_MAP.md`](PRODUCT_MIND_MAP.md), e a ordem de
 implementação com critérios técnicos está em [`IMPLEMENTATION_ROADMAP.md`](IMPLEMENTATION_ROADMAP.md).
+
+# Decisão de interface: navegação lateral
+
+O menu lateral concentra a troca de módulos no desktop. O Espaço do aluno não repete essa lista:
+mantém apenas ações contextuais e o resumo do dia. Em telas móveis, a barra inferior e o menu “Mais
+ferramentas” preservam o acesso completo.
