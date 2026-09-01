@@ -1,11 +1,13 @@
 import type { SpeechProvider, SpeechRequest } from "./speech-handler.js";
 
-const GEMINI_TTS_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
 const GEMINI_TTS_MODEL = "gemini-3.1-flash-tts-preview";
+const GEMINI_TTS_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TTS_MODEL}:generateContent`;
 const SAMPLE_RATE = 24_000;
 
 type GeminiAudioResponse = {
-  output_audio?: { data?: string };
+  candidates?: Array<{
+    content?: { parts?: Array<{ inlineData?: { data?: string } }> };
+  }>;
 };
 
 function paceInstruction(rate: number): string {
@@ -51,10 +53,21 @@ export function createGeminiSpeechProvider(apiKey: string): SpeechProvider {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
           body: JSON.stringify({
-            model: GEMINI_TTS_MODEL,
-            input: `Read only the English text represented by this JSON string exactly as written. Use natural American English ${paceInstruction(request.rate)}. Do not add commentary: ${JSON.stringify(request.text)}`,
-            response_format: { type: "audio" },
-            generation_config: { speech_config: [{ voice: request.voice }] },
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `Read only the English text represented by this JSON string exactly as written. Use natural American English ${paceInstruction(request.rate)}. Do not add commentary: ${JSON.stringify(request.text)}`,
+                  },
+                ],
+              },
+            ],
+            generationConfig: {
+              responseModalities: ["AUDIO"],
+              speechConfig: {
+                voiceConfig: { prebuiltVoiceConfig: { voiceName: request.voice } },
+              },
+            },
           }),
           signal: controller.signal,
         });
@@ -65,7 +78,7 @@ export function createGeminiSpeechProvider(apiKey: string): SpeechProvider {
           });
         }
         const result = (await response.json()) as GeminiAudioResponse;
-        const audio = result.output_audio?.data;
+        const audio = result.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
         if (!audio) throw new Error("Gemini TTS returned no audio");
         return pcmToWave(decodeBase64(audio));
       } finally {
