@@ -85,7 +85,8 @@ export const PRODUCT_MODULES = [
     id: "activity-bank",
     name: "Banco de atividades",
     purpose: "Reunir atividades de prática classificadas por controle, tempo e material.",
-    status: "foundation",
+    status: "available",
+    entryView: "activity-bank",
   },
   {
     id: "exams",
