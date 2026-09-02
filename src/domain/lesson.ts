@@ -14,9 +14,11 @@ export type LessonInput = {
   methodology: Methodology;
   practiceTotalControlledId: string;
   practiceSemiControlledId: string;
+  extraActivityId: string;
 };
 
-export type LessonSectionKind = "warm-up" | "presentation" | "practice" | "production" | "homework";
+export type LessonSectionKind =
+  "warm-up" | "presentation" | "practice" | "extra-activity" | "production" | "homework";
 
 export type LessonSection = {
   kind: LessonSectionKind;
