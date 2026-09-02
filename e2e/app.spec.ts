@@ -44,7 +44,7 @@ test("concentra as ferramentas na navegação lateral", async ({ page }, testInf
   test.skip(testInfo.project.name !== "desktop", "Contrato visual da página inicial desktop.");
   const navigation = page.getByRole("navigation", { name: "Navegação principal" });
 
-  await expect(navigation.getByRole("button")).toHaveCount(9);
+  await expect(navigation.getByRole("button")).toHaveCount(10);
   await expect(navigation.getByRole("button", { name: "Espaço do aluno" })).toHaveAttribute(
     "aria-current",
     "page",
@@ -126,7 +126,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
   await expect(toolsDialog).toBeVisible();
   await page.waitForTimeout(350);
   const toolItems = toolsDialog.locator(".more-item");
-  await expect(toolItems).toHaveCount(5);
+  await expect(toolItems).toHaveCount(6);
 
   for (const item of await toolItems.all()) {
     const iconBox = await item.locator(".navigation-icon").boundingBox();

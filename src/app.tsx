@@ -11,6 +11,7 @@ const LibraryView = lazy(() => import("./views/library-view"));
 const LessonBuilderView = lazy(() => import("./views/lesson-builder-view"));
 const NotesView = lazy(() => import("./views/notes-view"));
 const HomeworkView = lazy(() => import("./views/homework-view"));
+const ActivityBankView = lazy(() => import("./views/activity-bank-view"));
 
 export function App() {
   const [view, setView] = useState<AppView>("today");
@@ -40,6 +41,7 @@ export function App() {
         {view === "learn" && <LearnView workspace={workspace} dispatch={dispatch} />}
         {view === "library" && <LibraryView workspace={workspace} dispatch={dispatch} />}
         {view === "homework" && <HomeworkView workspace={workspace} dispatch={dispatch} />}
+        {view === "activity-bank" && <ActivityBankView onBack={() => setView("today")} />}
       </Suspense>
       <MobileNavigation view={view} onNavigate={setView} />
     </div>

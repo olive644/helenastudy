@@ -8,6 +8,7 @@ export type NavigationIconName =
   | "library"
   | "lesson"
   | "homework"
+  | "activity-bank"
   | "more"
   | "close";
 
@@ -28,6 +29,7 @@ const ICON_PATHS: Record<NavigationIconName, string> = {
   lesson: "M4 3h16v12H4V3zm-2 0h20M12 15v6m-4 0h8M8 8l2 2 5-4",
   homework:
     "M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm3-1h6v3H9V2zM6.5 10.5l1.5 1.5 3-3m-4.5 8 1.5 1.5 3-3",
+  "activity-bank": "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",
   more: "M5 12h.01M12 12h.01M19 12h.01",
   close: "M6 6l12 12M18 6 6 18",
 };
