@@ -781,6 +781,43 @@ p {
   line-height: 1.45;
 }
 
+.activity-detail {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--soft);
+}
+
+.activity-detail strong {
+  font-size: 0.74rem;
+}
+
+.activity-detail span {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 750;
+}
+
+.activity-detail p {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.activity-detail ol {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.activity-detail__supplies {
+  color: var(--muted);
+}
+
 .preview__footnote {
   margin: 0.8rem 0 0;
   color: var(--muted);

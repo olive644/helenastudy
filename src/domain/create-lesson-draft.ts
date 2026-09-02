@@ -1,3 +1,4 @@
+import { findActivity } from "./activity-bank";
 import type { LessonDraft, LessonInput, LessonSection } from "./lesson";
 
 const WEIGHTS = [0.15, 0.25, 0.3, 0.25, 0.05] as const;
@@ -23,6 +24,16 @@ export function createLessonDraft(input: LessonInput): LessonDraft {
   const objective =
     input.objective.trim() || `Usar ${topic} em uma situação comunicativa adequada ao nível.`;
 
+  const practiceActivities = [
+    findActivity(input.practiceTotalControlledId),
+    findActivity(input.practiceSemiControlledId),
+  ].filter((activity): activity is NonNullable<typeof activity> => activity !== undefined);
+  const practiceGuidance =
+    practiceActivities.length > 0
+      ? `Aplique ${practiceActivities.map((activity) => activity.name).join(" e depois ")} para praticar ${topic}.`
+      : "Comece com uma atividade controlada e avance para uma prática em duplas.";
+  const practiceActivityIds = practiceActivities.map((activity) => activity.id);
+
   const sections: LessonSection[] = [
     {
       kind: "warm-up",
@@ -40,7 +51,8 @@ export function createLessonDraft(input: LessonInput): LessonDraft {
       kind: "practice",
       title: "Prática",
       minutes: practice,
-      guidance: "Comece com uma atividade controlada e avance para uma prática em duplas.",
+      guidance: practiceGuidance,
+      ...(practiceActivityIds.length > 0 ? { activityIds: practiceActivityIds } : {}),
     },
     {
       kind: "production",
