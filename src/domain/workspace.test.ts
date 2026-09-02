@@ -136,4 +136,44 @@ describe("workspaceReducer", () => {
     const completedBoard = workspace.bingoBoards[0];
     expect(completedBoard && hasBingo(completedBoard)).toBe(true);
   });
+
+  it("cria uma lista de homework, adiciona itens e marca/remove itens", () => {
+    let workspace = workspaceReducer(createInitialWorkspace(), {
+      type: "homework-list/added",
+      subjectId: "subject-english",
+      title: "Lição de casa da semana",
+      createdAt: "2026-08-31T10:00:00.000Z",
+    });
+    const list = workspace.homeworkLists[0];
+    expect(list?.title).toBe("Lição de casa da semana");
+    expect(list?.items).toEqual([]);
+    if (!list) return;
+
+    workspace = workspaceReducer(workspace, {
+      type: "homework-item/added",
+      listId: list.id,
+      title: "Página 12 do livro",
+    });
+    const item = workspace.homeworkLists[0]?.items[0];
+    expect(item?.title).toBe("Página 12 do livro");
+    expect(item?.completed).toBe(false);
+    if (!item) return;
+
+    workspace = workspaceReducer(workspace, {
+      type: "homework-item/toggled",
+      listId: list.id,
+      itemId: item.id,
+    });
+    expect(workspace.homeworkLists[0]?.items[0]?.completed).toBe(true);
+
+    workspace = workspaceReducer(workspace, {
+      type: "homework-item/removed",
+      listId: list.id,
+      itemId: item.id,
+    });
+    expect(workspace.homeworkLists[0]?.items).toEqual([]);
+
+    workspace = workspaceReducer(workspace, { type: "homework-list/removed", id: list.id });
+    expect(workspace.homeworkLists).toEqual([]);
+  });
 });
