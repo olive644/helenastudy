@@ -19,6 +19,7 @@ export type LessonInput = {
   practiceSemiControlledId: string;
   extraActivityId: string;
   productionVariant: ProductionVariant;
+  homeworkLinksText: string;
 };
 
 export type LessonSectionKind =
@@ -30,6 +31,7 @@ export type LessonSection = {
   minutes: number;
   guidance: string;
   activityIds?: string[];
+  links?: string[];
 };
 
 export type LessonDraft = {
