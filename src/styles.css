@@ -998,6 +998,9 @@ p {
 }
 
 .bank-filter {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   padding: 0.45rem 0.9rem;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
