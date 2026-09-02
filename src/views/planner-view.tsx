@@ -1,6 +1,10 @@
-import { useState, type Dispatch, type FormEvent } from "react";
+import { lazy, Suspense, useState, type Dispatch, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
 import { toDateKey, type WorkspaceAction, type WorkspaceState } from "../domain/workspace";
+
+const HomeworkSection = lazy(() =>
+  import("./homework-section").then((module) => ({ default: module.HomeworkSection })),
+);
 
 type PlannerViewProps = {
   workspace: WorkspaceState;
@@ -249,6 +253,10 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
           )}
         </section>
       </div>
+
+      <Suspense fallback={null}>
+        <HomeworkSection workspace={workspace} dispatch={dispatch} />
+      </Suspense>
     </main>
   );
 }

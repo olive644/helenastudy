@@ -837,11 +837,7 @@ p {
   gap: 0.75rem;
   align-items: end;
   grid-template-columns: 1fr;
-  margin: 1.2rem 0;
-  padding: 1.1rem;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  background: var(--surface);
+  margin: 0.9rem 0;
 }
 
 @media (min-width: 640px) {
