@@ -8,6 +8,57 @@ classificadas (Total Controlled / Semi Controlled), para integrar ao módulo **P
 Não substitui o roadmap geral (`docs/IMPLEMENTATION_ROADMAP.md`); detalha a evolução de um módulo
 que já existe.
 
+## Mapa mental
+
+```mermaid
+mindmap
+  root((Plano de aula))
+    Aim e Objective
+      Aim: intenção pedagógica
+      Objective: critério observável do aluno
+    Estrutura
+      Warm Up
+      Presentation
+        Inductive / Discovery
+        Deductive / Rule-First
+      Practice
+        Activity 01: Book
+        Activity 02: Total Controlled
+        Activity 03: Semi Controlled
+      Extra Activity
+        tapa-buraco para sobra de tempo
+      Production
+        Product Pitch
+        Creative Task
+        Problem Solving
+    Homework
+      PDF para impressão
+      Vários links de apoio
+    Banco de atividades
+      Classificação fixa
+        Time
+        Topic
+        Steps
+        Goal
+        Supplies
+        Links
+      Total Controlled
+        Bingo
+        Swat
+        Mimic
+        Swatters
+        Labels and Images
+        What's Missing
+        Chinese Whispers
+        Singing
+      Semi Controlled
+        This or That
+        Draw
+        Dictation Draw
+        Like or Dislike
+        RolePlay Variation
+```
+
 ## 1. O que as notas pedem
 
 - **Aim vs Objective**: hoje `LessonInput`/`LessonDraft` (`src/domain/lesson.ts`) só tem
