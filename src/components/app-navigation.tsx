@@ -11,7 +11,6 @@ export type AppView =
   | "lesson-builder"
   | "learn"
   | "library"
-  | "homework"
   | "activity-bank";
 
 type NavigationProps = {
@@ -49,7 +48,6 @@ const NAVIGATION_SECTIONS: readonly { label: string; items: readonly NavigationI
       { view: "notes", label: "Cadernos", mobileLabel: "Notas", icon: "notes" },
       { view: "lesson-builder", label: "Planos de aula", icon: "lesson" },
       { view: "activity-bank", label: "Banco de atividades", icon: "activity-bank" },
-      { view: "homework", label: "Homework", icon: "homework" },
     ],
   },
 ];

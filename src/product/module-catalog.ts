@@ -22,7 +22,7 @@ export const PRODUCT_MODULES = [
   {
     id: "planner",
     name: "Agenda e planner",
-    purpose: "Organizar tarefas, compromissos e o planejamento de estudos.",
+    purpose: "Organizar tarefas, compromissos, listas de homework e o planejamento de estudos.",
     status: "available",
     entryView: "planner",
   },
@@ -67,13 +67,6 @@ export const PRODUCT_MODULES = [
     purpose: "Montar rascunhos determinísticos de aulas de inglês.",
     status: "available",
     entryView: "lesson-builder",
-  },
-  {
-    id: "homework",
-    name: "Homework",
-    purpose: "Organizar deveres de casa em listas com itens marcáveis.",
-    status: "available",
-    entryView: "homework",
   },
   {
     id: "helena-ai",

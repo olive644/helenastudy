@@ -1,8 +1,7 @@
 import { useState, type Dispatch, type FormEvent } from "react";
-import { PageHeader } from "../components/app-navigation";
 import type { HomeworkList, WorkspaceAction, WorkspaceState } from "../domain/workspace";
 
-type HomeworkViewProps = {
+type HomeworkSectionProps = {
   workspace: WorkspaceState;
   dispatch: Dispatch<WorkspaceAction>;
 };
@@ -82,7 +81,11 @@ function HomeworkListCard({
   );
 }
 
-export function HomeworkView({ workspace, dispatch }: HomeworkViewProps) {
+// Seção de Homework embutida na Agenda (Planner): listas de deveres com itens
+// marcáveis, ao lado de tarefas e compromissos. Não é mais uma tela própria
+// porque duplicava a lista de tarefas da Agenda; aqui ela complementa em vez
+// de repetir.
+export function HomeworkSection({ workspace, dispatch }: HomeworkSectionProps) {
   const [listTitle, setListTitle] = useState("");
   const defaultSubject = workspace.subjects[0];
 
@@ -102,14 +105,11 @@ export function HomeworkView({ workspace, dispatch }: HomeworkViewProps) {
   }
 
   return (
-    <main className="main-content" id="main-content">
-      <PageHeader />
-      <header className="view-heading">
-        <span className="section-label">Deveres de casa</span>
-        <h1>Homework</h1>
-        <p>Organize os deveres em listas e marque cada item ao concluir.</p>
-      </header>
-
+    <section className="module-panel" aria-labelledby="homework-section-title">
+      <div className="module-heading">
+        <h2 id="homework-section-title">Homework</h2>
+        <span>{workspace.homeworkLists.length}</span>
+      </div>
       <form className="homework-new-list" onSubmit={addList}>
         <label className="field field--full">
           <span>Nova lista</span>
@@ -136,8 +136,6 @@ export function HomeworkView({ workspace, dispatch }: HomeworkViewProps) {
           ))}
         </div>
       )}
-    </main>
+    </section>
   );
 }
-
-export default HomeworkView;
