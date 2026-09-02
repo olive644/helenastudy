@@ -16,22 +16,32 @@ type NavigationIconProps = {
   name: NavigationIconName;
 };
 
+// Cada glifo usa curvas e círculos generosos — a mesma linguagem redonda e
+// amigável dos olhos grandes da Helena — em vez de traços genéricos retos.
+// Círculos/elipses/retângulos arredondados são expressos como comandos de
+// arco dentro de um único path (em vez de vários elementos <circle>/<rect>)
+// para manter o bundle pequeno; os valores continuam matematicamente exatos.
 const ICON_PATHS: Record<NavigationIconName, string> = {
-  today: "m3 11 9-8 9 8v10h-6v-6H9v6H3z",
-  planner: "M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2zm-2 6h18M8 2v4m8-4v4",
-  focus: "M9 2h6m-3 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16zm0 3v5l3 2",
+  today:
+    "M4 12 12 5 20 12 M8 12H16A2 2 0 0 1 18 14V18A2 2 0 0 1 16 20H8A2 2 0 0 1 6 18V14A2 2 0 0 1 8 12Z M10.4 16.5a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0",
+  planner:
+    "M7 5H17A3 3 0 0 1 20 8V17A3 3 0 0 1 17 20H7A3 3 0 0 1 4 17V8A3 3 0 0 1 7 5Z M8 3L8 7 M16 3L16 7 M4 10L20 10 M7 14.5L17 14.5",
+  focus: "M4 13a8 8 0 1 0 16 0a8 8 0 1 0 -16 0 M9.5 3L14.5 3 M12 13L12 9 M12 13L15 13",
   learn:
-    "M7 8h10a5 5 0 0 1 4.8 6.4l-1 3.2a2 2 0 0 1-3.4.7L15 16H9l-2.4 2.3a2 2 0 0 1-3.4-.7l-1-3.2A5 5 0 0 1 7 8zm0 4v4m-2-2h4m7-1h.01m3 2h.01",
+    "M11 6H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4 M13 6h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4 M12 6L12 20",
   habits:
-    "M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z",
-  notes: "M6 3h11a2 2 0 0 1 2 2v16H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 0v18m3-13h5m-5 4h5m-5 4h3",
-  library: "M4 19V5h5v14H4zm5 0V3h6v16H9zm6 0V7h5v12h-5z",
-  lesson: "M4 3h16v12H4V3zm-2 0h20M12 15v6m-4 0h8M8 8l2 2 5-4",
+    "M12 20.5s-6.8-4-9-8C1 9 3.2 5 6.8 5c2 0 4 1 5.2 3 1.2-2 3.2-3 5.2-3 3.6 0 5.8 4 3.8 7.5-2.2 4-9 8-9 8Z",
+  notes:
+    "M6 3h9l4 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z M14 3v4h5 M8 13L15 13 M8 17L13 17",
+  library: "M4 5H8V20H4Z M10 7H14V20H10Z M16 4H20V20H16Z",
+  lesson:
+    "M6 4H18A2 2 0 0 1 20 6V18A2 2 0 0 1 18 20H6A2 2 0 0 1 4 18V6A2 2 0 0 1 6 4Z M9 2H15V5H9Z M7.5 10.5L14 10.5 M7.5 14.5L16.5 14.5",
   homework:
-    "M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm3-1h6v3H9V2zM6.5 10.5l1.5 1.5 3-3m-4.5 8 1.5 1.5 3-3",
-  "activity-bank": "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",
-  more: "M5 12h.01M12 12h.01M19 12h.01",
-  close: "M6 6l12 12M18 6 6 18",
+    "M7 4H17A2 2 0 0 1 19 6V19A2 2 0 0 1 17 21H7A2 2 0 0 1 5 19V6A2 2 0 0 1 7 4Z M9 2H15V5H9Z M7.5 11.5 9 13l3-3 M7.5 17 9 18.5l3-3",
+  "activity-bank":
+    "M7 16a5 4 0 1 0 10 0a5 4 0 1 0 -10 0 M4 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0 M8.3 5.8a2 2 0 1 0 4 0a2 2 0 1 0 -4 0 M11.7 5.8a2 2 0 1 0 4 0a2 2 0 1 0 -4 0 M16 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0",
+  more: "M4.4 12a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0 M10.4 12a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0 M16.4 12a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0",
+  close: "M6 6L18 18 M18 6L6 18",
 };
 
 export function NavigationIcon({ name }: NavigationIconProps) {
