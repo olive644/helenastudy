@@ -15,8 +15,8 @@ describe("feedback do quiz de escuta", () => {
   function reachAnswer() {
     render(<ListeningQuiz flashcards={[]} />);
     fireEvent.click(screen.getByRole("button", { name: /iniciar escuta/i }));
-    for (let step = 0; step < 3; step += 1) {
-      act(() => vi.advanceTimersByTime(700));
+    for (let step = 0; step < 5; step += 1) {
+      act(() => vi.advanceTimersByTime(1_000));
     }
   }
 
@@ -39,5 +39,20 @@ describe("feedback do quiz de escuta", () => {
     fireEvent.click(confirm);
     expect(screen.getByText("Resposta correta", { selector: "small" })).toBeTruthy();
     expect(screen.getByText("1 acertos")).toBeTruthy();
+  });
+
+  it("espera cinco segundos reais antes de cada palavra", () => {
+    reachAnswer();
+    fireEvent.change(screen.getByLabelText(/o que você ouviu/i), { target: { value: "escola" } });
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Próxima palavra" }));
+
+    expect(screen.getByText("5")).toBeTruthy();
+    for (let second = 0; second < 4; second += 1) {
+      act(() => vi.advanceTimersByTime(1_000));
+    }
+    expect(screen.queryByLabelText(/o que você ouviu/i)).toBeNull();
+    act(() => vi.advanceTimersByTime(1_000));
+    expect(screen.getByLabelText(/o que você ouviu/i)).toBeTruthy();
   });
 });

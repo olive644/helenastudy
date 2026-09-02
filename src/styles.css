@@ -1159,6 +1159,208 @@ body {
   }
 }
 
+/* Helena editorial: menos efeito de template, mais caderno de estudos. */
+body {
+  background: #faf7f0;
+}
+
+.main-content {
+  animation: none;
+}
+
+.page-header {
+  background: rgb(250 247 240 / 94%);
+  backdrop-filter: blur(10px);
+}
+
+.view-heading--today {
+  min-height: 228px;
+  border: 1px solid var(--line-strong);
+  border-top: 7px solid var(--yellow);
+  border-radius: 8px 24px 8px 8px;
+  color: var(--ink);
+  background: #eee9ff;
+  box-shadow: 7px 7px 0 #dfd7fb;
+}
+
+.view-heading--today::before {
+  right: 2.2rem;
+  bottom: 1.4rem;
+  width: 84px;
+  height: 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--yellow);
+  box-shadow: none;
+  transform: rotate(-3deg);
+}
+
+.view-heading--today h1,
+.view-heading--today .section-label {
+  color: var(--ink);
+}
+
+.view-heading--today > div > p {
+  color: #5d5765;
+}
+
+.today-hero-actions button {
+  border-color: var(--line-strong);
+  border-radius: 5px;
+  color: var(--ink);
+  background: #fffdf9;
+}
+
+.today-hero-actions button:hover {
+  color: #fff;
+  background: var(--ink);
+}
+
+.today-hero-actions .today-hero-primary,
+.today-hero-actions .today-hero-primary:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+  background: var(--yellow);
+}
+
+.today-helena {
+  filter: drop-shadow(6px 8px 0 rgb(114 87 232 / 16%));
+  animation: none;
+}
+
+.metric-row article {
+  min-height: 104px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+.metric-row article::before {
+  width: 8px;
+  height: 100%;
+  border-radius: 0;
+}
+
+.metric-row article:hover {
+  box-shadow: 4px 4px 0 var(--metric-tint, var(--lavender));
+  transform: translate(-2px, -2px);
+}
+
+.module-panel,
+.plain-panel,
+.lesson-form,
+.preview,
+.notes-layout,
+.focus-card {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  box-shadow: none;
+}
+
+.module-panel:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.quick-actions {
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+  gap: 0;
+}
+
+.quick-actions > button,
+.quick-actions > button:last-child {
+  min-height: 90px;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.quick-actions > button:hover,
+.quick-actions > button:focus-visible {
+  background: #f2edff;
+  box-shadow: inset 0 -4px 0 var(--violet);
+  transform: none;
+}
+
+.quick-action-icon {
+  border: 1px solid #d9d0fa;
+  border-radius: 5px;
+}
+
+.quick-actions > button:hover .quick-action-icon {
+  transform: rotate(-3deg);
+}
+
+.navigation-icon path,
+.sidebar .navigation-icon path,
+.sidebar .nav-item--active .navigation-icon path {
+  stroke: none;
+}
+
+.navigation-icon .navigation-icon__base,
+.sidebar .navigation-icon .navigation-icon__base,
+.sidebar .nav-item--active .navigation-icon__base {
+  fill: currentcolor;
+}
+
+.navigation-icon .navigation-icon__accent,
+.sidebar .navigation-icon .navigation-icon__accent {
+  fill: var(--yellow);
+}
+
+.navigation-icon .navigation-icon__detail,
+.sidebar .navigation-icon .navigation-icon__detail {
+  fill: var(--ink);
+}
+
+.sidebar .nav-item--active .navigation-icon__accent {
+  fill: var(--violet);
+}
+
+.primary-button {
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+@media (min-width: 900px) {
+  .sidebar {
+    background: var(--ink);
+  }
+
+  .sidebar .nav-item {
+    border-radius: 6px;
+  }
+
+  .sidebar .nav-item:not(:disabled):hover {
+    transform: none;
+  }
+
+  .sidebar .nav-item--active {
+    box-shadow: 4px 4px 0 #8c70ef;
+  }
+}
+
+@media (max-width: 599px) {
+  .view-heading--today {
+    border-radius: 7px 20px 7px 7px;
+    box-shadow: 5px 5px 0 #dfd7fb;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions > button,
+  .quick-actions > button:last-child {
+    min-height: 82px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
 /* SimpleStudy-inspired learning experience, with HelenaStudy identity. */
 :root {
   --page: #f7f5fc;
@@ -2071,6 +2273,13 @@ body {
 .listening-stage > p {
   max-width: 440px;
   color: var(--muted);
+}
+
+.listening-privacy-note {
+  display: block;
+  max-width: 38rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 .listening-speaker {
@@ -4475,6 +4684,18 @@ select {
   place-items: center;
 }
 
+.sheet-close .navigation-icon {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+}
+
+.sheet-close .navigation-icon > .navigation-icon__glyph {
+  width: 20px;
+  height: 20px;
+}
+
 .mobile-more-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4493,6 +4714,26 @@ select {
   font-size: 0.76rem;
   font-weight: 720;
   text-align: left;
+}
+
+.more-item .navigation-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border-radius: 9px;
+  background: var(--lavender);
+  place-items: center;
+}
+
+.more-item .navigation-icon > .navigation-icon__glyph {
+  width: 20px;
+  height: 20px;
+}
+
+.more-item > span:last-child {
+  min-width: 0;
+  line-height: 1.2;
 }
 
 .more-item--active {
@@ -4668,7 +4909,8 @@ select {
     width: 100%;
     min-height: 48px;
     padding: 0.65rem 0.75rem;
-    color: rgb(255 255 255 / 72%);
+    color: rgb(255 255 255 / 86%);
+    font-weight: 720;
   }
 
   .sidebar .nav-item::before {
@@ -4676,40 +4918,49 @@ select {
   }
 
   .sidebar .nav-item:not(:disabled):hover {
-    color: #fff;
-    background: rgb(255 255 255 / 9%);
-  }
-
-  .sidebar .nav-item--active {
     color: var(--ink);
     background: var(--yellow);
   }
 
+  .sidebar .nav-item--active {
+    color: var(--ink);
+    background: var(--violet);
+  }
+
   .sidebar .navigation-icon {
-    width: 27px;
-    height: 27px;
-    min-width: 27px;
-    overflow: visible;
+    display: grid;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    place-items: center;
+    border: 2px solid var(--ink);
+    border-radius: 9px;
+    color: var(--ink);
+    background: var(--yellow);
+    box-shadow: 0 2px 0 var(--ink);
   }
 
-  .sidebar .navigation-icon__base {
-    fill: currentColor;
+  .sidebar .navigation-icon svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
-  .sidebar .navigation-icon__accent {
-    fill: var(--yellow);
+  .sidebar .navigation-icon svg path,
+  .sidebar .nav-item--active .navigation-icon svg path {
+    fill: none;
+    stroke: var(--ink);
   }
 
-  .sidebar .navigation-icon__detail {
-    fill: var(--ink);
+  .sidebar .nav-item:not(:disabled):hover .navigation-icon {
+    transform: translateY(-1px);
   }
 
-  .sidebar .nav-item--active .navigation-icon__base {
-    fill: var(--ink);
-  }
-
-  .sidebar .nav-item--active .navigation-icon__accent {
-    fill: var(--violet);
+  .sidebar .nav-item--active .navigation-icon {
+    background: var(--violet);
   }
 
   .sidebar__footer {
@@ -4727,5 +4978,370 @@ select {
   .main-content {
     width: calc(100% - 264px);
     margin-left: 264px;
+  }
+}
+
+/* Final visual contract: icons stay legible and student-space shortcuts remain aligned. */
+.sidebar__nav {
+  overflow-x: hidden;
+}
+
+.view-heading--today::before {
+  content: none;
+}
+
+.quick-actions > button:hover,
+.quick-actions > button:focus-visible {
+  background: var(--lavender);
+  box-shadow: none;
+  transform: none;
+}
+
+.quick-actions > button::after {
+  content: none;
+}
+
+.quick-action-icon {
+  display: grid;
+  border: 1px solid #d9d0fa;
+  color: var(--ink);
+  background: var(--lavender);
+  line-height: 0;
+  place-items: center;
+  transform: none;
+}
+
+.quick-actions > button:hover .quick-action-icon,
+.quick-actions > button:focus-visible .quick-action-icon {
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  background: var(--violet);
+  transform: none;
+}
+
+.quick-action-icon > .navigation-icon {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+}
+
+.quick-action-icon > .navigation-icon > .navigation-icon__glyph {
+  width: 18px;
+  height: 18px;
+}
+
+.navigation-icon > .navigation-icon__glyph {
+  display: block;
+  width: 70%;
+  height: 70%;
+  overflow: visible;
+}
+
+.navigation-icon > .navigation-icon__glyph > .navigation-icon__stroke,
+.sidebar .nav-item--active .navigation-icon > .navigation-icon__glyph > .navigation-icon__stroke {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Atividade física pronta: mãos de papel usadas como mata-moscas de vocabulário. */
+.swat-activity {
+  margin-bottom: 1rem;
+  padding: clamp(1rem, 3vw, 1.4rem);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  scroll-margin-top: 70px;
+}
+
+.swat-activity__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+  gap: 1rem;
+}
+
+.swat-activity__header h2 {
+  margin: 0.2rem 0 0.3rem;
+  font-size: clamp(1.45rem, 4vw, 2rem);
+  letter-spacing: -0.045em;
+}
+
+.swat-activity__header p {
+  max-width: 620px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.swat-activity__tags {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.swat-activity__tags span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #d8cff8;
+  border-radius: 999px;
+  gap: 0.4rem;
+  color: var(--violet-dark);
+  background: var(--lavender);
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.swat-activity__layout {
+  display: grid;
+  padding-top: 1rem;
+  gap: 1rem;
+}
+
+.swat-activity__instructions {
+  display: grid;
+  gap: 1rem;
+}
+
+.swat-activity__instructions h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.82rem;
+}
+
+.swat-activity__instructions p,
+.swat-activity__instructions li {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.swat-activity__instructions p,
+.swat-activity__instructions ul,
+.swat-activity__instructions ol {
+  margin: 0;
+}
+
+.swat-activity__instructions ul,
+.swat-activity__instructions ol {
+  padding-left: 1.15rem;
+}
+
+.swat-activity__instructions li + li {
+  margin-top: 0.28rem;
+}
+
+.swat-activity__rule {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  padding: 0.8rem;
+  border-left: 4px solid var(--yellow);
+  border-radius: 8px;
+  gap: 0.55rem;
+  color: var(--ink);
+  background: #fff6cf;
+}
+
+.swat-activity__rule p {
+  color: var(--ink);
+}
+
+.swat-activity__print-area {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+}
+
+.swat-print-sheet {
+  padding: 0.8rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.swat-print-sheet > header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--line);
+  gap: 0.75rem;
+}
+
+.swat-print-sheet > header span {
+  color: var(--violet-dark);
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.swat-print-sheet > header h3 {
+  margin: 0.12rem 0 0;
+  font-size: 0.95rem;
+}
+
+.swat-print-sheet > header p {
+  max-width: 180px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.58rem;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.swat-hand-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 0.75rem 0;
+  gap: 0.35rem;
+}
+
+.swat-hand-grid > div {
+  display: grid;
+  aspect-ratio: 0.88;
+  min-width: 0;
+  border: 1px dashed #b9b3aa;
+  border-radius: 8px;
+  place-items: center;
+}
+
+.swat-hand-grid svg {
+  width: 72%;
+  height: 72%;
+  color: var(--ink);
+  fill: none;
+}
+
+.swat-team-lines {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.swat-team-lines > div {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  align-items: center;
+  min-height: 20px;
+  border-bottom: 1px solid #d8d4cc;
+  gap: 0.4rem;
+}
+
+.swat-team-lines span {
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  background: var(--yellow);
+}
+
+.swat-team-lines > div:nth-child(2) span {
+  background: #f8bfd8;
+}
+
+.swat-team-lines > div:nth-child(3) span {
+  background: #aee5e8;
+}
+
+.swat-team-lines > div:nth-child(4) span {
+  background: #d9c4ff;
+}
+
+.swat-team-lines p {
+  margin: 0;
+  color: #77716a;
+  font-size: 0.52rem;
+}
+
+.swat-print-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 0.45rem;
+}
+
+@media (min-width: 900px) {
+  .swat-activity__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.8fr);
+    gap: 1.35rem;
+  }
+}
+
+@media (max-width: 599px) {
+  .swat-activity__header {
+    display: grid;
+  }
+
+  .swat-activity__tags {
+    justify-content: flex-start;
+  }
+
+  .swat-print-sheet > header {
+    align-items: flex-start;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .swat-print-sheet,
+  .swat-print-sheet * {
+    visibility: visible;
+  }
+
+  .swat-print-sheet {
+    position: absolute;
+    inset: 0;
+    width: 190mm;
+    min-height: 277mm;
+    padding: 8mm;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .swat-print-sheet > header h3 {
+    font-size: 18pt;
+  }
+
+  .swat-print-sheet > header span,
+  .swat-print-sheet > header p,
+  .swat-team-lines p {
+    font-size: 9pt;
+  }
+
+  .swat-hand-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4mm;
+  }
+
+  .swat-hand-grid > div {
+    width: auto;
+    height: 70mm;
+    min-height: 0;
+    aspect-ratio: auto;
+    break-inside: avoid;
+  }
+
+  .swat-team-lines > div {
+    min-height: 9mm;
   }
 }

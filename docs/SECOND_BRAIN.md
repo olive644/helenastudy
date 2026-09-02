@@ -23,26 +23,72 @@ produto.
 5. Escrever, desenhar ou anexar uma digitalização nos Cadernos.
 6. Guardar links, textos e flashcards por matéria na Biblioteca.
 7. Revisar flashcards, responder Quizzes, completar Bingos e acompanhar metas em Praticar.
-8. Praticar escuta em rodadas curtas com voz natural local opcional e fallback do dispositivo.
+8. Praticar escuta em rodadas curtas com voz Gemini e fallback do dispositivo.
 9. Criar uma Sala local e sincronizar o lobby entre abas do mesmo navegador.
 10. Montar planos de aula pelo fluxo determinístico existente.
 
-Todos esses dados compartilham um workspace local versionado. Não há IA, conta, banco ou
-sincronização remota.
+Todos esses dados compartilham um workspace local versionado. Não há conta, banco ou sincronização
+remota. Somente o texto da pergunta de escuta sai do dispositivo quando a voz Gemini é usada.
 
 ## Arquitetura atual
 
 - React 19 e TypeScript estrito;
 - Vite para desenvolvimento e build;
 - CSS próprio, mobile-first e sem fonte externa;
-- interface com hierarquia de próxima ação, cartões de progresso, ícones próprios em traço e
+- interface com hierarquia de próxima ação, cartões de progresso, ícones ilustrados preenchidos e
   movimentos curtos compatíveis com `prefers-reduced-motion`;
 - Vitest e Testing Library para unidade/componente;
 - Playwright para fluxos desktop e mobile;
 - GitHub Actions para qualidade, auditoria, segredos, análise estática e CodeQL.
-- Piper TTS carregado somente pelo worker e por consentimento, com modelo neural armazenado no OPFS
-  sob demanda;
+- Gemini 2.5 Flash TTS chamado por função same-origin, sem expor a chave no navegador;
+- cache de áudio por texto, voz e velocidade durante a sessão, com fallback imediato para a voz do
+  dispositivo;
 - BroadcastChannel como transporte explícito do protótipo de Sala local.
+
+## Mapa mental vivo
+
+Este diagrama funciona como a rede de navegação do repositório: parte da experiência HelenaStudy e
+liga cada área do produto à sua base técnica e às garantias de qualidade.
+
+```mermaid
+flowchart LR
+  HS[HelenaStudy] --> UX[Experiência]
+  HS --> DATA[Workspace local]
+  HS --> STUDY[Estudo]
+  HS --> ORG[Organização]
+  HS --> QUALITY[Qualidade]
+  HS -. evolução segura .-> INTEL[Helena inteligente]
+
+  UX --> TODAY[Espaço do aluno]
+  UX --> NAV[Navegação responsiva]
+  UX --> BRAND[Helena e identidade visual]
+
+  DATA --> DOMAIN[Domínio e reducer]
+  DATA --> STORAGE[Persistência versionada]
+  DATA --> ROOM[Sala local via BroadcastChannel]
+
+  STUDY --> FOCUS[Foco]
+  STUDY --> LIB[Biblioteca e flashcards]
+  STUDY --> PRACTICE[Quizzes e bingo]
+  PRACTICE --> LISTEN[Escuta com Gemini e fallback]
+
+  ORG --> PLAN[Agenda e tarefas]
+  ORG --> HABITS[Hábitos]
+  ORG --> NOTES[Cadernos]
+  ORG --> LESSON[Planos de aula]
+
+  QUALITY --> UNIT[Vitest e Testing Library]
+  QUALITY --> E2E[Playwright desktop e mobile]
+  QUALITY --> CI[GitHub Actions e CodeQL]
+
+  INTEL --> CONSENT[Consentimento por solicitação]
+  INTEL --> BACKEND[Backend sem chave no navegador]
+  INTEL --> SOURCES[Somente fontes escolhidas]
+```
+
+Ao alterar uma área, atualize o nó correspondente e os fluxos ligados a ele. Detalhes de produto
+continuam em [`PRODUCT_MIND_MAP.md`](PRODUCT_MIND_MAP.md); este mapa serve como visão executiva do
+sistema completo.
 
 ## Etapas do produto
 
@@ -72,9 +118,9 @@ no bundle do navegador.
 
 Helena é a gata preta de olhos amarelos que orienta o fluxo. O aplicativo usa a silhueta
 assimétrica original em `public/helena.svg`, sem redesenhar a personagem como um gato genérico. O
-nome exibido na interface é somente HelenaStudy. As abas usam uma família própria de ícones SVG:
-formas assimétricas e pontas inspiradas na silhueta da Helena, corpo na cor do contexto e detalhes
-amarelos. Não são usados pacotes de ícones genéricos na navegação.
+nome exibido na interface é somente HelenaStudy. A navegação usa uma família própria de ícones SVG
+lineares, com selos amarelos e traços pretos para manter contraste e consistência sem carregar um
+pacote de ícones adicional.
 
 ## Fora do escopo desta fase
 
@@ -92,3 +138,9 @@ Cada item entra apenas quando o fluxo local básico estiver validado.
 
 O mapa completo do produto está em [`PRODUCT_MIND_MAP.md`](PRODUCT_MIND_MAP.md), e a ordem de
 implementação com critérios técnicos está em [`IMPLEMENTATION_ROADMAP.md`](IMPLEMENTATION_ROADMAP.md).
+
+# Decisão de interface: navegação lateral
+
+O menu lateral concentra a troca de módulos no desktop. O Espaço do aluno não repete essa lista:
+mantém apenas ações contextuais e o resumo do dia. Em telas móveis, a barra inferior e o menu “Mais
+ferramentas” preservam o acesso completo.

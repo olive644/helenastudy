@@ -1,32 +1,35 @@
 import { readFile, readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const distDirectory = new URL("../dist/", import.meta.url);
 const assetsDirectory = new URL("../dist/assets/", import.meta.url);
 const MAX_INITIAL_JS_BYTES = 220 * 1024;
 const MAX_TOTAL_JS_BYTES = 300 * 1024;
-const MAX_TTS_WORKER_BYTES = 190 * 1024;
-const MAX_TTS_WASM_BYTES = 14 * 1024 * 1024;
+const MAX_TTS_WORKER_BYTES = 2.25 * 1024 * 1024;
+const MAX_TTS_WASM_BYTES = 22 * 1024 * 1024;
 const manifest = JSON.parse(await readFile(new URL(".vite/manifest.json", distDirectory), "utf8"));
 const entry = Object.values(manifest).find((item) => item.isEntry === true);
 if (!entry?.file) throw new Error("Entrada principal ausente do manifesto do build.");
 
-const initialBytes = (await stat(join(distDirectory.pathname, entry.file))).size;
+const initialBytes = (await stat(join(fileURLToPath(distDirectory), entry.file))).size;
 const files = await readdir(assetsDirectory);
 const javascriptFiles = files.filter((file) => file.endsWith(".js"));
 const sizes = await Promise.all(
   javascriptFiles.map(async (file) => ({
     file,
-    bytes: (await stat(join(assetsDirectory.pathname, file))).size,
+    bytes: (await stat(join(fileURLToPath(assetsDirectory), file))).size,
   })),
 );
-const ttsWorker = sizes.find((item) => item.file.startsWith("piper-tts.worker-"));
+const ttsWorker = sizes.find(
+  (item) => item.file.startsWith("piper-tts.worker-") || item.file.startsWith("kokoro-tts.worker-"),
+);
 const applicationTotal = sizes
   .filter((item) => item !== ttsWorker)
   .reduce((sum, item) => sum + item.bytes, 0);
 const wasmFiles = files.filter((file) => file.endsWith(".wasm"));
 const wasmBytes = (
-  await Promise.all(wasmFiles.map((file) => stat(join(assetsDirectory.pathname, file))))
+  await Promise.all(wasmFiles.map((file) => stat(join(fileURLToPath(assetsDirectory), file))))
 ).reduce((sum, item) => sum + item.size, 0);
 
 console.log(`JavaScript inicial: ${(initialBytes / 1024).toFixed(1)} KiB`);

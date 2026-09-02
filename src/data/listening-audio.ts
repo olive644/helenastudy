@@ -1,84 +1,58 @@
-export type NaturalVoiceStatus = "idle" | "loading" | "ready" | "generating" | "playing" | "error";
+export type NaturalVoiceStatus = "idle" | "generating" | "playing" | "ready" | "error";
 
 export type NaturalVoiceState = {
   status: NaturalVoiceStatus;
-  progress?: number;
   message?: string;
 };
 
-export const PIPER_VOICES = [
-  { id: "en_US-hfc_female-medium", label: "HFC feminina, inglês americano" },
-  { id: "en_US-lessac-medium", label: "Lessac, inglês americano" },
-  { id: "en_GB-alba-medium", label: "Alba, inglês britânico" },
-] as const;
-
-type NaturalVoiceWorkerMessage =
-  | { type: "progress"; progress?: number }
-  | { type: "ready" }
-  | { type: "audio"; audio: Blob; speed: number; requestId: number }
-  | { type: "error"; message?: string };
-
 export class NaturalVoicePlayer {
-  private worker: Worker | undefined;
   private audio: HTMLAudioElement | undefined;
   private audioUrl: string | undefined;
+  private controller: AbortController | undefined;
   private requestId = 0;
+  private readonly cache = new Map<string, Promise<Blob>>();
 
   constructor(private readonly onState: (state: NaturalVoiceState) => void) {}
 
-  load(): void {
-    if (this.worker) return;
-    if (!("Worker" in window) || !("Audio" in window)) {
-      this.onState({
-        status: "error",
-        message: "A voz natural não é compatível com este navegador.",
-      });
-      return;
-    }
-    this.onState({ status: "loading", progress: 0 });
-    this.worker = new Worker(new URL("../workers/piper-tts.worker.ts", import.meta.url), {
-      type: "module",
-    });
-    this.worker.addEventListener("message", (event: MessageEvent<NaturalVoiceWorkerMessage>) => {
-      const type = event.data.type;
-      if (type === "progress") {
-        this.onState(
-          event.data.progress === undefined
-            ? { status: "loading" }
-            : { status: "loading", progress: event.data.progress },
-        );
-      } else if (type === "ready") {
-        this.onState({ status: "ready" });
-      } else if (type === "audio") {
-        void this.playBlob(event.data.audio, event.data.speed, event.data.requestId);
-      } else if (type === "error") {
-        this.onState({
-          status: "error",
-          message: event.data.message ?? "Falha na voz natural.",
-        });
-      }
-    });
-    this.worker.addEventListener("error", () => {
-      this.onState({
-        status: "error",
-        message: "A voz natural ficou sem memória ou não pôde iniciar.",
-      });
-    });
-    this.worker.postMessage({ type: "load" });
+  preload(text: string, rate: number): void {
+    void this.load(text, rate).catch(() => undefined);
   }
 
-  generate(text: string, voice: string, speed: number): void {
-    if (!this.worker) {
-      this.load();
-      if (!this.worker) return;
-    }
-    this.stop();
-    this.requestId += 1;
+  async generate(text: string, rate: number, fallback?: () => void): Promise<void> {
+    this.stopPlayback();
+    const requestId = this.requestId;
     this.onState({ status: "generating" });
-    this.worker.postMessage({ type: "generate", requestId: this.requestId, text, voice, speed });
+
+    try {
+      const blob = await this.load(text, rate);
+      if (requestId !== this.requestId) return;
+      await this.playBlob(blob, requestId);
+    } catch (error) {
+      if (requestId !== this.requestId) return;
+      if (error instanceof DOMException && error.name === "AbortError") {
+        this.onState({
+          status: "error",
+          message: "O Gemini demorou demais. Tente reproduzir novamente.",
+        });
+        fallback?.();
+        return;
+      }
+      this.onState({
+        status: "error",
+        message: "Gemini indisponível. Usando a voz inglesa do dispositivo.",
+      });
+      fallback?.();
+    }
   }
 
   stop(): void {
+    this.controller?.abort();
+    this.controller = undefined;
+    this.cache.clear();
+    this.stopPlayback();
+  }
+
+  private stopPlayback(): void {
     this.audio?.pause();
     this.audio = undefined;
     if (this.audioUrl) URL.revokeObjectURL(this.audioUrl);
@@ -88,26 +62,52 @@ export class NaturalVoicePlayer {
 
   dispose(): void {
     this.stop();
-    this.worker?.terminate();
-    this.worker = undefined;
   }
 
-  private async playBlob(blob: Blob, speed: number, requestId: number) {
-    if (requestId !== this.requestId) return;
+  private load(text: string, rate: number): Promise<Blob> {
+    const cacheKey = `${rate}:${text}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    const request = (async () => {
+      this.controller = new AbortController();
+      const timeout = window.setTimeout(() => this.controller?.abort(), 6_000);
+      try {
+        const response = await fetch("/api/speech", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, rate, consent: true }),
+          signal: this.controller.signal,
+        });
+        if (!response.ok) throw new Error("Gemini speech unavailable");
+        return await response.blob();
+      } finally {
+        window.clearTimeout(timeout);
+      }
+    })();
+    this.cache.set(cacheKey, request);
+    return request;
+  }
+
+  private async playBlob(blob: Blob, requestId: number): Promise<void> {
     const audioUrl = URL.createObjectURL(blob);
     const audio = new Audio(audioUrl);
-    audio.playbackRate = speed;
     audio.addEventListener(
       "ended",
       () => {
         URL.revokeObjectURL(audioUrl);
-        this.onState({ status: "ready" });
+        if (requestId === this.requestId) this.onState({ status: "ready" });
       },
       { once: true },
     );
     this.audioUrl = audioUrl;
     this.audio = audio;
     this.onState({ status: "playing" });
-    await audio.play();
+    try {
+      await audio.play();
+    } catch {
+      URL.revokeObjectURL(audioUrl);
+      throw new Error("Browser blocked audio playback");
+    }
   }
 }

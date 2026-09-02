@@ -6,13 +6,30 @@ export const SPEECH_RATE_OPTIONS = [
 
 const PREMIUM_HINTS = [
   "natural",
+  "ava",
+  "andrew",
+  "emma",
+  "brian",
+  "serena",
   "google us english",
+  "google uk english",
   "samantha",
   "aria",
   "jenny",
   "guy",
   "zira",
   "david",
+];
+
+const FEMALE_HINTS = [
+  "aria",
+  "jenny",
+  "ava",
+  "emma",
+  "samantha",
+  "zira",
+  "serena",
+  "google us english",
 ];
 
 export function isEnglishVoice(voice: Pick<SpeechSynthesisVoice, "lang">): boolean {
@@ -39,6 +56,20 @@ export function rankEnglishVoices(voices: readonly SpeechSynthesisVoice[]): Spee
     .filter(isEnglishVoice)
     .slice()
     .sort((left, right) => voiceQualityScore(right) - voiceQualityScore(left));
+}
+
+export function findFemaleEnglishVoice(
+  voices: readonly SpeechSynthesisVoice[],
+): SpeechSynthesisVoice | undefined {
+  return rankEnglishVoices(voices).find((voice) =>
+    FEMALE_HINTS.some((hint) => voice.name.toLocaleLowerCase("en-US").includes(hint)),
+  );
+}
+
+export function selectFallbackEnglishVoice(
+  voices: readonly SpeechSynthesisVoice[],
+): SpeechSynthesisVoice | undefined {
+  return findFemaleEnglishVoice(voices) ?? rankEnglishVoices(voices)[0];
 }
 
 export function speakEnglish(
