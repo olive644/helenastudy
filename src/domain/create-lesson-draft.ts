@@ -1,7 +1,16 @@
 import { findActivity } from "./activity-bank";
-import type { LessonDraft, LessonInput, LessonSection } from "./lesson";
+import type { LessonDraft, LessonInput, LessonSection, ProductionVariant } from "./lesson";
 
 const WEIGHTS = [0.15, 0.25, 0.3, 0.25, 0.05] as const;
+
+const PRODUCTION_GUIDANCE: Record<ProductionVariant, (topic: string) => string> = {
+  "product-pitch": (topic) =>
+    `Peça que os alunos apresentem um pitch curto usando ${topic} para vender uma ideia ou produto.`,
+  "creative-task": (topic) =>
+    `Proponha uma tarefa criativa (história, cena ou anúncio) em que os alunos usem ${topic} livremente.`,
+  "problem-solving": (topic) =>
+    `Apresente um problema real para os alunos resolverem em grupo usando ${topic}.`,
+};
 
 function allocateMinutes(duration: number): number[] {
   const safeDuration = Math.max(30, Math.min(180, Math.round(duration)));
@@ -35,6 +44,8 @@ export function createLessonDraft(input: LessonInput): LessonDraft {
   const practiceActivityIds = practiceActivities.map((activity) => activity.id);
 
   const extraActivity = findActivity(input.extraActivityId);
+
+  const productionGuidance = PRODUCTION_GUIDANCE[input.productionVariant](topic);
 
   const sections: LessonSection[] = [
     {
@@ -71,7 +82,7 @@ export function createLessonDraft(input: LessonInput): LessonDraft {
       kind: "production",
       title: "Produção",
       minutes: production,
-      guidance: `Proponha uma situação real em que os alunos precisem usar ${topic} com autonomia.`,
+      guidance: productionGuidance,
     },
     {
       kind: "homework",

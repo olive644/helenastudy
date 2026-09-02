@@ -11,6 +11,8 @@ import {
   CEFR_LEVELS,
   METHODOLOGIES,
   METHODOLOGY_LABELS,
+  PRODUCTION_VARIANTS,
+  PRODUCTION_VARIANT_LABELS,
   type LessonDraft,
   type LessonInput,
 } from "../domain/lesson";
@@ -26,6 +28,7 @@ const INITIAL_INPUT: LessonInput = {
   practiceTotalControlledId: "",
   practiceSemiControlledId: "",
   extraActivityId: "",
+  productionVariant: "product-pitch",
 };
 
 const TOTAL_CONTROLLED_ACTIVITIES = listActivitiesByControlLevel("total-controlled");
@@ -294,6 +297,23 @@ export function LessonBuilderView({ onBack }: { onBack: () => void }) {
                     onChange={() => setInput({ ...input, methodology })}
                   />
                   <span>{METHODOLOGY_LABELS[methodology]}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset className="method-fieldset">
+            <legend>Variante da Produção</legend>
+            <div className="method-grid">
+              {PRODUCTION_VARIANTS.map((variant) => (
+                <label className="method-option" key={variant}>
+                  <input
+                    type="radio"
+                    name="productionVariant"
+                    value={variant}
+                    checked={input.productionVariant === variant}
+                    onChange={() => setInput({ ...input, productionVariant: variant })}
+                  />
+                  <span>{PRODUCTION_VARIANT_LABELS[variant]}</span>
                 </label>
               ))}
             </div>
