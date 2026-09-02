@@ -29,6 +29,7 @@ const INITIAL_INPUT: LessonInput = {
   practiceSemiControlledId: "",
   extraActivityId: "",
   productionVariant: "product-pitch",
+  homeworkLinksText: "",
 };
 
 const TOTAL_CONTROLLED_ACTIVITIES = listActivitiesByControlLevel("total-controlled");
@@ -99,6 +100,17 @@ function DraftPreview({ draft }: { draft: LessonDraft | null }) {
                   </div>
                 );
               })}
+              {section.links && section.links.length > 0 && (
+                <ul className="homework-links">
+                  {section.links.map((link) => (
+                    <li key={link}>
+                      <a href={link} target="_blank" rel="noopener noreferrer">
+                        {link}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </li>
         ))}
@@ -318,6 +330,19 @@ export function LessonBuilderView({ onBack }: { onBack: () => void }) {
               ))}
             </div>
           </fieldset>
+          <label className="field field--full">
+            <span>Links de apoio (Homework)</span>
+            <small className="field-help">
+              Um link por linha, começando com http:// ou https://.
+            </small>
+            <textarea
+              name="homeworkLinksText"
+              value={input.homeworkLinksText}
+              onChange={(event) => setInput({ ...input, homeworkLinksText: event.target.value })}
+              placeholder={"https://exemplo.com/exercicio-1\nhttps://exemplo.com/exercicio-2"}
+              rows={2}
+            />
+          </label>
           <button className="primary-button primary-button--wide" type="submit">
             Criar rascunho
           </button>

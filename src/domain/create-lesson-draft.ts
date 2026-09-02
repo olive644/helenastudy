@@ -12,6 +12,13 @@ const PRODUCTION_GUIDANCE: Record<ProductionVariant, (topic: string) => string> 
     `Apresente um problema real para os alunos resolverem em grupo usando ${topic}.`,
 };
 
+function parseHomeworkLinks(text: string): string[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("http://") || line.startsWith("https://"));
+}
+
 function allocateMinutes(duration: number): number[] {
   const safeDuration = Math.max(30, Math.min(180, Math.round(duration)));
   const minutes = WEIGHTS.map((weight) => Math.max(1, Math.floor(safeDuration * weight)));
@@ -46,6 +53,8 @@ export function createLessonDraft(input: LessonInput): LessonDraft {
   const extraActivity = findActivity(input.extraActivityId);
 
   const productionGuidance = PRODUCTION_GUIDANCE[input.productionVariant](topic);
+
+  const homeworkLinks = parseHomeworkLinks(input.homeworkLinksText);
 
   const sections: LessonSection[] = [
     {
@@ -89,6 +98,7 @@ export function createLessonDraft(input: LessonInput): LessonDraft {
       title: "Homework",
       minutes: homework,
       guidance: "Finalize com uma tarefa breve que retome o objetivo principal da aula.",
+      ...(homeworkLinks.length > 0 ? { links: homeworkLinks } : {}),
     },
   ];
 
