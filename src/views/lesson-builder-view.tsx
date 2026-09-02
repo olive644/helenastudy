@@ -1,7 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
 import { VocabularySwatActivity } from "../components/vocabulary-swat-activity";
-import { findActivity, listActivitiesByControlLevel } from "../domain/activity-bank";
+import {
+  ACTIVITY_LIBRARY,
+  findActivity,
+  listActivitiesByControlLevel,
+} from "../domain/activity-bank";
 import { createLessonDraft } from "../domain/create-lesson-draft";
 import {
   CEFR_LEVELS,
@@ -21,6 +25,7 @@ const INITIAL_INPUT: LessonInput = {
   methodology: "inductive",
   practiceTotalControlledId: "",
   practiceSemiControlledId: "",
+  extraActivityId: "",
 };
 
 const TOTAL_CONTROLLED_ACTIVITIES = listActivitiesByControlLevel("total-controlled");
@@ -257,6 +262,25 @@ export function LessonBuilderView({ onBack }: { onBack: () => void }) {
               </label>
             </div>
           </fieldset>
+          <label className="field field--full">
+            <span>Extra Activity</span>
+            <small className="field-help">
+              Só aparece se sobrar tempo antes da produção — não entra no cálculo padrão dos minutos
+              da aula.
+            </small>
+            <select
+              name="extraActivityId"
+              value={input.extraActivityId}
+              onChange={(event) => setInput({ ...input, extraActivityId: event.target.value })}
+            >
+              <option value="">Nenhuma</option>
+              {ACTIVITY_LIBRARY.map((activity) => (
+                <option key={activity.id} value={activity.id}>
+                  {activity.name}
+                </option>
+              ))}
+            </select>
+          </label>
           <fieldset className="method-fieldset">
             <legend>Como apresentar o conteúdo</legend>
             <div className="method-grid">

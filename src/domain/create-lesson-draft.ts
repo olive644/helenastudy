@@ -34,6 +34,8 @@ export function createLessonDraft(input: LessonInput): LessonDraft {
       : "Comece com uma atividade controlada e avance para uma prática em duplas.";
   const practiceActivityIds = practiceActivities.map((activity) => activity.id);
 
+  const extraActivity = findActivity(input.extraActivityId);
+
   const sections: LessonSection[] = [
     {
       kind: "warm-up",
@@ -54,6 +56,17 @@ export function createLessonDraft(input: LessonInput): LessonDraft {
       guidance: practiceGuidance,
       ...(practiceActivityIds.length > 0 ? { activityIds: practiceActivityIds } : {}),
     },
+    ...(extraActivity
+      ? [
+          {
+            kind: "extra-activity" as const,
+            title: "Extra Activity",
+            minutes: extraActivity.time,
+            guidance: `Use ${extraActivity.name} se sobrar tempo antes da produção.`,
+            activityIds: [extraActivity.id],
+          },
+        ]
+      : []),
     {
       kind: "production",
       title: "Produção",
