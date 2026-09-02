@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  ACTIVITY_LIBRARY,
-  findActivity,
-  listActivitiesByControlLevel,
-} from "./activity-bank";
+import { ACTIVITY_LIBRARY, findActivity, listActivitiesByControlLevel } from "./activity-bank";
 
 describe("activity-bank", () => {
   it("tem as 13 atividades das notas, todas com classificação completa", () => {
