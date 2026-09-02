@@ -15,6 +15,7 @@ describe("createLessonDraft", () => {
       practiceTotalControlledId: "",
       practiceSemiControlledId: "",
       extraActivityId: "",
+      productionVariant: "product-pitch",
     });
 
     expect(draft.id).toBe("draft-123");
@@ -40,6 +41,7 @@ describe("createLessonDraft", () => {
       practiceTotalControlledId: "",
       practiceSemiControlledId: "",
       extraActivityId: "",
+      productionVariant: "product-pitch",
     });
 
     expect(draft.duration).toBe(30);
@@ -62,6 +64,7 @@ describe("createLessonDraft", () => {
         practiceTotalControlledId: "",
         practiceSemiControlledId: "",
         extraActivityId: "",
+        productionVariant: "product-pitch",
       }),
     ).toThrow("O tema da aula é obrigatório.");
   });
@@ -78,6 +81,7 @@ describe("createLessonDraft", () => {
       practiceTotalControlledId: "bingo",
       practiceSemiControlledId: "this-or-that",
       extraActivityId: "",
+      productionVariant: "product-pitch",
     });
 
     const practice = draft.sections.find((section) => section.kind === "practice");
@@ -98,6 +102,7 @@ describe("createLessonDraft", () => {
       practiceTotalControlledId: "",
       practiceSemiControlledId: "",
       extraActivityId: "",
+      productionVariant: "product-pitch",
     });
 
     const practice = draft.sections.find((section) => section.kind === "practice");
@@ -119,6 +124,7 @@ describe("createLessonDraft", () => {
       practiceTotalControlledId: "",
       practiceSemiControlledId: "",
       extraActivityId: "singing",
+      productionVariant: "product-pitch",
     });
 
     expect(draft.sections.map((section) => section.kind)).toEqual([
@@ -147,9 +153,34 @@ describe("createLessonDraft", () => {
       practiceTotalControlledId: "",
       practiceSemiControlledId: "",
       extraActivityId: "",
+      productionVariant: "product-pitch",
     });
 
     expect(draft.sections.some((section) => section.kind === "extra-activity")).toBe(false);
     expect(draft.sections.reduce((total, section) => total + section.minutes, 0)).toBe(60);
+  });
+
+  it.each([
+    ["product-pitch", "pitch"],
+    ["creative-task", "criativa"],
+    ["problem-solving", "problema"],
+  ] as const)("gera a orientação de produção certa para %s", (productionVariant, expectedWord) => {
+    const draft = createLessonDraft({
+      topic: "Simple Past",
+      level: "A2",
+      duration: 60,
+      audience: "Adultos",
+      aim: "",
+      objective: "",
+      methodology: "inductive",
+      practiceTotalControlledId: "",
+      practiceSemiControlledId: "",
+      extraActivityId: "",
+      productionVariant,
+    });
+
+    const production = draft.sections.find((section) => section.kind === "production");
+    expect(production?.guidance).toContain(expectedWord);
+    expect(production?.guidance).toContain("Simple Past");
   });
 });

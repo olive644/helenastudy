@@ -4,6 +4,9 @@ export type CefrLevel = (typeof CEFR_LEVELS)[number];
 export const METHODOLOGIES = ["inductive", "deductive", "discovery", "rule-first"] as const;
 export type Methodology = (typeof METHODOLOGIES)[number];
 
+export const PRODUCTION_VARIANTS = ["product-pitch", "creative-task", "problem-solving"] as const;
+export type ProductionVariant = (typeof PRODUCTION_VARIANTS)[number];
+
 export type LessonInput = {
   topic: string;
   level: CefrLevel;
@@ -15,6 +18,7 @@ export type LessonInput = {
   practiceTotalControlledId: string;
   practiceSemiControlledId: string;
   extraActivityId: string;
+  productionVariant: ProductionVariant;
 };
 
 export type LessonSectionKind =
@@ -45,4 +49,10 @@ export const METHODOLOGY_LABELS: Record<Methodology, string> = {
   deductive: "Dedutiva",
   discovery: "Descoberta guiada",
   "rule-first": "Regra primeiro",
+};
+
+export const PRODUCTION_VARIANT_LABELS: Record<ProductionVariant, string> = {
+  "product-pitch": "Product Pitch",
+  "creative-task": "Creative Task",
+  "problem-solving": "Problem Solving",
 };
