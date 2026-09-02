@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createInitialWorkspace } from "../domain/workspace";
+import { WORKSPACE_VERSION, createInitialWorkspace } from "../domain/workspace";
 import { loadWorkspace, saveWorkspace, WORKSPACE_STORAGE_KEY } from "./local-workspace";
 
 describe("local workspace", () => {
@@ -34,11 +34,12 @@ describe("local workspace", () => {
     window.localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(legacy));
 
     const migrated = loadWorkspace(window.localStorage);
-    expect(migrated.version).toBe(3);
+    expect(migrated.version).toBe(WORKSPACE_VERSION);
     expect(migrated.subjects).toEqual(current.subjects);
     expect(migrated.flashcards).toEqual([]);
     expect(migrated.materials).toEqual([]);
     expect(migrated.bingoBoards).toEqual([]);
+    expect(migrated.homeworkLists).toEqual([]);
   });
 
   it("migra o workspace v2 adicionando imagens e bingos sem perder os dados", () => {
@@ -61,12 +62,25 @@ describe("local workspace", () => {
     window.localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(workspaceV2));
 
     const migrated = loadWorkspace(window.localStorage);
-    expect(migrated.version).toBe(3);
+    expect(migrated.version).toBe(WORKSPACE_VERSION);
     expect(migrated.notes[0]).toMatchObject({
       title: "Resumo antigo",
       content: "Conteúdo preservado",
       assets: [],
     });
     expect(migrated.bingoBoards).toEqual([]);
+    expect(migrated.homeworkLists).toEqual([]);
+  });
+
+  it("migra o workspace v3 adicionando homeworkLists sem perder os dados", () => {
+    const current = createInitialWorkspace();
+    const workspaceV3: Record<string, unknown> = { ...current, version: 3 };
+    delete workspaceV3["homeworkLists"];
+    window.localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(workspaceV3));
+
+    const migrated = loadWorkspace(window.localStorage);
+    expect(migrated.version).toBe(WORKSPACE_VERSION);
+    expect(migrated.subjects).toEqual(current.subjects);
+    expect(migrated.homeworkLists).toEqual([]);
   });
 });

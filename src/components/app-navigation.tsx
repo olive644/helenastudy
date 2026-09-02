@@ -3,7 +3,15 @@ import { HelenaBrand } from "./helena-brand";
 import { NavigationIcon, type NavigationIconName } from "./navigation-icon";
 
 export type AppView =
-  "today" | "planner" | "focus" | "habits" | "notes" | "lesson-builder" | "learn" | "library";
+  | "today"
+  | "planner"
+  | "focus"
+  | "habits"
+  | "notes"
+  | "lesson-builder"
+  | "learn"
+  | "library"
+  | "homework";
 
 type NavigationProps = {
   view: AppView;
@@ -39,6 +47,7 @@ const NAVIGATION_SECTIONS: readonly { label: string; items: readonly NavigationI
       { view: "habits", label: "Hábitos", icon: "habits" },
       { view: "notes", label: "Cadernos", mobileLabel: "Notas", icon: "notes" },
       { view: "lesson-builder", label: "Planos de aula", icon: "lesson" },
+      { view: "homework", label: "Homework", icon: "homework" },
     ],
   },
 ];

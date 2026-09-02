@@ -832,6 +832,164 @@ p {
   word-break: break-all;
 }
 
+.homework-new-list {
+  display: grid;
+  gap: 0.75rem;
+  align-items: end;
+  grid-template-columns: 1fr;
+  margin: 1.2rem 0;
+  padding: 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+}
+
+@media (min-width: 640px) {
+  .homework-new-list {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.homework-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.homework-card {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+  align-content: start;
+}
+
+.homework-card__progress {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--soft);
+  overflow: hidden;
+}
+
+.homework-card__progress span {
+  display: block;
+  height: 100%;
+  background: var(--violet);
+  transition: width 180ms ease;
+}
+
+.homework-card__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.homework-card__heading h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.homework-card__delete {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0.2rem;
+}
+
+.homework-card__delete:hover {
+  color: #a23d3d;
+}
+
+.homework-item-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.homework-item-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.homework-item-list label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.homework-item-list label span {
+  overflow-wrap: anywhere;
+}
+
+.homework-item-list label span.is-complete {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.homework-item-list input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  accent-color: var(--violet);
+}
+
+.homework-item-list li > button {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0.1rem 0.3rem;
+  flex-shrink: 0;
+}
+
+.homework-item-list li > button:hover {
+  color: #a23d3d;
+}
+
+.homework-add-item {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.homework-add-item input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #cfccd3;
+  border-radius: 3px;
+  font-size: 0.78rem;
+}
+
+.homework-add-item button {
+  border: 0;
+  background: none;
+  color: var(--violet-dark);
+  font-size: 0.74rem;
+  font-weight: 650;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.homework-add-item button:hover {
+  text-decoration: underline;
+}
+
 .preview__footnote {
   margin: 0.8rem 0 0;
   color: var(--muted);

@@ -69,6 +69,13 @@ export const PRODUCT_MODULES = [
     entryView: "lesson-builder",
   },
   {
+    id: "homework",
+    name: "Homework",
+    purpose: "Organizar deveres de casa em listas com itens marcáveis.",
+    status: "available",
+    entryView: "homework",
+  },
+  {
     id: "helena-ai",
     name: "Helena inteligente",
     purpose: "Apoiar o estudo com fontes escolhidas e consentimento explícito.",
