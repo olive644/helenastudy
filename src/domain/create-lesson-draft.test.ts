@@ -9,6 +9,7 @@ describe("createLessonDraft", () => {
       level: "A2",
       duration: 60,
       audience: "Adultos",
+      aim: "Ensinar o Simple Past para narrativas curtas.",
       objective: "Relatar atividades do fim de semana.",
       methodology: "inductive",
     });
@@ -30,12 +31,14 @@ describe("createLessonDraft", () => {
       level: "A1",
       duration: 10,
       audience: "",
+      aim: "",
       objective: "",
       methodology: "discovery",
     });
 
     expect(draft.duration).toBe(30);
     expect(draft.title).toBe("Present Continuous");
+    expect(draft.aim).toContain("Present Continuous");
     expect(draft.objective).toContain("Present Continuous");
     expect(draft.audience).toBe("Turma de inglês");
   });
@@ -47,6 +50,7 @@ describe("createLessonDraft", () => {
         level: "B1",
         duration: 60,
         audience: "Adolescentes",
+        aim: "",
         objective: "",
         methodology: "deductive",
       }),

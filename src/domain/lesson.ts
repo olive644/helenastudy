@@ -9,6 +9,7 @@ export type LessonInput = {
   level: CefrLevel;
   duration: number;
   audience: string;
+  aim: string;
   objective: string;
   methodology: Methodology;
 };
@@ -28,6 +29,7 @@ export type LessonDraft = {
   level: CefrLevel;
   duration: number;
   audience: string;
+  aim: string;
   objective: string;
   methodology: Methodology;
   sections: LessonSection[];
