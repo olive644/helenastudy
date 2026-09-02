@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
 import { VocabularySwatActivity } from "../components/vocabulary-swat-activity";
+import { findActivity, listActivitiesByControlLevel } from "../domain/activity-bank";
 import { createLessonDraft } from "../domain/create-lesson-draft";
 import {
   CEFR_LEVELS,
@@ -18,7 +19,12 @@ const INITIAL_INPUT: LessonInput = {
   aim: "",
   objective: "",
   methodology: "inductive",
+  practiceTotalControlledId: "",
+  practiceSemiControlledId: "",
 };
+
+const TOTAL_CONTROLLED_ACTIVITIES = listActivitiesByControlLevel("total-controlled");
+const SEMI_CONTROLLED_ACTIVITIES = listActivitiesByControlLevel("semi-controlled");
 
 function DraftPreview({ draft }: { draft: LessonDraft | null }) {
   if (!draft) {
@@ -62,6 +68,29 @@ function DraftPreview({ draft }: { draft: LessonDraft | null }) {
                 <span>{section.minutes} min</span>
               </div>
               <p>{section.guidance}</p>
+              {section.activityIds?.map((activityId) => {
+                const activity = findActivity(activityId);
+                if (!activity) return null;
+                return (
+                  <div className="activity-detail" key={activityId}>
+                    <strong>{activity.name}</strong>
+                    <span>
+                      {activity.time} min · {activity.topic}
+                    </span>
+                    <p>{activity.goal}</p>
+                    <ol>
+                      {activity.steps.map((step) => (
+                        <li key={step}>{step}</li>
+                      ))}
+                    </ol>
+                    {activity.supplies.length > 0 && (
+                      <p className="activity-detail__supplies">
+                        Material: {activity.supplies.join(", ")}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </li>
         ))}
@@ -186,6 +215,48 @@ export function LessonBuilderView({ onBack }: { onBack: () => void }) {
               rows={3}
             />
           </label>
+          <fieldset className="method-fieldset">
+            <legend>Atividades da Prática</legend>
+            <small className="field-help">
+              Activity 01 é o livro didático; as atividades 02 e 03 vêm do banco de atividades.
+            </small>
+            <div className="field-row">
+              <label className="field">
+                <span>Activity 02 · Total Controlled</span>
+                <select
+                  name="practiceTotalControlledId"
+                  value={input.practiceTotalControlledId}
+                  onChange={(event) =>
+                    setInput({ ...input, practiceTotalControlledId: event.target.value })
+                  }
+                >
+                  <option value="">Nenhuma</option>
+                  {TOTAL_CONTROLLED_ACTIVITIES.map((activity) => (
+                    <option key={activity.id} value={activity.id}>
+                      {activity.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>Activity 03 · Semi Controlled</span>
+                <select
+                  name="practiceSemiControlledId"
+                  value={input.practiceSemiControlledId}
+                  onChange={(event) =>
+                    setInput({ ...input, practiceSemiControlledId: event.target.value })
+                  }
+                >
+                  <option value="">Nenhuma</option>
+                  {SEMI_CONTROLLED_ACTIVITIES.map((activity) => (
+                    <option key={activity.id} value={activity.id}>
+                      {activity.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </fieldset>
           <fieldset className="method-fieldset">
             <legend>Como apresentar o conteúdo</legend>
             <div className="method-grid">

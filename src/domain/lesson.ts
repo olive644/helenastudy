@@ -12,6 +12,8 @@ export type LessonInput = {
   aim: string;
   objective: string;
   methodology: Methodology;
+  practiceTotalControlledId: string;
+  practiceSemiControlledId: string;
 };
 
 export type LessonSectionKind = "warm-up" | "presentation" | "practice" | "production" | "homework";
@@ -21,6 +23,7 @@ export type LessonSection = {
   title: string;
   minutes: number;
   guidance: string;
+  activityIds?: string[];
 };
 
 export type LessonDraft = {
