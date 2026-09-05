@@ -23,7 +23,7 @@
     "verify": "npm run lint && npm run format:check && npm test && npm run build && npm run performance:check"
   },
   "dependencies": {
-    "lucide-react": "^1.33.0",
+    "lucide-react": "^1.39.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
@@ -43,12 +43,12 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.5",
+    "eslint-plugin-react-refresh": "^0.5.6",
     "globals": "^15.15.0",
     "jsdom": "^30.0.1",
     "prettier": "^3.9.6",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.68.0",
+    "typescript-eslint": "^8.69.0",
     "vite": "^8.1.5",
     "vitest": "^4.1.11"
   }
