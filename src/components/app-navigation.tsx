@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTheme } from "../hooks/use-theme";
 import { HelenaBrand } from "./helena-brand";
 import { NavigationIcon, type NavigationIconName } from "./navigation-icon";
 
@@ -85,6 +86,23 @@ function NavigationButton({
   );
 }
 
+function ThemeToggle({ showLabel }: { showLabel?: boolean }) {
+  const { theme, toggleTheme } = useTheme();
+  const label = theme === "dark" ? "Tema escuro" : "Tema claro";
+  const icon: NavigationIconName = theme === "dark" ? "theme-dark" : "theme-light";
+  return (
+    <button
+      className="theme-toggle"
+      type="button"
+      onClick={toggleTheme}
+      aria-label={`${label}. Toque para trocar de tema.`}
+    >
+      <NavigationIcon name={icon} />
+      {showLabel && <span>{label}</span>}
+    </button>
+  );
+}
+
 export function Sidebar({ view, onNavigate }: NavigationProps) {
   return (
     <aside className="sidebar">
@@ -104,6 +122,7 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
           </section>
         ))}
       </nav>
+      <ThemeToggle showLabel />
       <div className="sidebar__footer">
         <span className="status-dot" aria-hidden="true" />
         <div>
@@ -235,9 +254,14 @@ export function PageHeader() {
       <div className="page-header__brand">
         <HelenaBrand />
       </div>
-      <span className="local-note">
-        <i aria-hidden="true" /> Dados salvos neste dispositivo
-      </span>
+      <div className="page-header__actions">
+        <span className="local-note">
+          <i aria-hidden="true" /> Dados salvos neste dispositivo
+        </span>
+        <div className="page-header__theme">
+          <ThemeToggle />
+        </div>
+      </div>
     </header>
   );
 }

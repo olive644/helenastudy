@@ -1,7 +1,8 @@
 :root {
-  color: #17151c;
-  background: #f4f3ef;
+  color: var(--text);
+  background: var(--page);
   font-family:
+    Manrope,
     Inter,
     "Segoe UI",
     system-ui,
@@ -10,7 +11,9 @@
     sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  color-scheme: light;
   --ink: #17151c;
+  --text: var(--ink);
   --muted: #716e76;
   --violet: #7257e8;
   --violet-dark: #5c43c9;
@@ -158,12 +161,12 @@ p {
 }
 
 .nav-item:not(:disabled):hover {
-  color: var(--ink);
+  color: var(--text);
   background: #f2f0eb;
 }
 
 .nav-item--active {
-  color: var(--ink);
+  color: var(--text);
   background: #f0eee8;
 }
 
@@ -557,7 +560,7 @@ p {
   padding: 0.68rem 0.72rem;
   border: 1px solid #cfccd3;
   border-radius: 3px;
-  color: var(--ink);
+  color: var(--text);
   background: #fff;
 }
 
@@ -660,7 +663,7 @@ p {
 
 .preview--empty h2 {
   margin-bottom: 0.4rem;
-  color: var(--ink);
+  color: var(--text);
   font-size: 1.1rem;
 }
 
@@ -1001,7 +1004,7 @@ p {
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   background: var(--surface);
-  color: var(--ink);
+  color: var(--text);
   font-size: 0.76rem;
   font-weight: 650;
   cursor: pointer;
@@ -1248,7 +1251,7 @@ body {
 }
 
 .sidebar .nav-item--active {
-  color: var(--ink);
+  color: var(--text);
   background: var(--yellow);
 }
 
@@ -1498,7 +1501,7 @@ body {
   border: 1px solid var(--line-strong);
   border-top: 7px solid var(--yellow);
   border-radius: 8px 24px 8px 8px;
-  color: var(--ink);
+  color: var(--text);
   background: #eee9ff;
   box-shadow: 7px 7px 0 #dfd7fb;
 }
@@ -1517,7 +1520,7 @@ body {
 
 .view-heading--today h1,
 .view-heading--today .section-label {
-  color: var(--ink);
+  color: var(--text);
 }
 
 .view-heading--today > div > p {
@@ -1527,7 +1530,7 @@ body {
 .today-hero-actions button {
   border-color: var(--line-strong);
   border-radius: 5px;
-  color: var(--ink);
+  color: var(--text);
   background: #fffdf9;
 }
 
@@ -1538,7 +1541,7 @@ body {
 
 .today-hero-actions .today-hero-primary,
 .today-hero-actions .today-hero-primary:hover {
-  color: var(--ink);
+  color: var(--text);
   border-color: var(--ink);
   background: var(--yellow);
 }
@@ -1780,7 +1783,7 @@ body {
 }
 
 .today-hero-actions .today-hero-primary {
-  color: var(--ink);
+  color: var(--text);
   border-color: var(--yellow);
   background: var(--yellow);
 }
@@ -1856,7 +1859,7 @@ body {
 }
 
 .metric-row strong {
-  color: var(--ink);
+  color: var(--text);
   font-size: 2.25rem;
   letter-spacing: -0.055em;
 }
@@ -2276,7 +2279,7 @@ body {
   padding: 0.65rem 0.75rem;
   border: 1px solid var(--line-strong);
   border-radius: 10px;
-  color: var(--ink);
+  color: var(--text);
   background: var(--surface);
 }
 
@@ -2443,13 +2446,13 @@ body {
 }
 
 .listening-difficulty button.is-active {
-  color: var(--ink);
+  color: var(--text);
   border-color: var(--yellow);
   background: var(--yellow);
 }
 
 .listening-difficulty button.is-active small {
-  color: var(--ink);
+  color: var(--text);
 }
 
 .listening-difficulty button:disabled {
@@ -2498,7 +2501,7 @@ body {
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  color: var(--ink);
+  color: var(--text);
   font-size: 0.85rem;
   font-weight: 780;
 }
@@ -2558,7 +2561,7 @@ body {
   min-height: 34px;
   padding: 0 1.3rem 0 0.2rem;
   border: 0;
-  color: var(--ink);
+  color: var(--text);
   background: transparent;
   font: inherit;
 }
@@ -2609,7 +2612,7 @@ body {
   margin-bottom: 1.35rem;
   border: 0;
   border-radius: 22px;
-  color: var(--ink);
+  color: var(--text);
   background: var(--yellow);
   box-shadow: 0 8px 0 #d5a62e;
   transition:
@@ -3071,7 +3074,7 @@ body {
 }
 
 .scanner-drop strong {
-  color: var(--ink);
+  color: var(--text);
   font-size: 0.92rem;
 }
 
@@ -3217,7 +3220,7 @@ body {
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   gap: 0.45rem;
-  color: var(--ink);
+  color: var(--text);
   background: #fffefa;
   font-size: 0.68rem;
   font-weight: 700;
@@ -3901,7 +3904,7 @@ body {
   margin-top: 1.3rem;
   padding: 0;
   border: 0;
-  color: var(--ink);
+  color: var(--text);
   background: transparent;
   font-size: clamp(1.7rem, 6vw, 2.7rem);
   font-weight: 750;
@@ -4095,7 +4098,7 @@ body {
   padding: 0.35rem 1.8rem 0.35rem 0.5rem;
   border: 1px solid var(--line);
   border-radius: 3px;
-  color: var(--ink);
+  color: var(--text);
   background: #fff;
   font-size: 0.72rem;
   font-weight: 700;
@@ -4373,14 +4376,14 @@ body {
 }
 
 .study-finished > strong {
-  color: var(--ink);
+  color: var(--text);
   font-size: 2.7rem;
   letter-spacing: -0.06em;
 }
 
 .study-finished h3 {
   margin: 0.65rem 0 0.25rem;
-  color: var(--ink);
+  color: var(--text);
   font-size: 1rem;
 }
 
@@ -4498,8 +4501,62 @@ body {
   --line-strong: #cec5ba;
 }
 
+/* Paleta oficial da marca (guia HelenaStudy): Creme, Roxo, Amarelo, Grafite.
+   Sobrescreve as variáveis herdadas acima — mesmo padrão de camadas já usado
+   neste arquivo — e acrescenta um tema escuro opcional, alternável em tempo
+   real (ver .theme-toggle em app-navigation) e persistido no dispositivo. */
+:root {
+  --ink: #0f0f14;
+  --text: var(--ink);
+  --muted: #6b6570;
+  --violet: #7c3aed;
+  --violet-dark: #6d28d9;
+  --yellow: #facc15;
+  --page: #fff9ef;
+  --surface: #ffffff;
+  --soft: #fbf2e2;
+  --lavender: #efe6fd;
+  --line: #e6ddc9;
+  --line-strong: #d3c7ac;
+  color-scheme: light;
+}
+
+/* --ink fica intocado nos dois temas: várias superfícies (sidebar, botão
+   primário, chips ativos) usam var(--ink) como fundo escuro fixo com texto
+   branco por cima, independente do tema. Só --text (cor de leitura do corpo
+   do texto sobre var(--page)/var(--surface)) precisa clarear no escuro. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --text: #f4f2ee;
+    --muted: #a9a3ad;
+    --violet: #a685fa;
+    --violet-dark: #8b5cf6;
+    --page: #17151c;
+    --surface: #201d26;
+    --soft: #262230;
+    --lavender: #2c2540;
+    --line: #35313e;
+    --line-strong: #423d4c;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --text: #f4f2ee;
+  --muted: #a9a3ad;
+  --violet: #a685fa;
+  --violet-dark: #8b5cf6;
+  --page: #17151c;
+  --surface: #201d26;
+  --soft: #262230;
+  --lavender: #2c2540;
+  --line: #35313e;
+  --line-strong: #423d4c;
+  color-scheme: dark;
+}
+
 body {
-  color: var(--ink);
+  color: var(--text);
   background: var(--page);
 }
 
@@ -4583,7 +4640,7 @@ select {
 }
 
 .nav-item:not(:disabled):hover {
-  color: var(--ink);
+  color: var(--text);
   background: var(--soft);
 }
 
@@ -5238,12 +5295,12 @@ select {
   }
 
   .sidebar .nav-item:not(:disabled):hover {
-    color: var(--ink);
+    color: var(--text);
     background: var(--yellow);
   }
 
   .sidebar .nav-item--active {
-    color: var(--ink);
+    color: var(--text);
     background: var(--violet);
   }
 
@@ -5255,7 +5312,7 @@ select {
     place-items: center;
     border: 2px solid var(--ink);
     border-radius: 9px;
-    color: var(--ink);
+    color: var(--text);
     background: var(--yellow);
     box-shadow: 0 2px 0 var(--ink);
   }
@@ -5324,7 +5381,7 @@ select {
 .quick-action-icon {
   display: grid;
   border: 1px solid #d9d0fa;
-  color: var(--ink);
+  color: var(--text);
   background: var(--lavender);
   line-height: 0;
   place-items: center;
@@ -5334,7 +5391,7 @@ select {
 .quick-actions > button:hover .quick-action-icon,
 .quick-actions > button:focus-visible .quick-action-icon {
   border: 2px solid var(--ink);
-  color: var(--ink);
+  color: var(--text);
   background: var(--violet);
   transform: none;
 }
@@ -5469,12 +5526,12 @@ select {
   border-left: 4px solid var(--yellow);
   border-radius: 8px;
   gap: 0.55rem;
-  color: var(--ink);
+  color: var(--text);
   background: #fff6cf;
 }
 
 .swat-activity__rule p {
-  color: var(--ink);
+  color: var(--text);
 }
 
 .swat-activity__print-area {
@@ -5540,7 +5597,7 @@ select {
 .swat-hand-grid svg {
   width: 72%;
   height: 72%;
-  color: var(--ink);
+  color: var(--text);
   fill: none;
 }
 
@@ -5663,5 +5720,62 @@ select {
 
   .swat-team-lines > div {
     min-height: 9mm;
+  }
+}
+
+/* Alternância de tema (claro/escuro/sistema). */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0.5rem 0.6rem;
+  border: 0;
+  border-radius: 6px;
+  gap: 0.55rem;
+  color: var(--ink);
+  background: transparent;
+  font-size: 0.78rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  background: var(--soft);
+}
+
+.sidebar .theme-toggle {
+  margin-top: 0.4rem;
+  color: rgb(255 255 255 / 80%);
+}
+
+.sidebar .theme-toggle:hover {
+  background: rgb(255 255 255 / 8%);
+}
+
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.page-header__theme .theme-toggle {
+  padding: 0.5rem;
+}
+
+.page-header__theme .navigation-icon {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+}
+
+.page-header__theme .navigation-icon > .navigation-icon__glyph {
+  width: 16px;
+  height: 16px;
+}
+
+@media (min-width: 900px) {
+  .page-header__theme {
+    display: none;
   }
 }

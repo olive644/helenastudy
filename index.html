@@ -7,9 +7,27 @@
       name="description"
       content="HelenaStudy. Planejamento, estudos e rotina em um só lugar."
     />
-    <meta name="theme-color" content="#fff8ed" />
+    <meta name="theme-color" content="#fff9ef" />
     <link rel="icon" href="/helena.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+    />
     <title>HelenaStudy</title>
+    <script>
+      (function () {
+        try {
+          var stored = window.localStorage.getItem("helenastudy.theme");
+          if (stored === "light" || stored === "dark") {
+            document.documentElement.setAttribute("data-theme", stored);
+          }
+        } catch (error) {
+          // Sem localStorage disponível: a página segue o tema do sistema.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
