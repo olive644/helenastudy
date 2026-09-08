@@ -70,7 +70,9 @@ tipografia de sistema e textos mais diretos. A fala da mascote e os elementos de
 removidos. `public/helena.svg` agora preserva a silhueta irregular, os olhos amarelos e as pupilas
 do desenho original fornecido para a marca. A navegação desktop agora usa um rail compacto com os ícones oficiais em variantes
 clara, roxa e escura, nomes revelados no hover/foco e alternância de tema no canto superior direito.
-O retrato de Helena foi substituído pelo close oficial em `public/helena-face.png`. Os arquivos
+O retrato de Helena usa o PNG transparente `public/helena-mark.png`, sem moldura de aplicativo. A
+navegação desktop pode ser expandida pelo botão de três linhas para revelar categorias e nomes,
+enquanto o cabeçalho mantém a assinatura HelenaStudy com o sufixo roxo. Os arquivos
 individuais em `public/navigation-icons/` mantêm os desenhos aprovados sem reinterpretá-los e evitam
 dependência de posicionamento por sprite no navegador.
 

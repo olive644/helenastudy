@@ -62,7 +62,7 @@ export function TodayView({ workspace, dispatch, onNavigate }: TodayViewProps) {
         </div>
         <img
           className="today-helena"
-          src="/helena-face.png"
+          src="/helena-mark.png"
           alt="Rosto da Helena, a gata preta de olhos amarelos"
           width="132"
           height="132"
