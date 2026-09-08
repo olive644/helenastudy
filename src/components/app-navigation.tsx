@@ -105,9 +105,23 @@ function ThemeToggle({ showLabel }: { showLabel?: boolean }) {
 }
 
 export function Sidebar({ view, onNavigate }: NavigationProps) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <aside className="sidebar">
-      <HelenaBrand />
+    <aside className={expanded ? "sidebar sidebar--expanded" : "sidebar"}>
+      <div className="sidebar__top">
+        <button
+          className="sidebar__toggle"
+          type="button"
+          aria-label={expanded ? "Recolher menu lateral" : "Expandir menu lateral"}
+          aria-expanded={expanded}
+          onClick={() => setExpanded((current) => !current)}
+        >
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+        </button>
+      </div>
       <nav className="sidebar__nav" aria-label="Navegação principal">
         {NAVIGATION_SECTIONS.map((section) => (
           <section className="nav-section" aria-label={section.label} key={section.label}>
@@ -123,13 +137,6 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
           </section>
         ))}
       </nav>
-      <div className="sidebar__footer">
-        <span className="status-dot" aria-hidden="true" />
-        <div>
-          <strong>Dados locais</strong>
-          <small>Salvos neste dispositivo</small>
-        </div>
-      </div>
     </aside>
   );
 }

@@ -12,8 +12,20 @@ describe("App", () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: "Espaço do aluno" })).toBeTruthy();
     expect(screen.getByText(/dados salvos neste dispositivo/i)).toBeTruthy();
-    expect(screen.getByAltText(/rosto da helena/i).getAttribute("src")).toBe("/helena-face.png");
+    expect(screen.getByAltText(/rosto da helena/i).getAttribute("src")).toBe("/helena-mark.png");
     expect(screen.queryByText(/by oli/i)).toBeNull();
+  });
+
+  it("expande a navegação lateral para revelar categorias e nomes", () => {
+    render(<App />);
+    const sidebar = screen.getByRole("complementary");
+    const toggle = within(sidebar).getByRole("button", { name: "Expandir menu lateral" });
+
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(toggle);
+    expect(within(sidebar).getByRole("button", { name: "Recolher menu lateral" })).toBeTruthy();
+    expect(sidebar.classList.contains("sidebar--expanded")).toBe(true);
+    expect(within(sidebar).getByText("Principal")).toBeTruthy();
   });
 
   it("mantém as ferramentas na navegação sem duplicá-las no painel principal", () => {
