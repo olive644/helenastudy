@@ -51,11 +51,15 @@ describe("App", () => {
       ["Hábitos", "habits"],
       ["Cadernos", "notes"],
       ["Planos de aula", "lesson"],
+      ["Banco de atividades", "activity-bank"],
     ] as const;
 
     icons.forEach(([label, icon]) => {
       const button = within(navigation).getByRole("button", { name: label });
-      expect(button.querySelector(`[data-icon="${icon}"]`)).toBeTruthy();
+      const artwork = button.querySelector(`[data-icon="${icon}"]`);
+      expect(artwork).toBeTruthy();
+      expect(artwork?.querySelector(".navigation-icon__base")).toBeTruthy();
+      expect(artwork?.querySelector(".navigation-icon__accent")).toBeTruthy();
     });
   });
 
