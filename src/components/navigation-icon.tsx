@@ -38,18 +38,34 @@ const ICON_PATHS: Record<NavigationIconName, string> = {
   lesson:
     "M6 4H18A2 2 0 0 1 20 6V18A2 2 0 0 1 18 20H6A2 2 0 0 1 4 18V6A2 2 0 0 1 6 4Z M9 2H15V5H9Z M7.5 10.5L14 10.5 M7.5 14.5L16.5 14.5",
   "activity-bank":
-    "M7.5 15.5a4.5 4.5 0 1 0 9 0a4.5 4.5 0 1 0 -9 0 M3.5 10a2 2 0 1 0 4 0a2 2 0 1 0 -4 0 M7.1 6.3a2.2 2.2 0 1 0 4.4 0a2.2 2.2 0 1 0 -4.4 0 M12.5 6.3a2.2 2.2 0 1 0 4.4 0a2.2 2.2 0 1 0 -4.4 0 M16.5 10a2 2 0 1 0 4 0a2 2 0 1 0 -4 0",
+    "M5 8H15A2 2 0 0 1 17 10V18A2 2 0 0 1 15 20H5A2 2 0 0 1 3 18V10A2 2 0 0 1 5 8Z M9 4H19A2 2 0 0 1 21 6V14A2 2 0 0 1 19 16H9A2 2 0 0 1 7 14V6A2 2 0 0 1 9 4Z",
   "theme-light": "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM12 2v2M12 20v2M2 12h2M20 12h2",
   "theme-dark": "M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z",
   more: "M4.4 12a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0 M10.4 12a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0 M16.4 12a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0",
   close: "M6 6L18 18 M18 6L6 18",
 };
 
+// Pontinho amarelo de destaque da marca, reaproveitado no mesmo canto para
+// todos os ícones que o exibem (path curto e constante, sem custo extra).
+const ACCENT_DOT = "M18.3 4.3a1.7 1.7 0 1 0 3.4 0a1.7 1.7 0 1 0 -3.4 0";
+
+const ICONS_WITH_ACCENT = new Set<NavigationIconName>([
+  "planner",
+  "learn",
+  "library",
+  "habits",
+  "lesson",
+  "activity-bank",
+]);
+
 export function NavigationIcon({ name }: NavigationIconProps) {
   return (
     <span className="navigation-icon" data-icon={name} aria-hidden="true">
       <svg className="navigation-icon__glyph" viewBox="0 0 24 24" focusable="false">
         <path className="navigation-icon__stroke" d={ICON_PATHS[name]} />
+        {ICONS_WITH_ACCENT.has(name) && (
+          <path className="navigation-icon__accent-dot" d={ACCENT_DOT} />
+        )}
       </svg>
     </span>
   );
