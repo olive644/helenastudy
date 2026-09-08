@@ -1,5 +1,12 @@
 # Auditoria do estado atual
 
+## Sistema oficial de ícones HelenaStudy
+
+- A navegação usa glifos preenchidos e arredondados próprios para Espaço, Agenda, Foco, Praticar, Mais, Biblioteca, Hábitos, Notas, Planos e Banco.
+- A mesma geometria assume grafite sobre superfícies claras, roxo no estado ativo e creme sobre a navegação escura.
+- O amarelo permanece reservado aos pequenos acentos de cada símbolo, de acordo com a identidade da HelenaStudy.
+- Os mesmos componentes são reutilizados na barra lateral, na navegação móvel, no menu Mais, nos atalhos e no botão Começar prática.
+
 ## Dificuldade automática do vocabulário
 
 - O quiz de escuta classifica palavras como fáceis, médias ou difíceis usando frequência Zipf.
@@ -12,7 +19,7 @@
 
 - A barra lateral desktop mantém o fundo preto definido no redesign, mesmo após as camadas legadas de CSS.
 - Os ícones autorais recebem dimensões fixas e cores específicas no desktop para evitar encolhimento e deformação.
-- O estado ativo usa fundo amarelo, base preta e detalhe violeta; o comportamento móvel permanece inalterado.
+- O estado ativo usa o roxo da marca, enquanto os ícones inativos permanecem creme sobre o fundo escuro.
 
 ## Quiz de escuta e pronúncia
 
