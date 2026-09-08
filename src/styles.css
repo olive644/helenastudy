@@ -5820,3 +5820,125 @@ select {
     display: none;
   }
 }
+
+/* Sistema oficial de ícones HelenaStudy: grafite, roxo e creme com acento amarelo. */
+.navigation-icon {
+  --navigation-icon-detail: var(--surface);
+  --navigation-icon-accent: var(--yellow);
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  color: var(--ink);
+  line-height: 0;
+  place-items: center;
+}
+
+.navigation-icon > .navigation-icon__glyph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.navigation-icon__base {
+  fill: currentcolor;
+  stroke: none;
+}
+
+.navigation-icon__secondary {
+  fill: currentcolor;
+  opacity: 0.42;
+}
+
+.navigation-icon__accent {
+  fill: var(--navigation-icon-accent);
+  stroke: none;
+}
+
+.navigation-icon__detail {
+  fill: var(--navigation-icon-detail);
+  stroke: none;
+}
+
+.navigation-icon__line {
+  fill: none;
+  stroke: var(--navigation-icon-accent);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.navigation-icon__line--base {
+  stroke: currentcolor;
+}
+
+.mobile-nav__item .navigation-icon,
+.more-item .navigation-icon,
+.quick-action-icon .navigation-icon {
+  color: var(--ink);
+}
+
+.mobile-nav__item--active .navigation-icon,
+.more-item--active .navigation-icon,
+.quick-actions > button:hover .navigation-icon,
+.quick-actions > button:focus-visible .navigation-icon {
+  color: var(--violet);
+}
+
+.today-hero-primary .navigation-icon {
+  --navigation-icon-accent: var(--surface);
+  color: var(--violet);
+}
+
+.today-hero-actions .navigation-icon {
+  width: 22px;
+  height: 22px;
+}
+
+@media (min-width: 900px) {
+  .sidebar .navigation-icon,
+  .sidebar .nav-item--active .navigation-icon {
+    --navigation-icon-detail: var(--ink);
+    display: inline-grid;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border: 0;
+    border-radius: 0;
+    color: #fff9ef;
+    background: transparent;
+    box-shadow: none;
+    place-items: center;
+  }
+
+  .sidebar .navigation-icon > .navigation-icon__glyph,
+  .sidebar .nav-item--active .navigation-icon > .navigation-icon__glyph {
+    width: 24px;
+    height: 24px;
+    fill: initial;
+    stroke: none;
+  }
+
+  .sidebar .navigation-icon svg path,
+  .sidebar .nav-item--active .navigation-icon svg path {
+    stroke: none;
+  }
+
+  .sidebar .navigation-icon svg .navigation-icon__line,
+  .sidebar .nav-item--active .navigation-icon svg .navigation-icon__line {
+    fill: none;
+    stroke: var(--navigation-icon-accent);
+  }
+
+  .sidebar .navigation-icon svg .navigation-icon__line--base,
+  .sidebar .nav-item--active .navigation-icon svg .navigation-icon__line--base {
+    stroke: currentcolor;
+  }
+
+  .sidebar .nav-item:not(:disabled):hover .navigation-icon {
+    --navigation-icon-detail: var(--surface);
+    color: var(--ink);
+  }
+}
