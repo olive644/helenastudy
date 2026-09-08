@@ -12,7 +12,7 @@ describe("App", () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: "Espaço do aluno" })).toBeTruthy();
     expect(screen.getByText(/dados salvos neste dispositivo/i)).toBeTruthy();
-    expect(screen.getByAltText(/helena, a gata preta/i).getAttribute("src")).toBe("/helena.svg");
+    expect(screen.getByAltText(/rosto da helena/i).getAttribute("src")).toBe("/helena-face.png");
     expect(screen.queryByText(/by oli/i)).toBeNull();
   });
 
@@ -58,6 +58,7 @@ describe("App", () => {
       const button = within(navigation).getByRole("button", { name: label });
       const artwork = button.querySelector(`[data-icon="${icon}"]`);
       expect(artwork).toBeTruthy();
+      expect(artwork?.classList.contains("navigation-icon--brand")).toBe(true);
       expect(artwork?.querySelector(".navigation-icon__base")).toBeTruthy();
       expect(artwork?.querySelector(".navigation-icon__accent")).toBeTruthy();
     });

@@ -17,10 +17,29 @@ type NavigationIconProps = {
   name: NavigationIconName;
 };
 
+const BRAND_ICON_NAMES = new Set<NavigationIconName>([
+  "today",
+  "planner",
+  "focus",
+  "learn",
+  "more",
+  "library",
+  "habits",
+  "notes",
+  "lesson",
+  "activity-bank",
+]);
+
 export function NavigationIcon({ name }: NavigationIconProps) {
   const symbol = `/navigation-icons.svg#${name}`;
   return (
-    <span className="navigation-icon" data-icon={name} aria-hidden="true">
+    <span
+      className={
+        BRAND_ICON_NAMES.has(name) ? "navigation-icon navigation-icon--brand" : "navigation-icon"
+      }
+      data-icon={name}
+      aria-hidden="true"
+    >
       <svg className="navigation-icon__glyph" viewBox="0 0 24 24" focusable="false">
         <use className="navigation-icon__secondary" href={`${symbol}-secondary`} />
         <use className="navigation-icon__base" href={`${symbol}-base`} />

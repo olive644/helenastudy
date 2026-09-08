@@ -78,6 +78,7 @@ function NavigationButton({
       className={active ? "nav-item nav-item--active" : "nav-item"}
       type="button"
       onClick={onSelect}
+      aria-label={item.label}
       aria-current={active ? "page" : undefined}
     >
       <NavigationIcon name={item.icon} />
@@ -122,7 +123,6 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
           </section>
         ))}
       </nav>
-      <ThemeToggle showLabel />
       <div className="sidebar__footer">
         <span className="status-dot" aria-hidden="true" />
         <div>
