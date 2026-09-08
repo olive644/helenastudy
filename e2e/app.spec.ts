@@ -43,6 +43,7 @@ test.beforeEach(async ({ page }) => {
 test("concentra as ferramentas na navegação lateral", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "Contrato visual da página inicial desktop.");
   const navigation = page.getByRole("navigation", { name: "Navegação principal" });
+  const sidebar = page.locator(".sidebar");
 
   await expect(navigation.getByRole("button")).toHaveCount(9);
   await expect(navigation.getByRole("button", { name: "Espaço do aluno" })).toHaveAttribute(
@@ -55,6 +56,30 @@ test("concentra as ferramentas na navegação lateral", async ({ page }, testInf
     .locator(".view-heading--today")
     .evaluate((element) => getComputedStyle(element, "::before").content);
   expect(heroDecoration).toBe("none");
+
+  const compactSidebarBox = await sidebar.boundingBox();
+  const compactNavigationBox = await navigation.boundingBox();
+  expect(compactSidebarBox).not.toBeNull();
+  expect(compactNavigationBox).not.toBeNull();
+  expect(compactNavigationBox!.x).toBeGreaterThanOrEqual(compactSidebarBox!.x);
+  expect(compactNavigationBox!.x + compactNavigationBox!.width).toBeLessThanOrEqual(
+    compactSidebarBox!.x + compactSidebarBox!.width,
+  );
+
+  await page.getByRole("button", { name: "Expandir menu lateral" }).click();
+  await expect(sidebar).toHaveClass(/sidebar--expanded/);
+  await expect(sidebar).toHaveCSS("width", "260px");
+  await expect(sidebar.getByText("Principal", { exact: true })).toBeVisible();
+  await expect(sidebar.getByText("Espaço do aluno", { exact: true })).toBeVisible();
+
+  const expandedSidebarBox = await sidebar.boundingBox();
+  const expandedNavigationBox = await navigation.boundingBox();
+  expect(expandedSidebarBox).not.toBeNull();
+  expect(expandedNavigationBox).not.toBeNull();
+  expect(expandedNavigationBox!.x).toBeGreaterThanOrEqual(expandedSidebarBox!.x);
+  expect(expandedNavigationBox!.x + expandedNavigationBox!.width).toBeLessThanOrEqual(
+    expandedSidebarBox!.x + expandedSidebarBox!.width,
+  );
 });
 
 test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }, testInfo) => {
