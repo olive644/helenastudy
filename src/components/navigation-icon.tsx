@@ -28,6 +28,8 @@ const BRAND_ICON_NAMES = new Set<NavigationIconName>([
   "notes",
   "lesson",
   "activity-bank",
+  "theme-light",
+  "theme-dark",
 ]);
 
 export function NavigationIcon({ name }: NavigationIconProps) {
