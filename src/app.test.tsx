@@ -76,6 +76,26 @@ describe("App", () => {
     });
   });
 
+  it("usa a iconografia própria da Helena no seletor de tema", () => {
+    render(<App />);
+    const lightThemeButton = screen.getByRole("button", { name: /tema claro/i });
+    const lightArtwork = lightThemeButton.querySelector('[data-icon="theme-light"]');
+    expect(lightArtwork?.classList.contains("navigation-icon--brand")).toBe(true);
+    expect(lightArtwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
+    expect(
+      lightArtwork?.querySelector('img[src="/navigation-icons/claro/theme-light.png"]'),
+    ).toBeTruthy();
+
+    fireEvent.click(lightThemeButton);
+    const darkThemeButton = screen.getByRole("button", { name: /tema escuro/i });
+    const darkArtwork = darkThemeButton.querySelector('[data-icon="theme-dark"]');
+    expect(darkArtwork?.classList.contains("navigation-icon--brand")).toBe(true);
+    expect(darkArtwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
+    expect(
+      darkArtwork?.querySelector('img[src="/navigation-icons/escuro/theme-dark.png"]'),
+    ).toBeTruthy();
+  });
+
   it("cria uma tarefa, mostra no Espaço do aluno e permite concluí-la", () => {
     render(<App />);
     navigate("Agenda");
