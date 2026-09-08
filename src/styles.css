@@ -5962,6 +5962,13 @@ select {
   display: block;
 }
 
+.more-item .navigation-icon__variant {
+  inset: 50% auto auto 50%;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+}
+
 .mobile-nav__item--active .navigation-icon__variant--claro,
 .more-item--active .navigation-icon__variant--claro,
 .quick-actions > button:hover .navigation-icon__variant--claro,
