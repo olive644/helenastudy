@@ -62,10 +62,10 @@ export function TodayView({ workspace, dispatch, onNavigate }: TodayViewProps) {
         </div>
         <img
           className="today-helena"
-          src="/helena.svg"
-          alt="Helena, a gata preta de olhos amarelos"
-          width="116"
-          height="134"
+          src="/helena-face.png"
+          alt="Rosto da Helena, a gata preta de olhos amarelos"
+          width="132"
+          height="132"
         />
       </header>
 

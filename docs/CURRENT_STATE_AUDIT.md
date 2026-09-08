@@ -68,7 +68,10 @@ gerada, não uma ferramenta de trabalho.
 A direção foi simplificada para fundo neutro, painéis planos, bordas discretas, cantos pequenos,
 tipografia de sistema e textos mais diretos. A fala da mascote e os elementos decorativos foram
 removidos. `public/helena.svg` agora preserva a silhueta irregular, os olhos amarelos e as pupilas
-do desenho original fornecido para a marca.
+do desenho original fornecido para a marca. A navegação desktop agora usa um rail compacto com os ícones oficiais em variantes
+clara, roxa e escura, nomes revelados no hover/foco e alternância de tema no canto superior direito.
+O retrato de Helena foi substituído pelo close oficial em `public/helena-face.png`, enquanto o sprite
+`public/navigation-icons-brand.png` mantém os desenhos aprovados sem reinterpretá-los.
 
 ## 4. Fundação da central de estudos
 

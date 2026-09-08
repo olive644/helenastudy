@@ -59,7 +59,7 @@ test("concentra as ferramentas na navegação lateral", async ({ page }, testInf
 
 test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }, testInfo) => {
   await expect(page.getByRole("heading", { name: "Espaço do aluno" })).toBeVisible();
-  await expect(page.getByAltText(/helena, a gata preta/i)).toHaveAttribute("src", "/helena.svg");
+  await expect(page.getByAltText(/rosto da helena/i)).toHaveAttribute("src", "/helena-face.png");
 
   await page.getByRole("button", { name: "Agenda", exact: true }).click();
   await page.getByLabel(/o que precisa ser feito/i).fill("Revisar Simple Past");
