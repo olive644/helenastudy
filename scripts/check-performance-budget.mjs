@@ -4,7 +4,10 @@ import { fileURLToPath } from "node:url";
 
 const distDirectory = new URL("../dist/", import.meta.url);
 const assetsDirectory = new URL("../dist/assets/", import.meta.url);
-const MAX_INITIAL_JS_BYTES = 220 * 1024;
+// 222 KiB desde a troca de marca (fonte, paleta oficial e alternância de
+// tema): o hook de tema e o botão adicionam ~1 KiB, já com os ícones
+// otimizados para o menor path possível. Revisar se crescer de novo.
+const MAX_INITIAL_JS_BYTES = 222 * 1024;
 const MAX_TOTAL_JS_BYTES = 300 * 1024;
 const MAX_TTS_WORKER_BYTES = 2.25 * 1024 * 1024;
 const MAX_TTS_WASM_BYTES = 22 * 1024 * 1024;
