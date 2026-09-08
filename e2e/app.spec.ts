@@ -130,7 +130,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
 
   for (const item of await toolItems.all()) {
     const iconBox = await item.locator(".navigation-icon").boundingBox();
-    const glyphBox = await item.locator(".navigation-icon__glyph").boundingBox();
+    const glyphBox = await item.locator(".navigation-icon__variant:visible").boundingBox();
     expect(iconBox).not.toBeNull();
     expect(glyphBox).not.toBeNull();
     expect(iconBox!.width).toBe(32);
