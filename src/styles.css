@@ -6329,3 +6329,155 @@ select {
     object-fit: contain;
   }
 }
+
+/* Contrato definitivo do rail desktop. Mantido no fim do arquivo para que as
+   camadas legadas não desloquem os ícones para fora da barra lateral. */
+@media (min-width: 900px) {
+  .app-shell > .sidebar {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 84px;
+    padding: 14px 12px 12px;
+    overflow-x: visible;
+  }
+
+  .app-shell > .sidebar > .sidebar__top,
+  .app-shell > .sidebar > .sidebar__nav {
+    position: relative;
+    right: auto;
+    left: auto;
+    align-self: center;
+    box-sizing: border-box;
+    width: 60px;
+    margin-right: 0;
+    margin-left: 0;
+    transform: none;
+  }
+
+  .app-shell > .sidebar > .sidebar__top {
+    display: flex;
+    flex: 0 0 60px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .app-shell > .sidebar > .sidebar__nav {
+    display: grid;
+    flex: 1 1 auto;
+    margin-top: 18px;
+    padding: 0;
+    gap: 10px;
+  }
+
+  .app-shell > .sidebar:not(.sidebar--expanded) .nav-section {
+    display: grid;
+    width: 60px;
+    gap: 7px;
+  }
+
+  .app-shell > .sidebar:not(.sidebar--expanded) .nav-section__label {
+    display: none;
+  }
+
+  .app-shell > .sidebar:not(.sidebar--expanded) .nav-item {
+    position: relative;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 52px;
+    min-width: 52px;
+    max-width: 52px;
+    min-height: 52px;
+    margin: 0 auto;
+    padding: 0;
+    gap: 0;
+    transform: none;
+  }
+
+  .app-shell > .sidebar:not(.sidebar--expanded) .nav-item > .navigation-icon {
+    position: relative;
+    inset: auto;
+    display: block;
+    flex: 0 0 34px;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    margin: 0;
+    transform: none;
+  }
+
+  .app-shell > .sidebar.sidebar--expanded {
+    align-items: stretch;
+    width: 260px;
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .app-shell > .sidebar.sidebar--expanded > .sidebar__top,
+  .app-shell > .sidebar.sidebar--expanded > .sidebar__nav {
+    align-self: stretch;
+    width: 232px;
+  }
+
+  .app-shell > .sidebar.sidebar--expanded > .sidebar__top {
+    justify-content: flex-start;
+  }
+
+  .app-shell > .sidebar.sidebar--expanded > .sidebar__nav {
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-right: 4px;
+    gap: 18px;
+  }
+
+  .app-shell > .sidebar.sidebar--expanded .nav-section {
+    display: grid;
+    width: 100%;
+    gap: 5px;
+  }
+
+  .app-shell > .sidebar.sidebar--expanded .nav-section__label {
+    display: block;
+    padding: 0 12px 5px;
+  }
+
+  .app-shell > .sidebar.sidebar--expanded .nav-item {
+    justify-content: flex-start;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    min-height: 48px;
+    margin: 0;
+    padding: 7px 12px;
+    gap: 12px;
+  }
+
+  .app-shell > .sidebar.sidebar--expanded .nav-item > span:last-child {
+    position: static;
+    width: auto;
+    max-width: none;
+    padding: 0;
+    border: 0;
+    color: rgb(255 255 255 / 86%);
+    background: transparent;
+    box-shadow: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .app-shell > .sidebar.sidebar--expanded ~ .main-content {
+    width: calc(100% - 260px);
+    margin-left: 260px;
+  }
+
+  .app-shell > .sidebar:not(.sidebar--expanded) ~ .main-content {
+    width: calc(100% - 84px);
+    margin-left: 84px;
+  }
+
+  .page-header__brand {
+    display: block;
+  }
+}
