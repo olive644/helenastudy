@@ -5945,65 +5945,47 @@ select {
 
 /* Navegação final HelenaStudy: arte aprovada, sem reconstrução dos glifos. */
 .navigation-icon--brand {
-  background-image: url("/navigation-icons-brand.png");
-  background-repeat: no-repeat;
-  background-size: 1000% 300%;
+  position: relative;
+  background: none;
 }
 
-.navigation-icon--brand > .navigation-icon__glyph {
-  visibility: hidden;
+.navigation-icon__variant {
+  position: absolute;
+  inset: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-.navigation-icon--brand[data-icon="today"] {
-  background-position-x: 0%;
+.navigation-icon__variant--claro {
+  display: block;
 }
 
-.navigation-icon--brand[data-icon="planner"] {
-  background-position-x: 11.111%;
+.mobile-nav__item--active .navigation-icon__variant--claro,
+.more-item--active .navigation-icon__variant--claro,
+.quick-actions > button:hover .navigation-icon__variant--claro,
+.quick-actions > button:focus-visible .navigation-icon__variant--claro,
+.today-hero-primary .navigation-icon__variant--claro {
+  display: none;
 }
 
-.navigation-icon--brand[data-icon="focus"] {
-  background-position-x: 22.222%;
+.mobile-nav__item--active .navigation-icon__variant--roxo,
+.more-item--active .navigation-icon__variant--roxo,
+.quick-actions > button:hover .navigation-icon__variant--roxo,
+.quick-actions > button:focus-visible .navigation-icon__variant--roxo,
+.today-hero-primary .navigation-icon__variant--roxo {
+  display: block;
 }
 
-.navigation-icon--brand[data-icon="learn"] {
-  background-position-x: 33.333%;
+:root[data-theme="dark"] .navigation-icon__variant,
+.sidebar .navigation-icon__variant {
+  display: none;
 }
 
-.navigation-icon--brand[data-icon="more"] {
-  background-position-x: 44.444%;
-}
-
-.navigation-icon--brand[data-icon="library"] {
-  background-position-x: 55.556%;
-}
-
-.navigation-icon--brand[data-icon="habits"] {
-  background-position-x: 66.667%;
-}
-
-.navigation-icon--brand[data-icon="notes"] {
-  background-position-x: 77.778%;
-}
-
-.navigation-icon--brand[data-icon="lesson"] {
-  background-position-x: 88.889%;
-}
-
-.navigation-icon--brand[data-icon="activity-bank"] {
-  background-position-x: 100%;
-}
-
-.mobile-nav__item--active .navigation-icon--brand,
-.more-item--active .navigation-icon--brand,
-.quick-actions > button:hover .navigation-icon--brand,
-.quick-actions > button:focus-visible .navigation-icon--brand,
-.today-hero-primary .navigation-icon--brand {
-  background-position-y: 50%;
-}
-
-:root[data-theme="dark"] .navigation-icon--brand {
-  background-position-y: 100%;
+:root[data-theme="dark"] .navigation-icon__variant--escuro,
+.sidebar .navigation-icon__variant--escuro {
+  display: block;
 }
 
 /* Desktop: rail compacto, tooltips no hover/foco e controles globais no topo. */
@@ -6086,7 +6068,6 @@ select {
     border: 0;
     border-radius: 0;
     background-color: transparent;
-    background-position-y: 100%;
     box-shadow: none;
   }
 

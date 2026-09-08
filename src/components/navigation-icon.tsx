@@ -31,15 +31,24 @@ const BRAND_ICON_NAMES = new Set<NavigationIconName>([
 ]);
 
 export function NavigationIcon({ name }: NavigationIconProps) {
+  if (BRAND_ICON_NAMES.has(name)) {
+    return (
+      <span className="navigation-icon navigation-icon--brand" data-icon={name} aria-hidden="true">
+        {(["claro", "roxo", "escuro"] as const).map((variant) => (
+          <img
+            className={`navigation-icon__variant navigation-icon__variant--${variant}`}
+            src={`/navigation-icons/${variant}/${name}.png`}
+            alt=""
+            key={variant}
+          />
+        ))}
+      </span>
+    );
+  }
+
   const symbol = `/navigation-icons.svg#${name}`;
   return (
-    <span
-      className={
-        BRAND_ICON_NAMES.has(name) ? "navigation-icon navigation-icon--brand" : "navigation-icon"
-      }
-      data-icon={name}
-      aria-hidden="true"
-    >
+    <span className="navigation-icon" data-icon={name} aria-hidden="true">
       <svg className="navigation-icon__glyph" viewBox="0 0 24 24" focusable="false">
         <use className="navigation-icon__secondary" href={`${symbol}-secondary`} />
         <use className="navigation-icon__base" href={`${symbol}-base`} />

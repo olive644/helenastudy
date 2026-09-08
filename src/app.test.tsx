@@ -59,8 +59,8 @@ describe("App", () => {
       const artwork = button.querySelector(`[data-icon="${icon}"]`);
       expect(artwork).toBeTruthy();
       expect(artwork?.classList.contains("navigation-icon--brand")).toBe(true);
-      expect(artwork?.querySelector(".navigation-icon__base")).toBeTruthy();
-      expect(artwork?.querySelector(".navigation-icon__accent")).toBeTruthy();
+      expect(artwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
+      expect(artwork?.querySelector(`img[src="/navigation-icons/claro/${icon}.png"]`)).toBeTruthy();
     });
   });
 
