@@ -10,3 +10,7 @@ test-results
 *.log
 .DS_Store
 .vercel
+.venv
+work
+src/graphify-out
+.claude/settings.json
