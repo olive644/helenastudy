@@ -2512,6 +2512,104 @@ select {
   margin-top: 1rem;
 }
 
+.local-room-scoreboard {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 0.3rem;
+  list-style: none;
+}
+
+.local-room-scoreboard li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 0.65rem;
+  border-radius: 12px;
+  gap: 0.6rem;
+  background: var(--soft);
+}
+
+.local-room-scoreboard__rank {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.local-room-scoreboard strong {
+  color: var(--violet-dark);
+}
+
+.local-room-round {
+  display: grid;
+  padding-top: 1.2rem;
+  gap: 0.9rem;
+}
+
+.local-room-round__progress {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.local-room-round__host-question {
+  display: flex;
+  min-height: 96px;
+  align-items: center;
+  justify-content: center;
+  padding: 1.1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  color: var(--violet-dark);
+  background: var(--lavender);
+  font-size: 1.4rem;
+  font-weight: 750;
+  gap: 0.6rem;
+}
+
+.local-room-round__actions {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.local-room-answer {
+  display: grid;
+  gap: 0.7rem;
+  justify-items: start;
+}
+
+.local-room-answer label {
+  display: grid;
+  width: 100%;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 720;
+}
+
+.local-room-answer input {
+  min-height: 44px;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--surface);
+  font-size: 1.05rem;
+}
+
+.local-room-finished {
+  display: grid;
+  padding-top: 0.5rem;
+  gap: 1rem;
+}
+
+.local-room-finished .secondary-button {
+  justify-self: center;
+}
+
 @media (max-width: 599px) {
   .local-room-intro,
   .local-room-settings {
@@ -2525,6 +2623,10 @@ select {
 
   .local-room-session header {
     align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .local-room-round__actions {
     flex-direction: column;
   }
 }

@@ -1,126 +1,100 @@
-import { DoorOpen, Play, Radio, Users, X } from "lucide-react";
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import {
-  addLocalParticipant,
-  createLocalRoomCode,
-  isValidLocalRoomCode,
-  localRoomChannelName,
-  sanitizeDisplayName,
-  type LocalRoomMessage,
-  type LocalRoomSettings,
-  type LocalRoomState,
-} from "../domain/local-room";
+import { Check, DoorOpen, Play, Radio, Trophy, Users, Volume2, X } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import type { LocalRoomSettings } from "../domain/local-room";
+import { selectFallbackEnglishVoice, speakEnglish } from "../data/speech-voice";
+import { useLocalRoom } from "../hooks/use-local-room";
 
-const DEFAULT_SETTINGS: LocalRoomSettings = {
-  activity: "listening",
-  difficulty: "mixed",
-  questionCount: 10,
-  timed: false,
-};
+const DEFAULT_SETTINGS: LocalRoomSettings = { difficulty: "mixed", questionCount: 10 };
+
+function playQuestionAudio(text: string) {
+  const voices = window.speechSynthesis?.getVoices() ?? [];
+  speakEnglish(text, {
+    voice: selectFallbackEnglishVoice(voices),
+    rate: 0.9,
+    onUnavailable: () => {},
+  });
+}
+
+function Scoreboard({
+  participants,
+}: {
+  participants: readonly { id: string; displayName: string; score: number }[];
+}) {
+  const ranked = [...participants].sort((a, b) => b.score - a.score);
+  return (
+    <ol className="local-room-scoreboard">
+      {ranked.map((participant, index) => (
+        <li key={participant.id}>
+          <span className="local-room-scoreboard__rank">{index + 1}</span>
+          <span>{participant.displayName}</span>
+          <strong>{participant.score}</strong>
+        </li>
+      ))}
+    </ol>
+  );
+}
 
 export function LocalRoom() {
-  const [role, setRole] = useState<"choose" | "host" | "participant">("choose");
-  const [room, setRoom] = useState<LocalRoomState>();
+  const room = useLocalRoom();
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
-  const [error, setError] = useState("");
-  const channelRef = useRef<BroadcastChannel | undefined>(undefined);
+  const [answer, setAnswer] = useState("");
+  const [lastResult, setLastResult] = useState<"correct" | "wrong" | undefined>(undefined);
+  const state = room.state;
 
-  useEffect(() => () => channelRef.current?.close(), []);
-
-  function connect(roomCode: string, onMessage: (message: LocalRoomMessage) => void) {
-    channelRef.current?.close();
-    const channel = new BroadcastChannel(localRoomChannelName(roomCode));
-    channel.addEventListener("message", (event: MessageEvent<LocalRoomMessage>) =>
-      onMessage(event.data),
-    );
-    channelRef.current = channel;
-    return channel;
-  }
-
-  function createRoom() {
-    const nextRoom: LocalRoomState = {
-      code: createLocalRoomCode(),
-      phase: "lobby",
-      settings: DEFAULT_SETTINGS,
-      participants: [],
-      questionIndex: 0,
-      createdAt: Date.now(),
-    };
-    setRoom(nextRoom);
-    setRole("host");
-    connect(nextRoom.code, (message) => {
-      if (message.type !== "join") return;
-      setRoom((current) => {
-        if (!current) return current;
-        const updated = addLocalParticipant(current, message.participant);
-        channelRef.current?.postMessage({
-          type: "state",
-          state: updated,
-        } satisfies LocalRoomMessage);
-        return updated;
-      });
-    });
+  const questionKey = state ? `${state.phase}-${state.questionIndex}` : undefined;
+  const [seenQuestionKey, setSeenQuestionKey] = useState(questionKey);
+  if (questionKey !== seenQuestionKey) {
+    setSeenQuestionKey(questionKey);
+    setAnswer("");
+    setLastResult(undefined);
   }
 
   function joinRoom(event: FormEvent) {
     event.preventDefault();
-    const roomCode = code.trim().toUpperCase();
-    const displayName = sanitizeDisplayName(name);
-    if (!isValidLocalRoomCode(roomCode)) {
-      setError("Digite um código local válido com cinco caracteres.");
-      return;
-    }
-    if (!displayName) {
-      setError("Escolha um nome de exibição.");
-      return;
-    }
-    setError("");
-    setRole("participant");
-    const participant = { id: crypto.randomUUID(), displayName, score: 0 };
-    const channel = connect(roomCode, (message) => {
-      if (message.type === "state") setRoom(message.state);
-    });
-    channel.postMessage({ type: "join", participant } satisfies LocalRoomMessage);
+    void room.joinRoom(code, name);
   }
 
-  function updateSettings(settings: Partial<LocalRoomSettings>) {
-    setRoom((current) =>
-      current ? { ...current, settings: { ...current.settings, ...settings } } : current,
-    );
+  async function submitAnswer(event: FormEvent) {
+    event.preventDefault();
+    if (!state?.currentQuestion || !answer.trim()) return;
+    const correct = await room.submitAnswer(state.questionIndex, answer);
+    setLastResult(correct ? "correct" : "wrong");
   }
 
-  function publish(state: LocalRoomState) {
-    setRoom(state);
-    channelRef.current?.postMessage({ type: "state", state } satisfies LocalRoomMessage);
-  }
-
-  if (role === "choose")
+  if (room.role === "choose")
     return (
       <div className="local-room-intro">
         <Radio size={34} />
         <div>
-          <h3>Modo Sala local</h3>
-          <p>Sincroniza a atividade entre abas deste navegador. Não funciona pela internet.</p>
+          <h3>Modo Sala</h3>
+          <p>Cada aluno entra pelo próprio celular com um código de cinco letras.</p>
         </div>
         <div className="local-room-intro__actions">
-          <button className="primary-button" type="button" onClick={createRoom}>
+          <button
+            className="primary-button"
+            type="button"
+            onClick={() => void room.createRoom(DEFAULT_SETTINGS)}
+          >
             <Users size={17} /> Criar sala
           </button>
-          <button className="secondary-button" type="button" onClick={() => setRole("participant")}>
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={() => room.setRole("participant")}
+          >
             <DoorOpen size={17} /> Entrar com código
           </button>
         </div>
+        {room.error && <p role="alert">{room.error}</p>}
       </div>
     );
 
-  if (role === "participant" && !room)
+  if (room.role === "participant" && !state)
     return (
       <form className="local-room-join" onSubmit={joinRoom}>
-        <h3>Entrar em uma sala local</h3>
-        <p>
-          Abra esta página em outra aba no mesmo dispositivo e use o código mostrado pelo professor.
-        </p>
+        <h3>Entrar em uma sala</h3>
+        <p>Peça o código de cinco letras para o professor e digite seu nome.</p>
         <label>
           <span>Código</span>
           <input
@@ -133,118 +107,156 @@ export function LocalRoom() {
           <span>Nome de exibição</span>
           <input value={name} onChange={(event) => setName(event.target.value)} maxLength={24} />
         </label>
-        {error && <p role="alert">{error}</p>}
+        {room.error && <p role="alert">{room.error}</p>}
         <button className="primary-button" type="submit">
           Entrar
         </button>
       </form>
     );
 
-  if (!room) return null;
-  const isHost = role === "host";
+  if (!state) return null;
+  const isHost = room.isHost;
+  const answered = state.answeredParticipantIds.includes(room.participantId);
+
   return (
     <div className="local-room-session">
       <header>
         <div>
-          <span>Sala local</span>
-          <strong>{room.code}</strong>
+          <span>Sala</span>
+          <strong>{state.code}</strong>
         </div>
         <p>
-          <Users size={16} /> {room.participants.length} participantes
+          <Users size={16} /> {state.participants.length} participantes
         </p>
       </header>
-      {room.phase === "lobby" ? (
-        <>
-          {isHost ? (
-            <div className="local-room-settings">
-              <label>
-                <span>Atividade</span>
-                <select
-                  value={room.settings.activity}
-                  onChange={(event) =>
-                    updateSettings({
-                      activity: event.target.value as LocalRoomSettings["activity"],
-                    })
-                  }
-                >
-                  <option value="listening">Quiz de escuta</option>
-                  <option value="bingo">Bingo educativo</option>
-                </select>
-              </label>
-              <label>
-                <span>Dificuldade</span>
-                <select
-                  value={room.settings.difficulty}
-                  onChange={(event) =>
-                    updateSettings({
-                      difficulty: event.target.value as LocalRoomSettings["difficulty"],
-                    })
-                  }
-                >
-                  <option value="mixed">Misto</option>
-                  <option value="easy">Fácil</option>
-                  <option value="medium">Médio</option>
-                  <option value="hard">Difícil</option>
-                </select>
-              </label>
-              <label>
-                <span>Perguntas</span>
-                <select
-                  value={room.settings.questionCount}
-                  onChange={(event) =>
-                    updateSettings({
-                      questionCount:
-                        event.target.value === "all"
-                          ? "all"
-                          : (Number(event.target.value) as 5 | 10 | 15),
-                    })
-                  }
-                >
-                  <option value="5">5</option>
-                  <option value="10">10</option>
-                  <option value="15">15</option>
-                  <option value="all">Todas</option>
-                </select>
-              </label>
-              <button
-                className="primary-button"
-                type="button"
-                onClick={() => publish({ ...room, phase: "playing" })}
+
+      {state.phase === "lobby" ? (
+        isHost ? (
+          <div className="local-room-settings">
+            <label>
+              <span>Dificuldade</span>
+              <select
+                value={state.settings.difficulty}
+                onChange={(event) =>
+                  void room.updateSettings({
+                    difficulty: event.target.value as LocalRoomSettings["difficulty"],
+                  })
+                }
               >
-                <Play size={17} /> Iniciar rodada
-              </button>
+                <option value="mixed">Misto</option>
+                <option value="easy">Fácil</option>
+                <option value="medium">Médio</option>
+                <option value="hard">Difícil</option>
+              </select>
+            </label>
+            <label>
+              <span>Perguntas</span>
+              <select
+                value={state.settings.questionCount}
+                onChange={(event) =>
+                  void room.updateSettings({
+                    questionCount:
+                      event.target.value === "all"
+                        ? "all"
+                        : (Number(event.target.value) as 5 | 10 | 15),
+                  })
+                }
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="all">Todas</option>
+              </select>
+            </label>
+            {state.participants.length > 0 && <Scoreboard participants={state.participants} />}
+            <button
+              className="primary-button"
+              type="button"
+              disabled={state.participants.length === 0}
+              onClick={() => void room.startRound()}
+            >
+              <Play size={17} /> Iniciar rodada
+            </button>
+            {room.error && <p role="alert">{room.error}</p>}
+          </div>
+        ) : (
+          <div className="local-room-waiting" role="status">
+            <Radio size={28} />
+            <h3>Aguardando o início</h3>
+            <p>O organizador controla esta sala. Código: {state.code}</p>
+          </div>
+        )
+      ) : state.phase === "playing" && state.currentQuestion ? (
+        <div className="local-room-round">
+          <p className="local-room-round__progress">
+            Pergunta {state.questionIndex + 1} de {state.totalQuestions}
+          </p>
+          {isHost ? (
+            <>
+              <div className="local-room-round__host-question">
+                <Volume2 size={20} />
+                <span>{state.currentQuestion.front}</span>
+              </div>
+              <p>
+                {state.answeredParticipantIds.length} de {state.participants.length} já responderam
+              </p>
+              <Scoreboard participants={state.participants} />
+              <div className="local-room-round__actions">
+                <button
+                  className="primary-button"
+                  type="button"
+                  onClick={() => void room.nextQuestion()}
+                >
+                  Próxima pergunta
+                </button>
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() => void room.endRoom()}
+                >
+                  Encerrar sala
+                </button>
+              </div>
+            </>
+          ) : answered ? (
+            <div className="local-room-waiting" role="status">
+              {lastResult === "correct" ? <Check size={28} /> : <Radio size={28} />}
+              <h3>{lastResult === "correct" ? "Boa! Resposta certa." : "Resposta enviada."}</h3>
+              <p>Aguardando o professor avançar para a próxima pergunta.</p>
             </div>
           ) : (
-            <div className="local-room-waiting" role="status">
-              <Radio size={28} />
-              <h3>Aguardando o início</h3>
-              <p>O organizador controla esta sala local.</p>
-            </div>
-          )}
-        </>
-      ) : room.phase === "playing" ? (
-        <div className="local-room-waiting" role="status">
-          <Play size={28} />
-          <h3>Rodada iniciada</h3>
-          <p>
-            {room.settings.activity === "listening" ? "Quiz de escuta" : "Bingo educativo"}{" "}
-            preparado para sincronização local.
-          </p>
-          {isHost && (
-            <button
-              className="secondary-button"
-              type="button"
-              onClick={() => publish({ ...room, phase: "finished" })}
-            >
-              Encerrar sala
-            </button>
+            <form className="local-room-answer" onSubmit={submitAnswer}>
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => playQuestionAudio(state.currentQuestion!.front)}
+              >
+                <Volume2 size={18} /> Ouvir de novo
+              </button>
+              <label>
+                <span>Digite a tradução</span>
+                <input
+                  value={answer}
+                  onChange={(event) => setAnswer(event.target.value)}
+                  autoFocus
+                />
+              </label>
+              <button className="primary-button" type="submit">
+                Responder
+              </button>
+            </form>
           )}
         </div>
       ) : (
-        <div className="local-room-waiting" role="status">
-          <X size={28} />
-          <h3>Sala encerrada</h3>
-          <p>Esta sessão local terminou.</p>
+        <div className="local-room-finished">
+          <div className="local-room-waiting" role="status">
+            <Trophy size={28} />
+            <h3>Sala encerrada</h3>
+          </div>
+          <Scoreboard participants={state.participants} />
+          <button className="secondary-button" type="button" onClick={room.reset}>
+            <X size={16} /> Sair
+          </button>
         </div>
       )}
     </div>
