@@ -60,13 +60,6 @@ export function TodayView({ workspace, dispatch, onNavigate }: TodayViewProps) {
             </button>
           </div>
         </div>
-        <img
-          className="today-helena"
-          src="/helena-mark.png"
-          alt="Rosto da Helena, a gata preta de olhos amarelos"
-          width="132"
-          height="132"
-        />
       </header>
 
       <section className="metric-row" aria-label="Resumo de hoje">

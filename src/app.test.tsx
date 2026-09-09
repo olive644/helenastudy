@@ -8,11 +8,12 @@ function navigate(label: string) {
 }
 
 describe("App", () => {
-  it("apresenta a central local com a Helena original", () => {
+  it("apresenta a central sem avisos ou mascote decorativa no cabeçalho", () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: "Espaço do aluno" })).toBeTruthy();
-    expect(screen.getByText(/dados salvos neste dispositivo/i)).toBeTruthy();
-    expect(screen.getByAltText(/rosto da helena/i).getAttribute("src")).toBe("/helena-mark.png");
+    expect(screen.queryByText(/dados salvos neste dispositivo/i)).toBeNull();
+    expect(screen.queryByLabelText("HelenaStudy")).toBeNull();
+    expect(screen.queryByAltText(/rosto da helena/i)).toBeNull();
     expect(screen.queryByText(/by oli/i)).toBeNull();
   });
 

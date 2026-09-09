@@ -2176,6 +2176,16 @@ body {
   }
 }
 
+/* Cabeçalho limpo e indicadores sem ornamentos pastéis. */
+.page-header__actions {
+  margin-left: auto;
+}
+
+.metric-row article::before {
+  display: none;
+  content: none;
+}
+
 /* Navegação desktop expansível e cabeçalho de marca. */
 html,
 body,

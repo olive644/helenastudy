@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "../hooks/use-theme";
-import { HelenaBrand } from "./helena-brand";
 import { NavigationIcon, type NavigationIconName } from "./navigation-icon";
 
 export type AppView =
@@ -266,13 +265,7 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
 export function PageHeader() {
   return (
     <header className="page-header">
-      <div className="page-header__brand">
-        <HelenaBrand />
-      </div>
       <div className="page-header__actions">
-        <span className="local-note">
-          <i aria-hidden="true" /> Dados salvos neste dispositivo
-        </span>
         <div className="page-header__theme">
           <ThemeToggle />
         </div>

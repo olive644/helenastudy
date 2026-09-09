@@ -50,12 +50,18 @@ test("concentra as ferramentas na navegação lateral", async ({ page }, testInf
     "aria-current",
     "page",
   );
+  await expect(sidebar.getByText("Espaço do aluno", { exact: true })).toBeHidden();
   await expect(page.getByRole("region", { name: "Ferramentas do Espaço do aluno" })).toHaveCount(0);
 
   const heroDecoration = await page
     .locator(".view-heading--today")
     .evaluate((element) => getComputedStyle(element, "::before").content);
   expect(heroDecoration).toBe("none");
+
+  const metricDecorations = await page
+    .locator(".metric-row article")
+    .evaluateAll((items) => items.map((item) => getComputedStyle(item, "::before").content));
+  expect(metricDecorations).toEqual(["none", "none", "none"]);
 
   const compactSidebarBox = await sidebar.boundingBox();
   const compactNavigationBox = await navigation.boundingBox();
@@ -102,7 +108,9 @@ test("anima o seletor entre os temas claro e escuro", async ({ page }, testInfo)
 
 test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }, testInfo) => {
   await expect(page.getByRole("heading", { name: "Espaço do aluno" })).toBeVisible();
-  await expect(page.getByAltText(/rosto da helena/i)).toHaveAttribute("src", "/helena-mark.png");
+  await expect(page.getByText("Dados salvos neste dispositivo")).toHaveCount(0);
+  await expect(page.getByLabel("HelenaStudy")).toHaveCount(0);
+  await expect(page.getByAltText(/rosto da helena/i)).toHaveCount(0);
 
   await page.getByRole("button", { name: "Agenda", exact: true }).click();
   await page.getByLabel(/o que precisa ser feito/i).fill("Revisar Simple Past");
