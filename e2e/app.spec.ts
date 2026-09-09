@@ -82,6 +82,23 @@ test("concentra as ferramentas na navegação lateral", async ({ page }, testInf
   );
 });
 
+test("anima o seletor entre os temas claro e escuro", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "Contrato visual do seletor desktop.");
+  const toggle = page.getByRole("button", { name: /tema claro/i });
+  const thumb = toggle.locator(".theme-toggle__thumb");
+  const initialThumbBox = await thumb.boundingBox();
+  expect(initialThumbBox).not.toBeNull();
+  await expect(toggle.locator('[data-icon="theme-light"]')).toBeVisible();
+  await expect(toggle.locator('[data-icon="theme-dark"]')).toBeVisible();
+
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("data-theme", "dark");
+  await expect(toggle).toHaveAccessibleName(/tema escuro/i);
+  await expect
+    .poll(async () => (await thumb.boundingBox())?.x)
+    .toBeGreaterThan(initialThumbBox!.x + 20);
+});
+
 test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }, testInfo) => {
   await expect(page.getByRole("heading", { name: "Espaço do aluno" })).toBeVisible();
   await expect(page.getByAltText(/rosto da helena/i)).toHaveAttribute("src", "/helena-mark.png");
