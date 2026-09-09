@@ -6223,7 +6223,7 @@ select {
   .sidebar .nav-item--active:not(:disabled):hover {
     border-color: rgb(255 255 255 / 12%);
     background: linear-gradient(145deg, #8a55f5, #6f2ee8);
-    box-shadow: 0 8px 20px rgb(124 58 237 / 32%);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
   }
 
   .sidebar .navigation-icon,
