@@ -5,6 +5,9 @@ import { toDateKey, type WorkspaceAction, type WorkspaceState } from "../domain/
 const HomeworkSection = lazy(() =>
   import("./homework-section").then((module) => ({ default: module.HomeworkSection })),
 );
+const GoogleCalendarPanel = lazy(() =>
+  import("./google-calendar-panel").then((module) => ({ default: module.GoogleCalendarPanel })),
+);
 
 type PlannerViewProps = {
   workspace: WorkspaceState;
@@ -253,6 +256,10 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
           )}
         </section>
       </div>
+
+      <Suspense fallback={null}>
+        <GoogleCalendarPanel />
+      </Suspense>
 
       <Suspense fallback={null}>
         <HomeworkSection workspace={workspace} dispatch={dispatch} />
