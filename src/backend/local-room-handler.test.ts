@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createLocalRoomHandler } from "./local-room-handler";
 import type { KvStore } from "./kv-store";
+import type { PublicLocalRoomState } from "../domain/local-room";
 
 const origin = "https://helena.example";
 
@@ -27,22 +28,19 @@ function post(action: string, body: unknown): Request {
   });
 }
 
-function get(action: string, params: Record<string, string>): Request {
-  const url = new URL(`${origin}/api/local-room`);
-  url.searchParams.set("action", action);
-  for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
-  return new Request(url);
-}
-
 let handler: (request: Request) => Promise<Response>;
+let publish: ReturnType<typeof vi.fn>;
 let codeCounter = 0;
 let idCounter = 0;
 
 beforeEach(() => {
   codeCounter = 0;
   idCounter = 0;
+  publish = vi.fn().mockResolvedValue(undefined);
   handler = createLocalRoomHandler({
     store: createMemoryStore(),
+    publish: publish as (code: string, publicState: PublicLocalRoomState) => Promise<void>,
+    streamUrl: (code) => `https://helenastudy-rtdb.firebaseio.com/rooms/${code}.json`,
     now: () => 1_000,
     randomCode: () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[codeCounter++]!.repeat(5),
     randomId: () => `id-${idCounter++}`,
@@ -53,19 +51,26 @@ async function createRoomViaApi() {
   const response = await handler(
     post("create", { settings: { difficulty: "mixed", questionCount: 5 } }),
   );
-  return (await response.json()) as { code: string; hostToken: string };
+  return (await response.json()) as { code: string; hostToken: string; streamUrl: string };
 }
 
 describe("handler da sala local", () => {
-  it("cria uma sala e devolve o token do host sem expor no estado público", async () => {
+  it("cria uma sala, devolve o token do host e a URL de streaming público", async () => {
     const response = await handler(
       post("create", { settings: { difficulty: "easy", questionCount: 10 } }),
     );
     expect(response.status).toBe(201);
-    const payload = (await response.json()) as { code: string; hostToken: string; state: object };
+    const payload = (await response.json()) as {
+      code: string;
+      hostToken: string;
+      state: object;
+      streamUrl: string;
+    };
     expect(payload.code).toBeTruthy();
     expect(payload.hostToken).toBeTruthy();
     expect(payload.state).not.toHaveProperty("hostToken");
+    expect(payload.streamUrl).toContain(payload.code);
+    expect(publish).toHaveBeenCalledWith(payload.code, expect.objectContaining({ phase: "lobby" }));
   });
 
   it("recusa configurações inválidas na criação", async () => {
@@ -75,19 +80,18 @@ describe("handler da sala local", () => {
     expect(response.status).toBe(400);
   });
 
-  it("permite participante entrar e consultar o estado por código", async () => {
+  it("permite participante entrar e recebe a URL de streaming", async () => {
     const { code } = await createRoomViaApi();
     const joinResponse = await handler(post("join", { code, displayName: "Ana" }));
     expect(joinResponse.status).toBe(200);
     const joinPayload = (await joinResponse.json()) as {
       participantId: string;
       state: { participants: unknown[] };
+      streamUrl: string;
     };
     expect(joinPayload.participantId).toBeTruthy();
     expect(joinPayload.state.participants).toHaveLength(1);
-
-    const stateResponse = await handler(get("state", { code }));
-    expect(stateResponse.status).toBe(200);
+    expect(joinPayload.streamUrl).toContain(code);
   });
 
   it("recusa entrada em sala inexistente ou já iniciada", async () => {

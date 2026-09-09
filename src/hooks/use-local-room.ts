@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { isValidLocalRoomCode, sanitizeDisplayName } from "../domain/local-room";
 import type { LocalRoomSettings, PublicLocalRoomState } from "../domain/local-room";
-
-const POLL_INTERVAL_MS = 1500;
 
 type Role = "choose" | "host" | "participant";
 
@@ -24,33 +22,35 @@ export function useLocalRoom() {
   const [participantId, setParticipantId] = useState("");
   const hostTokenRef = useRef("");
   const codeRef = useRef("");
-  const pollTimer = useRef<number | undefined>(undefined);
+  const eventSourceRef = useRef<EventSource | undefined>(undefined);
 
-  const stopPolling = useCallback(() => {
-    if (pollTimer.current !== undefined) window.clearInterval(pollTimer.current);
-    pollTimer.current = undefined;
-  }, []);
+  function stopStreaming() {
+    eventSourceRef.current?.close();
+    eventSourceRef.current = undefined;
+  }
 
-  const startPolling = useCallback(
-    (code: string) => {
-      stopPolling();
-      pollTimer.current = window.setInterval(async () => {
-        try {
-          const response = await fetch(
-            `/api/local-room?action=state&code=${encodeURIComponent(code)}`,
-          );
-          if (!response.ok) return;
-          const payload = (await response.json()) as { state: PublicLocalRoomState };
-          setState(payload.state);
-        } catch {
-          // Falha passageira de rede: mantém o último estado e tenta de novo no próximo tick.
-        }
-      }, POLL_INTERVAL_MS);
-    },
-    [stopPolling],
-  );
+  // Conecta direto no Realtime Database do Firebase (fora do domínio do
+  // app) por Server-Sent Events nativos do navegador — sem SDK, sem
+  // polling: cada mudança que o servidor grava em /rooms/<code> chega aqui
+  // instantaneamente.
+  function startStreaming(streamUrl: string) {
+    stopStreaming();
+    const source = new EventSource(streamUrl);
+    source.addEventListener("put", (event) => {
+      try {
+        const payload = JSON.parse((event as MessageEvent<string>).data) as {
+          path: string;
+          data: PublicLocalRoomState | null;
+        };
+        if (payload.path === "/" && payload.data) setState(payload.data);
+      } catch {
+        // Evento malformado: ignora e espera o próximo.
+      }
+    });
+    eventSourceRef.current = source;
+  }
 
-  useEffect(() => stopPolling, [stopPolling]);
+  useEffect(() => stopStreaming, []);
 
   async function createRoom(settings: LocalRoomSettings) {
     setError("");
@@ -59,12 +59,13 @@ export function useLocalRoom() {
         code: string;
         hostToken: string;
         state: PublicLocalRoomState;
+        streamUrl: string;
       }>("create", { settings });
       hostTokenRef.current = payload.hostToken;
       codeRef.current = payload.code;
       setState(payload.state);
       setRole("host");
-      startPolling(payload.code);
+      startStreaming(payload.streamUrl);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Não foi possível criar a sala.");
     }
@@ -83,15 +84,16 @@ export function useLocalRoom() {
       return;
     }
     try {
-      const payload = await requestRoom<{ participantId: string; state: PublicLocalRoomState }>(
-        "join",
-        { code: roomCode, displayName },
-      );
+      const payload = await requestRoom<{
+        participantId: string;
+        state: PublicLocalRoomState;
+        streamUrl: string;
+      }>("join", { code: roomCode, displayName });
       setParticipantId(payload.participantId);
       codeRef.current = roomCode;
       setState(payload.state);
       setRole("participant");
-      startPolling(roomCode);
+      startStreaming(payload.streamUrl);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Não foi possível entrar na sala.");
     }
@@ -141,7 +143,7 @@ export function useLocalRoom() {
         hostToken: hostTokenRef.current,
       });
       setState(payload.state);
-      stopPolling();
+      stopStreaming();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Não foi possível encerrar a sala.");
     }
@@ -167,7 +169,7 @@ export function useLocalRoom() {
   }
 
   function reset() {
-    stopPolling();
+    stopStreaming();
     setState(undefined);
     setError("");
     setRole("choose");

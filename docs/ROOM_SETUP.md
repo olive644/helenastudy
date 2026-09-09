@@ -6,65 +6,108 @@ jogar o quiz de escuta em tempo real com placar ao vivo.
 
 Como o HelenaStudy é uma SPA estática na Vercel (sem servidor tradicional
 nem banco de dados), o estado de cada sala precisa ficar em algum lugar
-acessível pelos dispositivos de todos os participantes — não dá para usar só
-o navegador de uma pessoa como no modo anterior. Isso exige um banco de
-dados chave-valor (Redis) conectado ao projeto na Vercel, que só pode ser
-criado por quem tem acesso ao painel — não pode ser feito pelo Claude Code.
+acessível pelos dispositivos de todos os participantes. Usamos o
+**Firebase Realtime Database**: o servidor (função na Vercel) é o único que
+grava; cada navegador escuta atualizações direto do Firebase por Server-Sent
+Events nativos (sem instalar o SDK do Firebase, sem custo de bundle, e sem
+polling — a atualização chega na hora). Isso exige um projeto Firebase, que
+só pode ser criado por quem tem acesso ao Google Cloud — não pode ser feito
+pelo Claude Code.
 
-## 1. Criar o banco de dados na Vercel
+## 1. Criar (ou reaproveitar) o projeto e ativar o Realtime Database
 
-1. Acesse o [painel do projeto `helenastudy` na Vercel](https://vercel.com/meuludi/helenastudy).
-2. Vá na aba **Storage**.
-3. Clique em **Create Database** e escolha **Upstash — Redis** (aparece no
-   Marketplace da Vercel; tem um plano gratuito que é mais do que suficiente
-   para o uso do Modo Sala).
-4. Siga o assistente de criação. Na etapa de conectar a um projeto, conecte
-   ao projeto `helenastudy` no ambiente **Production** (e também
-   **Preview**, se quiser testar em PRs).
+1. Acesse o [console do Firebase](https://console.firebase.google.com/).
+2. Se o projeto Google Cloud que você já usa para o Google Agenda
+   (`ideiasteam`, ou o que você tiver criado) ainda não tem o Firebase
+   ativado, clique em **Adicionar projeto** e selecione esse projeto
+   existente em vez de criar um novo — Firebase e Google Cloud compartilham
+   o mesmo projeto por baixo dos panos.
+3. No menu lateral, vá em **Build → Realtime Database** e clique em
+   **Criar banco de dados**. Escolha a região (`us-central1` é uma opção
+   segura) e comece em **modo bloqueado** (vamos definir as regras abaixo).
+4. Anote a **URL do banco** mostrada no topo da página (algo como
+   `https://SEU-PROJETO-default-rtdb.firebaseio.com`).
 
-## 2. Conferir as variáveis de ambiente
+## 2. Definir as regras de segurança
 
-Ao conectar o banco, a Vercel adiciona automaticamente as variáveis de
-ambiente do projeto. Confira em **Settings → Environment Variables** se
-alguma destas combinações apareceu (o nome exato varia um pouco conforme a
-integração):
+Na aba **Regras** do Realtime Database, substitua pelo seguinte e publique:
 
-- `KV_REST_API_URL` e `KV_REST_API_TOKEN`, **ou**
-- `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN`
+```json
+{
+  "rules": {
+    "rooms": {
+      "$code": {
+        ".read": true,
+        ".write": false
+      }
+    },
+    "private-rooms": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}
+```
 
-O código já lê qualquer uma das duas combinações, então não precisa
-renomear nada — só confirmar que uma delas está presente em **Production**.
+- `/rooms/<código>` é a projeção pública da sala (participantes, pergunta
+  atual, placar) — qualquer navegador pode **ler**, ninguém pode escrever
+  diretamente.
+- `/private-rooms/<código>` guarda o estado completo (com o token do
+  organizador e as respostas certas) — ninguém lê nem escreve direto por
+  aqui, nem autenticado.
 
-## 3. Novo deploy
+O servidor (a função da Vercel) escreve nos dois caminhos usando uma conta
+de serviço com privilégio de administrador, que **ignora** essas regras —
+por isso elas protegem os dados mesmo assim.
 
-Depois de conectar o banco, um novo deploy é necessário para as variáveis
-de ambiente entrarem em vigor (a Vercel geralmente já dispara um deploy
-automático ao conectar um Storage; se não disparar, faça um redeploy manual
-pelo painel).
+## 3. Criar a conta de serviço
+
+1. No console do Firebase, vá em **Configurações do projeto → Contas de
+   serviço**.
+2. Clique em **Gerar nova chave privada** e confirme. Um arquivo `.json` é
+   baixado — guarde-o com cuidado, ele dá acesso total ao banco.
+3. Abra o arquivo. Você vai precisar de dois campos dele:
+   - `client_email`
+   - `private_key`
+
+## 4. Configurar as variáveis de ambiente na Vercel
+
+No painel do projeto na Vercel (**Settings → Environment Variables**),
+nunca num arquivo do repositório:
+
+| Variável                | Valor                                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `FIREBASE_DATABASE_URL` | a URL anotada no passo 1                                                                                                       |
+| `FIREBASE_CLIENT_EMAIL` | o campo `client_email` do arquivo baixado                                                                                      |
+| `FIREBASE_PRIVATE_KEY`  | o campo `private_key` do arquivo baixado, colado como está (com os `\n` literais — o código já converte para quebras de linha) |
+
+Depois de configurar, faça um novo deploy para as variáveis entrarem em
+vigor.
 
 ## Como funciona por trás
 
 - `POST /api/local-room?action=create` — o professor cria a sala; recebe um
-  código de cinco letras e um token de organizador (guardado só no
-  navegador dele, nunca exposto aos alunos).
+  código de cinco letras, um token de organizador (guardado só no
+  navegador dele) e a URL de streaming pública da sala.
 - `POST /api/local-room?action=join` — cada aluno entra com o código e um
-  nome de exibição.
-- `GET /api/local-room?action=state&code=XXXXX` — todo mundo consulta o
-  estado da sala a cada ~1,5s (participantes, pergunta atual, placar).
+  nome de exibição, e recebe a mesma URL de streaming.
+- O navegador de cada participante conecta direto em
+  `https://SEU-PROJETO-default-rtdb.firebaseio.com/rooms/<código>.json`
+  usando `EventSource` (API nativa do navegador) e recebe cada atualização
+  em tempo real, sem precisar perguntar de novo.
 - `POST ?action=start` / `?action=next` / `?action=end` — só o organizador
   pode iniciar a rodada, avançar pergunta ou encerrar (validado pelo token).
 - `POST ?action=answer` — cada aluno envia sua resposta; a correção é
-  conferida no servidor (o baralho completo com as respostas certas nunca é
-  enviado para o navegador de ninguém, só o texto da palavra atual).
+  conferida no servidor (o baralho completo com as respostas certas fica só
+  em `/private-rooms`, nunca é enviado para o navegador de ninguém).
 
-Cada sala expira sozinha no banco depois de 4 horas sem uso, então não
-acumula lixo.
+Cada sala expira sozinha no armazenamento privado depois de 4 horas sem
+uso (a projeção pública em `/rooms` não expira sozinha — é só o estado
+final de uma sala já encerrada, sem dado sensível, então não tem pressa
+para limpar).
 
 ## Limitações desta primeira versão
 
 - Só o **quiz de escuta** roda dentro da sala por enquanto (o bingo digital
   ainda não tem um modelo de sincronização definido — fica para uma
   próxima etapa).
-- Sincronização por consulta periódica (polling a cada 1,5s), não é
-  instantânea como um WebSocket — para uma atividade de sala de aula isso é
-  imperceptível na prática.

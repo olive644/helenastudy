@@ -14,11 +14,14 @@ import {
   updateRoomSettings,
   type LocalRoomSettings,
   type LocalRoomState,
+  type PublicLocalRoomState,
 } from "../domain/local-room";
 import type { KvStore } from "./kv-store";
 
 export type LocalRoomHandlerDependencies = {
   store: KvStore;
+  publish(code: string, publicState: PublicLocalRoomState): Promise<void>;
+  streamUrl(code: string): string;
   now?(): number;
   randomCode?(): string;
   randomId?(): string;
@@ -73,14 +76,21 @@ async function loadRoom(store: KvStore, code: string): Promise<LocalRoomState | 
   }
 }
 
-async function saveRoom(store: KvStore, state: LocalRoomState): Promise<void> {
-  await store.set(localRoomStorageKey(state.code), JSON.stringify(state), ROOM_TTL_SECONDS);
-}
-
 export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencies) {
   const now = () => dependencies.now?.() ?? Date.now();
   const randomCode = () => dependencies.randomCode?.() ?? createLocalRoomCode();
   const randomId = () => dependencies.randomId?.() ?? crypto.randomUUID();
+
+  async function saveRoom(state: LocalRoomState): Promise<PublicLocalRoomState> {
+    await dependencies.store.set(
+      localRoomStorageKey(state.code),
+      JSON.stringify(state),
+      ROOM_TTL_SECONDS,
+    );
+    const publicState = toPublicRoomState(state);
+    await dependencies.publish(state.code, publicState);
+    return publicState;
+  }
 
   return async function handleLocalRoom(request: Request): Promise<Response> {
     const url = new URL(request.url);
@@ -98,8 +108,13 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
       const code = randomCode();
       const hostToken = randomId();
       const state = createRoom(settings, { code, hostToken, now: now() });
-      await saveRoom(dependencies.store, state);
-      return jsonResponse(201, { code, hostToken, state: toPublicRoomState(state) });
+      const publicState = await saveRoom(state);
+      return jsonResponse(201, {
+        code,
+        hostToken,
+        state: publicState,
+        streamUrl: dependencies.streamUrl(code),
+      });
     }
 
     if (action === "join" && request.method === "POST") {
@@ -122,16 +137,12 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
       if (updated === state && state.phase !== "lobby") {
         return jsonResponse(409, { error: "Esta sala já começou a atividade." });
       }
-      await saveRoom(dependencies.store, updated);
-      return jsonResponse(200, { participantId, state: toPublicRoomState(updated) });
-    }
-
-    if (action === "state" && request.method === "GET") {
-      const code = (url.searchParams.get("code") ?? "").toUpperCase();
-      if (!isValidLocalRoomCode(code)) return jsonResponse(400, { error: "Código inválido." });
-      const state = await loadRoom(dependencies.store, code);
-      if (!state) return jsonResponse(404, { error: "Sala não encontrada." });
-      return jsonResponse(200, { state: toPublicRoomState(state) });
+      const publicState = await saveRoom(updated);
+      return jsonResponse(200, {
+        participantId,
+        state: publicState,
+        streamUrl: dependencies.streamUrl(code),
+      });
     }
 
     if (action === "settings" && request.method === "POST") {
@@ -146,8 +157,8 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
         body["settings"] as Partial<LocalRoomSettings>,
         now(),
       );
-      await saveRoom(dependencies.store, updated);
-      return jsonResponse(200, { state: toPublicRoomState(updated) });
+      const publicState = await saveRoom(updated);
+      return jsonResponse(200, { state: publicState });
     }
 
     if (action === "start" && request.method === "POST") {
@@ -158,8 +169,8 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
       if (started.phase !== "playing") {
         return jsonResponse(409, { error: "É preciso ao menos um participante para iniciar." });
       }
-      await saveRoom(dependencies.store, started);
-      return jsonResponse(200, { state: toPublicRoomState(started) });
+      const publicState = await saveRoom(started);
+      return jsonResponse(200, { state: publicState });
     }
 
     if (action === "answer" && request.method === "POST") {
@@ -174,8 +185,8 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
       const state = await loadRoom(dependencies.store, code);
       if (!state) return jsonResponse(404, { error: "Sala não encontrada." });
       const result = submitRoomAnswer(state, { participantId, questionIndex, answer, now: now() });
-      await saveRoom(dependencies.store, result.state);
-      return jsonResponse(200, { correct: result.correct, state: toPublicRoomState(result.state) });
+      const publicState = await saveRoom(result.state);
+      return jsonResponse(200, { correct: result.correct, state: publicState });
     }
 
     if (action === "next" && request.method === "POST") {
@@ -183,8 +194,8 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
       const state = await requireHost(dependencies.store, body);
       if (state instanceof Response) return state;
       const advanced = advanceRoomQuestion(state, now());
-      await saveRoom(dependencies.store, advanced);
-      return jsonResponse(200, { state: toPublicRoomState(advanced) });
+      const publicState = await saveRoom(advanced);
+      return jsonResponse(200, { state: publicState });
     }
 
     if (action === "end" && request.method === "POST") {
@@ -192,8 +203,8 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
       const state = await requireHost(dependencies.store, body);
       if (state instanceof Response) return state;
       const ended = endRoom(state, now());
-      await saveRoom(dependencies.store, ended);
-      return jsonResponse(200, { state: toPublicRoomState(ended) });
+      const publicState = await saveRoom(ended);
+      return jsonResponse(200, { state: publicState });
     }
 
     return jsonResponse(404, { error: "Ação desconhecida." });

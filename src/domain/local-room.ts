@@ -60,7 +60,7 @@ export function sanitizeDisplayName(value: string): string {
 }
 
 export function localRoomStorageKey(code: string): string {
-  return `helena-local-room:${code.toUpperCase()}`;
+  return `private-rooms/${code.toUpperCase()}`;
 }
 
 export function createRoom(
