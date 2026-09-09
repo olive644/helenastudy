@@ -2186,6 +2186,16 @@ body {
   content: none;
 }
 
+@media (min-width: 900px) {
+  .app-shell > .sidebar:not(.sidebar--expanded) .nav-item > span:last-child {
+    display: none;
+  }
+
+  .app-shell > .sidebar.sidebar--expanded .nav-item > span:last-child {
+    display: block;
+  }
+}
+
 /* Navegação desktop expansível e cabeçalho de marca. */
 html,
 body,
