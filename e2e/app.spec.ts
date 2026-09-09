@@ -84,8 +84,9 @@ test("concentra as ferramentas na navegação lateral", async ({ page }, testInf
 
 test("anima o seletor entre os temas claro e escuro", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "Contrato visual do seletor desktop.");
-  const toggle = page.getByRole("button", { name: /tema claro/i });
+  const toggle = page.locator(".page-header__theme .theme-toggle");
   const thumb = toggle.locator(".theme-toggle__thumb");
+  await expect(toggle).toHaveAccessibleName(/tema claro/i);
   const initialThumbBox = await thumb.boundingBox();
   expect(initialThumbBox).not.toBeNull();
   await expect(toggle.locator('[data-icon="theme-light"]')).toBeVisible();
