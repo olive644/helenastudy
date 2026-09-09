@@ -1,8 +1,7 @@
 import { Check, Plus } from "lucide-react";
-import { useState, type Dispatch, type FormEvent } from "react";
+import { lazy, Suspense, useState, type Dispatch, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
 import { ListeningQuiz } from "../components/listening-quiz";
-import { LocalRoom } from "../components/local-room";
 import {
   buildBingoLabels,
   dueFlashcards,
@@ -13,6 +12,10 @@ import {
   type WorkspaceAction,
   type WorkspaceState,
 } from "../domain/workspace";
+
+const LocalRoom = lazy(() =>
+  import("../components/local-room").then((module) => ({ default: module.LocalRoom })),
+);
 
 type LearnViewProps = { workspace: WorkspaceState; dispatch: Dispatch<WorkspaceAction> };
 
@@ -351,7 +354,9 @@ export function LearnView({ workspace, dispatch }: LearnViewProps) {
               subjectId={selectedSubject.id}
             />
           ) : (
-            <LocalRoom />
+            <Suspense fallback={null}>
+              <LocalRoom />
+            </Suspense>
           )}
         </section>
 

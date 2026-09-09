@@ -7,7 +7,7 @@ export type ListeningCard = Pick<Flashcard, "id" | "front" | "back"> & {
   category?: string;
 };
 
-const STARTER_DECK: readonly ListeningCard[] = LISTENING_VOCABULARY.map((item) => ({
+export const STARTER_DECK: readonly ListeningCard[] = LISTENING_VOCABULARY.map((item) => ({
   id: `starter-${item.id}`,
   front: item.english,
   back: item.translation,

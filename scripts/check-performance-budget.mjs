@@ -8,10 +8,10 @@ const assetsDirectory = new URL("../dist/assets/", import.meta.url);
 // tema): o hook de tema e o botão adicionam ~1 KiB, já com os ícones
 // otimizados para o menor path possível. Revisar se crescer de novo.
 const MAX_INITIAL_JS_BYTES = 222 * 1024;
-// 302 KiB desde a integração com o Google Agenda: o painel é carregado sob
-// demanda (lazy), mas o hook e a UI de conectar/listar eventos ainda somam
-// ~2.7 KiB ao total da aplicação. Revisar se crescer de novo.
-const MAX_TOTAL_JS_BYTES = 302 * 1024;
+// 308 KiB desde o Modo Sala com multiplayer real (sala.tsx virou seu próprio
+// chunk sob demanda, ~10 KiB, mais o hook de polling e a logica de domínio
+// da sala). Revisar se crescer de novo.
+const MAX_TOTAL_JS_BYTES = 308 * 1024;
 const MAX_TTS_WORKER_BYTES = 2.25 * 1024 * 1024;
 const MAX_TTS_WASM_BYTES = 22 * 1024 * 1024;
 const manifest = JSON.parse(await readFile(new URL(".vite/manifest.json", distDirectory), "utf8"));
