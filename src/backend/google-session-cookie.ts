@@ -15,10 +15,12 @@ function deriveKey(secret: string): Buffer {
   return raw;
 }
 
+const AUTH_TAG_LENGTH = 16;
+
 export function encryptSession(secret: string, tokens: GoogleTokens): string {
   const key = deriveKey(secret);
   const iv = randomBytes(12);
-  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const cipher = createCipheriv("aes-256-gcm", key, iv, { authTagLength: AUTH_TAG_LENGTH });
   const plaintext = Buffer.from(JSON.stringify(tokens), "utf8");
   const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
   const tag = cipher.getAuthTag();
@@ -30,9 +32,9 @@ export function decryptSession(secret: string, cookieValue: string): GoogleToken
     const key = deriveKey(secret);
     const raw = Buffer.from(cookieValue, "base64url");
     const iv = raw.subarray(0, 12);
-    const tag = raw.subarray(12, 28);
-    const ciphertext = raw.subarray(28);
-    const decipher = createDecipheriv("aes-256-gcm", key, iv);
+    const tag = raw.subarray(12, 12 + AUTH_TAG_LENGTH);
+    const ciphertext = raw.subarray(12 + AUTH_TAG_LENGTH);
+    const decipher = createDecipheriv("aes-256-gcm", key, iv, { authTagLength: AUTH_TAG_LENGTH });
     decipher.setAuthTag(tag);
     const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
     const tokens = JSON.parse(plaintext.toString("utf8")) as GoogleTokens;
