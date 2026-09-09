@@ -128,6 +128,14 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
           <span aria-hidden="true" />
           <span aria-hidden="true" />
         </button>
+        {expanded && (
+          <div className="sidebar__brand" aria-label="HelenaStudy">
+            <img src="/helena-mark.png" alt="" width="36" height="36" />
+            <strong>
+              Helena<span>Study</span>
+            </strong>
+          </div>
+        )}
       </div>
       <nav className="sidebar__nav" aria-label="Navegação principal">
         {NAVIGATION_SECTIONS.map((section) => (

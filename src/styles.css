@@ -2176,26 +2176,6 @@ body {
   }
 }
 
-/* Cabeçalho limpo e indicadores sem ornamentos pastéis. */
-.page-header__actions {
-  margin-left: auto;
-}
-
-.metric-row article::before {
-  display: none;
-  content: none;
-}
-
-@media (min-width: 900px) {
-  .app-shell > .sidebar:not(.sidebar--expanded) .nav-item > span:last-child {
-    display: none;
-  }
-
-  .app-shell > .sidebar.sidebar--expanded .nav-item > span:last-child {
-    display: block;
-  }
-}
-
 /* Navegação desktop expansível e cabeçalho de marca. */
 html,
 body,
@@ -6649,5 +6629,57 @@ select {
   .theme-toggle__moon,
   .theme-toggle__sun {
     animation: none;
+  }
+}
+
+/* Ajustes finais do cabeçalho, indicadores e marca do menu expandido. */
+.page-header__actions {
+  margin-left: auto;
+}
+
+.metric-row article::before {
+  display: none;
+  content: none;
+}
+
+@media (min-width: 900px) {
+  .app-shell > .sidebar:not(.sidebar--expanded) .nav-item > span:last-child {
+    display: none;
+  }
+
+  .app-shell > .sidebar.sidebar--expanded .nav-item > span:last-child {
+    display: block;
+  }
+
+  .app-shell > .sidebar.sidebar--expanded > .sidebar__top {
+    gap: 10px;
+  }
+
+  .sidebar__brand {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 7px;
+    color: #fff9ef;
+  }
+
+  .sidebar__brand img {
+    display: block;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgb(0 0 0 / 28%));
+  }
+
+  .sidebar__brand strong {
+    font-size: 0.92rem;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    white-space: nowrap;
+  }
+
+  .sidebar__brand strong span {
+    color: #a685fa;
   }
 }

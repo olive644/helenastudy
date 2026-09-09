@@ -75,6 +75,7 @@ test("concentra as ferramentas na navegação lateral", async ({ page }, testInf
   await page.getByRole("button", { name: "Expandir menu lateral" }).click();
   await expect(sidebar).toHaveClass(/sidebar--expanded/);
   await expect(sidebar).toHaveCSS("width", "260px");
+  await expect(sidebar.getByLabel("HelenaStudy")).toBeVisible();
   await expect(sidebar.getByText("Principal", { exact: true })).toBeVisible();
   await expect(sidebar.getByText("Espaço do aluno", { exact: true })).toBeVisible();
 
