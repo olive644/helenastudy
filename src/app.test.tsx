@@ -26,6 +26,7 @@ describe("App", () => {
     fireEvent.click(toggle);
     expect(within(sidebar).getByRole("button", { name: "Recolher menu lateral" })).toBeTruthy();
     expect(sidebar.classList.contains("sidebar--expanded")).toBe(true);
+    expect(within(sidebar).getByLabelText("HelenaStudy")).toBeTruthy();
     expect(within(sidebar).getByText("Principal")).toBeTruthy();
   });
 
