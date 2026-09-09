@@ -90,15 +90,23 @@ function NavigationButton({
 function ThemeToggle({ showLabel }: { showLabel?: boolean }) {
   const { theme, toggleTheme } = useTheme();
   const label = theme === "dark" ? "Tema escuro" : "Tema claro";
-  const icon: NavigationIconName = theme === "dark" ? "theme-dark" : "theme-light";
   return (
     <button
       className="theme-toggle"
       type="button"
+      data-theme={theme}
       onClick={toggleTheme}
       aria-label={`${label}. Toque para trocar de tema.`}
     >
-      <NavigationIcon name={icon} />
+      <span className="theme-toggle__track" aria-hidden="true">
+        <span className="theme-toggle__celestial theme-toggle__moon">
+          <NavigationIcon name="theme-dark" />
+        </span>
+        <span className="theme-toggle__celestial theme-toggle__sun">
+          <NavigationIcon name="theme-light" />
+        </span>
+        <span className="theme-toggle__thumb" />
+      </span>
       {showLabel && <span>{label}</span>}
     </button>
   );
