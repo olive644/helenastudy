@@ -1,6 +1,7 @@
 import {
   addLocalParticipant,
   advanceRoomQuestion,
+  canAdvanceRoomQuestion,
   createLocalRoomCode,
   createRoom,
   endRoom,
@@ -54,6 +55,12 @@ function isSettingsPayload(value: unknown): value is Partial<LocalRoomSettings> 
   ) {
     return false;
   }
+  if (
+    "roundSeconds" in candidate &&
+    ![15, 30, 45, 60].includes(candidate["roundSeconds"] as number)
+  ) {
+    return false;
+  }
   return true;
 }
 
@@ -104,6 +111,7 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
       const settings: LocalRoomSettings = {
         difficulty: (body["settings"] as Partial<LocalRoomSettings>).difficulty ?? "mixed",
         questionCount: (body["settings"] as Partial<LocalRoomSettings>).questionCount ?? 10,
+        roundSeconds: (body["settings"] as Partial<LocalRoomSettings>).roundSeconds ?? 30,
       };
       const code = randomCode();
       const hostToken = randomId();
@@ -186,13 +194,22 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
       if (!state) return jsonResponse(404, { error: "Sala não encontrada." });
       const result = submitRoomAnswer(state, { participantId, questionIndex, answer, now: now() });
       const publicState = await saveRoom(result.state);
-      return jsonResponse(200, { correct: result.correct, state: publicState });
+      return jsonResponse(200, {
+        correct: result.correct,
+        xpChange: result.xpChange,
+        state: publicState,
+      });
     }
 
     if (action === "next" && request.method === "POST") {
       const body = await readJsonBody(request);
       const state = await requireHost(dependencies.store, body);
       if (state instanceof Response) return state;
+      if (!canAdvanceRoomQuestion(state, now())) {
+        return jsonResponse(409, {
+          error: "Ainda dá tempo: espere todo mundo responder ou o tempo acabar.",
+        });
+      }
       const advanced = advanceRoomQuestion(state, now());
       const publicState = await saveRoom(advanced);
       return jsonResponse(200, { state: publicState });

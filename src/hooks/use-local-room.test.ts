@@ -7,8 +7,9 @@ describe("normalizeRoomState", () => {
     const raw = {
       code: "ABCDE",
       phase: "lobby",
-      settings: { difficulty: "mixed", questionCount: 10 },
+      settings: { difficulty: "mixed", questionCount: 10, roundSeconds: 30 },
       questionIndex: 0,
+      questionStartedAt: 1000,
       totalQuestions: 0,
       // participants e answeredParticipantIds ausentes de propósito, como o
       // Realtime Database realmente envia quando o array está vazio.
@@ -16,9 +17,10 @@ describe("normalizeRoomState", () => {
     expect(normalizeRoomState(raw)).toEqual({
       code: "ABCDE",
       phase: "lobby",
-      settings: { difficulty: "mixed", questionCount: 10 },
+      settings: { difficulty: "mixed", questionCount: 10, roundSeconds: 30 },
       participants: [],
       questionIndex: 0,
+      questionStartedAt: 1000,
       totalQuestions: 0,
       answeredParticipantIds: [],
     });
@@ -28,9 +30,10 @@ describe("normalizeRoomState", () => {
     const raw: PublicLocalRoomState = {
       code: "ABCDE",
       phase: "playing",
-      settings: { difficulty: "hard", questionCount: 5 },
+      settings: { difficulty: "hard", questionCount: 5, roundSeconds: 15 },
       participants: [{ id: "p1", displayName: "Ana", score: 2 }],
       questionIndex: 1,
+      questionStartedAt: 2000,
       totalQuestions: 5,
       answeredParticipantIds: ["p1"],
       currentQuestion: { id: "c1", front: "hello" },

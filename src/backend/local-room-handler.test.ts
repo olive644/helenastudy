@@ -32,24 +32,26 @@ let handler: (request: Request) => Promise<Response>;
 let publish: ReturnType<typeof vi.fn>;
 let codeCounter = 0;
 let idCounter = 0;
+let currentTime = 1_000;
 
 beforeEach(() => {
   codeCounter = 0;
   idCounter = 0;
+  currentTime = 1_000;
   publish = vi.fn().mockResolvedValue(undefined);
   handler = createLocalRoomHandler({
     store: createMemoryStore(),
     publish: publish as (code: string, publicState: PublicLocalRoomState) => Promise<void>,
     streamUrl: (code) => `https://helenastudy-rtdb.firebaseio.com/rooms/${code}.json`,
-    now: () => 1_000,
+    now: () => currentTime,
     randomCode: () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[codeCounter++]!.repeat(5),
     randomId: () => `id-${idCounter++}`,
   });
 });
 
-async function createRoomViaApi() {
+async function createRoomViaApi(roundSeconds: 15 | 30 | 45 | 60 = 15) {
   const response = await handler(
-    post("create", { settings: { difficulty: "mixed", questionCount: 5 } }),
+    post("create", { settings: { difficulty: "mixed", questionCount: 5, roundSeconds } }),
   );
   return (await response.json()) as { code: string; hostToken: string; streamUrl: string };
 }
@@ -57,7 +59,7 @@ async function createRoomViaApi() {
 describe("handler da sala local", () => {
   it("cria uma sala, devolve o token do host e a URL de streaming público", async () => {
     const response = await handler(
-      post("create", { settings: { difficulty: "easy", questionCount: 10 } }),
+      post("create", { settings: { difficulty: "easy", questionCount: 10, roundSeconds: 30 } }),
     );
     expect(response.status).toBe(201);
     const payload = (await response.json()) as {
@@ -74,10 +76,20 @@ describe("handler da sala local", () => {
   });
 
   it("recusa configurações inválidas na criação", async () => {
-    const response = await handler(
+    const invalidDifficulty = await handler(
       post("create", { settings: { difficulty: "muito-dificil", questionCount: 10 } }),
     );
-    expect(response.status).toBe(400);
+    expect(invalidDifficulty.status).toBe(400);
+    const invalidRound = await handler(
+      post("create", { settings: { difficulty: "easy", questionCount: 10, roundSeconds: 5 } }),
+    );
+    expect(invalidRound.status).toBe(400);
+  });
+
+  it("aplica 30s como tempo padrão da rodada quando não informado", async () => {
+    const response = await handler(post("create", { settings: { difficulty: "mixed" } }));
+    const payload = (await response.json()) as { state: { settings: { roundSeconds: number } } };
+    expect(payload.state.settings.roundSeconds).toBe(30);
   });
 
   it("permite participante entrar e recebe a URL de streaming", async () => {
@@ -134,7 +146,7 @@ describe("handler da sala local", () => {
     expect(response.status).toBe(409);
   });
 
-  it("aceita resposta do participante e avança perguntas até finished", async () => {
+  it("dá xp na resposta e avança sozinho quando todo mundo já respondeu", async () => {
     const { code, hostToken } = await createRoomViaApi();
     const joinResponse = await handler(post("join", { code, displayName: "Ana" }));
     const { participantId } = (await joinResponse.json()) as { participantId: string };
@@ -144,16 +156,31 @@ describe("handler da sala local", () => {
       post("answer", { code, participantId, questionIndex: 0, answer: "qualquer coisa" }),
     );
     expect(answerResponse.status).toBe(200);
-    const answerPayload = (await answerResponse.json()) as { correct: boolean };
+    const answerPayload = (await answerResponse.json()) as {
+      correct: boolean;
+      xpChange: number;
+      state: { questionIndex: number };
+    };
     expect(typeof answerPayload.correct).toBe("boolean");
+    // Único participante da sala: ao responder, já passou a ser "todo mundo
+    // respondeu" e a rodada avança sozinha, sem precisar de action=next.
+    expect(answerPayload.state.questionIndex).toBe(1);
+  });
 
-    let phase = "playing";
-    for (let index = 0; index < 6 && phase === "playing"; index += 1) {
-      const nextResponse = await handler(post("next", { code, hostToken }));
-      const nextPayload = (await nextResponse.json()) as { state: { phase: string } };
-      phase = nextPayload.state.phase;
-    }
-    expect(phase).toBe("finished");
+  it("recusa avançar manualmente antes do tempo, e aceita depois que o tempo acaba", async () => {
+    const { code, hostToken } = await createRoomViaApi(15);
+    await handler(post("join", { code, displayName: "Ana" }));
+    await handler(post("join", { code, displayName: "Bia" }));
+    await handler(post("start", { code, hostToken }));
+
+    const tooEarly = await handler(post("next", { code, hostToken }));
+    expect(tooEarly.status).toBe(409);
+
+    currentTime += 15_000;
+    const onTime = await handler(post("next", { code, hostToken }));
+    expect(onTime.status).toBe(200);
+    const payload = (await onTime.json()) as { state: { questionIndex: number } };
+    expect(payload.state.questionIndex).toBe(1);
   });
 
   it("encerra a sala a pedido do host", async () => {

@@ -3,10 +3,14 @@ import {
   addLocalParticipant,
   advanceRoomQuestion,
   buildLocalRoomJoinUrl,
+  canAdvanceRoomQuestion,
+  CORRECT_ANSWER_XP,
   createLocalRoomCode,
   createRoom,
   endRoom,
   isValidLocalRoomCode,
+  LEADER_WRONG_ANSWER_PENALTY_XP,
+  rankLocalRoomParticipants,
   readLocalRoomCodeFromUrl,
   sanitizeDisplayName,
   startRoom,
@@ -16,7 +20,7 @@ import {
   type LocalRoomSettings,
 } from "./local-room";
 
-const settings: LocalRoomSettings = { difficulty: "mixed", questionCount: 5 };
+const settings: LocalRoomSettings = { difficulty: "mixed", questionCount: 5, roundSeconds: 30 };
 
 function room() {
   return createRoom(settings, { code: "ABCDE", hostToken: "secret", now: 1 });
@@ -24,6 +28,15 @@ function room() {
 
 function participant(id = "p1", displayName = "Ana") {
   return { id, displayName, score: 0 };
+}
+
+function startedWithTwo() {
+  const withTwo = addLocalParticipant(
+    addLocalParticipant(room(), participant("p1", "Ana"), 2),
+    participant("p2", "Bia"),
+    2,
+  );
+  return startRoom(withTwo, { now: 3, random: () => 0 });
 }
 
 describe("sala local", () => {
@@ -64,13 +77,11 @@ describe("sala local", () => {
     expect(started.phase).toBe("playing");
     expect(started.deck).toHaveLength(5);
     expect(started.participants[0]?.score).toBe(0);
+    expect(started.questionStartedAt).toBe(3);
   });
 
-  it("aceita uma resposta certa uma vez só por participante e pontua", () => {
-    const started = startRoom(addLocalParticipant(room(), participant(), 2), {
-      now: 3,
-      random: () => 0,
-    });
+  it("dá XP ao acertar e nada ao errar sem estar liderando", () => {
+    const started = startedWithTwo();
     const card = started.deck[0]!;
     const first = submitRoomAnswer(started, {
       participantId: "p1",
@@ -79,24 +90,101 @@ describe("sala local", () => {
       now: 4,
     });
     expect(first.correct).toBe(true);
-    expect(first.state.participants[0]?.score).toBe(1);
+    expect(first.xpChange).toBe(CORRECT_ANSWER_XP);
+    expect(first.state.participants.find((item) => item.id === "p1")?.score).toBe(
+      CORRECT_ANSWER_XP,
+    );
     expect(first.state.answeredParticipantIds).toEqual(["p1"]);
 
     const second = submitRoomAnswer(first.state, {
+      participantId: "p2",
+      questionIndex: 0,
+      answer: "resposta errada",
+      now: 5,
+    });
+    expect(second.correct).toBe(false);
+    expect(second.xpChange).toBe(0);
+    expect(second.state.participants.find((item) => item.id === "p2")?.score).toBe(0);
+  });
+
+  it("recusa uma segunda resposta do mesmo participante", () => {
+    const started = startedWithTwo();
+    const card = started.deck[0]!;
+    const first = submitRoomAnswer(started, {
+      participantId: "p1",
+      questionIndex: 0,
+      answer: card.back,
+      now: 4,
+    });
+    const again = submitRoomAnswer(first.state, {
       participantId: "p1",
       questionIndex: 0,
       answer: card.back,
       now: 5,
     });
-    expect(second.correct).toBe(false);
-    expect(second.state.participants[0]?.score).toBe(1);
+    expect(again.correct).toBe(false);
+    expect(again.state).toBe(first.state);
+  });
+
+  it("tira XP de quem está liderando se errar, e trava em zero", () => {
+    const started = startedWithTwo();
+    const card = started.deck[0]!;
+    const leading = submitRoomAnswer(started, {
+      participantId: "p1",
+      questionIndex: 0,
+      answer: card.back,
+      now: 4,
+    });
+    expect(leading.state.participants.find((item) => item.id === "p1")?.score).toBe(
+      CORRECT_ANSWER_XP,
+    );
+
+    const nextCard = leading.state.deck[leading.state.questionIndex]!;
+    const stillTwoAnswered = submitRoomAnswer(leading.state, {
+      participantId: "p2",
+      questionIndex: leading.state.questionIndex,
+      answer: "errada",
+      now: 5,
+    });
+    // p2 não lidera (0 contra CORRECT_ANSWER_XP de p1), então não perde nada.
+    expect(stillTwoAnswered.xpChange).toBe(0);
+
+    const p1Wrong = submitRoomAnswer(stillTwoAnswered.state, {
+      participantId: "p1",
+      questionIndex: stillTwoAnswered.state.questionIndex,
+      answer: "errada",
+      now: 6,
+    });
+    expect(p1Wrong.xpChange).toBe(-LEADER_WRONG_ANSWER_PENALTY_XP);
+    expect(p1Wrong.state.participants.find((item) => item.id === "p1")?.score).toBe(
+      Math.max(0, CORRECT_ANSWER_XP - LEADER_WRONG_ANSWER_PENALTY_XP),
+    );
+    expect(nextCard).toBeTruthy();
+  });
+
+  it("avança a rodada sozinha assim que todo mundo responde", () => {
+    const started = startedWithTwo();
+    const card = started.deck[0]!;
+    const first = submitRoomAnswer(started, {
+      participantId: "p1",
+      questionIndex: 0,
+      answer: card.back,
+      now: 4,
+    });
+    expect(first.state.questionIndex).toBe(0);
+    const second = submitRoomAnswer(first.state, {
+      participantId: "p2",
+      questionIndex: 0,
+      answer: card.back,
+      now: 5,
+    });
+    expect(second.state.questionIndex).toBe(1);
+    expect(second.state.answeredParticipantIds).toEqual([]);
+    expect(second.state.questionStartedAt).toBe(5);
   });
 
   it("recusa resposta de participante desconhecido ou de pergunta errada", () => {
-    const started = startRoom(addLocalParticipant(room(), participant(), 2), {
-      now: 3,
-      random: () => 0,
-    });
+    const started = startedWithTwo();
     const card = started.deck[0]!;
     const stranger = submitRoomAnswer(started, {
       participantId: "ghost",
@@ -114,11 +202,23 @@ describe("sala local", () => {
     expect(wrongIndex.state).toBe(started);
   });
 
+  it("só deixa avançar manualmente se o tempo acabou ou todo mundo respondeu", () => {
+    const started = startedWithTwo();
+    expect(canAdvanceRoomQuestion(started, 4)).toBe(false);
+    expect(canAdvanceRoomQuestion(started, started.questionStartedAt + 30_000)).toBe(true);
+
+    const card = started.deck[0]!;
+    const oneAnswered = submitRoomAnswer(started, {
+      participantId: "p1",
+      questionIndex: 0,
+      answer: card.back,
+      now: 4,
+    }).state;
+    expect(canAdvanceRoomQuestion(oneAnswered, 5)).toBe(false);
+  });
+
   it("avança perguntas e termina no fim do baralho", () => {
-    let state = startRoom(addLocalParticipant(room(), participant(), 2), {
-      now: 3,
-      random: () => 0,
-    });
+    let state = startedWithTwo();
     for (let index = 0; index < 5; index += 1) {
       expect(state.phase).toBe("playing");
       state = advanceRoomQuestion(state, 4 + index);
@@ -142,11 +242,17 @@ describe("sala local", () => {
     expect(readLocalRoomCodeFromUrl("https://helenastudy.vercel.app/?sala=xx")).toBeUndefined();
   });
 
+  it("classifica os participantes do maior pro menor placar", () => {
+    const ranked = rankLocalRoomParticipants([
+      { id: "p1", displayName: "Ana", score: 10 },
+      { id: "p2", displayName: "Bia", score: 30 },
+      { id: "p3", displayName: "Caio", score: 20 },
+    ]);
+    expect(ranked.map((item) => item.id)).toEqual(["p2", "p3", "p1"]);
+  });
+
   it("nunca expõe o baralho completo nem o token do host no estado público", () => {
-    const started = startRoom(addLocalParticipant(room(), participant(), 2), {
-      now: 3,
-      random: () => 0,
-    });
+    const started = startedWithTwo();
     const publicState = toPublicRoomState(started);
     expect(publicState).not.toHaveProperty("deck");
     expect(publicState).not.toHaveProperty("hostToken");
@@ -155,5 +261,6 @@ describe("sala local", () => {
       front: started.deck[0]!.front,
     });
     expect(publicState.totalQuestions).toBe(5);
+    expect(publicState.questionStartedAt).toBe(started.questionStartedAt);
   });
 });

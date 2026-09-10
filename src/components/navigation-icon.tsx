@@ -11,7 +11,12 @@ export type NavigationIconName =
   | "theme-light"
   | "theme-dark"
   | "more"
-  | "close";
+  | "close"
+  | "timer"
+  | "xp"
+  | "medal-first"
+  | "medal-second"
+  | "medal-third";
 
 type NavigationIconProps = {
   name: NavigationIconName;
