@@ -130,7 +130,7 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
         </button>
         {expanded && (
           <div className="sidebar__brand" aria-label="HelenaStudy">
-            <img src="/helena-mark.png" alt="" width="36" height="36" />
+            <img src="/helena-portrait.png" alt="" width="36" height="36" />
             <strong>
               Helena<span>Study</span>
             </strong>
