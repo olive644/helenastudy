@@ -2499,6 +2499,40 @@ select {
   justify-self: start;
 }
 
+.local-room-share {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--soft);
+  gap: 1rem;
+}
+
+.local-room-share svg {
+  flex: 0 0 auto;
+  border-radius: 8px;
+}
+
+.local-room-share__link {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.local-room-share__link p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 599px) {
+  .local-room-share {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
 .local-room-waiting {
   display: flex;
   min-height: 230px;

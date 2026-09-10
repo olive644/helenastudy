@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   addLocalParticipant,
   advanceRoomQuestion,
+  buildLocalRoomJoinUrl,
   createLocalRoomCode,
   createRoom,
   endRoom,
   isValidLocalRoomCode,
+  readLocalRoomCodeFromUrl,
   sanitizeDisplayName,
   startRoom,
   submitRoomAnswer,
@@ -126,6 +128,18 @@ describe("sala local", () => {
 
   it("permite encerrar a sala a qualquer momento", () => {
     expect(endRoom(room(), 2).phase).toBe("finished");
+  });
+
+  it("monta o link de convite com o código em maiúsculas", () => {
+    expect(buildLocalRoomJoinUrl("https://helenastudy.vercel.app/", "abcde")).toBe(
+      "https://helenastudy.vercel.app/?sala=ABCDE",
+    );
+  });
+
+  it("lê o código de convite da URL só quando é válido", () => {
+    expect(readLocalRoomCodeFromUrl("https://helenastudy.vercel.app/?sala=abcde")).toBe("ABCDE");
+    expect(readLocalRoomCodeFromUrl("https://helenastudy.vercel.app/")).toBeUndefined();
+    expect(readLocalRoomCodeFromUrl("https://helenastudy.vercel.app/?sala=xx")).toBeUndefined();
   });
 
   it("nunca expõe o baralho completo nem o token do host no estado público", () => {
