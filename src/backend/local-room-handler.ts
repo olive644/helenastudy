@@ -15,8 +15,8 @@ import {
   type LocalRoomSettings,
   type LocalRoomState,
   type PublicLocalRoomState,
-} from "../domain/local-room";
-import type { KvStore } from "./kv-store";
+} from "../domain/local-room.js";
+import type { KvStore } from "./kv-store.js";
 
 export type LocalRoomHandlerDependencies = {
   store: KvStore;
