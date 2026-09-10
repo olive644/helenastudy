@@ -63,6 +63,19 @@ export function localRoomStorageKey(code: string): string {
   return `private-rooms/${code.toUpperCase()}`;
 }
 
+export const LOCAL_ROOM_JOIN_PARAM = "sala";
+
+export function buildLocalRoomJoinUrl(origin: string, code: string): string {
+  const url = new URL(origin);
+  url.searchParams.set(LOCAL_ROOM_JOIN_PARAM, code.toUpperCase());
+  return url.toString();
+}
+
+export function readLocalRoomCodeFromUrl(href: string): string | undefined {
+  const code = new URL(href).searchParams.get(LOCAL_ROOM_JOIN_PARAM);
+  return code && isValidLocalRoomCode(code) ? code.toUpperCase() : undefined;
+}
+
 export function createRoom(
   settings: LocalRoomSettings,
   dependencies: { code: string; hostToken: string; now: number },

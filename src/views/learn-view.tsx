@@ -17,7 +17,11 @@ const LocalRoom = lazy(() =>
   import("../components/local-room").then((module) => ({ default: module.LocalRoom })),
 );
 
-type LearnViewProps = { workspace: WorkspaceState; dispatch: Dispatch<WorkspaceAction> };
+type LearnViewProps = {
+  workspace: WorkspaceState;
+  dispatch: Dispatch<WorkspaceAction>;
+  joinCode?: string | undefined;
+};
 
 function normalizeAnswer(value: string): string {
   return value
@@ -242,10 +246,12 @@ function BingoSession({ workspace, dispatch, subjectId }: LearnViewProps & { sub
   );
 }
 
-export function LearnView({ workspace, dispatch }: LearnViewProps) {
+export function LearnView({ workspace, dispatch, joinCode }: LearnViewProps) {
   const defaultSubject = workspace.subjects[0];
   const [subjectId, setSubjectId] = useState(defaultSubject?.id ?? "");
-  const [mode, setMode] = useState<"review" | "quiz" | "listening" | "bingo" | "room">("review");
+  const [mode, setMode] = useState<"review" | "quiz" | "listening" | "bingo" | "room">(
+    joinCode ? "room" : "review",
+  );
   const [goalTitle, setGoalTitle] = useState("");
   const [targetMinutes, setTargetMinutes] = useState(300);
   const [deadline, setDeadline] = useState(toDateKey(new Date()));
@@ -355,7 +361,7 @@ export function LearnView({ workspace, dispatch }: LearnViewProps) {
             />
           ) : (
             <Suspense fallback={null}>
-              <LocalRoom />
+              <LocalRoom initialJoinCode={joinCode} />
             </Suspense>
           )}
         </section>

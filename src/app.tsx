@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { MobileNavigation, Sidebar, type AppView } from "./components/app-navigation";
+import { readLocalRoomCodeFromUrl } from "./domain/local-room";
 import { useWorkspace } from "./hooks/use-workspace";
 import { FocusView } from "./views/focus-view";
 import { HabitsView } from "./views/habits-view";
@@ -13,7 +14,8 @@ const NotesView = lazy(() => import("./views/notes-view"));
 const ActivityBankView = lazy(() => import("./views/activity-bank-view"));
 
 export function App() {
-  const [view, setView] = useState<AppView>("today");
+  const [joinCode] = useState(() => readLocalRoomCodeFromUrl(window.location.href));
+  const [view, setView] = useState<AppView>(joinCode ? "learn" : "today");
   const { workspace, dispatch } = useWorkspace();
 
   return (
@@ -37,7 +39,9 @@ export function App() {
         {view === "habits" && <HabitsView workspace={workspace} dispatch={dispatch} />}
         {view === "notes" && <NotesView workspace={workspace} dispatch={dispatch} />}
         {view === "lesson-builder" && <LessonBuilderView onBack={() => setView("today")} />}
-        {view === "learn" && <LearnView workspace={workspace} dispatch={dispatch} />}
+        {view === "learn" && (
+          <LearnView workspace={workspace} dispatch={dispatch} joinCode={joinCode} />
+        )}
         {view === "library" && <LibraryView workspace={workspace} dispatch={dispatch} />}
         {view === "activity-bank" && <ActivityBankView onBack={() => setView("today")} />}
       </Suspense>

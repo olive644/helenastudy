@@ -1,10 +1,40 @@
-import { Check, DoorOpen, Play, Radio, Trophy, Users, Volume2, X } from "lucide-react";
+import { Check, Copy, DoorOpen, Play, Radio, Trophy, Users, Volume2, X } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import type { LocalRoomSettings } from "../domain/local-room";
+import { buildLocalRoomJoinUrl, type LocalRoomSettings } from "../domain/local-room";
 import { selectFallbackEnglishVoice, speakEnglish } from "../data/speech-voice";
 import { useLocalRoom } from "../hooks/use-local-room";
+import { RoomQrCode } from "./room-qr-code";
 
 const DEFAULT_SETTINGS: LocalRoomSettings = { difficulty: "mixed", questionCount: 10 };
+
+type LocalRoomProps = { initialJoinCode?: string | undefined };
+
+function ShareRoom({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+  const joinUrl = buildLocalRoomJoinUrl(window.location.href, code);
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(joinUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Sem permissão de área de transferência: a pessoa copia o link à mão.
+    }
+  }
+
+  return (
+    <div className="local-room-share">
+      <RoomQrCode value={joinUrl} />
+      <div className="local-room-share__link">
+        <p>Ou peça para escanear o QR code, ou compartilhe o link direto:</p>
+        <button className="secondary-button" type="button" onClick={() => void copyLink()}>
+          <Copy size={16} /> {copied ? "Link copiado!" : "Copiar link da sala"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function playQuestionAudio(text: string) {
   const voices = window.speechSynthesis?.getVoices() ?? [];
@@ -34,13 +64,19 @@ function Scoreboard({
   );
 }
 
-export function LocalRoom() {
+export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
   const room = useLocalRoom();
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(initialJoinCode ?? "");
   const [name, setName] = useState("");
   const [answer, setAnswer] = useState("");
   const [lastResult, setLastResult] = useState<"correct" | "wrong" | undefined>(undefined);
   const state = room.state;
+
+  const [appliedJoinCode, setAppliedJoinCode] = useState(false);
+  if (initialJoinCode && !appliedJoinCode && room.role === "choose") {
+    setAppliedJoinCode(true);
+    room.setRole("participant");
+  }
 
   const questionKey = state ? `${state.phase}-${state.questionIndex}` : undefined;
   const [seenQuestionKey, setSeenQuestionKey] = useState(questionKey);
@@ -133,6 +169,7 @@ export function LocalRoom() {
       {state.phase === "lobby" ? (
         isHost ? (
           <div className="local-room-settings">
+            <ShareRoom code={state.code} />
             <label>
               <span>Dificuldade</span>
               <select
