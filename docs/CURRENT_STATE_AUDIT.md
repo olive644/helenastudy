@@ -222,6 +222,9 @@ lobby, mas sorteio, cartelas distintas e validação sincronizada permanecem par
 
 ## 13. Experiência de estudo renovada
 
+A foto aprovada da Helena, sem óculos e com fundo roxo, é usada no ícone da aba e na marca do menu,
+por meio do arquivo local `public/helena-portrait.png`.
+
 O painel e a navegação adotam uma hierarquia inspirada em aplicativos de revisão como SimpleStudy:
 próxima ação evidente, atalhos de prática, progresso diário visível e cartões fáceis de reconhecer.
 A referência é apenas de experiência; cores, componentes, textos e iconografia continuam próprios.
