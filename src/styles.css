@@ -1420,14 +1420,15 @@ body {
   transform-origin: center;
 }
 
-/* Medalhas do pódio: a de ouro reaproveita o amarelo padrão da marca;
-   prata e bronze só trocam a cor do disco (mesmo desenho para as três). */
-.navigation-icon[data-icon="medal-second"] {
-  --navigation-icon-accent: #b7c0cc;
+/* Troféus do pódio: mesmo desenho para os três lugares, diferenciados pela
+   cor do preenchimento (1º amarelo, 2º roxo); o 3º fica no tom do texto
+   (preto no claro, branco no escuro), sem override. */
+.navigation-icon[data-icon="medal-first"] .navigation-icon__base {
+  fill: var(--yellow);
 }
 
-.navigation-icon[data-icon="medal-third"] {
-  --navigation-icon-accent: #d99a5b;
+.navigation-icon[data-icon="medal-second"] .navigation-icon__base {
+  fill: var(--violet);
 }
 
 .primary-button,
