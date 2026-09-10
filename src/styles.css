@@ -2735,6 +2735,69 @@ select {
   justify-self: center;
 }
 
+/* Modo Sala ocupa a tela toda (posição fixa por cima de tudo) em vez de
+   ficar como um cartão na página — fica bem visível quando projetado ou
+   compartilhado. body.local-room-active trava o scroll de fundo enquanto
+   isso, e o conteúdo interno mantém as mesmas classes/estilos de antes. */
+.local-room-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: clamp(1rem, 4vw, 2.5rem);
+  background: var(--page);
+}
+
+.local-room-fullscreen > * {
+  width: 100%;
+  max-width: 640px;
+}
+
+body.local-room-active {
+  overflow: hidden;
+}
+
+/* Contagem regressiva (3, 2, 1, Vai!) antes da primeira pergunta da sala. */
+.local-room-countdown {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.local-room-countdown__value {
+  font-size: clamp(4rem, 22vw, 8rem);
+  font-weight: 800;
+  color: var(--surface);
+  animation: local-room-countdown-pop 0.7s ease-out;
+}
+
+@keyframes local-room-countdown-pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .local-room-countdown__value {
+    animation: none;
+  }
+}
+
 @media (max-width: 599px) {
   .local-room-intro,
   .local-room-settings {

@@ -1,5 +1,6 @@
 import { Check, Copy, DoorOpen, Play, Radio, Users, Volume2, X } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import {
   buildLocalRoomJoinUrl,
   rankLocalRoomParticipants,
@@ -18,6 +19,27 @@ const DEFAULT_SETTINGS: LocalRoomSettings = {
 };
 
 const MEDAL_ICON_BY_RANK = ["medal-first", "medal-second", "medal-third"] as const;
+
+// Passos da contagem regressiva antes de liberar a primeira pergunta:
+// 3, 2, 1 e "Vai!" (representado por 0), cada um por COUNTDOWN_STEP_MS.
+const COUNTDOWN_STEP_MS = 700;
+
+function CountdownOverlay({ value }: { value: number }) {
+  return (
+    <div className="local-room-countdown" role="status" aria-live="assertive">
+      <span key={value} className="local-room-countdown__value">
+        {value > 0 ? value : "Vai!"}
+      </span>
+    </div>
+  );
+}
+
+// Um portal direto pro <body> — não pro elemento pai mais próximo — porque
+// qualquer ancestral com transform (como o hover de .module-panel) vira um
+// "containing block" e faz position:fixed grudar nele em vez da tela toda.
+function LocalRoomFullscreen({ children }: { children: ReactNode }) {
+  return createPortal(<div className="local-room-fullscreen">{children}</div>, document.body);
+}
 
 type LocalRoomProps = { initialJoinCode?: string | undefined };
 
@@ -130,6 +152,36 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
     Math.max(0, roundSeconds - Math.floor((Date.now() - questionStartedAt) / 1000)),
   );
 
+  // Modo Sala toma a tela toda enquanto estiver aberto, pra ficar bem
+  // visível projetado ou compartilhado — some de novo assim que a pessoa
+  // troca de aba/modo e este componente é desmontado.
+  useEffect(() => {
+    document.body.classList.add("local-room-active");
+    return () => {
+      document.body.classList.remove("local-room-active");
+    };
+  }, []);
+
+  // Contagem regressiva (3, 2, 1, Vai!) antes da primeira pergunta de cada
+  // sala — dispara só na transição do lobby pra a rodada, nunca de novo
+  // entre perguntas nem se a pessoa entrar com a sala já em andamento.
+  const previousPhaseRef = useRef(state?.phase);
+  const [countdownValue, setCountdownValue] = useState<number | null>(null);
+  useEffect(() => {
+    const previousPhase = previousPhaseRef.current;
+    previousPhaseRef.current = state?.phase;
+    if (previousPhase === "lobby" && state?.phase === "playing" && state.questionIndex === 0) {
+      setCountdownValue(3);
+    }
+  }, [state?.phase, state?.questionIndex]);
+  useEffect(() => {
+    if (countdownValue === null) return;
+    const timer = window.setTimeout(() => {
+      setCountdownValue((current) => (current === null || current <= 0 ? null : current - 1));
+    }, COUNTDOWN_STEP_MS);
+    return () => window.clearTimeout(timer);
+  }, [countdownValue]);
+
   // Só o navegador do organizador tenta avançar a rodada quando o tempo
   // acaba — ninguém tem um botão para pular antes disso. Quando todo mundo
   // já respondeu, o próprio servidor avança sozinho (submitRoomAnswer); o
@@ -172,54 +224,58 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
 
   if (room.role === "choose")
     return (
-      <div className="local-room-intro">
-        <Radio size={34} />
-        <div>
-          <h3>Modo Sala</h3>
-          <p>Cada aluno entra pelo próprio celular com um código de cinco letras.</p>
+      <LocalRoomFullscreen>
+        <div className="local-room-intro">
+          <Radio size={34} />
+          <div>
+            <h3>Modo Sala</h3>
+            <p>Cada aluno entra pelo próprio celular com um código de cinco letras.</p>
+          </div>
+          <div className="local-room-intro__actions">
+            <button
+              className="primary-button"
+              type="button"
+              onClick={() => void room.createRoom(DEFAULT_SETTINGS)}
+            >
+              <Users size={17} /> Criar sala
+            </button>
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={() => room.setRole("participant")}
+            >
+              <DoorOpen size={17} /> Entrar com código
+            </button>
+          </div>
+          {room.error && <p role="alert">{room.error}</p>}
         </div>
-        <div className="local-room-intro__actions">
-          <button
-            className="primary-button"
-            type="button"
-            onClick={() => void room.createRoom(DEFAULT_SETTINGS)}
-          >
-            <Users size={17} /> Criar sala
-          </button>
-          <button
-            className="secondary-button"
-            type="button"
-            onClick={() => room.setRole("participant")}
-          >
-            <DoorOpen size={17} /> Entrar com código
-          </button>
-        </div>
-        {room.error && <p role="alert">{room.error}</p>}
-      </div>
+      </LocalRoomFullscreen>
     );
 
   if (room.role === "participant" && !state)
     return (
-      <form className="local-room-join" onSubmit={joinRoom}>
-        <h3>Entrar em uma sala</h3>
-        <p>Peça o código de cinco letras para o professor e digite seu nome.</p>
-        <label>
-          <span>Código</span>
-          <input
-            value={code}
-            onChange={(event) => setCode(event.target.value.toUpperCase())}
-            maxLength={5}
-          />
-        </label>
-        <label>
-          <span>Nome de exibição</span>
-          <input value={name} onChange={(event) => setName(event.target.value)} maxLength={24} />
-        </label>
-        {room.error && <p role="alert">{room.error}</p>}
-        <button className="primary-button" type="submit">
-          Entrar
-        </button>
-      </form>
+      <LocalRoomFullscreen>
+        <form className="local-room-join" onSubmit={joinRoom}>
+          <h3>Entrar em uma sala</h3>
+          <p>Peça o código de cinco letras para o professor e digite seu nome.</p>
+          <label>
+            <span>Código</span>
+            <input
+              value={code}
+              onChange={(event) => setCode(event.target.value.toUpperCase())}
+              maxLength={5}
+            />
+          </label>
+          <label>
+            <span>Nome de exibição</span>
+            <input value={name} onChange={(event) => setName(event.target.value)} maxLength={24} />
+          </label>
+          {room.error && <p role="alert">{room.error}</p>}
+          <button className="primary-button" type="submit">
+            Entrar
+          </button>
+        </form>
+      </LocalRoomFullscreen>
     );
 
   if (!state) return null;
@@ -227,166 +283,170 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
   const answered = state.answeredParticipantIds.includes(room.participantId);
 
   return (
-    <div className="local-room-session">
-      <header>
-        <div>
-          <span>Sala</span>
-          <strong>{state.code}</strong>
-        </div>
-        <p>
-          <Users size={16} /> {state.participants.length} participantes
-        </p>
-      </header>
+    <LocalRoomFullscreen>
+      {countdownValue !== null && <CountdownOverlay value={countdownValue} />}
+      <div className="local-room-session">
+        <header>
+          <div>
+            <span>Sala</span>
+            <strong>{state.code}</strong>
+          </div>
+          <p>
+            <Users size={16} /> {state.participants.length} participantes
+          </p>
+        </header>
 
-      {state.phase === "lobby" ? (
-        isHost ? (
-          <div className="local-room-settings">
-            <ShareRoom code={state.code} />
-            <label>
-              <span>Dificuldade</span>
-              <select
-                value={state.settings.difficulty}
-                onChange={(event) =>
-                  void room.updateSettings({
-                    difficulty: event.target.value as LocalRoomSettings["difficulty"],
-                  })
-                }
-              >
-                <option value="mixed">Misto</option>
-                <option value="easy">Fácil</option>
-                <option value="medium">Médio</option>
-                <option value="hard">Difícil</option>
-              </select>
-            </label>
-            <label>
-              <span>Perguntas</span>
-              <select
-                value={state.settings.questionCount}
-                onChange={(event) =>
-                  void room.updateSettings({
-                    questionCount:
-                      event.target.value === "all"
-                        ? "all"
-                        : (Number(event.target.value) as 5 | 10 | 15),
-                  })
-                }
-              >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="15">15</option>
-                <option value="all">Todas</option>
-              </select>
-            </label>
-            <label>
-              <span>Tempo por pergunta</span>
-              <select
-                value={state.settings.roundSeconds}
-                onChange={(event) =>
-                  void room.updateSettings({
-                    roundSeconds: Number(event.target.value) as LocalRoomSettings["roundSeconds"],
-                  })
-                }
-              >
-                <option value="15">15s</option>
-                <option value="30">30s</option>
-                <option value="45">45s</option>
-                <option value="60">60s</option>
-              </select>
-            </label>
-            {state.participants.length > 0 && <Scoreboard participants={state.participants} />}
-            <button
-              className="primary-button"
-              type="button"
-              disabled={state.participants.length === 0}
-              onClick={() => void room.startRound()}
-            >
-              <Play size={17} /> Iniciar rodada
-            </button>
-            {room.error && <p role="alert">{room.error}</p>}
-          </div>
-        ) : (
-          <div className="local-room-waiting" role="status">
-            <Radio size={28} />
-            <h3>Aguardando o início</h3>
-            <p>O organizador controla esta sala. Código: {state.code}</p>
-          </div>
-        )
-      ) : state.phase === "playing" && state.currentQuestion ? (
-        <div className="local-room-round">
-          <div className="local-room-round__progress">
-            <span>
-              Pergunta {state.questionIndex + 1} de {state.totalQuestions}
-            </span>
-            <span className="local-room-round__timer">
-              <NavigationIcon name="timer" /> {secondsLeft}s
-            </span>
-          </div>
-          {isHost ? (
-            <>
-              <div className="local-room-round__host-question">
-                <Volume2 size={20} />
-                <span>{state.currentQuestion.front}</span>
-              </div>
-              <p>
-                {state.answeredParticipantIds.length} de {state.participants.length} já responderam
-                — a rodada passa sozinha quando todo mundo responder ou o tempo acabar.
-              </p>
-              <Scoreboard participants={state.participants} />
+        {state.phase === "lobby" ? (
+          isHost ? (
+            <div className="local-room-settings">
+              <ShareRoom code={state.code} />
+              <label>
+                <span>Dificuldade</span>
+                <select
+                  value={state.settings.difficulty}
+                  onChange={(event) =>
+                    void room.updateSettings({
+                      difficulty: event.target.value as LocalRoomSettings["difficulty"],
+                    })
+                  }
+                >
+                  <option value="mixed">Misto</option>
+                  <option value="easy">Fácil</option>
+                  <option value="medium">Médio</option>
+                  <option value="hard">Difícil</option>
+                </select>
+              </label>
+              <label>
+                <span>Perguntas</span>
+                <select
+                  value={state.settings.questionCount}
+                  onChange={(event) =>
+                    void room.updateSettings({
+                      questionCount:
+                        event.target.value === "all"
+                          ? "all"
+                          : (Number(event.target.value) as 5 | 10 | 15),
+                    })
+                  }
+                >
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="15">15</option>
+                  <option value="all">Todas</option>
+                </select>
+              </label>
+              <label>
+                <span>Tempo por pergunta</span>
+                <select
+                  value={state.settings.roundSeconds}
+                  onChange={(event) =>
+                    void room.updateSettings({
+                      roundSeconds: Number(event.target.value) as LocalRoomSettings["roundSeconds"],
+                    })
+                  }
+                >
+                  <option value="15">15s</option>
+                  <option value="30">30s</option>
+                  <option value="45">45s</option>
+                  <option value="60">60s</option>
+                </select>
+              </label>
+              {state.participants.length > 0 && <Scoreboard participants={state.participants} />}
               <button
-                className="secondary-button"
+                className="primary-button"
                 type="button"
-                onClick={() => void room.endRoom()}
+                disabled={state.participants.length === 0}
+                onClick={() => void room.startRound()}
               >
-                Encerrar sala
+                <Play size={17} /> Iniciar rodada
               </button>
-            </>
-          ) : answered ? (
-            <div className="local-room-waiting" role="status">
-              {lastResult?.correct ? <Check size={28} /> : <Radio size={28} />}
-              <h3>{lastResult?.correct ? "Boa! Resposta certa." : "Resposta enviada."}</h3>
-              {lastResult && lastResult.xpChange !== 0 && (
-                <p className="local-room-xp-feedback">
-                  <NavigationIcon name="xp" /> {lastResult.xpChange > 0 ? "+" : ""}
-                  {lastResult.xpChange} XP
-                </p>
-              )}
-              <p>Aguardando a próxima pergunta.</p>
+              {room.error && <p role="alert">{room.error}</p>}
             </div>
           ) : (
-            <form className="local-room-answer" onSubmit={submitAnswer}>
-              <button
-                className="secondary-button"
-                type="button"
-                onClick={() => playQuestionAudio(state.currentQuestion!.front)}
-              >
-                <Volume2 size={18} /> Ouvir de novo
-              </button>
-              <label>
-                <span>Digite a tradução</span>
-                <input
-                  value={answer}
-                  onChange={(event) => setAnswer(event.target.value)}
-                  autoFocus
-                />
-              </label>
-              <button className="primary-button" type="submit">
-                Responder
-              </button>
-            </form>
-          )}
-        </div>
-      ) : (
-        <div className="local-room-finished">
-          <div className="local-room-waiting" role="status">
-            <NavigationIcon name="medal-first" />
-            <h3>Sala encerrada</h3>
+            <div className="local-room-waiting" role="status">
+              <Radio size={28} />
+              <h3>Aguardando o início</h3>
+              <p>O organizador controla esta sala. Código: {state.code}</p>
+            </div>
+          )
+        ) : state.phase === "playing" && state.currentQuestion ? (
+          <div className="local-room-round">
+            <div className="local-room-round__progress">
+              <span>
+                Pergunta {state.questionIndex + 1} de {state.totalQuestions}
+              </span>
+              <span className="local-room-round__timer">
+                <NavigationIcon name="timer" /> {secondsLeft}s
+              </span>
+            </div>
+            {isHost ? (
+              <>
+                <div className="local-room-round__host-question">
+                  <Volume2 size={20} />
+                  <span>{state.currentQuestion.front}</span>
+                </div>
+                <p>
+                  {state.answeredParticipantIds.length} de {state.participants.length} já
+                  responderam — a rodada passa sozinha quando todo mundo responder ou o tempo
+                  acabar.
+                </p>
+                <Scoreboard participants={state.participants} />
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() => void room.endRoom()}
+                >
+                  Encerrar sala
+                </button>
+              </>
+            ) : answered ? (
+              <div className="local-room-waiting" role="status">
+                {lastResult?.correct ? <Check size={28} /> : <Radio size={28} />}
+                <h3>{lastResult?.correct ? "Boa! Resposta certa." : "Resposta enviada."}</h3>
+                {lastResult && lastResult.xpChange !== 0 && (
+                  <p className="local-room-xp-feedback">
+                    <NavigationIcon name="xp" /> {lastResult.xpChange > 0 ? "+" : ""}
+                    {lastResult.xpChange} XP
+                  </p>
+                )}
+                <p>Aguardando a próxima pergunta.</p>
+              </div>
+            ) : (
+              <form className="local-room-answer" onSubmit={submitAnswer}>
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() => playQuestionAudio(state.currentQuestion!.front)}
+                >
+                  <Volume2 size={18} /> Ouvir de novo
+                </button>
+                <label>
+                  <span>Digite a tradução</span>
+                  <input
+                    value={answer}
+                    onChange={(event) => setAnswer(event.target.value)}
+                    autoFocus
+                  />
+                </label>
+                <button className="primary-button" type="submit">
+                  Responder
+                </button>
+              </form>
+            )}
           </div>
-          <Podium participants={state.participants} />
-          <button className="secondary-button" type="button" onClick={room.reset}>
-            <X size={16} /> Sair
-          </button>
-        </div>
-      )}
-    </div>
+        ) : (
+          <div className="local-room-finished">
+            <div className="local-room-waiting" role="status">
+              <NavigationIcon name="medal-first" />
+              <h3>Sala encerrada</h3>
+            </div>
+            <Podium participants={state.participants} />
+            <button className="secondary-button" type="button" onClick={room.reset}>
+              <X size={16} /> Sair
+            </button>
+          </div>
+        )}
+      </div>
+    </LocalRoomFullscreen>
   );
 }
