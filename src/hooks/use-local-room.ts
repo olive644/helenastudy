@@ -13,9 +13,10 @@ export function normalizeRoomState(data: Partial<PublicLocalRoomState>): PublicL
   return {
     code: data.code ?? "",
     phase: data.phase ?? "lobby",
-    settings: data.settings ?? { difficulty: "mixed", questionCount: 10 },
+    settings: data.settings ?? { difficulty: "mixed", questionCount: 10, roundSeconds: 30 },
     participants: data.participants ?? [],
     questionIndex: data.questionIndex ?? 0,
+    questionStartedAt: data.questionStartedAt ?? 0,
     totalQuestions: data.totalQuestions ?? 0,
     answeredParticipantIds: data.answeredParticipantIds ?? [],
     ...(data.currentQuestion ? { currentQuestion: data.currentQuestion } : {}),
@@ -167,22 +168,21 @@ export function useLocalRoom() {
     }
   }
 
-  async function submitAnswer(questionIndex: number, answer: string): Promise<boolean> {
+  async function submitAnswer(
+    questionIndex: number,
+    answer: string,
+  ): Promise<{ correct: boolean; xpChange: number }> {
     try {
-      const payload = await requestRoom<{ correct: boolean; state: PublicLocalRoomState }>(
-        "answer",
-        {
-          code: codeRef.current,
-          participantId,
-          questionIndex,
-          answer,
-        },
-      );
+      const payload = await requestRoom<{
+        correct: boolean;
+        xpChange: number;
+        state: PublicLocalRoomState;
+      }>("answer", { code: codeRef.current, participantId, questionIndex, answer });
       setState(payload.state);
-      return payload.correct;
+      return { correct: payload.correct, xpChange: payload.xpChange };
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Não foi possível enviar a resposta.");
-      return false;
+      return { correct: false, xpChange: 0 };
     }
   }
 

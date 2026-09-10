@@ -1,11 +1,23 @@
-import { Check, Copy, DoorOpen, Play, Radio, Trophy, Users, Volume2, X } from "lucide-react";
-import { useState, type FormEvent } from "react";
-import { buildLocalRoomJoinUrl, type LocalRoomSettings } from "../domain/local-room";
+import { Check, Copy, DoorOpen, Play, Radio, Users, Volume2, X } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
+import {
+  buildLocalRoomJoinUrl,
+  rankLocalRoomParticipants,
+  type LocalRoomParticipant,
+  type LocalRoomSettings,
+} from "../domain/local-room";
 import { selectFallbackEnglishVoice, speakEnglish } from "../data/speech-voice";
 import { useLocalRoom } from "../hooks/use-local-room";
+import { NavigationIcon } from "./navigation-icon";
 import { RoomQrCode } from "./room-qr-code";
 
-const DEFAULT_SETTINGS: LocalRoomSettings = { difficulty: "mixed", questionCount: 10 };
+const DEFAULT_SETTINGS: LocalRoomSettings = {
+  difficulty: "mixed",
+  questionCount: 10,
+  roundSeconds: 30,
+};
+
+const MEDAL_ICON_BY_RANK = ["medal-first", "medal-second", "medal-third"] as const;
 
 type LocalRoomProps = { initialJoinCode?: string | undefined };
 
@@ -45,22 +57,45 @@ function playQuestionAudio(text: string) {
   });
 }
 
-function Scoreboard({
-  participants,
-}: {
-  participants: readonly { id: string; displayName: string; score: number }[];
-}) {
-  const ranked = [...participants].sort((a, b) => b.score - a.score);
+function Scoreboard({ participants }: { participants: readonly LocalRoomParticipant[] }) {
+  const ranked = rankLocalRoomParticipants(participants);
   return (
     <ol className="local-room-scoreboard">
       {ranked.map((participant, index) => (
         <li key={participant.id}>
           <span className="local-room-scoreboard__rank">{index + 1}</span>
           <span>{participant.displayName}</span>
-          <strong>{participant.score}</strong>
+          <strong>
+            {participant.score} <NavigationIcon name="xp" />
+          </strong>
         </li>
       ))}
     </ol>
+  );
+}
+
+function Podium({ participants }: { participants: readonly LocalRoomParticipant[] }) {
+  const ranked = rankLocalRoomParticipants(participants);
+  const top3 = ranked.slice(0, 3);
+  const rest = ranked.slice(3);
+  return (
+    <>
+      <ol className="local-room-podium">
+        {top3.map((participant, index) => (
+          <li
+            className={`local-room-podium__place local-room-podium__place--${index + 1}`}
+            key={participant.id}
+          >
+            <NavigationIcon name={MEDAL_ICON_BY_RANK[index]!} />
+            <span>{participant.displayName}</span>
+            <strong>
+              {participant.score} <NavigationIcon name="xp" />
+            </strong>
+          </li>
+        ))}
+      </ol>
+      {rest.length > 0 && <Scoreboard participants={rest} />}
+    </>
   );
 }
 
@@ -69,7 +104,9 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
   const [code, setCode] = useState(initialJoinCode ?? "");
   const [name, setName] = useState("");
   const [answer, setAnswer] = useState("");
-  const [lastResult, setLastResult] = useState<"correct" | "wrong" | undefined>(undefined);
+  const [lastResult, setLastResult] = useState<{ correct: boolean; xpChange: number } | undefined>(
+    undefined,
+  );
   const state = room.state;
 
   const [appliedJoinCode, setAppliedJoinCode] = useState(false);
@@ -86,6 +123,41 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
     setLastResult(undefined);
   }
 
+  const isPlaying = state?.phase === "playing";
+  const questionStartedAt = state?.questionStartedAt ?? 0;
+  const roundSeconds = state?.settings.roundSeconds ?? 30;
+  const [secondsLeft, setSecondsLeft] = useState(() =>
+    Math.max(0, roundSeconds - Math.floor((Date.now() - questionStartedAt) / 1000)),
+  );
+
+  // Só o navegador do organizador tenta avançar a rodada quando o tempo
+  // acaba — ninguém tem um botão para pular antes disso. Quando todo mundo
+  // já respondeu, o próprio servidor avança sozinho (submitRoomAnswer); o
+  // "advancing" evita pedidos repetidos enquanto um já está a caminho, e o
+  // intervalo de 500ms tenta de novo sozinho se o primeiro pedido falhar
+  // por uma pequena diferença entre o relógio do navegador e o do servidor.
+  useEffect(() => {
+    if (!isPlaying) return;
+    let advancing = false;
+    const tick = () => {
+      const remaining = Math.max(
+        0,
+        roundSeconds - Math.floor((Date.now() - questionStartedAt) / 1000),
+      );
+      setSecondsLeft(remaining);
+      if (remaining === 0 && room.isHost && !advancing) {
+        advancing = true;
+        void room.nextQuestion().finally(() => {
+          advancing = false;
+        });
+      }
+    };
+    tick();
+    const timer = window.setInterval(tick, 500);
+    return () => window.clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying, questionStartedAt, roundSeconds, room.isHost]);
+
   function joinRoom(event: FormEvent) {
     event.preventDefault();
     void room.joinRoom(code, name);
@@ -94,8 +166,8 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
   async function submitAnswer(event: FormEvent) {
     event.preventDefault();
     if (!state?.currentQuestion || !answer.trim()) return;
-    const correct = await room.submitAnswer(state.questionIndex, answer);
-    setLastResult(correct ? "correct" : "wrong");
+    const result = await room.submitAnswer(state.questionIndex, answer);
+    setLastResult(result);
   }
 
   if (room.role === "choose")
@@ -205,6 +277,22 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
                 <option value="all">Todas</option>
               </select>
             </label>
+            <label>
+              <span>Tempo por pergunta</span>
+              <select
+                value={state.settings.roundSeconds}
+                onChange={(event) =>
+                  void room.updateSettings({
+                    roundSeconds: Number(event.target.value) as LocalRoomSettings["roundSeconds"],
+                  })
+                }
+              >
+                <option value="15">15s</option>
+                <option value="30">30s</option>
+                <option value="45">45s</option>
+                <option value="60">60s</option>
+              </select>
+            </label>
             {state.participants.length > 0 && <Scoreboard participants={state.participants} />}
             <button
               className="primary-button"
@@ -225,9 +313,14 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
         )
       ) : state.phase === "playing" && state.currentQuestion ? (
         <div className="local-room-round">
-          <p className="local-room-round__progress">
-            Pergunta {state.questionIndex + 1} de {state.totalQuestions}
-          </p>
+          <div className="local-room-round__progress">
+            <span>
+              Pergunta {state.questionIndex + 1} de {state.totalQuestions}
+            </span>
+            <span className="local-room-round__timer">
+              <NavigationIcon name="timer" /> {secondsLeft}s
+            </span>
+          </div>
           {isHost ? (
             <>
               <div className="local-room-round__host-question">
@@ -236,30 +329,28 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
               </div>
               <p>
                 {state.answeredParticipantIds.length} de {state.participants.length} já responderam
+                — a rodada passa sozinha quando todo mundo responder ou o tempo acabar.
               </p>
               <Scoreboard participants={state.participants} />
-              <div className="local-room-round__actions">
-                <button
-                  className="primary-button"
-                  type="button"
-                  onClick={() => void room.nextQuestion()}
-                >
-                  Próxima pergunta
-                </button>
-                <button
-                  className="secondary-button"
-                  type="button"
-                  onClick={() => void room.endRoom()}
-                >
-                  Encerrar sala
-                </button>
-              </div>
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => void room.endRoom()}
+              >
+                Encerrar sala
+              </button>
             </>
           ) : answered ? (
             <div className="local-room-waiting" role="status">
-              {lastResult === "correct" ? <Check size={28} /> : <Radio size={28} />}
-              <h3>{lastResult === "correct" ? "Boa! Resposta certa." : "Resposta enviada."}</h3>
-              <p>Aguardando o professor avançar para a próxima pergunta.</p>
+              {lastResult?.correct ? <Check size={28} /> : <Radio size={28} />}
+              <h3>{lastResult?.correct ? "Boa! Resposta certa." : "Resposta enviada."}</h3>
+              {lastResult && lastResult.xpChange !== 0 && (
+                <p className="local-room-xp-feedback">
+                  <NavigationIcon name="xp" /> {lastResult.xpChange > 0 ? "+" : ""}
+                  {lastResult.xpChange} XP
+                </p>
+              )}
+              <p>Aguardando a próxima pergunta.</p>
             </div>
           ) : (
             <form className="local-room-answer" onSubmit={submitAnswer}>
@@ -287,10 +378,10 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
       ) : (
         <div className="local-room-finished">
           <div className="local-room-waiting" role="status">
-            <Trophy size={28} />
+            <NavigationIcon name="medal-first" />
             <h3>Sala encerrada</h3>
           </div>
-          <Scoreboard participants={state.participants} />
+          <Podium participants={state.participants} />
           <button className="secondary-button" type="button" onClick={room.reset}>
             <X size={16} /> Sair
           </button>
