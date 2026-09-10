@@ -4,6 +4,24 @@ import type { LocalRoomSettings, PublicLocalRoomState } from "../domain/local-ro
 
 type Role = "choose" | "host" | "participant";
 
+// O Realtime Database do Firebase omite chaves cujo valor é um array vazio
+// (ou objeto vazio) em vez de mandá-las como "[]" — ao contrário do
+// JSON.stringify comum, que preserva arrays vazios. Isso só afeta o estado
+// que chega pelo EventSource (lido direto do Firebase); as respostas da
+// nossa própria API usam JSON.stringify normal e não têm esse problema.
+export function normalizeRoomState(data: Partial<PublicLocalRoomState>): PublicLocalRoomState {
+  return {
+    code: data.code ?? "",
+    phase: data.phase ?? "lobby",
+    settings: data.settings ?? { difficulty: "mixed", questionCount: 10 },
+    participants: data.participants ?? [],
+    questionIndex: data.questionIndex ?? 0,
+    totalQuestions: data.totalQuestions ?? 0,
+    answeredParticipantIds: data.answeredParticipantIds ?? [],
+    ...(data.currentQuestion ? { currentQuestion: data.currentQuestion } : {}),
+  };
+}
+
 async function requestRoom<T>(action: string, body: Record<string, unknown>): Promise<T> {
   const response = await fetch(`/api/local-room?action=${action}`, {
     method: "POST",
@@ -42,7 +60,7 @@ export function useLocalRoom() {
           path: string;
           data: PublicLocalRoomState | null;
         };
-        if (payload.path === "/" && payload.data) setState(payload.data);
+        if (payload.path === "/" && payload.data) setState(normalizeRoomState(payload.data));
       } catch {
         // Evento malformado: ignora e espera o próximo.
       }
