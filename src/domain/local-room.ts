@@ -3,7 +3,7 @@ import {
   isListeningAnswerCorrect,
   STARTER_DECK,
   type ListeningCard,
-} from "./listening-quiz";
+} from "./listening-quiz.js";
 
 export type LocalRoomPhase = "lobby" | "playing" | "finished";
 
