@@ -1,5 +1,5 @@
-import type { Flashcard } from "./workspace";
-import { LISTENING_VOCABULARY, type PedagogicalDifficulty } from "../data/listening-vocabulary";
+import type { Flashcard } from "./workspace.js";
+import { LISTENING_VOCABULARY, type PedagogicalDifficulty } from "../data/listening-vocabulary.js";
 
 export type ListeningCard = Pick<Flashcard, "id" | "front" | "back"> & {
   acceptedAnswers?: readonly string[];

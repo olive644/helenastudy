@@ -1,5 +1,5 @@
-import { findActivity } from "./activity-bank";
-import type { LessonDraft, LessonInput, LessonSection, ProductionVariant } from "./lesson";
+import { findActivity } from "./activity-bank.js";
+import type { LessonDraft, LessonInput, LessonSection, ProductionVariant } from "./lesson.js";
 
 const WEIGHTS = [0.15, 0.25, 0.3, 0.25, 0.05] as const;
 
