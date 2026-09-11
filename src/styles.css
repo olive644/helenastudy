@@ -1844,10 +1844,6 @@ select {
   .view-heading--today {
     border-radius: 18px;
   }
-
-  .today-helena {
-    width: 88px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3297,9 +3293,15 @@ body.local-room-active {
 }
 
 .today-helena {
-  display: none;
-  width: 105px;
+  display: block;
+  width: 88px;
   height: auto;
+}
+
+@media (min-width: 600px) {
+  .today-helena {
+    width: 105px;
+  }
 }
 
 .metric-row {
