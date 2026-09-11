@@ -12,12 +12,16 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   color-scheme: light;
-  --ink: #17151c;
+  /* Tokens de cor base: mantidos alinhados à paleta oficial HelenaStudy
+     (Creme/Roxo/Amarelo/Grafite). O bloco :root em "Paleta oficial da marca"
+     mais abaixo neste arquivo redeclara os mesmos valores e é a referência
+     final — mantenha os dois sincronizados ao alterar qualquer tom de marca. */
+  --ink: #0f0f14;
   --text: var(--ink);
   --muted: #716e76;
-  --violet: #7257e8;
-  --violet-dark: #5c43c9;
-  --yellow: #ffc94a;
+  --violet: #7c3aed;
+  --violet-dark: #6d28d9;
+  --yellow: #facc15;
   --page: #f4f3ef;
   --surface: #fff;
   --soft: #f8f7f4;
@@ -4949,11 +4953,7 @@ body.local-room-active {
 /* Redesign de conforto e navegação */
 
 :root {
-  --ink: #17151c;
   --muted: #68636d;
-  --violet: #7257e8;
-  --violet-dark: #5c43c9;
-  --yellow: #ffc94a;
   --page: #fff8ed;
   --surface: #fffdf9;
   --soft: #f5f1eb;
