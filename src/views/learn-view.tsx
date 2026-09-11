@@ -361,7 +361,7 @@ export function LearnView({ workspace, dispatch, joinCode }: LearnViewProps) {
             />
           ) : (
             <Suspense fallback={null}>
-              <LocalRoom initialJoinCode={joinCode} />
+              <LocalRoom initialJoinCode={joinCode} onExit={() => setMode("review")} />
             </Suspense>
           )}
         </section>
