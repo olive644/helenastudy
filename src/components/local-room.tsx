@@ -147,9 +147,7 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
   }
 
   const participantCount = state?.participants.length ?? 0;
-  useEffect(() => {
-    if (participantCount > 0) setStartRoundWarning(false);
-  }, [participantCount]);
+  const showStartRoundWarning = startRoundWarning && participantCount === 0;
 
   const isPlaying = state?.phase === "playing";
   const questionStartedAt = state?.questionStartedAt ?? 0;
@@ -382,7 +380,7 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
               >
                 <Play size={17} /> Iniciar rodada
               </button>
-              {startRoundWarning && (
+              {showStartRoundWarning && (
                 <p role="alert">Não é possível iniciar a sala sem nenhum participante.</p>
               )}
               {room.error && <p role="alert">{room.error}</p>}
