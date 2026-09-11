@@ -1,4 +1,4 @@
-import { Check, Copy, DoorOpen, Play, Radio, Users, Volume2, X } from "lucide-react";
+import { ArrowLeft, Check, Copy, DoorOpen, Play, Radio, Users, Volume2, X } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -41,7 +41,7 @@ function LocalRoomFullscreen({ children }: { children: ReactNode }) {
   return createPortal(<div className="local-room-fullscreen">{children}</div>, document.body);
 }
 
-type LocalRoomProps = { initialJoinCode?: string | undefined };
+type LocalRoomProps = { initialJoinCode?: string | undefined; onExit?: () => void };
 
 function ShareRoom({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
@@ -121,7 +121,7 @@ function Podium({ participants }: { participants: readonly LocalRoomParticipant[
   );
 }
 
-export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
+export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
   const room = useLocalRoom();
   const [code, setCode] = useState(initialJoinCode ?? "");
   const [name, setName] = useState("");
@@ -129,6 +129,7 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
   const [lastResult, setLastResult] = useState<{ correct: boolean; xpChange: number } | undefined>(
     undefined,
   );
+  const [startRoundWarning, setStartRoundWarning] = useState(false);
   const state = room.state;
 
   const [appliedJoinCode, setAppliedJoinCode] = useState(false);
@@ -144,6 +145,11 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
     setAnswer("");
     setLastResult(undefined);
   }
+
+  const participantCount = state?.participants.length ?? 0;
+  useEffect(() => {
+    if (participantCount > 0) setStartRoundWarning(false);
+  }, [participantCount]);
 
   const isPlaying = state?.phase === "playing";
   const questionStartedAt = state?.questionStartedAt ?? 0;
@@ -225,6 +231,16 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
   if (room.role === "choose")
     return (
       <LocalRoomFullscreen>
+        {onExit && (
+          <button
+            className="icon-button local-room-back"
+            type="button"
+            onClick={onExit}
+            aria-label="Voltar"
+          >
+            <ArrowLeft size={18} />
+          </button>
+        )}
         <div className="local-room-intro">
           <Radio size={34} />
           <div>
@@ -355,11 +371,20 @@ export function LocalRoom({ initialJoinCode }: LocalRoomProps) {
               <button
                 className="primary-button"
                 type="button"
-                disabled={state.participants.length === 0}
-                onClick={() => void room.startRound()}
+                onClick={() => {
+                  if (state.participants.length === 0) {
+                    setStartRoundWarning(true);
+                    return;
+                  }
+                  setStartRoundWarning(false);
+                  void room.startRound();
+                }}
               >
                 <Play size={17} /> Iniciar rodada
               </button>
+              {startRoundWarning && (
+                <p role="alert">Não é possível iniciar a sala sem nenhum participante.</p>
+              )}
               {room.error && <p role="alert">{room.error}</p>}
             </div>
           ) : (

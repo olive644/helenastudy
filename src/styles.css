@@ -2756,6 +2756,15 @@ select {
   max-width: 640px;
 }
 
+.local-room-back {
+  position: fixed;
+  top: clamp(1rem, 4vw, 2.5rem);
+  left: clamp(1rem, 4vw, 2.5rem);
+  width: 44px;
+  max-width: 44px;
+  z-index: 71;
+}
+
 body.local-room-active {
   overflow: hidden;
 }
