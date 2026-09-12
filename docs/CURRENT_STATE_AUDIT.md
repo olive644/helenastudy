@@ -253,6 +253,9 @@ da escolha da atividade no desktop e passam para uma coluna no celular. Escuta c
 estão disponíveis; Flashcards em grupo e Quiz competitivo aparecem desabilitados como “Em breve”.
 A barra inferior resume a rodada e mantém a ação de início visível. Os ícones aprovados do projeto,
 a arte da Helena segurando a placa e o QR SVG dinâmico foram preservados.
+No quiz de escuta, o professor também pode montar a rodada manualmente com até 30 pares no formato
+`inglês = tradução`. O formulário valida linhas incompletas antes de enviar o baralho temporário e
+mantém o início bloqueado até que as palavras sejam aplicadas à sala.
 Anfitrião e participante guardam a credencial somente na aba atual e retomam a mesma sala após uma
 atualização da página, inclusive durante a rodada. Uma sessão expirada ou inválida é descartada com
 mensagem clara, sem criar um participante duplicado.

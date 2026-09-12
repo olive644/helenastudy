@@ -85,6 +85,18 @@ for (const activity of ["listening", "bingo"] as const) {
       await host.getByRole("button", { name: "Criar sala", exact: true }).click();
       await host.getByRole("combobox", { name: "Perguntas", exact: true }).selectOption("5");
       await host.getByRole("combobox", { name: "Atividade", exact: true }).selectOption(activity);
+      if (activity === "listening") {
+        await host
+          .getByRole("combobox", { name: "Material da sala", exact: true })
+          .selectOption("Palavras manuais");
+        await host
+          .getByLabel("Uma por linha, no formato inglês = tradução")
+          .fill(
+            "school = escola\nfriend = amigo\nbook = livro\nwindow = janela\nteacher = professor",
+          );
+        await host.getByRole("button", { name: "Aplicar palavras", exact: true }).click();
+        await expect(host.getByText("5 questões disponíveis neste filtro.")).toBeVisible();
+      }
       const code = await host.locator(".local-room-session__code strong").innerText();
       const players = await Promise.all(contexts.slice(1).map((c) => c.newPage()));
       await Promise.all(

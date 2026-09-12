@@ -16,6 +16,25 @@ export const STARTER_DECK: readonly ListeningCard[] = LISTENING_VOCABULARY.map((
   ...(item.acceptedAnswers ? { acceptedAnswers: item.acceptedAnswers } : {}),
 }));
 
+export function parseManualListeningCards(value: string): ListeningCard[] {
+  const lines = value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length === 0 || lines.length > 30) return [];
+
+  const cards = lines.map((line, index) => {
+    const [front = "", ...answer] = line.split("=");
+    const back = answer.join("=").trim();
+    return { id: `manual-${index + 1}`, front: front.trim(), back, difficulty: "medium" as const };
+  });
+  return cards.every(
+    ({ front, back }) => front && back && front.length <= 200 && back.length <= 200,
+  )
+    ? cards
+    : [];
+}
+
 export function normalizeListeningAnswer(value: string): string {
   return value
     .trim()

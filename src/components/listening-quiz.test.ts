@@ -5,6 +5,7 @@ import {
   buildListeningDeck,
   createListeningRound,
   isListeningAnswerCorrect,
+  parseManualListeningCards,
   normalizeListeningAnswer,
 } from "../domain/listening-quiz";
 
@@ -69,5 +70,16 @@ describe("quiz de escuta", () => {
     };
     expect(isListeningAnswerCorrect(journey, "  VIÁGEM! ")).toBe(true);
     expect(isListeningAnswerCorrect(journey, "viajante")).toBe(false);
+  });
+
+  it("cria cartões manuais a partir de uma palavra e tradução por linha", () => {
+    expect(parseManualListeningCards("school = escola\n\nfriend = amigo")).toEqual([
+      { id: "manual-1", front: "school", back: "escola", difficulty: "medium" },
+      { id: "manual-2", front: "friend", back: "amigo", difficulty: "medium" },
+    ]);
+  });
+
+  it("informa linhas manuais sem palavra ou tradução", () => {
+    expect(parseManualListeningCards("school = escola\nsem tradução\n= resposta")).toEqual([]);
   });
 });
