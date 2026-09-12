@@ -128,10 +128,12 @@ usar `firebase-room.rules.json`, preservando quaisquer regras de outros produtos
    diariamente às 04:00 UTC; a API exige Authorization Bearer. Reutiliza credenciais Firebase
    do servidor. Conferir logs `room_cleanup` e testar sem segredo (401) e com segredo.
 
-O job remove até 100 registros expirados por caminho por execução, com ETag e rechecagem
+O job processa até 10 lotes de 100 registros por caminho, respeitando orçamento global
+de 45 segundos e timeout de 10 segundos por pedido, com ETag e rechecagem
 para não apagar uma sala recriada. Leitura expirada é bloqueada antes da remoção física.
 Em volume maior, ampliar frequência/capacidade e acompanhar backlog; o cron diário não
-promete remoção imediata. Regras, segredo e App Check não foram ativados por este código.
+promete remoção imediata. `pendingPaths` na resposta/log indica caminhos que precisam
+de nova execução, inclusive conflitos concorrentes. Regras, segredo e App Check não foram ativados por este código.
 
 ## Modelo de ameaça e operação
 
@@ -148,4 +150,5 @@ promete remoção imediata. Regras, segredo e App Check não foram ativados por 
 - Logs `action`, `status`, `durationMs` permitem contar join/leave/resume e falhas; não existe
   dashboard ou telemetria de abandono físico instantâneo. Alertas e retenção ainda dependem da operação.
 - Testes automatizados usam handler real com armazenamento/transporte de teste. Antes de
-  produção validar Firebase real, WebKit, retorno após bloquear o telefone e 30 dispositivos.
+  produção validar Firebase real, Safari em aparelho físico, retorno após bloquear o telefone e 30 dispositivos.
+  Chromium/WebKit automatizados passaram no CI da PR #98 em 12/09/2026.

@@ -4,6 +4,11 @@
 
 Esta seção atualiza o diagnóstico histórico abaixo; código na branch não significa configuração ativa em produção.
 
+Atualização: o CI da PR #98 passou em Chromium/WebKit. A limpeza agora percorre até
+10 lotes de 100 por caminho, com orçamento global de 45 segundos e relatório
+`pendingPaths`; substitui o limite inicial de um único lote citado abaixo. Permanece
+pendente a ativação externa e a validação em aparelhos físicos/Firebase real.
+
 - Concorrência: leitura ETag e gravação condicional no estado privado, repetição de conflitos e publicação pública monotônica por geração/revisão. Criação, entrada e resposta têm recibos idempotentes. Publicação e estado privado ainda são duas gravações; heartbeat/repetição repara falha intermediária.
 - Identidade: token privado de participante separado do identificador público. Credenciais e respostas do quiz não entram na projeção pública.
 - Presença: heartbeat de 15 segundos; tolerância de 2 minutos; inativos saem do lobby e ficam sinalizados na partida. Anfitrião ausente encerra a sala na próxima interação. Não há transferência de controle nem detecção instantânea por onDisconnect; se todos saírem, a expiração limita a vida da sala.

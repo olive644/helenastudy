@@ -2,6 +2,10 @@
 
 ## Decisões do Modo Sala — 12/09/2026
 
+A limpeza passou a processar múltiplos lotes com prazo de 45 segundos, timeout de
+rede e indicação explícita de backlog. O CI da PR #98 validou Chromium/WebKit;
+isso não substitui a validação física nem ativa App Check/cron em produção.
+
 - Firebase REST usa ETags/CAS, revisões públicas monotônicas e recibos para operações repetidas; não há bloqueio apenas em memória no servidor de produção.
 - Sessão temporária possui credencial privada distinta do ID exibido. Presença usa heartbeat e encerra após 2 minutos sem anfitrião; sala tem prazo absoluto de 4 horas.
 - Quiz e bingo compartilham rodada, equipes, prévia e seleção de material. Flashcards pessoais selecionados são compartilhados temporariamente, com aviso na interface.

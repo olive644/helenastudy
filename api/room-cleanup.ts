@@ -16,7 +16,7 @@ export default createVercelHandler("/api/room-cleanup", async (request) => {
       "https://www.googleapis.com/auth/userinfo.email",
     ],
   );
-  const removed = await cleanExpiredRooms(process.env["FIREBASE_DATABASE_URL"] ?? "", token);
-  console.info(JSON.stringify({ event: "room_cleanup", removed }));
-  return Response.json({ removed });
+  const result = await cleanExpiredRooms(process.env["FIREBASE_DATABASE_URL"] ?? "", token);
+  console.info(JSON.stringify({ event: "room_cleanup", ...result }));
+  return Response.json(result);
 });
