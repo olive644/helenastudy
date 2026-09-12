@@ -1,3 +1,13 @@
+---
+title: HelenaStudy TTS
+emoji: 🗣️
+colorFrom: purple
+colorTo: yellow
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Servico de TTS (Kokoro + Piper)
 
 Servico interno em FastAPI que gera a voz do Quiz de Escuta e do Modo Sala.
@@ -13,7 +23,7 @@ cd services/tts
 python -m venv .venv
 ./.venv/Scripts/python -m pip install -r requirements-dev.txt
 ./scripts/download-voice-models.sh
-TTS_SERVICE_TOKEN=um-segredo-de-teste ./.venv/Scripts/python -m uvicorn app.main:app --port 8080
+TTS_SERVICE_TOKEN=um-segredo-de-teste ./.venv/Scripts/python -m uvicorn app.main:app --port 7860
 ```
 
 No Linux/macOS troque `./.venv/Scripts/python` por `./.venv/bin/python`.
@@ -65,8 +75,8 @@ descritos em `.env.example`, na raiz do projeto.
 
 ```bash
 docker build -t helenastudy-tts services/tts
-docker run -p 8080:8080 -e TTS_SERVICE_TOKEN=um-segredo-de-teste helenastudy-tts
-curl http://localhost:8080/health
+docker run -p 7860:7860 -e TTS_SERVICE_TOKEN=um-segredo-de-teste helenastudy-tts
+curl http://localhost:7860/health
 ```
 
 O build baixa os modelos durante a construcao da imagem (via
@@ -76,10 +86,59 @@ e nao depende de rede na inicializacao do container.
 **Pendente nesta entrega**: o build e o teste do container Docker acima nao
 puderam ser executados no ambiente onde este servico foi desenvolvido (sem
 Docker disponivel). O Dockerfile foi escrito e revisado manualmente contra a
-documentacao oficial da imagem `python:3.12-slim`, mas o build de verdade
-fica como validacao pendente antes do primeiro deploy.
+documentacao oficial da imagem `python:3.12-slim` e contra os requisitos de
+permissao do Hugging Face Spaces (usuario nao-root, porta 7860), mas o build
+de verdade fica como validacao pendente antes do primeiro deploy.
 
-## Deploy no Google Cloud Run (sugerido)
+## Deploy no Hugging Face Spaces (recomendado, sem custo)
+
+O SDK Docker do Hugging Face Spaces le o `sdk: docker` e `app_port: 7860` do
+cabecalho YAML deste proprio README. Nao precisa de cartao de credito nem
+conta de faturamento.
+
+1. Crie um novo Space em https://huggingface.co/new-space, escolhendo SDK
+   **Docker** e visibilidade **Private** (o segredo no header ja protege o
+   endpoint, mas deixar privado evita que o Space apareca em buscas).
+2. Em **Settings → Variables and secrets** do Space, adicione como _Secret_:
+   `TTS_SERVICE_TOKEN` (o mesmo valor configurado na Vercel). As demais
+   variaveis (`KOKORO_VOICE`, `PIPER_VOICE`, etc.) sao opcionais; os padroes
+   ja servem.
+3. Publique o conteudo desta pasta no repositorio git do Space:
+
+```bash
+cd services/tts
+git init
+git remote add space https://huggingface.co/spaces/<seu-usuario>/<nome-do-space>
+git add -A
+git commit -m "Publica servico de TTS"
+git push --force space HEAD:main
+```
+
+(Peça login antes com `huggingface-cli login`, instalado via
+`pip install huggingface_hub`, ou cole um token de acesso quando o git
+pedir usuario/senha.) 4. O primeiro build demora alguns minutos (baixa os modelos). Acompanhe em
+**Logs** na propria pagina do Space. 5. A URL do serviço fica em
+`https://<seu-usuario>-<nome-do-space>.hf.space`. Configure na Vercel
+(nunca com prefixo `VITE_`):
+
+```
+TTS_SERVICE_URL=https://<seu-usuario>-<nome-do-space>.hf.space
+TTS_SERVICE_TOKEN=<o mesmo segredo do passo 2>
+```
+
+O tier gratis de CPU do Hugging Face Spaces "dorme" o Space depois de um
+tempo sem uso; a primeira requisicao depois disso enfrenta um cold start
+parecido com o de qualquer container que escala a zero (alguns segundos pra
+recarregar os modelos).
+
+## Deploy no Google Cloud Run (alternativa, exige faturamento)
+
+Cloud Run tem tier "always free" genuino (2 milhoes de requisicoes, 360.000
+GB-segundos de memoria e 180.000 vCPU-segundos por mes), mas o Google passou
+a exigir um pre-pagamento reembolsavel (na faixa de R$200) pra abrir uma conta
+de faturamento nova no Brasil, mesmo pra ficar dentro do tier gratis depois.
+Avalie se vale a pena antes de seguir por aqui; o Hugging Face Spaces acima
+nao tem essa exigencia.
 
 ```bash
 gcloud auth login
@@ -89,11 +148,18 @@ gcloud run deploy helenastudy-tts \
   --region us-central1 \
   --memory 2Gi \
   --cpu 2 \
+  --concurrency 1 \
   --min-instances 0 \
   --max-instances 3 \
-  --no-allow-unauthenticated \
+  --allow-unauthenticated \
   --set-env-vars TTS_SERVICE_TOKEN=<segredo-forte>,KOKORO_VOICE=af_heart,PIPER_VOICE=en_US-hfc_female-medium
 ```
+
+`--allow-unauthenticated` e necessario porque a Vercel autentica com o
+segredo no header `X-TTS-Secret`, nao com um token de identidade do Google;
+`--no-allow-unauthenticated` bloquearia a requisicao antes mesmo dela chegar
+no FastAPI. A protecao real continua sendo o segredo validado pelo proprio
+servico.
 
 Depois do deploy, configure na Vercel (nunca com prefixo `VITE_`):
 
@@ -105,7 +171,9 @@ TTS_SERVICE_TOKEN=<o mesmo segredo>
 `--min-instances 0` deixa o servico escalar a zero entre usos (mais barato),
 ao custo de um cold start (~3 a 5s de carregamento dos modelos) na primeira
 requisicao apos um periodo ocioso. Se isso for perceptivel demais no Quiz de
-Escuta ao vivo, considere `--min-instances 1`.
+Escuta ao vivo, considere `--min-instances 1` (deixa de ser gratuito).
+Configure tambem um orcamento de baixo valor em Cloud Billing com alerta por
+e-mail; orcamentos so avisam, nao bloqueiam gasto automaticamente.
 
 ## Licencas
 
