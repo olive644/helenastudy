@@ -234,6 +234,10 @@ família de ícones usa traço consistente e pequenos acentos da marca, sem subs
 identidade genérica. As animações são curtas, comunicam mudança de estado e são removidas quando o
 sistema solicita redução de movimento.
 
+Os carregamentos de módulos e ferramentas usam uma única animação vetorial da Helena caminhando,
+com mensagem anunciada por leitor de tela, tipografia Manrope e versões responsivas para telas
+completas ou painéis compactos. O ciclo fica estático quando `prefers-reduced-motion` está ativo.
+
 No celular, a navegação flutua acima do conteúdo, os atalhos aparecem em uma grade de toque amplo e
 o painel mantém resumo, prioridades e início rápido sem rolagem horizontal. Nenhum fluxo, dado local
 ou contrato de domínio foi alterado pelo redesign.
