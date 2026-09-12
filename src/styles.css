@@ -2190,6 +2190,36 @@ select {
   place-items: center;
 }
 
+.helena-room-qr--holding {
+  width: min(100%, 440px);
+  min-width: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.helena-room-qr--holding img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.helena-room-qr--holding svg {
+  position: absolute;
+  left: 20%;
+  top: 24%;
+  width: 33%;
+  height: 33%;
+  border-radius: 0;
+}
+
+.local-room-share:has(.helena-room-qr--holding) {
+  flex-direction: column;
+}
+
 .helena-room-icon {
   flex: 0 0 auto;
   overflow: visible;

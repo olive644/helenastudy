@@ -276,6 +276,11 @@ ou contrato de domínio foi alterado pelo redesign.
 
 # Navegação e painel principal
 
+O convite do Modo Sala usa a arte aprovada da Helena segurando uma placa. O QR
+continua sendo SVG dinâmico com margem branca de quatro módulos, posicionado
+na área livre da placa sem cobrir as patas. A imagem é apenas apresentação;
+o endereço codificado continua sendo gerado a partir da sala atual.
+
 - No desktop, a barra lateral é o ponto único de acesso aos módulos.
 - O Espaço do aluno concentra contexto diário, métricas, tarefas e agenda; atalhos que duplicavam a
   navegação foram removidos.
