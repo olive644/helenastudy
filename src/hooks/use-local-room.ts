@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { roomAppCheckToken } from "../data/room-app-check";
 import {
   isValidLocalRoomCode,
   normalizeLocalRoomCode,
@@ -66,7 +67,59 @@ function clearStoredLocalRoomSession() {
 // que chega pelo EventSource (lido direto do Firebase); as respostas da
 // nossa própria API usam JSON.stringify normal e não têm esse problema.
 export function normalizeRoomState(data: Partial<PublicLocalRoomState>): PublicLocalRoomState {
+  const strings = (value: unknown) =>
+    value === undefined ||
+    (Array.isArray(value) && value.every((item) => typeof item === "string"));
+  if (
+    !data ||
+    typeof data !== "object" ||
+    typeof data.code !== "string" ||
+    !isValidLocalRoomCode(data.code) ||
+    !["lobby", "playing", "finished"].includes(data.phase ?? "") ||
+    !data.settings ||
+    ![15, 30, 45, 60].includes(data.settings.roundSeconds) ||
+    !["mixed", "easy", "medium", "hard"].includes(data.settings.difficulty) ||
+    ![5, 10, 15, "all"].includes(data.settings.questionCount) ||
+    [
+      data.questionIndex,
+      data.questionStartedAt,
+      data.totalQuestions,
+      data.revision,
+      data.expiresAt,
+    ].some((value) => value !== undefined && (!Number.isFinite(value) || value < 0)) ||
+    !strings(data.answeredParticipantIds) ||
+    !strings(data.drawnIds) ||
+    (data.participants !== undefined &&
+      (!Array.isArray(data.participants) ||
+        data.participants.some(
+          (p) =>
+            !p ||
+            typeof p.id !== "string" ||
+            typeof p.displayName !== "string" ||
+            !Number.isFinite(p.score) ||
+            !strings(p.bingoCard) ||
+            !strings(p.bingoMarks),
+        ))) ||
+    (data.currentQuestion &&
+      (typeof data.currentQuestion.id !== "string" ||
+        typeof data.currentQuestion.front !== "string")) ||
+    (data.content &&
+      (!Number.isFinite(data.content.count) ||
+        !Array.isArray(data.content.preview) ||
+        !strings(data.content.preview))) ||
+    (data.bingoWords !== undefined &&
+      (!Array.isArray(data.bingoWords) ||
+        data.bingoWords.some(
+          (word) => !word || typeof word.id !== "string" || typeof word.text !== "string",
+        )))
+  )
+    throw new Error("A sala enviou dados inválidos. Tente reconectar.");
   return {
+    ...(data.revision === undefined ? {} : { revision: data.revision }),
+    ...(data.expiresAt === undefined ? {} : { expiresAt: data.expiresAt }),
+    ...(data.generation === undefined ? {} : { generation: data.generation }),
+    ...(data.content ? { content: data.content } : {}),
+    ...(data.bingoWords ? { bingoWords: data.bingoWords, drawnIds: data.drawnIds ?? [] } : {}),
     code: data.code ?? "",
     phase: data.phase ?? "lobby",
     settings: data.settings ?? { difficulty: "mixed", questionCount: 10, roundSeconds: 30 },
@@ -79,18 +132,63 @@ export function normalizeRoomState(data: Partial<PublicLocalRoomState>): PublicL
   };
 }
 
-async function requestRoom<T>(action: string, body: Record<string, unknown>): Promise<T> {
-  const response = await fetch(`/api/local-room?action=${action}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const payload = (await response.json().catch(() => ({}))) as T & { error?: string };
-  if (!response.ok) throw new Error(payload.error ?? "Não foi possível falar com a sala agora.");
-  return payload;
+class RoomRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly invalidSession = false,
+  ) {
+    super(message);
+  }
+}
+
+async function sendRoom<T>(
+  action: string,
+  body: Record<string, unknown>,
+  signal: AbortSignal,
+): Promise<T> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const appCheckToken = await roomAppCheckToken();
+    const response = await fetch(`/api/local-room?action=${action}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(appCheckToken ? { "X-Firebase-AppCheck": appCheckToken } : {}),
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.any([controller.signal, signal]),
+    });
+    const payload = (await response.json().catch(() => ({}))) as T & {
+      error?: string;
+      code?: string;
+    };
+    if (!response.ok)
+      throw new RoomRequestError(
+        payload.error ?? "Não foi possível falar com a sala agora.",
+        response.status,
+        payload.code === "invalid_session",
+      );
+    if (payload && typeof payload === "object" && "state" in payload)
+      normalizeRoomState(payload.state as Partial<PublicLocalRoomState>);
+    return payload;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export function useLocalRoom(initialJoinCode?: string) {
+  const requestsRef = useRef(new Set<AbortController>());
+  async function requestRoom<T>(action: string, body: Record<string, unknown>): Promise<T> {
+    const controller = new AbortController();
+    requestsRef.current.add(controller);
+    try {
+      return await sendRoom<T>(action, body, controller.signal);
+    } finally {
+      requestsRef.current.delete(controller);
+    }
+  }
   const [storedSession] = useState(() => {
     const session = readStoredLocalRoomSession();
     if (initialJoinCode && session?.code !== normalizeLocalRoomCode(initialJoinCode)) {
@@ -100,14 +198,31 @@ export function useLocalRoom(initialJoinCode?: string) {
     return session;
   });
   const [role, setRole] = useState<Role>(storedSession?.role ?? "choose");
-  const [state, setState] = useState<PublicLocalRoomState>();
+  const [state, updateState] = useState<PublicLocalRoomState>();
+  function setState(next: PublicLocalRoomState | undefined) {
+    updateState((current) =>
+      !next
+        ? undefined
+        : current?.code === next.code && (current.revision ?? -1) > (next.revision ?? 0)
+          ? current
+          : next,
+    );
+  }
   const [error, setError] = useState("");
   const [participantId, setParticipantId] = useState(
     storedSession?.role === "participant" ? storedSession.credential : "",
   );
   const [isRestoring, setIsRestoring] = useState(Boolean(storedSession));
+  const [restoreAttempt, setRestoreAttempt] = useState(0);
   const [connectionStatus, setConnectionStatus] = useState<RoomConnectionStatus>("disconnected");
   const hostTokenRef = useRef(storedSession?.role === "host" ? storedSession.credential : "");
+  const participantTokenRef = useRef(
+    storedSession?.role === "participant" ? storedSession.credential : "",
+  );
+  const pendingRef = useRef(false);
+  const createRequestRef = useRef(crypto.randomUUID());
+  const joinRequestRef = useRef({ identity: "", id: crypto.randomUUID() });
+  const [busy, setBusy] = useState(false);
   const codeRef = useRef(storedSession?.code ?? "");
   const eventSourceRef = useRef<EventSource | undefined>(undefined);
 
@@ -127,6 +242,10 @@ export function useLocalRoom(initialJoinCode?: string) {
     const source = new EventSource(streamUrl);
     source.onopen = () => setConnectionStatus("online");
     source.onerror = () => setConnectionStatus(navigator.onLine ? "reconnecting" : "offline");
+    source.addEventListener("cancel", () => {
+      stopStreaming();
+      setError("A sala não está mais disponível. Volte para entrar em outra sala.");
+    });
     source.addEventListener("put", (event) => {
       try {
         const payload = JSON.parse((event as MessageEvent<string>).data) as {
@@ -134,6 +253,10 @@ export function useLocalRoom(initialJoinCode?: string) {
           data: PublicLocalRoomState | null;
         };
         if (payload.path === "/" && payload.data) setState(normalizeRoomState(payload.data));
+        if (payload.path === "/" && payload.data === null) {
+          stopStreaming();
+          setError("Esta sala expirou ou foi encerrada.");
+        }
       } catch {
         // Evento malformado: ignora e espera o próximo.
       }
@@ -142,25 +265,39 @@ export function useLocalRoom(initialJoinCode?: string) {
   }
 
   useEffect(() => {
-    if (!storedSession) return;
+    if (!storedSession || codeRef.current !== storedSession.code) return;
     let active = true;
-    void requestRoom<{ state: PublicLocalRoomState; streamUrl: string }>("resume", {
-      code: storedSession.code,
-      role: storedSession.role,
-      credential: storedSession.credential,
-    })
+    setIsRestoring(true);
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+    void requestRoom<{ state: PublicLocalRoomState; streamUrl: string; participantId?: string }>(
+      "resume",
+      {
+        code: storedSession.code,
+        role: storedSession.role,
+        credential: storedSession.credential,
+      },
+    )
       .then((payload) => {
         if (!active) return;
         setState(payload.state);
+        if (payload.participantId) setParticipantId(payload.participantId);
         startStreaming(payload.streamUrl);
       })
       .catch((caught) => {
         if (!active) return;
-        clearStoredLocalRoomSession();
-        hostTokenRef.current = "";
-        codeRef.current = "";
-        setParticipantId("");
-        setRole("choose");
+        if (
+          caught instanceof RoomRequestError &&
+          (caught.status === 404 || caught.invalidSession)
+        ) {
+          clearStoredLocalRoomSession();
+          hostTokenRef.current = "";
+          codeRef.current = "";
+          setParticipantId("");
+          setRole("choose");
+        } else {
+          setConnectionStatus(navigator.onLine ? "reconnecting" : "offline");
+          retryTimer = setTimeout(() => setRestoreAttempt((attempt) => attempt + 1), 5000);
+        }
         setError(caught instanceof Error ? caught.message : "Não foi possível retomar a sala.");
       })
       .finally(() => {
@@ -168,12 +305,60 @@ export function useLocalRoom(initialJoinCode?: string) {
       });
     return () => {
       active = false;
+      clearTimeout(retryTimer);
     };
     // A sessão é capturada uma vez na montagem; o streaming tem ciclo próprio.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [restoreAttempt]);
 
   useEffect(() => {
+    if (!state || state.phase === "finished") return;
+    let active = true;
+    let running = false;
+    const beat = async () => {
+      if (running || !navigator.onLine) return;
+      running = true;
+      try {
+        const payload = await requestRoom<{ state: PublicLocalRoomState }>("heartbeat", {
+          code: codeRef.current,
+          role,
+          credential: role === "host" ? hostTokenRef.current : participantTokenRef.current,
+        });
+        if (active) setState(payload.state);
+      } catch (caught) {
+        if (
+          active &&
+          caught instanceof RoomRequestError &&
+          (caught.status === 404 || caught.invalidSession)
+        ) {
+          stopStreaming();
+          clearStoredLocalRoomSession();
+          setError(caught.message);
+          setState(undefined);
+          setRole("choose");
+        } else if (active) setConnectionStatus("reconnecting");
+      } finally {
+        running = false;
+      }
+    };
+    const timer = window.setInterval(() => void beat(), 15000);
+    const visible = () => {
+      if (document.visibilityState === "visible") void beat();
+    };
+    window.addEventListener("online", beat);
+    document.addEventListener("visibilitychange", visible);
+    return () => {
+      active = false;
+      clearInterval(timer);
+      window.removeEventListener("online", beat);
+      document.removeEventListener("visibilitychange", visible);
+    };
+    // The identity changes only when joining or leaving the room.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state?.code, state?.phase, role]);
+
+  useEffect(() => {
+    const requests = requestsRef.current;
     const handleOffline = () => eventSourceRef.current && setConnectionStatus("offline");
     const handleOnline = () => eventSourceRef.current && setConnectionStatus("reconnecting");
     window.addEventListener("offline", handleOffline);
@@ -182,10 +367,14 @@ export function useLocalRoom(initialJoinCode?: string) {
       window.removeEventListener("offline", handleOffline);
       window.removeEventListener("online", handleOnline);
       stopStreaming();
+      for (const controller of requests) controller.abort();
     };
   }, []);
 
   async function createRoom(settings: LocalRoomSettings) {
+    if (pendingRef.current) return;
+    pendingRef.current = true;
+    setBusy(true);
     setError("");
     try {
       const payload = await requestRoom<{
@@ -193,7 +382,7 @@ export function useLocalRoom(initialJoinCode?: string) {
         hostToken: string;
         state: PublicLocalRoomState;
         streamUrl: string;
-      }>("create", { settings });
+      }>("create", { settings, requestId: createRequestRef.current });
       hostTokenRef.current = payload.hostToken;
       codeRef.current = payload.code;
       writeStoredLocalRoomSession({
@@ -205,7 +394,12 @@ export function useLocalRoom(initialJoinCode?: string) {
       setRole("host");
       startStreaming(payload.streamUrl);
     } catch (caught) {
+      if (caught instanceof RoomRequestError && caught.status === 409)
+        createRequestRef.current = crypto.randomUUID();
       setError(caught instanceof Error ? caught.message : "Não foi possível criar a sala.");
+    } finally {
+      pendingRef.current = false;
+      setBusy(false);
     }
   }
 
@@ -221,33 +415,48 @@ export function useLocalRoom(initialJoinCode?: string) {
       setError("Escolha um nome de exibição.");
       return;
     }
+    if (pendingRef.current) return;
+    pendingRef.current = true;
+    setBusy(true);
+    const identity = `${roomCode}:${displayName}`;
+    if (joinRequestRef.current.identity !== identity)
+      joinRequestRef.current = { identity, id: crypto.randomUUID() };
     try {
       const payload = await requestRoom<{
         participantId: string;
+        participantToken: string;
         state: PublicLocalRoomState;
         streamUrl: string;
-      }>("join", { code: roomCode, displayName });
+      }>("join", { code: roomCode, displayName, requestId: joinRequestRef.current.id });
       setParticipantId(payload.participantId);
+      participantTokenRef.current = payload.participantToken;
       codeRef.current = roomCode;
       writeStoredLocalRoomSession({
         role: "participant",
         code: roomCode,
-        credential: payload.participantId,
+        credential: payload.participantToken,
       });
       setState(payload.state);
       setRole("participant");
       startStreaming(payload.streamUrl);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Não foi possível entrar na sala.");
+    } finally {
+      pendingRef.current = false;
+      setBusy(false);
     }
   }
 
-  async function updateSettings(settings: Partial<LocalRoomSettings>) {
+  async function updateSettings(
+    settings: Partial<LocalRoomSettings>,
+    sourceDeck?: { id: string; front: string; back: string }[],
+  ) {
     try {
       const payload = await requestRoom<{ state: PublicLocalRoomState }>("settings", {
         code: codeRef.current,
         hostToken: hostTokenRef.current,
         settings,
+        ...(sourceDeck ? { sourceDeck } : {}),
       });
       setState(payload.state);
     } catch (caught) {
@@ -272,6 +481,7 @@ export function useLocalRoom(initialJoinCode?: string) {
       const payload = await requestRoom<{ state: PublicLocalRoomState }>("next", {
         code: codeRef.current,
         hostToken: hostTokenRef.current,
+        questionIndex: state?.questionIndex,
       });
       setState(payload.state);
     } catch (caught) {
@@ -301,7 +511,13 @@ export function useLocalRoom(initialJoinCode?: string) {
         correct: boolean;
         xpChange: number;
         state: PublicLocalRoomState;
-      }>("answer", { code: codeRef.current, participantId, questionIndex, answer });
+      }>("answer", {
+        code: codeRef.current,
+        participantId,
+        participantToken: participantTokenRef.current,
+        questionIndex,
+        answer,
+      });
       setState(payload.state);
       return { correct: payload.correct, xpChange: payload.xpChange };
     } catch (caught) {
@@ -311,6 +527,14 @@ export function useLocalRoom(initialJoinCode?: string) {
   }
 
   function reset() {
+    for (const controller of requestsRef.current) controller.abort();
+    createRequestRef.current = crypto.randomUUID();
+    if (codeRef.current)
+      void requestRoom("leave", {
+        code: codeRef.current,
+        role,
+        credential: role === "host" ? hostTokenRef.current : participantTokenRef.current,
+      }).catch(() => {});
     stopStreaming();
     clearStoredLocalRoomSession();
     setState(undefined);
@@ -329,6 +553,7 @@ export function useLocalRoom(initialJoinCode?: string) {
     participantId,
     isRestoring,
     connectionStatus,
+    busy,
     setRole,
     createRoom,
     joinRoom,

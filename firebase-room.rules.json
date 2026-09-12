@@ -1,0 +1,13 @@
+{
+  "rules": {
+    "rooms": {
+      ".indexOn": ["expiresAt"],
+      "$code": {
+        ".read": "data.child('expiresAt').isNumber() && data.child('expiresAt').val() > now",
+        ".write": false
+      }
+    },
+    "private-rooms": { ".indexOn": ["expiresAt"], ".read": false, ".write": false },
+    "room-limits": { ".indexOn": ["expiresAt"], ".read": false, ".write": false }
+  }
+}

@@ -23,6 +23,48 @@ function tokenResponse(): Response {
 }
 
 describe("armazenamento no Firebase Realtime Database", () => {
+  it("usa ETags na leitura e rejeita gravação concorrente sem sobrescrever", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(tokenResponse())
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ value: "old", expiresAt: 5000 }), {
+          headers: { etag: '"v2"' },
+        }),
+      )
+      .mockResolvedValueOnce(tokenResponse())
+      .mockResolvedValueOnce(new Response(null, { status: 412 }));
+    const store = createFirebaseRealtimeStore(config, fetchImpl, () => 1000);
+    expect(await store.readVersion!("private-rooms/ABCDE")).toEqual({
+      value: "old",
+      version: '"v2"',
+    });
+    expect(await store.compareAndSet!("private-rooms/ABCDE", "new", 60, '"v2"')).toBe(false);
+    expect(fetchImpl.mock.calls[3]![1].headers["if-match"]).toBe('"v2"');
+  });
+
+  it("não publica uma revisão antiga após conflito na projeção pública", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(tokenResponse())
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ revision: 1, generation: "1000" }), {
+          headers: { etag: '"v1"' },
+        }),
+      )
+      .mockResolvedValueOnce(new Response(null, { status: 412 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ revision: 3, generation: "1000" }), {
+          headers: { etag: '"v3"' },
+        }),
+      );
+    await createFirebasePublicRoomPublisher(
+      config,
+      fetchImpl,
+      () => 1000,
+    )("ABCDE", { revision: 2, generation: "1000" });
+    expect(fetchImpl).toHaveBeenCalledTimes(4);
+  });
   it("lê um valor não vencido e devolve só o conteúdo", async () => {
     const fetchImpl = vi
       .fn()
@@ -77,10 +119,11 @@ describe("armazenamento no Firebase Realtime Database", () => {
     const fetchImpl = vi
       .fn()
       .mockResolvedValueOnce(tokenResponse())
+      .mockResolvedValueOnce(new Response("null", { status: 200, headers: { etag: '"v1"' } }))
       .mockResolvedValueOnce(new Response(null, { status: 200 }));
     const publish = createFirebasePublicRoomPublisher(config, fetchImpl, () => 1_000);
     await publish("ABCDE", { phase: "lobby" });
-    const [url, init] = fetchImpl.mock.calls[1] as [string, RequestInit];
+    const [url, init] = fetchImpl.mock.calls[2] as [string, RequestInit];
     expect(url).toBe(`${config.databaseUrl}/rooms/ABCDE.json`);
     expect(init.method).toBe("PUT");
     expect(JSON.parse(init.body as string)).toEqual({ phase: "lobby" });

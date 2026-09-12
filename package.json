@@ -23,6 +23,8 @@
     "verify": "npm run lint && npm run format:check && npm test && npm run build && npm run performance:check"
   },
   "dependencies": {
+    "firebase": "^12.19.0",
+    "jose": "^6.2.12",
     "lucide-react": "^1.41.0",
     "qrcode-generator": "^2.0.4",
     "react": "^19.2.0",
@@ -36,10 +38,10 @@
     "@playwright/test": "^1.63.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
-    "@typescript/native": "npm:typescript@^7.0.2",
     "@types/node": "^26.4.1",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.7",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "@vitejs/plugin-react": "^6.1.0",
     "eslint": "^10.10.0",
     "eslint-config-prettier": "^10.1.8",

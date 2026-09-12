@@ -1,6 +1,7 @@
 import { Check, Plus } from "lucide-react";
 import { lazy, Suspense, useEffect, useState, type Dispatch, type FormEvent } from "react";
 import { HelenaLoading } from "../components/helena-loading";
+import { RoomErrorBoundary } from "../components/room-error-boundary";
 import { PageHeader } from "../components/app-navigation";
 import { ListeningQuiz } from "../components/listening-quiz";
 import {
@@ -379,7 +380,19 @@ export function LearnView({ workspace, dispatch, joinCode }: LearnViewProps) {
             />
           ) : (
             <Suspense fallback={<HelenaLoading label="Preparando o Modo Sala…" />}>
-              <LocalRoom initialJoinCode={joinCode} onExit={leaveRoom} />
+              <RoomErrorBoundary>
+                <LocalRoom
+                  initialJoinCode={joinCode}
+                  onExit={leaveRoom}
+                  materials={workspace.subjects.map((subject) => ({
+                    id: subject.id,
+                    name: subject.name,
+                    cards: workspace.flashcards
+                      .filter((card) => card.subjectId === subject.id)
+                      .map(({ id, front, back }) => ({ id, front, back })),
+                  }))}
+                />
+              </RoomErrorBoundary>
             </Suspense>
           )}
         </section>

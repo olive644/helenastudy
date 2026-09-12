@@ -7,6 +7,8 @@ import {
   MAX_ROOM_PARTICIPANTS,
   normalizeLocalRoomCode,
   rankLocalRoomParticipants,
+  localRoomPool,
+  ROOM_CATEGORIES,
   type LocalRoomParticipant,
   type LocalRoomSettings,
 } from "../domain/local-room";
@@ -41,10 +43,62 @@ function CountdownOverlay({ value }: { value: number }) {
 // qualquer ancestral com transform (como o hover de .module-panel) vira um
 // "containing block" e faz position:fixed grudar nele em vez da tela toda.
 function LocalRoomFullscreen({ children }: { children: ReactNode }) {
-  return createPortal(<div className="local-room-fullscreen">{children}</div>, document.body);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const previous = document.activeElement;
+    const root = document.getElementById("root");
+    const wasInert = root?.inert ?? false;
+    if (root) root.inert = true;
+    ref.current?.focus();
+    return () => {
+      if (root) root.inert = wasInert;
+      if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
+    };
+  }, []);
+  return createPortal(
+    <div
+      ref={ref}
+      className="local-room-fullscreen"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Modo Sala"
+      tabIndex={-1}
+      onKeyDown={(event) => {
+        if (event.key !== "Tab") return;
+        const controls = Array.from(
+          ref.current?.querySelectorAll<HTMLElement>(
+            'button:not(:disabled), input:not(:disabled), select:not(:disabled), a[href], [tabindex="0"]',
+          ) ?? [],
+        ).filter((element) => element.getClientRects().length > 0);
+        const first = controls[0];
+        const last = controls.at(-1);
+        if (!first) {
+          event.preventDefault();
+          return;
+        }
+        if (
+          event.shiftKey &&
+          (document.activeElement === first || document.activeElement === ref.current)
+        ) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }}
+    >
+      {children}
+    </div>,
+    document.body,
+  );
 }
 
-type LocalRoomProps = { initialJoinCode?: string | undefined; onExit?: () => void };
+type LocalRoomProps = {
+  initialJoinCode?: string | undefined;
+  onExit?: () => void;
+  materials?: { id: string; name: string; cards: { id: string; front: string; back: string }[] }[];
+};
 
 function ShareRoom({ code }: { code: string }) {
   const [copyStatus, setCopyStatus] = useState<"idle" | "link" | "code" | "manual">("idle");
@@ -114,7 +168,11 @@ function Scoreboard({ participants }: { participants: readonly LocalRoomParticip
       {ranked.map((participant, index) => (
         <li key={participant.id}>
           <span className="local-room-scoreboard__rank">{index + 1}</span>
-          <span>{participant.displayName}</span>
+          <span>
+            {participant.displayName}
+            {participant.team ? ` · ${participant.team}` : ""}
+            {participant.online === false ? " · ausente" : ""}
+          </span>
           <strong>
             {participant.score} <NavigationIcon name="xp" />
           </strong>
@@ -149,7 +207,7 @@ function Podium({ participants }: { participants: readonly LocalRoomParticipant[
   );
 }
 
-export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
+export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoomProps) {
   const room = useLocalRoom(initialJoinCode);
   const [code, setCode] = useState(initialJoinCode ?? "");
   const [name, setName] = useState("");
@@ -174,7 +232,7 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
   }
 
   const participantCount = state?.participants.length ?? 0;
-  const canJoin = isValidLocalRoomCode(code) && name.trim().length > 0;
+  const canJoin = !room.busy && isValidLocalRoomCode(code) && name.trim().length > 0;
 
   const isPlaying = state?.phase === "playing";
   const questionStartedAt = state?.questionStartedAt ?? 0;
@@ -293,6 +351,7 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
               className="primary-button"
               type="button"
               onClick={() => void room.createRoom(DEFAULT_SETTINGS)}
+              disabled={room.busy}
             >
               <Users size={17} /> Criar sala
             </button>
@@ -360,10 +419,16 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
   const isHost = room.isHost;
   const answered = state.answeredParticipantIds.includes(room.participantId);
   const questionCount = state.settings.questionCount;
-  const estimatedMinutes =
-    questionCount === "all"
-      ? undefined
-      : Math.max(1, Math.ceil((questionCount * roundSeconds) / 60));
+  const pool = localRoomPool(state.settings);
+  const availableCount = state.content?.count ?? pool.length;
+  const actualCount =
+    questionCount === "all" ? availableCount : Math.min(questionCount, availableCount);
+  const estimatedMinutes = Math.ceil((actualCount * roundSeconds) / 60);
+  const ownParticipant = state.participants.find((p) => p.id === room.participantId);
+  const teamScores = ["Roxo", "Amarelo"].map((team) => ({
+    team,
+    score: state.participants.filter((p) => p.team === team).reduce((sum, p) => sum + p.score, 0),
+  }));
   const connectionLabel =
     room.connectionStatus === "online"
       ? "Sala online"
@@ -394,6 +459,16 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
             </button>
           </div>
         </header>
+        <p className="local-note" role="status" aria-live="polite">
+          {state.participants.filter((p) => p.online !== false).length} participantes conectados ·{" "}
+          {connectionLabel}
+        </p>
+        {room.error && <p role="alert">{room.error}</p>}
+        {state.settings.teams && (
+          <p aria-label="Placar por equipe">
+            {teamScores.map((t) => `${t.team}: ${t.score} XP`).join(" · ")}
+          </p>
+        )}
 
         {state.phase === "lobby" ? (
           isHost ? (
@@ -426,6 +501,100 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
               <div className="local-room-settings">
                 <h3>Configurar rodada</h3>
                 <label>
+                  <span>Material da sala</span>
+                  <select
+                    value={state.settings.subjectName ?? ""}
+                    onChange={(event) => {
+                      const material = materials.find((item) => item.name === event.target.value);
+                      void room.updateSettings(
+                        { subjectName: material?.name ?? "", difficulty: "mixed", category: "" },
+                        material?.cards.slice(0, 30) ?? [],
+                      );
+                    }}
+                  >
+                    <option value="">Catálogo de inglês</option>
+                    {materials
+                      .filter((item) => item.cards.length)
+                      .map((item) => (
+                        <option key={item.id} value={item.name}>
+                          {item.name} · meus cartões
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                <p className="local-note">
+                  Ao selecionar seus cartões, você compartilha até 30 deles nesta sala por quatro
+                  horas. Materiais pessoais usam dificuldade média.
+                </p>
+                <label>
+                  <span>Atividade</span>
+                  <select
+                    value={state.settings.activity ?? "listening"}
+                    onChange={(event) =>
+                      void room.updateSettings({
+                        activity: event.target.value as "listening" | "bingo",
+                      })
+                    }
+                  >
+                    <option value="listening">Quiz de escuta</option>
+                    <option value="bingo">Bingo de vocabulário</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Matéria / tema</span>
+                  <select
+                    value={state.settings.category ?? ""}
+                    disabled={Boolean(state.settings.subjectName)}
+                    onChange={(event) => void room.updateSettings({ category: event.target.value })}
+                  >
+                    <option value="">Inglês · todos os temas</option>
+                    {ROOM_CATEGORIES.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <p>
+                  {availableCount} questões disponíveis neste filtro. Prévia:{" "}
+                  {(state.content?.preview ?? pool.slice(0, 3).map((card) => card.front)).join(
+                    ", ",
+                  ) || "Nenhuma questão"}
+                  .
+                </p>
+                <label>
+                  <span>Respostas</span>
+                  <select
+                    value={state.settings.teams ? "teams" : "individual"}
+                    onChange={(event) =>
+                      void room.updateSettings({ teams: event.target.value === "teams" })
+                    }
+                  >
+                    <option value="individual">Individuais</option>
+                    <option value="teams">Equipes Roxo e Amarelo · soma dos pontos</option>
+                  </select>
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={state.settings.shuffle !== false}
+                    onChange={(event) =>
+                      void room.updateSettings({ shuffle: event.target.checked })
+                    }
+                  />{" "}
+                  Embaralhar questões
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={state.settings.allowLateJoin ?? false}
+                    onChange={(event) =>
+                      void room.updateSettings({ allowLateJoin: event.target.checked })
+                    }
+                  />{" "}
+                  Permitir entrada após iniciar
+                </label>
+                <label>
                   <span>Dificuldade</span>
                   <select
                     value={state.settings.difficulty}
@@ -435,10 +604,26 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
                       })
                     }
                   >
-                    <option value="mixed">Misto</option>
-                    <option value="easy">Fácil</option>
-                    <option value="medium">Médio</option>
-                    <option value="hard">Difícil</option>
+                    <option value="mixed">
+                      Misto ·{" "}
+                      {state.content?.difficultyCounts?.mixed ??
+                        localRoomPool({ ...state.settings, difficulty: "mixed" }).length}
+                    </option>
+                    <option value="easy">
+                      Fácil ·{" "}
+                      {state.content?.difficultyCounts?.easy ??
+                        localRoomPool({ ...state.settings, difficulty: "easy" }).length}
+                    </option>
+                    <option value="medium">
+                      Médio ·{" "}
+                      {state.content?.difficultyCounts?.medium ??
+                        localRoomPool({ ...state.settings, difficulty: "medium" }).length}
+                    </option>
+                    <option value="hard">
+                      Difícil ·{" "}
+                      {state.content?.difficultyCounts?.hard ??
+                        localRoomPool({ ...state.settings, difficulty: "hard" }).length}
+                    </option>
                   </select>
                 </label>
                 <label>
@@ -479,22 +664,24 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
                   </select>
                 </label>
                 <div className="local-room-summary" aria-label="Resumo da rodada">
-                  <strong>Quiz de escuta · vocabulário em inglês</strong>
+                  <strong>
+                    {state.settings.activity === "bingo" ? "Bingo" : "Quiz de escuta"} ·{" "}
+                    {state.settings.subjectName || "vocabulário em inglês"}
+                  </strong>
                   <p>
-                    {questionCount === "all"
-                      ? "Todas as perguntas disponíveis"
-                      : `${questionCount} perguntas`}{" "}
-                    · {state.settings.roundSeconds}s cada
+                    {actualCount} perguntas · {state.settings.roundSeconds}s cada
                     {estimatedMinutes ? ` · cerca de ${estimatedMinutes} min` : ""}
                   </p>
                   <small>
-                    Respostas individuais · ordem embaralhada · entrada fecha ao iniciar
+                    {state.settings.teams ? "Equipes" : "Respostas individuais"} ·{" "}
+                    {state.settings.shuffle === false ? "ordem do catálogo" : "ordem embaralhada"} ·{" "}
+                    {state.settings.allowLateJoin ? "entrada aberta" : "entrada fecha ao iniciar"}
                   </small>
                 </div>
                 <button
                   className="primary-button"
                   type="button"
-                  disabled={participantCount === 0}
+                  disabled={participantCount === 0 || availableCount === 0}
                   onClick={() => void room.startRound()}
                 >
                   <Play size={17} /> Iniciar rodada
@@ -542,6 +729,42 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
                   Encerrar sala
                 </button>
               </>
+            ) : state.settings.activity === "bingo" ? (
+              <div className="local-room-bingo">
+                <h3>Complete sua cartela</h3>
+                <p>
+                  Ouça a palavra e marque a tradução correspondente. Vence quem completar a cartela.
+                </p>
+                <button
+                  className="secondary-button"
+                  onClick={() => playQuestionAudio(state.currentQuestion!.front)}
+                >
+                  <Volume2 size={18} /> Ouvir palavra
+                </button>
+                <div className="local-room-bingo-grid">
+                  {(ownParticipant?.bingoCard ?? []).map((id) => (
+                    <button
+                      key={id}
+                      className="secondary-button"
+                      aria-pressed={ownParticipant?.bingoMarks?.includes(id) ?? false}
+                      disabled={
+                        answered || secondsLeft === 0 || ownParticipant?.bingoMarks?.includes(id)
+                      }
+                      onClick={() => void room.submitAnswer(state.questionIndex, id)}
+                    >
+                      {state.bingoWords?.find((word) => word.id === id)?.text ?? id}
+                      {ownParticipant?.bingoMarks?.includes(id) ? " ✓" : ""}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  className="secondary-button"
+                  disabled={answered || secondsLeft === 0}
+                  onClick={() => void room.submitAnswer(state.questionIndex, "pass")}
+                >
+                  Não está na minha cartela
+                </button>
+              </div>
             ) : answered ? (
               <div className="local-room-waiting" role="status">
                 {lastResult?.correct ? <Check size={28} /> : <Radio size={28} />}
