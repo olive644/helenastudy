@@ -143,4 +143,6 @@ implementação com critérios técnicos está em [`IMPLEMENTATION_ROADMAP.md`](
 
 O menu lateral concentra a troca de módulos no desktop. O Espaço do aluno não repete essa lista:
 mantém apenas ações contextuais e o resumo do dia. Em telas móveis, a barra inferior e o menu “Mais
-ferramentas” preservam o acesso completo.
+ferramentas” preservam o acesso completo. A barra inferior usa preto no tema claro, roxo no tema
+escuro e os ícones brancos já existentes, com transições curtas entre módulos e respeito à
+preferência de movimento reduzido do sistema.

@@ -6464,3 +6464,96 @@ select {
     color: #a685fa;
   }
 }
+
+/* Barra móvel: alto contraste e movimento curto na troca de módulos. */
+@media (max-width: 899px) {
+  .mobile-nav {
+    padding: 0.38rem 0.42rem env(safe-area-inset-bottom);
+    border: 1px solid rgb(255 255 255 / 10%);
+    border-radius: 24px;
+    color: #fff;
+    background: #17151c;
+    box-shadow: 0 14px 36px rgb(23 21 28 / 28%);
+    transition:
+      background-color 240ms ease,
+      box-shadow 240ms ease;
+  }
+
+  :root[data-theme="dark"] .mobile-nav {
+    background: #6d28d9;
+    box-shadow: 0 14px 36px rgb(75 32 160 / 34%);
+  }
+
+  .mobile-nav__item,
+  .mobile-nav__item--active {
+    color: #fff;
+    transition:
+      transform 180ms ease,
+      color 180ms ease;
+  }
+
+  .mobile-nav__item:active {
+    transform: scale(0.94);
+  }
+
+  .mobile-nav__icon,
+  .mobile-nav__item--active .mobile-nav__icon {
+    border-color: transparent;
+    background: transparent;
+    transition:
+      background-color 220ms ease,
+      transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .mobile-nav__item--active .mobile-nav__icon {
+    background: #7c3aed;
+    animation: mobile-tab-pop 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  :root[data-theme="dark"] .mobile-nav__item--active .mobile-nav__icon {
+    background: rgb(255 255 255 / 18%);
+  }
+
+  .mobile-nav .navigation-icon__variant {
+    display: none;
+  }
+
+  .mobile-nav .navigation-icon__variant--escuro {
+    display: block;
+  }
+
+  .main-content {
+    animation: mobile-view-arrive 280ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+  }
+}
+
+@keyframes mobile-tab-pop {
+  0% {
+    opacity: 0.65;
+    transform: scale(0.78) translateY(3px);
+  }
+
+  65% {
+    transform: scale(1.08) translateY(-2px);
+  }
+}
+
+@keyframes mobile-view-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-nav,
+  .mobile-nav__item,
+  .mobile-nav__icon {
+    transition: none;
+  }
+
+  .mobile-nav__item--active .mobile-nav__icon,
+  .main-content {
+    animation: none;
+  }
+}
