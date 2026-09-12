@@ -43,23 +43,75 @@ test.beforeEach(async ({ page }) => {
 test("concentra as ferramentas na navegação lateral", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "Contrato visual da página inicial desktop.");
   const navigation = page.getByRole("navigation", { name: "Navegação principal" });
+  const sidebar = page.locator(".sidebar");
 
   await expect(navigation.getByRole("button")).toHaveCount(9);
   await expect(navigation.getByRole("button", { name: "Espaço do aluno" })).toHaveAttribute(
     "aria-current",
     "page",
   );
+  await expect(sidebar.getByText("Espaço do aluno", { exact: true })).toBeHidden();
   await expect(page.getByRole("region", { name: "Ferramentas do Espaço do aluno" })).toHaveCount(0);
 
   const heroDecoration = await page
     .locator(".view-heading--today")
     .evaluate((element) => getComputedStyle(element, "::before").content);
   expect(heroDecoration).toBe("none");
+
+  const metricDecorations = await page
+    .locator(".metric-row article")
+    .evaluateAll((items) => items.map((item) => getComputedStyle(item, "::before").content));
+  expect(metricDecorations).toEqual(["none", "none", "none"]);
+
+  const compactSidebarBox = await sidebar.boundingBox();
+  const compactNavigationBox = await navigation.boundingBox();
+  expect(compactSidebarBox).not.toBeNull();
+  expect(compactNavigationBox).not.toBeNull();
+  expect(compactNavigationBox!.x).toBeGreaterThanOrEqual(compactSidebarBox!.x);
+  expect(compactNavigationBox!.x + compactNavigationBox!.width).toBeLessThanOrEqual(
+    compactSidebarBox!.x + compactSidebarBox!.width,
+  );
+
+  await page.getByRole("button", { name: "Expandir menu lateral" }).click();
+  await expect(sidebar).toHaveClass(/sidebar--expanded/);
+  await expect(sidebar).toHaveCSS("width", "260px");
+  await expect(sidebar.getByLabel("HelenaStudy")).toBeVisible();
+  await expect(sidebar.getByText("Principal", { exact: true })).toBeVisible();
+  await expect(sidebar.getByText("Espaço do aluno", { exact: true })).toBeVisible();
+
+  const expandedSidebarBox = await sidebar.boundingBox();
+  const expandedNavigationBox = await navigation.boundingBox();
+  expect(expandedSidebarBox).not.toBeNull();
+  expect(expandedNavigationBox).not.toBeNull();
+  expect(expandedNavigationBox!.x).toBeGreaterThanOrEqual(expandedSidebarBox!.x);
+  expect(expandedNavigationBox!.x + expandedNavigationBox!.width).toBeLessThanOrEqual(
+    expandedSidebarBox!.x + expandedSidebarBox!.width,
+  );
+});
+
+test("anima o seletor entre os temas claro e escuro", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "Contrato visual do seletor desktop.");
+  const toggle = page.locator(".page-header__theme .theme-toggle");
+  const thumb = toggle.locator(".theme-toggle__thumb");
+  await expect(toggle).toHaveAccessibleName(/tema claro/i);
+  const initialThumbBox = await thumb.boundingBox();
+  expect(initialThumbBox).not.toBeNull();
+  await expect(toggle.locator('[data-icon="theme-light"]')).toBeVisible();
+  await expect(toggle.locator('[data-icon="theme-dark"]')).toBeVisible();
+
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("data-theme", "dark");
+  await expect(toggle).toHaveAccessibleName(/tema escuro/i);
+  await expect
+    .poll(async () => (await thumb.boundingBox())?.x)
+    .toBeGreaterThan(initialThumbBox!.x + 20);
 });
 
 test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }, testInfo) => {
   await expect(page.getByRole("heading", { name: "Espaço do aluno" })).toBeVisible();
-  await expect(page.getByAltText(/helena, a gata preta/i)).toHaveAttribute("src", "/helena.svg");
+  await expect(page.getByText("Dados salvos neste dispositivo")).toHaveCount(0);
+  await expect(page.getByLabel("HelenaStudy")).toHaveCount(0);
+  await expect(page.getByAltText(/rosto da helena/i)).toHaveCount(0);
 
   await page.getByRole("button", { name: "Agenda", exact: true }).click();
   await page.getByLabel(/o que precisa ser feito/i).fill("Revisar Simple Past");
@@ -130,7 +182,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
 
   for (const item of await toolItems.all()) {
     const iconBox = await item.locator(".navigation-icon").boundingBox();
-    const glyphBox = await item.locator(".navigation-icon__glyph").boundingBox();
+    const glyphBox = await item.locator(".navigation-icon__variant:visible").boundingBox();
     expect(iconBox).not.toBeNull();
     expect(glyphBox).not.toBeNull();
     expect(iconBox!.width).toBe(32);
@@ -155,6 +207,31 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
     expect(overflow).toBe(false);
   }
+});
+
+test("adapta a barra móvel ao tema e anima a troca de aba", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile", "Contrato visual da navegação móvel.");
+  const navigation = page.getByRole("navigation", { name: "Navegação móvel" });
+
+  await expect(navigation).toHaveCSS("background-color", "rgb(23, 21, 28)");
+  await expect(navigation).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(navigation.locator(".navigation-icon__variant--escuro").first()).toBeVisible();
+
+  await navigation.getByRole("button", { name: "Agenda", exact: true }).click();
+  await expect(navigation.getByRole("button", { name: "Agenda", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await expect(navigation.locator(".mobile-nav__item--active .mobile-nav__icon")).toHaveCSS(
+    "animation-name",
+    "mobile-tab-pop",
+  );
+  await expect(page.locator("main")).toHaveCSS("animation-name", "mobile-view-arrive");
+
+  await page.getByRole("button", { name: /tema claro/i }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(navigation).toHaveCSS("background-color", "rgb(109, 40, 217)");
+  await expect(navigation).toHaveCSS("color", "rgb(255, 255, 255)");
 });
 
 test("abre digitalização, escrita à mão e completa um bingo", async ({ page }, testInfo) => {

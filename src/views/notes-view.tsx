@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, type Dispatch } from "react";
 import { PageHeader } from "../components/app-navigation";
+import { HelenaLoading } from "../components/helena-loading";
 import type { WorkspaceAction, WorkspaceState } from "../domain/workspace";
 
 const NoteCaptureTools = lazy(() => import("../components/note-capture-tools"));
@@ -120,7 +121,7 @@ export function NotesView({ workspace, dispatch }: NotesViewProps) {
                 <span>{activeSubject.name}</span>
                 <small>Salva automaticamente</small>
               </div>
-              <Suspense fallback={<span className="capture-loading">Abrindo ferramentas…</span>}>
+              <Suspense fallback={<HelenaLoading label="Abrindo ferramentas…" compact />}>
                 <NoteCaptureTools onSave={saveAsset} />
               </Suspense>
               <input

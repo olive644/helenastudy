@@ -5,7 +5,7 @@ import {
   type HelenaErrorCode,
   type HelenaRequest,
   type HelenaResponse,
-} from "../ai/helena-contract";
+} from "../ai/helena-contract.js";
 
 const MAX_BODY_BYTES = 64_000;
 
