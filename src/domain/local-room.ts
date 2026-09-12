@@ -15,9 +15,25 @@ export type LocalRoomSettings = {
   difficulty: LocalRoomDifficulty;
   questionCount: 5 | 10 | 15 | "all";
   roundSeconds: LocalRoomRoundSeconds;
+  activity?: "listening" | "bingo";
+  category?: string;
+  shuffle?: boolean;
+  teams?: boolean;
+  allowLateJoin?: boolean;
+  subjectName?: string;
 };
 
-export type LocalRoomParticipant = { id: string; displayName: string; score: number };
+export type LocalRoomParticipant = {
+  id: string;
+  displayName: string;
+  score: number;
+  token?: string;
+  lastSeenAt?: number;
+  online?: boolean;
+  team?: string;
+  bingoMarks?: string[];
+  bingoCard?: string[];
+};
 
 export type LocalRoomQuestion = { id: string; front: string };
 
@@ -33,6 +49,16 @@ export type LocalRoomState = {
   answeredParticipantIds: string[];
   createdAt: number;
   updatedAt: number;
+  revision?: number;
+  hostLastSeenAt?: number;
+  expiresAt?: number;
+  receipts?: Record<
+    string,
+    { correct?: boolean; xpChange?: number; participantId?: string; participantToken?: string }
+  >;
+  createRequestId?: string;
+  generation?: string;
+  sourceDeck?: ListeningCard[];
 };
 
 export type PublicLocalRoomState = {
@@ -45,25 +71,34 @@ export type PublicLocalRoomState = {
   totalQuestions: number;
   currentQuestion?: LocalRoomQuestion;
   answeredParticipantIds: string[];
+  revision?: number;
+  expiresAt?: number;
+  bingoWords?: { id: string; text: string }[];
+  drawnIds?: string[];
+  generation?: string;
+  content?: {
+    count: number;
+    preview: string[];
+    difficultyCounts?: Record<LocalRoomDifficulty, number>;
+  };
 };
 
-const ROOM_CODE = /^[A-HJ-NP-Z2-9]{5}$/;
+import { LOCAL_ROOM_JOIN_PARAM } from "./room-code.js";
+export {
+  LOCAL_ROOM_JOIN_PARAM,
+  normalizeLocalRoomCode,
+  isValidLocalRoomCode,
+  readLocalRoomCodeFromUrl,
+} from "./room-code.js";
 export const MAX_ROOM_PARTICIPANTS = 30;
 export const ROOM_TTL_SECONDS = 60 * 60 * 4;
+export const ROOM_PRESENCE_GRACE_MS = 120_000;
 
 // Quanto vale acertar, e quanto quem está na liderança perde ao errar — dá
 // um motivo real pra quem está na frente continuar prestando atenção, em
 // vez de só acumular pontos sem risco.
 export const CORRECT_ANSWER_XP = 10;
 export const LEADER_WRONG_ANSWER_PENALTY_XP = 5;
-
-export function normalizeLocalRoomCode(value: string): string {
-  return value.replace(/[\s-]+/g, "").toUpperCase();
-}
-
-export function isValidLocalRoomCode(code: string): boolean {
-  return ROOM_CODE.test(normalizeLocalRoomCode(code));
-}
 
 export function createLocalRoomCode(random: () => number = Math.random): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -78,17 +113,10 @@ export function localRoomStorageKey(code: string): string {
   return `private-rooms/${code.toUpperCase()}`;
 }
 
-export const LOCAL_ROOM_JOIN_PARAM = "sala";
-
 export function buildLocalRoomJoinUrl(origin: string, code: string): string {
   const url = new URL(origin);
   url.searchParams.set(LOCAL_ROOM_JOIN_PARAM, code.toUpperCase());
   return url.toString();
-}
-
-export function readLocalRoomCodeFromUrl(href: string): string | undefined {
-  const code = new URL(href).searchParams.get(LOCAL_ROOM_JOIN_PARAM);
-  return code && isValidLocalRoomCode(code) ? normalizeLocalRoomCode(code) : undefined;
 }
 
 export function createRoom(
@@ -107,6 +135,10 @@ export function createRoom(
     answeredParticipantIds: [],
     createdAt: dependencies.now,
     updatedAt: dependencies.now,
+    hostLastSeenAt: dependencies.now,
+    expiresAt: dependencies.now + ROOM_TTL_SECONDS * 1000,
+    revision: 0,
+    generation: String(dependencies.now),
   };
 }
 
@@ -115,7 +147,11 @@ export function addLocalParticipant(
   participant: LocalRoomParticipant,
   now: number,
 ): LocalRoomState {
-  if (state.phase !== "lobby" || state.participants.length >= MAX_ROOM_PARTICIPANTS) return state;
+  if (
+    (state.phase !== "lobby" && !(state.phase === "playing" && state.settings.allowLateJoin)) ||
+    state.participants.filter((p) => p.online !== false).length >= MAX_ROOM_PARTICIPANTS
+  )
+    return state;
   if (state.participants.some((item) => item.id === participant.id)) return state;
   return { ...state, participants: [...state.participants, participant], updatedAt: now };
 }
@@ -129,19 +165,36 @@ export function updateRoomSettings(
   return { ...state, settings: { ...state.settings, ...settings }, updatedAt: now };
 }
 
-function poolForDifficulty(difficulty: LocalRoomDifficulty): readonly ListeningCard[] {
-  return difficulty === "mixed"
-    ? STARTER_DECK
-    : STARTER_DECK.filter((card) => card.difficulty === difficulty);
+export function localRoomPool(
+  settings: LocalRoomSettings,
+  source: readonly ListeningCard[] = STARTER_DECK,
+): readonly ListeningCard[] {
+  return source.filter(
+    (card) =>
+      (settings.difficulty === "mixed" || card.difficulty === settings.difficulty) &&
+      (!settings.category || card.category === settings.category),
+  );
 }
+export const ROOM_CATEGORIES = [
+  ...new Set(
+    STARTER_DECK.map((card) => card.category).filter((value): value is string => Boolean(value)),
+  ),
+];
 
 export function startRoom(
   state: LocalRoomState,
   dependencies: { random?: () => number; now: number },
 ): LocalRoomState {
   if (state.phase !== "lobby" || state.participants.length === 0) return state;
-  const pool = poolForDifficulty(state.settings.difficulty);
-  const deck = createListeningRound(pool, state.settings.questionCount, dependencies.random);
+  const pool = localRoomPool(state.settings, state.sourceDeck);
+  if (!pool.length) return state;
+  const deck =
+    state.settings.shuffle === false
+      ? pool.slice(
+          0,
+          state.settings.questionCount === "all" ? undefined : state.settings.questionCount,
+        )
+      : createListeningRound(pool, state.settings.questionCount, dependencies.random);
   return {
     ...state,
     phase: "playing",
@@ -149,7 +202,15 @@ export function startRoom(
     questionIndex: 0,
     questionStartedAt: dependencies.now,
     answeredParticipantIds: [],
-    participants: state.participants.map((participant) => ({ ...participant, score: 0 })),
+    participants: state.participants.map((participant, index) => ({
+      ...participant,
+      ...(state.settings.teams ? { team: index % 2 === 0 ? "Roxo" : "Amarelo" } : { team: "" }),
+      score: 0,
+      bingoMarks: [],
+      bingoCard: createListeningRound(deck, Math.min(9, deck.length), dependencies.random).map(
+        (card) => card.id,
+      ),
+    })),
     updatedAt: dependencies.now,
   };
 }
@@ -170,17 +231,35 @@ export function submitRoomAnswer(
     state.phase !== "playing" ||
     dependencies.questionIndex !== state.questionIndex ||
     !card ||
+    dependencies.now >= state.questionStartedAt + state.settings.roundSeconds * 1000 ||
     state.answeredParticipantIds.includes(dependencies.participantId) ||
     !state.participants.some((item) => item.id === dependencies.participantId)
   ) {
     return { state, correct: false, xpChange: 0 };
   }
-  const correct = isListeningAnswerCorrect(card, dependencies.answer);
-  const wasLeading = !correct && isLeading(state.participants, dependencies.participantId);
+  const correct =
+    state.settings.activity === "bingo"
+      ? dependencies.answer === card.id &&
+        Boolean(
+          state.participants
+            .find((p) => p.id === dependencies.participantId)
+            ?.bingoCard?.includes(card.id),
+        )
+      : isListeningAnswerCorrect(card, dependencies.answer);
+  const wasLeading =
+    state.settings.activity !== "bingo" &&
+    !correct &&
+    isLeading(state.participants, dependencies.participantId);
   const xpChange = correct ? CORRECT_ANSWER_XP : wasLeading ? -LEADER_WRONG_ANSWER_PENALTY_XP : 0;
   const participants = state.participants.map((participant) =>
     participant.id === dependencies.participantId
-      ? { ...participant, score: Math.max(0, participant.score + xpChange) }
+      ? {
+          ...participant,
+          score: Math.max(0, participant.score + xpChange),
+          ...(correct && state.settings.activity === "bingo"
+            ? { bingoMarks: [...(participant.bingoMarks ?? []), card.id] }
+            : {}),
+        }
       : participant,
   );
   const answered: LocalRoomState = {
@@ -189,9 +268,20 @@ export function submitRoomAnswer(
     answeredParticipantIds: [...state.answeredParticipantIds, dependencies.participantId],
     updatedAt: dependencies.now,
   };
-  const allAnswered = answered.answeredParticipantIds.length === answered.participants.length;
+  const active = answered.participants.filter((p) => p.online !== false);
+  const allAnswered =
+    active.length > 0 && active.every((p) => answered.answeredParticipantIds.includes(p.id));
+  const bingo =
+    state.settings.activity === "bingo" &&
+    participants.some(
+      (p) => p.bingoCard?.length && p.bingoCard.every((id) => p.bingoMarks?.includes(id)),
+    );
   return {
-    state: allAnswered ? advanceRoomQuestion(answered, dependencies.now) : answered,
+    state: bingo
+      ? endRoom(answered, dependencies.now)
+      : allAnswered
+        ? advanceRoomQuestion(answered, dependencies.now)
+        : answered,
     correct,
     xpChange,
   };
@@ -240,11 +330,36 @@ export function toPublicRoomState(state: LocalRoomState): PublicLocalRoomState {
     code: state.code,
     phase: state.phase,
     settings: state.settings,
-    participants: state.participants,
+    participants: state.participants.map((participant) => {
+      const publicParticipant = { ...participant };
+      delete publicParticipant.token;
+      return publicParticipant;
+    }),
     questionIndex: state.questionIndex,
     questionStartedAt: state.questionStartedAt,
     totalQuestions: state.deck.length,
     answeredParticipantIds: state.answeredParticipantIds,
+    ...(state.revision === undefined ? {} : { revision: state.revision }),
+    ...(state.expiresAt === undefined ? {} : { expiresAt: state.expiresAt }),
+    ...(state.generation === undefined ? {} : { generation: state.generation }),
+    content: {
+      count: localRoomPool(state.settings, state.sourceDeck).length,
+      difficultyCounts: {
+        mixed: localRoomPool({ ...state.settings, difficulty: "mixed" }, state.sourceDeck).length,
+        easy: localRoomPool({ ...state.settings, difficulty: "easy" }, state.sourceDeck).length,
+        medium: localRoomPool({ ...state.settings, difficulty: "medium" }, state.sourceDeck).length,
+        hard: localRoomPool({ ...state.settings, difficulty: "hard" }, state.sourceDeck).length,
+      },
+      preview: localRoomPool(state.settings, state.sourceDeck)
+        .slice(0, 3)
+        .map((item) => item.front),
+    },
+    ...(state.settings.activity === "bingo"
+      ? {
+          bingoWords: state.deck.map((item) => ({ id: item.id, text: item.back })),
+          drawnIds: state.deck.slice(0, state.questionIndex + 1).map((item) => item.id),
+        }
+      : {}),
     ...(state.phase === "playing" && card
       ? { currentQuestion: { id: card.id, front: card.front } }
       : {}),

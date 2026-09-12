@@ -1,5 +1,19 @@
 # HelenaStudy: Second Brain
 
+## Decisões do Modo Sala — 12/09/2026
+
+A limpeza passou a processar múltiplos lotes com prazo de 45 segundos, timeout de
+rede e indicação explícita de backlog. O CI da PR #98 validou Chromium/WebKit;
+isso não substitui a validação física nem ativa App Check/cron em produção.
+
+- Firebase REST usa ETags/CAS, revisões públicas monotônicas e recibos para operações repetidas; não há bloqueio apenas em memória no servidor de produção.
+- Sessão temporária possui credencial privada distinta do ID exibido. Presença usa heartbeat e encerra após 2 minutos sem anfitrião; sala tem prazo absoluto de 4 horas.
+- Quiz e bingo compartilham rodada, equipes, prévia e seleção de material. Flashcards pessoais selecionados são compartilhados temporariamente, com aviso na interface.
+- SDK Firebase App Check é importado dinamicamente apenas se configurado. JWT é verificado com jose no servidor; configuração externa ainda pendente, sem enforcement ativo declarado.
+- Limpeza autenticada diária em `api/room-cleanup.ts` depende de CRON_SECRET e regras/índices em `firebase-room.rules.json`. Não publicar as regras sem considerar salas legadas sem expiresAt.
+- `npm run verify` reúne lint, formatação, testes, build e orçamento. `PLAYWRIGHT_SYSTEM_EDGE=1` permite validar com Edge local quando os browsers Playwright não estão disponíveis; CI mantém Chromium/WebKit. E2E multiplayer usa transportes de teste, não produção.
+- Estado e pendências detalhados em `CURRENT_STATE_AUDIT.md` e procedimento em `ROOM_SETUP.md`.
+
 ## Proposta
 
 O HelenaStudy é o segundo aplicativo da marca Oli. Ele reúne organização, foco, rotina e

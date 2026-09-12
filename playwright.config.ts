@@ -7,8 +7,22 @@ export default defineConfig({
   reporter: process.env["CI"] ? "github" : "list",
   use: { baseURL: "http://127.0.0.1:4173", trace: "on-first-retry" },
   projects: [
-    { name: "desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "mobile", use: { ...devices["iPhone 13"] } },
+    {
+      name: "desktop",
+      use: {
+        ...devices["Desktop Chrome"],
+        ...(process.env["PLAYWRIGHT_SYSTEM_EDGE"] ? { channel: "msedge" } : {}),
+      },
+    },
+    {
+      name: "mobile",
+      use: {
+        ...devices["iPhone 13"],
+        ...(process.env["PLAYWRIGHT_SYSTEM_EDGE"]
+          ? { browserName: "chromium" as const, channel: "msedge" }
+          : {}),
+      },
+    },
   ],
   webServer: {
     command: "npm run build && npm run preview -- --host 127.0.0.1",

@@ -30,6 +30,27 @@ export function createFirebaseRealtimeStore(
   }
 
   return {
+    async readVersion(key) {
+      const response = await authorizedFetch(key, {
+        method: "GET",
+        headers: { "X-Firebase-ETag": "true" },
+      });
+      if (!response.ok) throw new Error(`Firebase respondeu HTTP ${response.status}`);
+      const version = response.headers.get("etag");
+      if (!version) throw new Error("Firebase não devolveu a versão do registro.");
+      const payload = (await response.json()) as StoredEnvelope | null;
+      return { value: payload && payload.expiresAt > now() ? payload.value : undefined, version };
+    },
+    async compareAndSet(key, value, ttlSeconds, version) {
+      const response = await authorizedFetch(key, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "if-match": version },
+        body: JSON.stringify({ value, expiresAt: now() + ttlSeconds * 1000 }),
+      });
+      if (response.status === 412) return false;
+      if (!response.ok) throw new Error(`Firebase respondeu HTTP ${response.status}`);
+      return true;
+    },
     async get(key) {
       const response = await authorizedFetch(key, { method: "GET" });
       if (!response.ok) throw new Error(`Firebase respondeu HTTP ${response.status}`);
@@ -68,12 +89,36 @@ export function createFirebasePublicRoomPublisher(
 ) {
   return async function publish(code: string, publicState: unknown): Promise<void> {
     const token = await getGoogleAccessToken(config.serviceAccount, SCOPES, fetchImpl, now());
-    const response = await fetchImpl(`${config.databaseUrl}/rooms/${code}.json`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify(publicState),
-    });
-    if (!response.ok) throw new Error(`Firebase respondeu HTTP ${response.status}`);
+    const url = `${config.databaseUrl}/rooms/${code}.json`;
+    for (let attempt = 0; attempt < 40; attempt++) {
+      const snapshot = await fetchImpl(url, {
+        headers: { Authorization: `Bearer ${token}`, "X-Firebase-ETag": "true" },
+      });
+      if (!snapshot.ok) throw new Error(`Firebase respondeu HTTP ${snapshot.status}`);
+      const current = (await snapshot.json()) as { revision?: number; generation?: string } | null;
+      const next = publicState as { revision?: number; generation?: string };
+      if (Number(current?.generation ?? 0) > Number(next.generation ?? 0)) return;
+      if (
+        current?.generation === next.generation &&
+        (current?.revision ?? -1) >= (next.revision ?? 0)
+      )
+        return;
+      const version = snapshot.headers.get("etag");
+      if (!version) throw new Error("Firebase não devolveu a versão pública.");
+      const response = await fetchImpl(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          "if-match": version,
+        },
+        body: JSON.stringify(publicState),
+      });
+      if (response.status === 412) continue;
+      if (!response.ok) throw new Error(`Firebase respondeu HTTP ${response.status}`);
+      return;
+    }
+    throw new Error("A sala mudou durante a publicação. Reconecte para sincronizar.");
   };
 }
 

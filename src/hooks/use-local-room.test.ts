@@ -9,6 +9,16 @@ import {
 import type { PublicLocalRoomState } from "../domain/local-room";
 
 describe("normalizeRoomState", () => {
+  it("rejeita dados de participantes inválidos", () => {
+    expect(() =>
+      normalizeRoomState({
+        code: "ABCDE",
+        phase: "lobby",
+        settings: { difficulty: "mixed", questionCount: 5, roundSeconds: 30 },
+        participants: [{ id: "p", displayName: "Ana", score: Number.NaN }],
+      }),
+    ).toThrow("dados inválidos");
+  });
   it("preenche arrays que o Firebase omite quando estão vazios", () => {
     const raw = {
       code: "ABCDE",
@@ -49,6 +59,22 @@ describe("normalizeRoomState", () => {
 });
 
 describe("sessão temporária da sala", () => {
+  it("preserva a sessão quando App Check recusa temporariamente a reconexão", async () => {
+    const session = { role: "participant", code: "ABCDE", credential: "private-token" };
+    window.sessionStorage.setItem(LOCAL_ROOM_SESSION_KEY, JSON.stringify(session));
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          Response.json({ error: "Recarregue para verificar o dispositivo" }, { status: 403 }),
+        ),
+    );
+    const { result, unmount } = renderHook(() => useLocalRoom());
+    await waitFor(() => expect(result.current.isRestoring).toBe(false));
+    expect(readStoredLocalRoomSession()).toEqual(session);
+    unmount();
+  });
   afterEach(() => {
     window.sessionStorage.clear();
     vi.unstubAllGlobals();

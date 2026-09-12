@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { MobileNavigation, Sidebar, type AppView } from "./components/app-navigation";
 import { HelenaLoading } from "./components/helena-loading";
-import { readLocalRoomCodeFromUrl } from "./domain/local-room";
+import { readLocalRoomCodeFromUrl } from "./domain/room-code";
 import { useWorkspace } from "./hooks/use-workspace";
 import { FocusView } from "./views/focus-view";
 import { HabitsView } from "./views/habits-view";

@@ -2278,6 +2278,34 @@ select {
   height: 15px;
 }
 
+.local-room-bingo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-block: 1rem;
+}
+
+.local-room-settings label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 44px;
+}
+
+.local-room-settings input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  accent-color: #7c3aed;
+}
+.local-room-bingo-grid button {
+  min-height: 4rem;
+  overflow-wrap: anywhere;
+}
+.local-room-bingo-grid button[aria-pressed="true"] {
+  background: var(--primary, #7c3aed);
+  color: white;
+}
 .local-room-round {
   display: grid;
   padding-top: 1.2rem;

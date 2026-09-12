@@ -104,13 +104,51 @@ vigor.
   conferida no servidor (o baralho completo com as respostas certas fica só
   em `/private-rooms`, nunca é enviado para o navegador de ninguém).
 
-Cada sala expira sozinha no armazenamento privado depois de 4 horas sem
-uso (a projeção pública em `/rooms` não expira sozinha — é só o estado
-final de uma sala já encerrada, sem dado sensível, então não tem pressa
-para limpar).
+## Ativação da versão com concorrência, presença e bingo
 
-## Limitações desta primeira versão
+A sala agora tem prazo absoluto de 4 horas. O código expira a sessão privada;
+a leitura pública só fica protegida pela expiração após publicar as regras novas.
+As regras antigas exibidas anteriormente neste guia são históricas: para esta versão,
+usar `firebase-room.rules.json`, preservando quaisquer regras de outros produtos.
 
-- Só o **quiz de escuta** roda dentro da sala por enquanto (o bingo digital
-  ainda não tem um modelo de sincronização definido — fica para uma
-  próxima etapa).
+1. Revisar/publicar a branch por PR, sem merge automático. Não misturar clientes antigos
+   com credenciais de participante novas; pedir que salas antigas sejam recriadas.
+2. Registrar aplicativo Web no Firebase appstudyoli e configurar reCAPTCHA Enterprise
+   com os domínios reais, incluindo preview apenas se explicitamente autorizado.
+3. Configurar `VITE_FIREBASE_APPCHECK_SITE_KEY`, `VITE_FIREBASE_API_KEY`,
+   `VITE_FIREBASE_APP_ID` e `FIREBASE_APP_ID`. As primeiras são públicas por natureza;
+   nunca expor a chave privada de serviço em variável VITE_.
+4. Verificar tokens válidos em preview antes de definir `FIREBASE_APPCHECK_ENFORCE=true`.
+   Sem enforcement, o limitador de pedidos continua ativo, mas App Check não protege a API.
+   App Check não substitui autenticação, código de convite ou limitação de tentativas.
+5. Publicar regras/índices de `firebase-room.rules.json` após revisar migração. Elas negam
+   leitura de projeções sem expiresAt. Inventariar e remover/migrar salas legadas de forma
+   controlada; a rotina automática não apaga registros sem data de expiração.
+6. Configurar `CRON_SECRET` privado forte na Vercel e publicar `vercel.json`. O cron roda
+   diariamente às 04:00 UTC; a API exige Authorization Bearer. Reutiliza credenciais Firebase
+   do servidor. Conferir logs `room_cleanup` e testar sem segredo (401) e com segredo.
+
+O job processa até 10 lotes de 100 registros por caminho, respeitando orçamento global
+de 45 segundos e timeout de 10 segundos por pedido, com ETag e rechecagem
+para não apagar uma sala recriada. Leitura expirada é bloqueada antes da remoção física.
+Em volume maior, ampliar frequência/capacidade e acompanhar backlog; o cron diário não
+promete remoção imediata. `pendingPaths` na resposta/log indica caminhos que precisam
+de nova execução, inclusive conflitos concorrentes. Regras, segredo e App Check não foram ativados por este código.
+
+## Modelo de ameaça e operação
+
+- Quem conhece o código pode ler nomes/placar e conteúdo público da atividade. Não usar nomes
+  completos ou material confidencial. Bingo precisa expor palavras da cartela; o quiz não expõe
+  versos privados. O material original do workspace não é alterado.
+- IDs públicos não autorizam respostas. Tokens temporários ficam na aba; XSS ainda ameaça
+  essas credenciais. Não registrar tokens, nomes, respostas ou IP bruto nos logs.
+- Limites por IP confiável fornecido pela Vercel: 6 criações/minuto, 90 entradas/minuto,
+  600 demais ações/minuto. O limite de entrada inclui códigos incorretos. Uma sala com 30 alunos
+  atrás do mesmo roteador cabe nos limites; várias salas na mesma rede podem precisar ajuste.
+- Heartbeat a cada 15 segundos e tolerância de 2 minutos acomodam interrupções curtas. O
+  anfitrião ausente encerra na próxima interação; não há transferência de controle automática.
+- Logs `action`, `status`, `durationMs` permitem contar join/leave/resume e falhas; não existe
+  dashboard ou telemetria de abandono físico instantâneo. Alertas e retenção ainda dependem da operação.
+- Testes automatizados usam handler real com armazenamento/transporte de teste. Antes de
+  produção validar Firebase real, Safari em aparelho físico, retorno após bloquear o telefone e 30 dispositivos.
+  Chromium/WebKit automatizados passaram no CI da PR #98 em 12/09/2026.

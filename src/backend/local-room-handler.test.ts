@@ -1,24 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createLocalRoomHandler } from "./local-room-handler";
-import type { KvStore } from "./kv-store";
+import { createMemoryRoomStore } from "./room-transaction";
 import { MAX_ROOM_PARTICIPANTS, type PublicLocalRoomState } from "../domain/local-room";
 
 const origin = "https://helena.example";
-
-function createMemoryStore(): KvStore {
-  const data = new Map<string, string>();
-  return {
-    async get(key) {
-      return data.get(key);
-    },
-    async set(key, value) {
-      data.set(key, value);
-    },
-    async del(key) {
-      data.delete(key);
-    },
-  };
-}
 
 function post(action: string, body: unknown): Request {
   return new Request(`${origin}/api/local-room?action=${action}`, {
@@ -40,7 +25,7 @@ beforeEach(() => {
   currentTime = 1_000;
   publish = vi.fn().mockResolvedValue(undefined);
   handler = createLocalRoomHandler({
-    store: createMemoryStore(),
+    store: createMemoryRoomStore(() => currentTime),
     publish: publish as (code: string, publicState: PublicLocalRoomState) => Promise<void>,
     streamUrl: (code) => `https://helenastudy-rtdb.firebaseio.com/rooms/${code}.json`,
     now: () => currentTime,
@@ -109,7 +94,7 @@ describe("handler da sala local", () => {
   it("retoma a sessão do host e do participante depois de recarregar", async () => {
     const { code, hostToken } = await createRoomViaApi();
     const joinResponse = await handler(post("join", { code, displayName: "Ana" }));
-    const { participantId } = (await joinResponse.json()) as { participantId: string };
+    const { participantToken } = (await joinResponse.json()) as { participantToken: string };
     await handler(post("start", { code, hostToken }));
 
     const resumedHost = await handler(
@@ -124,7 +109,7 @@ describe("handler da sala local", () => {
     );
 
     const resumedParticipant = await handler(
-      post("resume", { code, role: "participant", credential: participantId }),
+      post("resume", { code, role: "participant", credential: participantToken }),
     );
     expect(resumedParticipant.status).toBe(200);
     expect(await resumedParticipant.json()).toEqual(
@@ -140,6 +125,7 @@ describe("handler da sala local", () => {
     expect(response.status).toBe(403);
     expect(await response.json()).toEqual({
       error: "Não foi possível confirmar sua participação nesta sala.",
+      code: "invalid_session",
     });
   });
 
@@ -216,11 +202,20 @@ describe("handler da sala local", () => {
   it("dá xp na resposta e avança sozinho quando todo mundo já respondeu", async () => {
     const { code, hostToken } = await createRoomViaApi();
     const joinResponse = await handler(post("join", { code, displayName: "Ana" }));
-    const { participantId } = (await joinResponse.json()) as { participantId: string };
+    const { participantId, participantToken } = (await joinResponse.json()) as {
+      participantId: string;
+      participantToken: string;
+    };
     await handler(post("start", { code, hostToken }));
 
     const answerResponse = await handler(
-      post("answer", { code, participantId, questionIndex: 0, answer: "qualquer coisa" }),
+      post("answer", {
+        code,
+        participantId,
+        participantToken,
+        questionIndex: 0,
+        answer: "qualquer coisa",
+      }),
     );
     expect(answerResponse.status).toBe(200);
     const answerPayload = (await answerResponse.json()) as {

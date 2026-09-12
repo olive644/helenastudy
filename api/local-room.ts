@@ -5,6 +5,7 @@ import {
 } from "../src/backend/firebase-realtime-store.js";
 import { createLocalRoomHandler } from "../src/backend/local-room-handler.js";
 import { createVercelHandler } from "../src/backend/vercel-adapter.js";
+import { createRoomGuard } from "../src/backend/room-guard.js";
 
 const config = {
   databaseUrl: process.env["FIREBASE_DATABASE_URL"] ?? "",
@@ -16,8 +17,16 @@ const config = {
   },
 };
 
+const store = createFirebaseRealtimeStore(config);
 const handler = createLocalRoomHandler({
-  store: createFirebaseRealtimeStore(config),
+  store,
+  guard: createRoomGuard(
+    store,
+    "776947909599",
+    process.env["FIREBASE_APP_ID"] ?? "",
+    process.env["FIREBASE_APPCHECK_ENFORCE"] === "true",
+  ),
+  observe: (event) => console.info(JSON.stringify({ event: "room_request", ...event })),
   publish: createFirebasePublicRoomPublisher(config),
   streamUrl: (code) => firebasePublicStreamUrl(config, code),
 });
