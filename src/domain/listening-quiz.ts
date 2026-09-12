@@ -1,5 +1,5 @@
-import type { Flashcard } from "./workspace";
-import { LISTENING_VOCABULARY, type PedagogicalDifficulty } from "../data/listening-vocabulary";
+import type { Flashcard } from "./workspace.js";
+import { LISTENING_VOCABULARY, type PedagogicalDifficulty } from "../data/listening-vocabulary.js";
 
 export type ListeningCard = Pick<Flashcard, "id" | "front" | "back"> & {
   acceptedAnswers?: readonly string[];
@@ -7,7 +7,7 @@ export type ListeningCard = Pick<Flashcard, "id" | "front" | "back"> & {
   category?: string;
 };
 
-const STARTER_DECK: readonly ListeningCard[] = LISTENING_VOCABULARY.map((item) => ({
+export const STARTER_DECK: readonly ListeningCard[] = LISTENING_VOCABULARY.map((item) => ({
   id: `starter-${item.id}`,
   front: item.english,
   back: item.translation,

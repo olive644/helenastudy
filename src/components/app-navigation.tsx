@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { HelenaBrand } from "./helena-brand";
+import { useTheme } from "../hooks/use-theme";
 import { NavigationIcon, type NavigationIconName } from "./navigation-icon";
 
 export type AppView =
@@ -77,6 +77,7 @@ function NavigationButton({
       className={active ? "nav-item nav-item--active" : "nav-item"}
       type="button"
       onClick={onSelect}
+      aria-label={item.label}
       aria-current={active ? "page" : undefined}
     >
       <NavigationIcon name={item.icon} />
@@ -85,10 +86,57 @@ function NavigationButton({
   );
 }
 
-export function Sidebar({ view, onNavigate }: NavigationProps) {
+function ThemeToggle({ showLabel }: { showLabel?: boolean }) {
+  const { theme, toggleTheme } = useTheme();
+  const label = theme === "dark" ? "Tema escuro" : "Tema claro";
   return (
-    <aside className="sidebar">
-      <HelenaBrand />
+    <button
+      className="theme-toggle"
+      type="button"
+      data-theme={theme}
+      onClick={toggleTheme}
+      aria-label={`${label}. Toque para trocar de tema.`}
+    >
+      <span className="theme-toggle__track" aria-hidden="true">
+        <span className="theme-toggle__celestial theme-toggle__moon">
+          <NavigationIcon name="theme-dark" />
+        </span>
+        <span className="theme-toggle__celestial theme-toggle__sun">
+          <NavigationIcon name="theme-light" />
+        </span>
+        <span className="theme-toggle__thumb" />
+      </span>
+      {showLabel && <span>{label}</span>}
+    </button>
+  );
+}
+
+export function Sidebar({ view, onNavigate }: NavigationProps) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <aside className={expanded ? "sidebar sidebar--expanded" : "sidebar"}>
+      <div className="sidebar__top">
+        <button
+          className="sidebar__toggle"
+          type="button"
+          aria-label={expanded ? "Recolher menu lateral" : "Expandir menu lateral"}
+          aria-expanded={expanded}
+          onClick={() => setExpanded((current) => !current)}
+        >
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+        </button>
+        {expanded && (
+          <div className="sidebar__brand" aria-label="HelenaStudy">
+            <img src="/helena-portrait.png" alt="" width="36" height="36" />
+            <strong>
+              Helena<span>Study</span>
+            </strong>
+          </div>
+        )}
+      </div>
       <nav className="sidebar__nav" aria-label="Navegação principal">
         {NAVIGATION_SECTIONS.map((section) => (
           <section className="nav-section" aria-label={section.label} key={section.label}>
@@ -104,13 +152,6 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
           </section>
         ))}
       </nav>
-      <div className="sidebar__footer">
-        <span className="status-dot" aria-hidden="true" />
-        <div>
-          <strong>Dados locais</strong>
-          <small>Salvos neste dispositivo</small>
-        </div>
-      </div>
     </aside>
   );
 }
@@ -232,12 +273,11 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
 export function PageHeader() {
   return (
     <header className="page-header">
-      <div className="page-header__brand">
-        <HelenaBrand />
+      <div className="page-header__actions">
+        <div className="page-header__theme">
+          <ThemeToggle />
+        </div>
       </div>
-      <span className="local-note">
-        <i aria-hidden="true" /> Dados salvos neste dispositivo
-      </span>
     </header>
   );
 }

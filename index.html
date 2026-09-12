@@ -5,11 +5,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta
       name="description"
-      content="HelenaStudy. Planejamento, estudos e rotina em um só lugar."
+      content="HelenaStudy é o app gratuito de estudos com agenda, hábitos, cronômetro de foco (Pomodoro), flashcards e quizzes num só lugar. Organize sua rotina de estudos para ENEM, vestibular e concursos com a Helena."
     />
-    <meta name="theme-color" content="#fff8ed" />
-    <link rel="icon" href="/helena.svg" type="image/svg+xml" />
-    <title>HelenaStudy</title>
+    <meta
+      name="keywords"
+      content="app de estudos, planejador de estudos, agenda de estudos, cronograma de estudos, rotina de estudos, técnica pomodoro, flashcards, quizzes, hábitos de estudo, ENEM, vestibular, concursos, plano de aula de inglês"
+    />
+    <meta name="author" content="HelenaStudy" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#fff9ef" />
+    <link rel="canonical" href="https://helenastudy.vercel.app/" />
+
+    <!-- Open Graph / redes sociais -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="HelenaStudy" />
+    <meta property="og:title" content="HelenaStudy — sua central de estudos, foco e rotina" />
+    <meta
+      property="og:description"
+      content="Agenda, hábitos, cronômetro de foco, flashcards e quizzes num só lugar. Organize sua rotina de estudos com a Helena."
+    />
+    <meta property="og:url" content="https://helenastudy.vercel.app/" />
+    <meta property="og:image" content="https://helenastudy.vercel.app/helena-portrait.png" />
+    <meta property="og:locale" content="pt_BR" />
+
+    <!-- Twitter/X Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="HelenaStudy — sua central de estudos, foco e rotina" />
+    <meta
+      name="twitter:description"
+      content="Agenda, hábitos, cronômetro de foco, flashcards e quizzes num só lugar. Organize sua rotina de estudos com a Helena."
+    />
+    <meta name="twitter:image" content="https://helenastudy.vercel.app/helena-portrait.png" />
+
+    <link rel="icon" href="/helena-portrait.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fonte carregada de forma não bloqueante: preload + troca do rel para
+         'stylesheet' após o download evita que a requisição à Google Fonts
+         atrase a primeira renderização da página. O <noscript> garante a
+         fonte mesmo sem JavaScript. -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      />
+    </noscript>
+    <title>HelenaStudy — Agenda, foco e rotina de estudos</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "HelenaStudy",
+        "url": "https://helenastudy.vercel.app/",
+        "description": "Central de estudos, foco e rotina: agenda, hábitos, cronômetro de foco, flashcards, quizzes e planejador de aulas.",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "BRL"
+        }
+      }
+    </script>
+    <script>
+      (function () {
+        try {
+          var stored = window.localStorage.getItem("helenastudy.theme");
+          if (stored === "light" || stored === "dark") {
+            document.documentElement.setAttribute("data-theme", stored);
+          }
+        } catch (error) {
+          // Sem localStorage disponível: a página segue o tema do sistema.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
