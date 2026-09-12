@@ -99,7 +99,7 @@ export function createSpeechHandler(dependencies: SpeechHandlerDependencies) {
     } catch (error) {
       const response = jsonError(
         503,
-        "A voz Gemini está indisponível. Usando a voz do dispositivo.",
+        "A voz natural está indisponível. Usando a voz do dispositivo.",
       );
       if (
         error instanceof Error &&

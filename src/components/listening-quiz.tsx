@@ -279,11 +279,11 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
             </summary>
             <p className="listening-model-state" role="status">
               {naturalState.status === "idle"
-                ? "Voz feminina. O texto é enviado ao Google somente quando você pede o áudio."
+                ? "Voz feminina. O áudio é gerado quando você pede para ouvir."
                 : naturalState.status === "error"
                   ? naturalState.message
                   : naturalState.status === "generating"
-                    ? "Gerando pronúncia com o Gemini…"
+                    ? (naturalState.message ?? "Preparando a pronúncia.")
                     : naturalState.status === "playing"
                       ? "Reproduzindo voz feminina…"
                       : "Pronúncia pronta nesta sessão."}

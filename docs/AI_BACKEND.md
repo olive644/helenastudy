@@ -3,19 +3,30 @@
 ## Estado da decisão
 
 A fronteira da futura tutora Helena está definida como contrato independente de provedor e permanece
-desativada. Separadamente, o quiz de escuta usa uma integração mínima com Gemini TTS, descrita
-abaixo, que recebe somente o texto curto a ser pronunciado.
+desativada. Separadamente, o Quiz de Escuta e o Modo Sala usam o mesmo serviço de voz natural,
+descrito abaixo, que recebe somente o texto curto a ser pronunciado.
 
-## Voz do quiz de escuta
+## Voz do Quiz de Escuta e do Modo Sala
 
-`POST /api/speech` é uma função Vercel same-origin. Ela aceita texto de até 160 caracteres, uma voz
-allowlist, velocidade entre 0,7 e 1,05 e consentimento explícito no corpo. Origem, tamanho e limite de
-uso são validados antes de chamar `gemini-2.5-flash-preview-tts`. O PCM retornado é convertido para
-WAV no servidor e nenhum conteúdo é registrado.
+`POST /api/speech` é uma função Vercel same-origin. Ela aceita texto de até 160 caracteres, velocidade
+entre 0,7 e 1,05 e consentimento explícito no corpo. Origem, tamanho e limite de uso são validados
+antes de repassar o pedido para o serviço de TTS (`services/tts`), que roda em container separado,
+nunca exposto direto ao navegador.
 
-Configure `GEMINI_API_KEY` apenas como variável protegida da Vercel. Sem a chave ou quando o Gemini
-falha, o cliente usa automaticamente a voz em inglês disponível no navegador. O cache de áudio vive
-somente na memória da sessão.
+O serviço de TTS tenta o Kokoro primeiro (voz americana natural, `af_heart` por padrão). Se o Kokoro
+falhar, exceder o tempo limite configurado ou estiver indisponível, o próprio serviço tenta o Piper
+(`en_US-hfc_female-medium` por padrão) automaticamente, sem que o cliente perceba qual dos dois gerou
+o áudio. Se os dois falharem, `/api/speech` responde com erro e o cliente (`NaturalVoicePlayer`, em
+`src/data/listening-audio.ts`) usa a voz em inglês disponível no navegador como último recurso. O
+áudio retorna em WAV e nenhum texto, resposta ou token é registrado em log.
+
+Configure `TTS_SERVICE_URL` e `TTS_SERVICE_TOKEN` apenas como variáveis protegidas da Vercel (nunca
+com prefixo `VITE_`, que exporia o segredo no navegador). Veja `services/tts/README.md` para como
+rodar, testar e publicar o serviço, incluindo licenças do Kokoro (Apache 2.0) e do Piper (GPL-3.0, isolado
+como processo próprio) e o alerta de licenciamento da voz `en_US-hfc_female-medium` (dataset de
+treinamento sob CC BY-NC-SA, não comercial). O cache de áudio do cliente vive somente na memória da
+sessão; o serviço de TTS mantém um cache próprio, por texto normalizado, voz e velocidade, com limite
+de tamanho e expiração.
 
 ## Fluxo de dados
 
