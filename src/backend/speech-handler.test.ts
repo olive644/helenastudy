@@ -20,7 +20,7 @@ function post(body: unknown, requestOrigin = origin): Request {
   });
 }
 
-describe("handler da voz Gemini", () => {
+describe("handler de voz", () => {
   it("valida e devolve somente áudio", async () => {
     const deps = dependencies();
     const response = await createSpeechHandler(deps)(post(validRequest));

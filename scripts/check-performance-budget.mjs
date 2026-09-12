@@ -8,11 +8,13 @@ const assetsDirectory = new URL("../dist/assets/", import.meta.url);
 // tema): o hook de tema e o botão adicionam ~1 KiB, já com os ícones
 // otimizados para o menor path possível. Revisar se crescer de novo.
 const MAX_INITIAL_JS_BYTES = 222 * 1024;
-// 397 KiB: App Check oficial adiciona ~44 KiB de chunks carregados somente
+// 398 KiB: App Check oficial adiciona ~44 KiB de chunks carregados somente
 // quando a proteção está configurada e a sala faz uma requisição. Bingo,
-// presença, material próprio e o editor manual completam o crescimento.
+// presença, material próprio e o editor manual completam o crescimento. O
+// Modo Sala também passou a reusar o mesmo cliente de voz natural do Quiz
+// de Escuta (NaturalVoicePlayer) em vez de chamar a Web Speech API direto.
 // Entrada mantém 222 KiB.
-const MAX_TOTAL_JS_BYTES = 397 * 1024;
+const MAX_TOTAL_JS_BYTES = 398 * 1024;
 const MAX_TTS_WORKER_BYTES = 2.25 * 1024 * 1024;
 const MAX_TTS_WASM_BYTES = 22 * 1024 * 1024;
 const manifest = JSON.parse(await readFile(new URL(".vite/manifest.json", distDirectory), "utf8"));

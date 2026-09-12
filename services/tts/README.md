@@ -1,0 +1,128 @@
+# Servico de TTS (Kokoro + Piper)
+
+Servico interno em FastAPI que gera a voz do Quiz de Escuta e do Modo Sala.
+Kokoro e o provedor principal; se falhar, exceder o tempo limite ou estiver
+indisponivel, o proprio servico tenta o Piper. Se os dois falharem, quem
+chama (a funcao `/api/speech` da Vercel) sinaliza para o navegador usar a
+Web Speech API. Este servico nunca e exposto direto ao frontend.
+
+## Executar localmente
+
+```bash
+cd services/tts
+python -m venv .venv
+./.venv/Scripts/python -m pip install -r requirements-dev.txt
+./scripts/download-voice-models.sh
+TTS_SERVICE_TOKEN=um-segredo-de-teste ./.venv/Scripts/python -m uvicorn app.main:app --port 8080
+```
+
+No Linux/macOS troque `./.venv/Scripts/python` por `./.venv/bin/python`.
+
+## Testes
+
+```bash
+./.venv/Scripts/python -m pytest
+```
+
+Os testes em `tests/test_integration_real_models.py` sao pulados
+automaticamente quando os modelos nao estao baixados em `models/`. Rode
+`scripts/download-voice-models.sh` antes para exercitar sintese de audio
+de verdade (Kokoro e Piper reais, nao mockados).
+
+## Variaveis de ambiente
+
+| Variavel                    | Obrigatoria | Padrao                    | Descricao                                                                                     |
+| --------------------------- | ----------- | ------------------------- | --------------------------------------------------------------------------------------------- |
+| `TTS_SERVICE_TOKEN`         | sim         | (vazio, recusa tudo)      | Segredo compartilhado com a funcao `/api/speech` da Vercel, enviado no header `X-TTS-Secret`. |
+| `KOKORO_VOICE`              | nao         | `af_heart`                | Voz do Kokoro (americana feminina natural).                                                   |
+| `PIPER_VOICE`               | nao         | `en_US-hfc_female-medium` | Voz do Piper usada como reserva.                                                              |
+| `KOKORO_TIMEOUT_MS`         | nao         | `6000`                    | Tempo limite da sintese com Kokoro antes de tentar o Piper.                                   |
+| `PIPER_TIMEOUT_MS`          | nao         | `6000`                    | Tempo limite da sintese com Piper antes de desistir.                                          |
+| `TTS_CACHE_TTL_SECONDS`     | nao         | `3600`                    | Tempo de vida de cada audio em cache.                                                         |
+| `TTS_CACHE_MAX_ENTRIES`     | nao         | `512`                     | Numero maximo de audios guardados em cache ao mesmo tempo.                                    |
+| `TTS_MAX_CONCURRENT_KOKORO` | nao         | `2`                       | Sinteses simultaneas permitidas no Kokoro (limite de memoria).                                |
+| `TTS_MAX_CONCURRENT_PIPER`  | nao         | `2`                       | Sinteses simultaneas permitidas no Piper.                                                     |
+| `TTS_MAX_TEXT_LENGTH`       | nao         | `160`                     | Tamanho maximo do texto aceito, em caracteres.                                                |
+
+Nenhuma dessas variaveis deve ser exposta ao navegador (nao usar prefixo
+`VITE_`). `TTS_SERVICE_URL` e `TTS_SERVICE_TOKEN` do lado da Vercel ficam
+descritos em `.env.example`, na raiz do projeto.
+
+## Memoria e inicializacao esperadas
+
+- Modelo Kokoro em disco: ~325MB (`kokoro-v1.0.onnx`) + ~27MB (`voices-v1.0.bin`).
+- Modelo Piper em disco: ~63MB (`en_US-hfc_female-medium.onnx`).
+- Memoria residente observada com os dois modelos carregados: pedir pelo
+  menos **1.5GB de RAM** para o container, com folga para concorrencia
+  (2 sinteses simultaneas por provedor, por padrao).
+- Tempo de carregamento medido nesta maquina: Kokoro ~2.5s, Piper ~4.5s.
+  O `lifespan` do FastAPI carrega os dois uma unica vez na inicializacao
+  do processo; requisicoes concorrentes reaproveitam a mesma instancia.
+- `/health` responde `{"status": "ok", "kokoro_loaded": bool, "piper_loaded": bool}`
+  sem revelar nenhuma configuracao sensivel.
+
+## Build do container
+
+```bash
+docker build -t helenastudy-tts services/tts
+docker run -p 8080:8080 -e TTS_SERVICE_TOKEN=um-segredo-de-teste helenastudy-tts
+curl http://localhost:8080/health
+```
+
+O build baixa os modelos durante a construcao da imagem (via
+`scripts/download-voice-models.sh`), entao a imagem final e autossuficiente
+e nao depende de rede na inicializacao do container.
+
+**Pendente nesta entrega**: o build e o teste do container Docker acima nao
+puderam ser executados no ambiente onde este servico foi desenvolvido (sem
+Docker disponivel). O Dockerfile foi escrito e revisado manualmente contra a
+documentacao oficial da imagem `python:3.12-slim`, mas o build de verdade
+fica como validacao pendente antes do primeiro deploy.
+
+## Deploy no Google Cloud Run (sugerido)
+
+```bash
+gcloud auth login
+gcloud config set project SEU_PROJETO_GCP
+gcloud run deploy helenastudy-tts \
+  --source services/tts \
+  --region us-central1 \
+  --memory 2Gi \
+  --cpu 2 \
+  --min-instances 0 \
+  --max-instances 3 \
+  --no-allow-unauthenticated \
+  --set-env-vars TTS_SERVICE_TOKEN=<segredo-forte>,KOKORO_VOICE=af_heart,PIPER_VOICE=en_US-hfc_female-medium
+```
+
+Depois do deploy, configure na Vercel (nunca com prefixo `VITE_`):
+
+```
+TTS_SERVICE_URL=<url do Cloud Run>
+TTS_SERVICE_TOKEN=<o mesmo segredo>
+```
+
+`--min-instances 0` deixa o servico escalar a zero entre usos (mais barato),
+ao custo de um cold start (~3 a 5s de carregamento dos modelos) na primeira
+requisicao apos um periodo ocioso. Se isso for perceptivel demais no Quiz de
+Escuta ao vivo, considere `--min-instances 1`.
+
+## Licencas
+
+- **Kokoro**: Apache 2.0 (modelo hexgrad/Kokoro-82M, distribuido via
+  `kokoro-onnx` 0.6.1).
+- **Piper**: o pacote `piper-tts` (mantido atualmente, fork "Piper 1") usa
+  licenca GPL-3.0. Ele fica isolado neste servico Python, executado como
+  processo proprio; nenhum codigo GPL entra no frontend (JavaScript/TypeScript
+  do HelenaStudy).
+- **Voz do Piper** (`en_US-hfc_female-medium`): distribuida no repositorio
+  `rhasspy/piper-voices` no Hugging Face. O `MODEL_CARD` oficial dessa voz
+  informa que o dataset de treinamento (Hi-Fi CAPTAIN, NICT) usa licenca
+  **CC BY-NC-SA 4.0 (nao comercial)**: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en.
+  Isso pode ser incompativel com uso comercial do HelenaStudy dependendo de
+  como o produto for monetizado; nao troquei a voz por conta propria porque
+  foi pedida nominalmente, mas isso precisa ser decidido antes do deploy em
+  producao. Este projeto nao redistribui o arquivo do modelo, apenas o baixa
+  em tempo de build a partir da fonte oficial.
+- A avaliacao juridica final sobre a distribuicao (incluindo a licenca
+  exata da voz Piper) continua necessaria e nao foi feita aqui.

@@ -5,12 +5,14 @@ export type NaturalVoiceState = {
   message?: string;
 };
 
+type CachedAudio = { blob: Blob; provider: string | undefined };
+
 export class NaturalVoicePlayer {
   private audio: HTMLAudioElement | undefined;
   private audioUrl: string | undefined;
   private controller: AbortController | undefined;
   private requestId = 0;
-  private readonly cache = new Map<string, Promise<Blob>>();
+  private readonly cache = new Map<string, Promise<CachedAudio>>();
 
   constructor(private readonly onState: (state: NaturalVoiceState) => void) {}
 
@@ -21,25 +23,20 @@ export class NaturalVoicePlayer {
   async generate(text: string, rate: number, fallback?: () => void): Promise<void> {
     this.stopPlayback();
     const requestId = this.requestId;
-    this.onState({ status: "generating" });
+    this.onState({ status: "generating", message: "Preparando a pronúncia." });
 
     try {
-      const blob = await this.load(text, rate);
+      const { blob, provider } = await this.load(text, rate);
       if (requestId !== this.requestId) return;
-      await this.playBlob(blob, requestId);
-    } catch (error) {
-      if (requestId !== this.requestId) return;
-      if (error instanceof DOMException && error.name === "AbortError") {
-        this.onState({
-          status: "error",
-          message: "O Gemini demorou demais. Tente reproduzir novamente.",
-        });
-        fallback?.();
-        return;
+      if (provider && provider !== "kokoro") {
+        this.onState({ status: "generating", message: "Usando voz alternativa." });
       }
+      await this.playBlob(blob, requestId);
+    } catch {
+      if (requestId !== this.requestId) return;
       this.onState({
         status: "error",
-        message: "Gemini indisponível. Usando a voz inglesa do dispositivo.",
+        message: "Usando a voz do dispositivo.",
       });
       fallback?.();
     }
@@ -64,7 +61,7 @@ export class NaturalVoicePlayer {
     this.stop();
   }
 
-  private load(text: string, rate: number): Promise<Blob> {
+  private load(text: string, rate: number): Promise<CachedAudio> {
     const cacheKey = `${rate}:${text}`;
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
@@ -79,8 +76,9 @@ export class NaturalVoicePlayer {
           body: JSON.stringify({ text, rate, consent: true }),
           signal: this.controller.signal,
         });
-        if (!response.ok) throw new Error("Gemini speech unavailable");
-        return await response.blob();
+        if (!response.ok) throw new Error("Natural speech unavailable");
+        const provider = response.headers.get("X-TTS-Provider") ?? undefined;
+        return { blob: await response.blob(), provider };
       } finally {
         window.clearTimeout(timeout);
       }

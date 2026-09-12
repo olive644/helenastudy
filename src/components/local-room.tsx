@@ -14,6 +14,7 @@ import {
 } from "../domain/local-room";
 import { parseManualListeningCards } from "../domain/listening-quiz";
 import { selectFallbackEnglishVoice, speakEnglish } from "../data/speech-voice";
+import { NaturalVoicePlayer, type NaturalVoiceState } from "../data/listening-audio";
 import { useLocalRoom } from "../hooks/use-local-room";
 import { ThemeToggle } from "./app-navigation";
 import { NavigationIcon } from "./navigation-icon";
@@ -211,15 +212,6 @@ function LobbyParticipants({ participants }: { participants: readonly LocalRoomP
   );
 }
 
-function playQuestionAudio(text: string) {
-  const voices = window.speechSynthesis?.getVoices() ?? [];
-  speakEnglish(text, {
-    voice: selectFallbackEnglishVoice(voices),
-    rate: 0.9,
-    onUnavailable: () => {},
-  });
-}
-
 function Scoreboard({ participants }: { participants: readonly LocalRoomParticipant[] }) {
   const ranked = rankLocalRoomParticipants(participants);
   return (
@@ -277,6 +269,25 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
     undefined,
   );
   const state = room.state;
+  const [naturalState, setNaturalState] = useState<NaturalVoiceState>({ status: "idle" });
+  const naturalPlayerRef = useRef<NaturalVoicePlayer | undefined>(undefined);
+
+  useEffect(() => {
+    const player = new NaturalVoicePlayer(setNaturalState);
+    naturalPlayerRef.current = player;
+    return () => player.dispose();
+  }, []);
+
+  function playQuestionAudio(text: string) {
+    void naturalPlayerRef.current?.generate(text, 0.9, () => {
+      const voices = window.speechSynthesis?.getVoices() ?? [];
+      speakEnglish(text, {
+        voice: selectFallbackEnglishVoice(voices),
+        rate: 0.9,
+        onUnavailable: () => {},
+      });
+    });
+  }
 
   const [appliedJoinCode, setAppliedJoinCode] = useState(false);
   if (initialJoinCode && !appliedJoinCode && room.role === "choose") {
@@ -291,6 +302,15 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
     setAnswer("");
     setLastResult(undefined);
   }
+
+  const currentQuestionFront = state?.currentQuestion?.front;
+  useEffect(() => {
+    // Uma pergunta nova nao deve tocar a reproducao (ou pedido de audio) da
+    // pergunta anterior por cima; ja aproveita pra pedir o audio dela com
+    // antecedencia, antes de alguem clicar em "Ouvir".
+    naturalPlayerRef.current?.stop();
+    if (currentQuestionFront) naturalPlayerRef.current?.preload(currentQuestionFront, 0.9);
+  }, [questionKey, currentQuestionFront]);
 
   const participantCount = state?.participants.length ?? 0;
   const canJoin = !room.busy && isValidLocalRoomCode(code) && name.trim().length > 0;
@@ -922,6 +942,11 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                 >
                   <Volume2 size={18} /> Ouvir palavra
                 </button>
+                {naturalState.message && naturalState.status !== "ready" && (
+                  <p className="local-room-audio-status" role="status">
+                    {naturalState.message}
+                  </p>
+                )}
                 <div className="local-room-bingo-grid">
                   {(ownParticipant?.bingoCard ?? []).map((id) => (
                     <button
@@ -967,6 +992,11 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                 >
                   <Volume2 size={18} /> Ouvir de novo
                 </button>
+                {naturalState.message && naturalState.status !== "ready" && (
+                  <p className="local-room-audio-status" role="status">
+                    {naturalState.message}
+                  </p>
+                )}
                 <label>
                   <span>Digite a tradução</span>
                   <input

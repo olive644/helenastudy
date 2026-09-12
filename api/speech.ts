@@ -1,5 +1,5 @@
-import { createGeminiSpeechProvider } from "../src/backend/gemini-speech-provider.js";
 import { createSpeechHandler } from "../src/backend/speech-handler.js";
+import { createTtsServiceProvider } from "../src/backend/tts-service-provider.js";
 import { createVercelHandler } from "../src/backend/vercel-adapter.js";
 
 const requests = new Map<string, number[]>();
@@ -18,7 +18,11 @@ const handler = createSpeechHandler({
       return true;
     },
   },
-  provider: createGeminiSpeechProvider(process.env["GEMINI_API_KEY"] ?? ""),
+  provider: createTtsServiceProvider(
+    process.env["TTS_SERVICE_URL"] ?? "",
+    process.env["TTS_SERVICE_TOKEN"] ?? "",
+    Number(process.env["TTS_TIMEOUT_MS"] ?? "8000"),
+  ),
 });
 
 export default createVercelHandler("/api/speech", handler);
