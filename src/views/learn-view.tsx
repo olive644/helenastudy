@@ -1,5 +1,6 @@
 import { Check, Plus } from "lucide-react";
 import { lazy, Suspense, useEffect, useState, type Dispatch, type FormEvent } from "react";
+import { HelenaLoading } from "../components/helena-loading";
 import { PageHeader } from "../components/app-navigation";
 import { ListeningQuiz } from "../components/listening-quiz";
 import {
@@ -377,7 +378,7 @@ export function LearnView({ workspace, dispatch, joinCode }: LearnViewProps) {
               subjectId={selectedSubject.id}
             />
           ) : (
-            <Suspense fallback={null}>
+            <Suspense fallback={<HelenaLoading label="Preparando o Modo Sala…" />}>
               <LocalRoom initialJoinCode={joinCode} onExit={leaveRoom} />
             </Suspense>
           )}

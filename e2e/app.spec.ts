@@ -209,6 +209,31 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
   }
 });
 
+test("adapta a barra móvel ao tema e anima a troca de aba", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile", "Contrato visual da navegação móvel.");
+  const navigation = page.getByRole("navigation", { name: "Navegação móvel" });
+
+  await expect(navigation).toHaveCSS("background-color", "rgb(23, 21, 28)");
+  await expect(navigation).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(navigation.locator(".navigation-icon__variant--escuro").first()).toBeVisible();
+
+  await navigation.getByRole("button", { name: "Agenda", exact: true }).click();
+  await expect(navigation.getByRole("button", { name: "Agenda", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await expect(navigation.locator(".mobile-nav__item--active .mobile-nav__icon")).toHaveCSS(
+    "animation-name",
+    "mobile-tab-pop",
+  );
+  await expect(page.locator("main")).toHaveCSS("animation-name", "mobile-view-arrive");
+
+  await page.getByRole("button", { name: /tema claro/i }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(navigation).toHaveCSS("background-color", "rgb(109, 40, 217)");
+  await expect(navigation).toHaveCSS("color", "rgb(255, 255, 255)");
+});
+
 test("abre digitalização, escrita à mão e completa um bingo", async ({ page }, testInfo) => {
   await navigateToTool(page, testInfo.project.name, "Cadernos", "Notas");
   await page.getByRole("button", { name: /nova anotação/i }).click();
