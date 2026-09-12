@@ -86,7 +86,7 @@ function NavigationButton({
   );
 }
 
-function ThemeToggle({ showLabel }: { showLabel?: boolean }) {
+export function ThemeToggle({ showLabel }: { showLabel?: boolean }) {
   const { theme, toggleTheme } = useTheme();
   const label = theme === "dark" ? "Tema escuro" : "Tema claro";
   return (

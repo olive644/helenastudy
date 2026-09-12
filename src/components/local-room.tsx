@@ -14,6 +14,7 @@ import {
 } from "../domain/local-room";
 import { selectFallbackEnglishVoice, speakEnglish } from "../data/speech-voice";
 import { useLocalRoom } from "../hooks/use-local-room";
+import { ThemeToggle } from "./app-navigation";
 import { NavigationIcon } from "./navigation-icon";
 import { HelenaRoomIcon } from "./helena-room-icon";
 import { RoomQrCode } from "./room-qr-code";
@@ -23,6 +24,36 @@ const DEFAULT_SETTINGS: LocalRoomSettings = {
   questionCount: 10,
   roundSeconds: 30,
 };
+
+const ROOM_ACTIVITY_OPTIONS = [
+  {
+    key: "listening",
+    icon: "focus",
+    title: "Escuta coletiva",
+    badge: "Recomendado",
+    enabled: true,
+  },
+  {
+    key: "flashcards",
+    icon: "learn",
+    title: "Flashcards em grupo",
+    badge: "Em breve",
+    enabled: false,
+  },
+  {
+    key: "quiz",
+    icon: "medal-first",
+    title: "Quiz competitivo",
+    badge: "Em breve",
+    enabled: false,
+  },
+  {
+    key: "bingo",
+    icon: "activity-bank",
+    title: "Bingo",
+    enabled: true,
+  },
+] as const;
 
 const MEDAL_ICON_BY_RANK = ["medal-first", "medal-second", "medal-third"] as const;
 
@@ -102,54 +133,79 @@ type LocalRoomProps = {
 };
 
 function ShareRoom({ code }: { code: string }) {
-  const [copyStatus, setCopyStatus] = useState<"idle" | "link" | "code" | "manual">("idle");
-  const linkInputRef = useRef<HTMLInputElement>(null);
+  const [copyStatus, setCopyStatus] = useState("");
   const joinUrl = buildLocalRoomJoinUrl(window.location.href, code);
 
-  async function copy(value: string, success: "link" | "code") {
+  async function copy(value: string, success: string) {
     try {
       await navigator.clipboard.writeText(value);
       setCopyStatus(success);
     } catch {
-      setCopyStatus("manual");
-      linkInputRef.current?.select();
+      setCopyStatus("Não foi possível copiar.");
     }
-    window.setTimeout(() => setCopyStatus("idle"), 2500);
+    window.setTimeout(() => setCopyStatus(""), 2500);
   }
 
   return (
     <div className="local-room-share">
-      <RoomQrCode value={joinUrl} />
+      <div className="local-room-share__heading">
+        <h3>Convide seus alunos</h3>
+        <p>Todo mundo começa por aqui.</p>
+      </div>
+      <div className="local-room-share__code">
+        <strong aria-label="Código da sala">{code}</strong>
+        <button
+          className="icon-button"
+          type="button"
+          onClick={() => void copy(code, "Código copiado ✓")}
+          aria-label="Copiar código da sala"
+        >
+          <Copy size={17} />
+        </button>
+      </div>
+      <details className="local-room-share__qr" open>
+        <summary>Mostrar ou recolher QR code</summary>
+        <RoomQrCode value={joinUrl} />
+      </details>
       <div className="local-room-share__link">
-        <p>Escaneie o QR code ou compartilhe o convite:</p>
-        <input ref={linkInputRef} aria-label="Link da sala" value={joinUrl} readOnly />
+        <p>Escaneie o QR code ou compartilhe o convite.</p>
+        <input aria-label="Link da sala" value={joinUrl} readOnly />
         <div className="local-room-share__actions">
           <button
             className="secondary-button"
             type="button"
-            onClick={() => void copy(joinUrl, "link")}
+            onClick={() => void copy(joinUrl, "Link copiado ✓")}
           >
             <Copy size={16} /> Copiar link
           </button>
-          <button
-            className="secondary-button"
-            type="button"
-            onClick={() => void copy(code, "code")}
-          >
-            <Copy size={16} /> Copiar código
-          </button>
         </div>
         <p className="local-room-copy-status" role="status" aria-live="polite">
-          {copyStatus === "link"
-            ? "Link copiado ✓"
-            : copyStatus === "code"
-              ? "Código copiado ✓"
-              : copyStatus === "manual"
-                ? "Selecione e copie o link acima."
-                : ""}
+          {copyStatus}
         </p>
       </div>
     </div>
+  );
+}
+
+function LobbyParticipants({ participants }: { participants: readonly LocalRoomParticipant[] }) {
+  return (
+    <ul className="local-room-participant-list">
+      {participants.map((participant, index) => (
+        <li key={participant.id}>
+          <span
+            className={`local-room-avatar local-room-avatar--${(index % 4) + 1}`}
+            aria-hidden="true"
+          >
+            {participant.displayName.slice(0, 2).toUpperCase()}
+          </span>
+          <span className="local-room-participant-list__name">{participant.displayName}</span>
+          <small className={participant.online === false ? "is-offline" : ""}>
+            <span aria-hidden="true" />
+            {participant.online === false ? "Ausente" : "Conectado"}
+          </small>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -453,8 +509,12 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
               <span aria-hidden="true" /> {connectionLabel}
             </p>
             <p>
-              <Users size={16} /> {state.participants.length} participantes
+              <Users size={16} /> <strong>{state.participants.length}</strong>{" "}
+              <span className="local-room-participant-noun">participantes</span>
             </p>
+            <span className="local-room-theme-toggle">
+              <ThemeToggle />
+            </span>
             <button className="secondary-button" type="button" onClick={exitRoom}>
               <HelenaRoomIcon name="close" size={18} /> Sair da sala
             </button>
@@ -494,196 +554,251 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                       <p>Compartilhe o código {state.code}. A rodada começa com uma pessoa.</p>
                     </div>
                   ) : (
-                    <Scoreboard participants={state.participants} />
+                    <LobbyParticipants participants={state.participants} />
                   )}
                 </section>
               </div>
 
               <div className="local-room-settings">
-                <h3>Configurar rodada</h3>
-                <label>
-                  <span>Material da sala</span>
-                  <select
-                    value={state.settings.subjectName ?? ""}
-                    onChange={(event) => {
-                      const material = materials.find((item) => item.name === event.target.value);
-                      void room.updateSettings(
-                        { subjectName: material?.name ?? "", difficulty: "mixed", category: "" },
-                        material?.cards.slice(0, 30) ?? [],
-                      );
-                    }}
-                  >
-                    <option value="">Catálogo de inglês</option>
-                    {materials
-                      .filter((item) => item.cards.length)
-                      .map((item) => (
-                        <option key={item.id} value={item.name}>
-                          {item.name} · meus cartões
+                <div className="local-room-settings__heading">
+                  <h2>Escolha uma atividade</h2>
+                  <p>Uma nova experiência, sem trocar de sala.</p>
+                </div>
+                <div className="local-room-activities" aria-label="Atividades da sala">
+                  {ROOM_ACTIVITY_OPTIONS.map((activity) => (
+                    <button
+                      className="local-room-activity"
+                      type="button"
+                      disabled={!activity.enabled}
+                      aria-pressed={
+                        activity.enabled
+                          ? (state.settings.activity ?? "listening") === activity.key
+                          : undefined
+                      }
+                      onClick={() =>
+                        activity.enabled && void room.updateSettings({ activity: activity.key })
+                      }
+                      key={activity.key}
+                    >
+                      <span className="local-room-activity__icon">
+                        <NavigationIcon name={activity.icon} />
+                      </span>
+                      {"badge" in activity && (
+                        <span className="local-room-activity__badge">{activity.badge}</span>
+                      )}
+                      <strong>{activity.title}</strong>
+                    </button>
+                  ))}
+                </div>
+                <div className="local-room-settings__panel">
+                  <h3>
+                    {state.settings.activity === "bingo" ? "Prepare o bingo" : "Prepare a escuta"}
+                  </h3>
+                  <label>
+                    <span>Material da sala</span>
+                    <select
+                      value={state.settings.subjectName ?? ""}
+                      onChange={(event) => {
+                        const material = materials.find((item) => item.name === event.target.value);
+                        void room.updateSettings(
+                          { subjectName: material?.name ?? "", difficulty: "mixed", category: "" },
+                          material?.cards.slice(0, 30) ?? [],
+                        );
+                      }}
+                    >
+                      <option value="">Catálogo de inglês</option>
+                      {materials
+                        .filter((item) => item.cards.length)
+                        .map((item) => (
+                          <option key={item.id} value={item.name}>
+                            {item.name} · meus cartões
+                          </option>
+                        ))}
+                    </select>
+                  </label>
+                  <label className="local-room-activity-native">
+                    <span>Atividade</span>
+                    <select
+                      value={state.settings.activity ?? "listening"}
+                      onChange={(event) =>
+                        void room.updateSettings({
+                          activity: event.target.value as "listening" | "bingo",
+                        })
+                      }
+                    >
+                      <option value="listening">Quiz de escuta</option>
+                      <option value="bingo">Bingo de vocabulário</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Matéria / tema</span>
+                    <select
+                      value={state.settings.category ?? ""}
+                      disabled={Boolean(state.settings.subjectName)}
+                      onChange={(event) =>
+                        void room.updateSettings({ category: event.target.value })
+                      }
+                    >
+                      <option value="">Inglês · todos os temas</option>
+                      {ROOM_CATEGORIES.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
                         </option>
                       ))}
-                  </select>
-                </label>
-                <label>
-                  <span>Atividade</span>
-                  <select
-                    value={state.settings.activity ?? "listening"}
-                    onChange={(event) =>
-                      void room.updateSettings({
-                        activity: event.target.value as "listening" | "bingo",
-                      })
-                    }
-                  >
-                    <option value="listening">Quiz de escuta</option>
-                    <option value="bingo">Bingo de vocabulário</option>
-                  </select>
-                </label>
-                <label>
-                  <span>Matéria / tema</span>
-                  <select
-                    value={state.settings.category ?? ""}
-                    disabled={Boolean(state.settings.subjectName)}
-                    onChange={(event) => void room.updateSettings({ category: event.target.value })}
-                  >
-                    <option value="">Inglês · todos os temas</option>
-                    {ROOM_CATEGORIES.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
+                    </select>
+                  </label>
+                  <p>
+                    {availableCount} questões disponíveis neste filtro. Prévia:{" "}
+                    {(state.content?.preview ?? pool.slice(0, 3).map((card) => card.front)).join(
+                      ", ",
+                    ) || "Nenhuma questão"}
+                    .
+                  </p>
+                  <label>
+                    <span>Respostas</span>
+                    <select
+                      value={state.settings.teams ? "teams" : "individual"}
+                      onChange={(event) =>
+                        void room.updateSettings({ teams: event.target.value === "teams" })
+                      }
+                    >
+                      <option value="individual">Individuais</option>
+                      <option value="teams">Equipes Roxo e Amarelo · soma dos pontos</option>
+                    </select>
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={state.settings.shuffle !== false}
+                      onChange={(event) =>
+                        void room.updateSettings({ shuffle: event.target.checked })
+                      }
+                    />{" "}
+                    Embaralhar questões
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={state.settings.allowLateJoin ?? false}
+                      onChange={(event) =>
+                        void room.updateSettings({ allowLateJoin: event.target.checked })
+                      }
+                    />{" "}
+                    Permitir entrada após iniciar
+                  </label>
+                  <label>
+                    <span>Dificuldade</span>
+                    <select
+                      value={state.settings.difficulty}
+                      onChange={(event) =>
+                        void room.updateSettings({
+                          difficulty: event.target.value as LocalRoomSettings["difficulty"],
+                        })
+                      }
+                    >
+                      <option value="mixed">
+                        Misto ·{" "}
+                        {state.content?.difficultyCounts?.mixed ??
+                          localRoomPool({ ...state.settings, difficulty: "mixed" }).length}
                       </option>
-                    ))}
-                  </select>
-                </label>
-                <p>
-                  {availableCount} questões disponíveis neste filtro. Prévia:{" "}
-                  {(state.content?.preview ?? pool.slice(0, 3).map((card) => card.front)).join(
-                    ", ",
-                  ) || "Nenhuma questão"}
-                  .
-                </p>
-                <label>
-                  <span>Respostas</span>
-                  <select
-                    value={state.settings.teams ? "teams" : "individual"}
-                    onChange={(event) =>
-                      void room.updateSettings({ teams: event.target.value === "teams" })
-                    }
-                  >
-                    <option value="individual">Individuais</option>
-                    <option value="teams">Equipes Roxo e Amarelo · soma dos pontos</option>
-                  </select>
-                </label>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={state.settings.shuffle !== false}
-                    onChange={(event) =>
-                      void room.updateSettings({ shuffle: event.target.checked })
-                    }
-                  />{" "}
-                  Embaralhar questões
-                </label>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={state.settings.allowLateJoin ?? false}
-                    onChange={(event) =>
-                      void room.updateSettings({ allowLateJoin: event.target.checked })
-                    }
-                  />{" "}
-                  Permitir entrada após iniciar
-                </label>
-                <label>
-                  <span>Dificuldade</span>
-                  <select
-                    value={state.settings.difficulty}
-                    onChange={(event) =>
-                      void room.updateSettings({
-                        difficulty: event.target.value as LocalRoomSettings["difficulty"],
-                      })
-                    }
-                  >
-                    <option value="mixed">
-                      Misto ·{" "}
-                      {state.content?.difficultyCounts?.mixed ??
-                        localRoomPool({ ...state.settings, difficulty: "mixed" }).length}
-                    </option>
-                    <option value="easy">
-                      Fácil ·{" "}
-                      {state.content?.difficultyCounts?.easy ??
-                        localRoomPool({ ...state.settings, difficulty: "easy" }).length}
-                    </option>
-                    <option value="medium">
-                      Médio ·{" "}
-                      {state.content?.difficultyCounts?.medium ??
-                        localRoomPool({ ...state.settings, difficulty: "medium" }).length}
-                    </option>
-                    <option value="hard">
-                      Difícil ·{" "}
-                      {state.content?.difficultyCounts?.hard ??
-                        localRoomPool({ ...state.settings, difficulty: "hard" }).length}
-                    </option>
-                  </select>
-                </label>
-                <label>
-                  <span>Perguntas</span>
-                  <select
-                    value={state.settings.questionCount}
-                    onChange={(event) =>
-                      void room.updateSettings({
-                        questionCount:
-                          event.target.value === "all"
-                            ? "all"
-                            : (Number(event.target.value) as 5 | 10 | 15),
-                      })
-                    }
-                  >
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                    <option value="15">15</option>
-                    <option value="all">Todas</option>
-                  </select>
-                </label>
-                <label>
-                  <span>Tempo por pergunta</span>
-                  <select
-                    value={state.settings.roundSeconds}
-                    onChange={(event) =>
-                      void room.updateSettings({
-                        roundSeconds: Number(
-                          event.target.value,
-                        ) as LocalRoomSettings["roundSeconds"],
-                      })
-                    }
-                  >
-                    <option value="15">15s</option>
-                    <option value="30">30s</option>
-                    <option value="45">45s</option>
-                    <option value="60">60s</option>
-                  </select>
-                </label>
-                <div className="local-room-summary" aria-label="Resumo da rodada">
+                      <option value="easy">
+                        Fácil ·{" "}
+                        {state.content?.difficultyCounts?.easy ??
+                          localRoomPool({ ...state.settings, difficulty: "easy" }).length}
+                      </option>
+                      <option value="medium">
+                        Médio ·{" "}
+                        {state.content?.difficultyCounts?.medium ??
+                          localRoomPool({ ...state.settings, difficulty: "medium" }).length}
+                      </option>
+                      <option value="hard">
+                        Difícil ·{" "}
+                        {state.content?.difficultyCounts?.hard ??
+                          localRoomPool({ ...state.settings, difficulty: "hard" }).length}
+                      </option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Perguntas</span>
+                    <select
+                      value={state.settings.questionCount}
+                      onChange={(event) =>
+                        void room.updateSettings({
+                          questionCount:
+                            event.target.value === "all"
+                              ? "all"
+                              : (Number(event.target.value) as 5 | 10 | 15),
+                        })
+                      }
+                    >
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                      <option value="15">15</option>
+                      <option value="all">Todas</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Tempo por pergunta</span>
+                    <select
+                      value={state.settings.roundSeconds}
+                      onChange={(event) =>
+                        void room.updateSettings({
+                          roundSeconds: Number(
+                            event.target.value,
+                          ) as LocalRoomSettings["roundSeconds"],
+                        })
+                      }
+                    >
+                      <option value="15">15s</option>
+                      <option value="30">30s</option>
+                      <option value="45">45s</option>
+                      <option value="60">60s</option>
+                    </select>
+                  </label>
+                  <div className="local-room-summary" aria-label="Resumo da rodada">
+                    <strong>
+                      {state.settings.activity === "bingo" ? "Bingo" : "Quiz de escuta"} ·{" "}
+                      {state.settings.subjectName || "vocabulário em inglês"}
+                    </strong>
+                    <p>
+                      {actualCount} perguntas · {state.settings.roundSeconds}s cada
+                      {estimatedMinutes ? ` · cerca de ${estimatedMinutes} min` : ""}
+                    </p>
+                    <small>
+                      {state.settings.teams ? "Equipes" : "Respostas individuais"} ·{" "}
+                      {state.settings.shuffle === false ? "ordem do catálogo" : "ordem embaralhada"}{" "}
+                      ·{" "}
+                      {state.settings.allowLateJoin ? "entrada aberta" : "entrada fecha ao iniciar"}
+                    </small>
+                  </div>
+                  {room.error && <p role="alert">{room.error}</p>}
+                </div>
+              </div>
+              <div className="local-room-action-bar">
+                <div>
                   <strong>
-                    {state.settings.activity === "bingo" ? "Bingo" : "Quiz de escuta"} ·{" "}
-                    {state.settings.subjectName || "vocabulário em inglês"}
+                    {state.settings.activity === "bingo" ? "Bingo" : "Escuta coletiva"}
                   </strong>
                   <p>
-                    {actualCount} perguntas · {state.settings.roundSeconds}s cada
-                    {estimatedMinutes ? ` · cerca de ${estimatedMinutes} min` : ""}
+                    {actualCount} perguntas, {state.settings.roundSeconds}s cada, cerca de{" "}
+                    {estimatedMinutes} min
                   </p>
-                  <small>
-                    {state.settings.teams ? "Equipes" : "Respostas individuais"} ·{" "}
-                    {state.settings.shuffle === false ? "ordem do catálogo" : "ordem embaralhada"} ·{" "}
-                    {state.settings.allowLateJoin ? "entrada aberta" : "entrada fecha ao iniciar"}
-                  </small>
                 </div>
-                <button
-                  className="primary-button"
-                  type="button"
-                  disabled={participantCount === 0 || availableCount === 0}
-                  onClick={() => void room.startRound()}
-                >
-                  <HelenaRoomIcon name="play" size={18} /> Iniciar rodada
-                </button>
-                {room.error && <p role="alert">{room.error}</p>}
+                <span>{participantCount} participantes prontos</span>
+                <div>
+                  <button
+                    className="primary-button"
+                    type="button"
+                    disabled={participantCount === 0 || availableCount === 0}
+                    onClick={() => void room.startRound()}
+                    aria-describedby={participantCount === 0 ? "local-room-start-help" : undefined}
+                  >
+                    <HelenaRoomIcon name="play" size={18} /> Iniciar atividade
+                  </button>
+                  {participantCount === 0 && (
+                    <small id="local-room-start-help">Aguarde pelo menos um aluno entrar</small>
+                  )}
+                </div>
               </div>
             </div>
           ) : (
