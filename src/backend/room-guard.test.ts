@@ -10,6 +10,33 @@ vi.mock("jose", () => ({
   }),
 }));
 
+it.each([true, false])(
+  "registra resultados sem expor credenciais (enforce=%s)",
+  async (enforce) => {
+    const observe = vi.fn();
+    const guard = createRoomGuard(createMemoryRoomStore(), "project", "app", enforce, observe);
+    for (const [token, result] of [
+      ["valid-token", "valid"],
+      ["tampered-token", "invalid"],
+      ["", "missing"],
+    ]) {
+      const response = await guard(
+        new Request("https://app.example/api/local-room?action=resume", {
+          headers: token ? { "X-Firebase-AppCheck": token } : {},
+        }),
+      );
+      expect(response?.status).toBe(enforce && result !== "valid" ? 403 : undefined);
+      expect(observe).toHaveBeenLastCalledWith({
+        action: "resume",
+        enforced: enforce,
+        result,
+        status: enforce && result !== "valid" ? 403 : 200,
+      });
+    }
+    expect(JSON.stringify(observe.mock.calls)).not.toContain("token");
+  },
+);
+
 it("limita criação de salas de forma atômica e independente por endereço", async () => {
   const guard = createRoomGuard(createMemoryRoomStore(), "project", "app", false);
   const request = (ip: string) =>

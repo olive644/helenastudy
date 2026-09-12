@@ -8,8 +8,31 @@ export function createRoomGuard(
   projectNumber: string,
   appId: string,
   enforce: boolean,
+  observe: (event: {
+    action: string;
+    enforced: boolean;
+    result: string;
+    status: number;
+  }) => void = () => {},
 ) {
   return async (request: Request): Promise<Response | undefined> => {
+    const requestedAction = new URL(request.url).searchParams.get("action");
+    const action = [
+      "create",
+      "join",
+      "resume",
+      "heartbeat",
+      "leave",
+      "settings",
+      "start",
+      "answer",
+      "next",
+      "end",
+    ].includes(requestedAction ?? "")
+      ? requestedAction!
+      : "unknown";
+    const log = (result: string, status: number) =>
+      observe({ action, enforced: enforce, result, status });
     const reject = (status: number, error: string) =>
       new Response(JSON.stringify({ error }), {
         status,
@@ -19,12 +42,12 @@ export function createRoomGuard(
           ...(status === 429 ? { "Retry-After": "60" } : {}),
         },
       });
-    if (enforce) {
+    let verification = "valid";
+    const token = request.headers.get("X-Firebase-AppCheck");
+    if (!projectNumber || !appId) verification = "misconfigured";
+    else if (!token) verification = "missing";
+    else {
       try {
-        if (!projectNumber || !appId)
-          return reject(503, "A proteção da sala está sendo configurada.");
-        const token = request.headers.get("X-Firebase-AppCheck");
-        if (!token) return reject(403, "Reabra o aplicativo para verificar este dispositivo.");
         await jwtVerify(token, keys, {
           algorithms: ["RS256"],
           issuer: `https://firebaseappcheck.googleapis.com/${projectNumber}`,
@@ -33,13 +56,22 @@ export function createRoomGuard(
           requiredClaims: ["exp", "iat", "iss", "aud", "sub"],
         });
       } catch {
-        return reject(403, "A verificação do dispositivo expirou. Recarregue a página.");
+        verification = "invalid";
       }
+    }
+    const blockedStatus = verification === "misconfigured" ? 503 : 403;
+    log(verification, enforce && verification !== "valid" ? blockedStatus : 200);
+    if (enforce && verification !== "valid") {
+      return reject(
+        blockedStatus,
+        verification === "misconfigured"
+          ? "A proteção da sala está sendo configurada."
+          : "Reabra o aplicativo para verificar este dispositivo.",
+      );
     }
     // Vercel supplies this header. Never use a caller-controlled id as the only abuse boundary.
     const address =
       request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-    const action = new URL(request.url).searchParams.get("action");
     const limit = action === "create" ? 6 : action === "join" ? 90 : 600;
     const bucket = Math.floor(Date.now() / 60000);
     const key = `room-limits/${createHash("sha256").update(`${address}:${action}`).digest("hex")}`;
@@ -49,8 +81,10 @@ export function createRoomGuard(
         ? (JSON.parse(entry.value) as { bucket: number; count: number })
         : undefined;
       const count = saved?.bucket === bucket ? saved.count : 0;
-      if (count >= limit)
+      if (count >= limit) {
+        log("rate_limited", 429);
         return reject(429, "Muitas tentativas. Aguarde um minuto e tente novamente.");
+      }
       if (
         await store.compareAndSet!(
           key,
@@ -61,6 +95,7 @@ export function createRoomGuard(
       )
         return undefined;
     }
+    log("rate_limit_contention", 429);
     return reject(429, "Muitas tentativas simultâneas. Aguarde um minuto.");
   };
 }
