@@ -165,6 +165,35 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
       });
     }
 
+    if (action === "resume" && request.method === "POST") {
+      const body = await readJsonBody(request);
+      const code = typeof body["code"] === "string" ? normalizeLocalRoomCode(body["code"]) : "";
+      const role = body["role"];
+      const credential = typeof body["credential"] === "string" ? body["credential"] : "";
+      if (
+        !isValidLocalRoomCode(code) ||
+        !["host", "participant"].includes(role as string) ||
+        !credential
+      ) {
+        return jsonResponse(400, { error: "Dados de reconexão inválidos." });
+      }
+      const state = await loadRoom(dependencies.store, code);
+      if (!state) return jsonResponse(404, { error: "Esta sala não está mais disponível." });
+      const isAuthorized =
+        role === "host"
+          ? state.hostToken === credential
+          : state.participants.some((participant) => participant.id === credential);
+      if (!isAuthorized) {
+        return jsonResponse(403, {
+          error: "Não foi possível confirmar sua participação nesta sala.",
+        });
+      }
+      return jsonResponse(200, {
+        state: toPublicRoomState(state),
+        streamUrl: dependencies.streamUrl(code),
+      });
+    }
+
     if (action === "settings" && request.method === "POST") {
       const body = await readJsonBody(request);
       const state = await requireHost(dependencies.store, body);

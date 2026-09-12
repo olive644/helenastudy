@@ -45,7 +45,9 @@ enviado ao Gemini apenas quando a voz neural é usada.
 - cache de áudio por texto, voz e velocidade durante a sessão, com fallback imediato para a voz do
   dispositivo;
 - Firebase Realtime Database como armazenamento temporário da Sala e Server-Sent Events para o
-  estado público realtime.
+  estado público realtime;
+- credenciais temporárias da Sala ficam em `sessionStorage`, permitindo retomar a atividade após
+  recarregar a aba sem duplicar participantes.
 
 ## Mapa mental vivo
 

@@ -1870,10 +1870,41 @@ select {
 }
 
 .local-room-intro,
+.local-room-restoring,
 .local-room-join,
 .local-room-session {
   min-height: 330px;
   padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.local-room-restoring {
+  display: grid;
+  min-height: min(420px, 70vh);
+  text-align: center;
+  place-content: center;
+  gap: 0.55rem;
+}
+
+.local-room-restoring svg {
+  margin-inline: auto;
+  color: var(--violet);
+  animation: local-room-reconnect-pulse 1s ease-in-out infinite alternate;
+}
+
+.local-room-restoring h3,
+.local-room-restoring p {
+  margin: 0;
+}
+
+.local-room-restoring p {
+  color: var(--muted);
+}
+
+@keyframes local-room-reconnect-pulse {
+  to {
+    opacity: 0.45;
+    transform: scale(0.88);
+  }
 }
 
 .local-room-intro {
@@ -2427,6 +2458,7 @@ body.local-room-active {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .local-room-restoring svg,
   .local-room-countdown__value {
     animation: none;
   }

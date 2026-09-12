@@ -91,6 +91,9 @@ vigor.
   navegador dele) e a URL de streaming pública da sala.
 - `POST /api/local-room?action=join` — cada aluno entra com o código e um
   nome de exibição, e recebe a mesma URL de streaming.
+- `POST /api/local-room?action=resume` — depois de atualizar a página, a aba
+  apresenta novamente a credencial temporária do organizador ou participante
+  e recebe o estado atual sem criar uma nova entrada na sala.
 - O navegador de cada participante conecta direto em
   `https://SEU-PROJETO-default-rtdb.firebaseio.com/rooms/<código>.json`
   usando `EventSource` (API nativa do navegador) e recebe cada atualização

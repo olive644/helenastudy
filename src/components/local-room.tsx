@@ -150,7 +150,7 @@ function Podium({ participants }: { participants: readonly LocalRoomParticipant[
 }
 
 export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
-  const room = useLocalRoom();
+  const room = useLocalRoom(initialJoinCode);
   const [code, setCode] = useState(initialJoinCode ?? "");
   const [name, setName] = useState("");
   const [answer, setAnswer] = useState("");
@@ -257,6 +257,17 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
     room.reset();
     onExit?.();
   }
+
+  if (room.isRestoring)
+    return (
+      <LocalRoomFullscreen>
+        <div className="local-room-restoring" role="status" aria-live="polite">
+          <Radio size={34} aria-hidden="true" />
+          <h3>Retomando sala…</h3>
+          <p>Reconectando você à atividade em andamento.</p>
+        </div>
+      </LocalRoomFullscreen>
+    );
 
   if (room.role === "choose")
     return (

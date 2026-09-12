@@ -7,8 +7,58 @@ import {
 import type { LocalRoomSettings, PublicLocalRoomState } from "../domain/local-room";
 
 type Role = "choose" | "host" | "participant";
+export type StoredLocalRoomSession = {
+  role: Exclude<Role, "choose">;
+  code: string;
+  credential: string;
+};
 export type RoomConnectionStatus =
   "disconnected" | "connecting" | "online" | "reconnecting" | "offline";
+
+export const LOCAL_ROOM_SESSION_KEY = "helena:local-room-session:v1";
+
+export function readStoredLocalRoomSession(
+  storage?: Pick<Storage, "getItem">,
+): StoredLocalRoomSession | undefined {
+  try {
+    const target = storage ?? (typeof window === "undefined" ? undefined : window.sessionStorage);
+    const raw = target?.getItem(LOCAL_ROOM_SESSION_KEY);
+    if (!raw) return undefined;
+    const value = JSON.parse(raw) as Partial<StoredLocalRoomSession>;
+    if (
+      (value.role !== "host" && value.role !== "participant") ||
+      typeof value.code !== "string" ||
+      !isValidLocalRoomCode(value.code) ||
+      typeof value.credential !== "string" ||
+      !value.credential
+    ) {
+      return undefined;
+    }
+    return {
+      role: value.role,
+      code: normalizeLocalRoomCode(value.code),
+      credential: value.credential,
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+function writeStoredLocalRoomSession(session: StoredLocalRoomSession) {
+  try {
+    window.sessionStorage.setItem(LOCAL_ROOM_SESSION_KEY, JSON.stringify(session));
+  } catch {
+    // A sala continua funcionando mesmo quando o navegador bloqueia storage.
+  }
+}
+
+function clearStoredLocalRoomSession() {
+  try {
+    window.sessionStorage.removeItem(LOCAL_ROOM_SESSION_KEY);
+  } catch {
+    // Nada a limpar quando o navegador bloqueia storage.
+  }
+}
 
 // O Realtime Database do Firebase omite chaves cujo valor é um array vazio
 // (ou objeto vazio) em vez de mandá-las como "[]" — ao contrário do
@@ -40,14 +90,25 @@ async function requestRoom<T>(action: string, body: Record<string, unknown>): Pr
   return payload;
 }
 
-export function useLocalRoom() {
-  const [role, setRole] = useState<Role>("choose");
+export function useLocalRoom(initialJoinCode?: string) {
+  const [storedSession] = useState(() => {
+    const session = readStoredLocalRoomSession();
+    if (initialJoinCode && session?.code !== normalizeLocalRoomCode(initialJoinCode)) {
+      clearStoredLocalRoomSession();
+      return undefined;
+    }
+    return session;
+  });
+  const [role, setRole] = useState<Role>(storedSession?.role ?? "choose");
   const [state, setState] = useState<PublicLocalRoomState>();
   const [error, setError] = useState("");
-  const [participantId, setParticipantId] = useState("");
+  const [participantId, setParticipantId] = useState(
+    storedSession?.role === "participant" ? storedSession.credential : "",
+  );
+  const [isRestoring, setIsRestoring] = useState(Boolean(storedSession));
   const [connectionStatus, setConnectionStatus] = useState<RoomConnectionStatus>("disconnected");
-  const hostTokenRef = useRef("");
-  const codeRef = useRef("");
+  const hostTokenRef = useRef(storedSession?.role === "host" ? storedSession.credential : "");
+  const codeRef = useRef(storedSession?.code ?? "");
   const eventSourceRef = useRef<EventSource | undefined>(undefined);
 
   function stopStreaming() {
@@ -81,6 +142,38 @@ export function useLocalRoom() {
   }
 
   useEffect(() => {
+    if (!storedSession) return;
+    let active = true;
+    void requestRoom<{ state: PublicLocalRoomState; streamUrl: string }>("resume", {
+      code: storedSession.code,
+      role: storedSession.role,
+      credential: storedSession.credential,
+    })
+      .then((payload) => {
+        if (!active) return;
+        setState(payload.state);
+        startStreaming(payload.streamUrl);
+      })
+      .catch((caught) => {
+        if (!active) return;
+        clearStoredLocalRoomSession();
+        hostTokenRef.current = "";
+        codeRef.current = "";
+        setParticipantId("");
+        setRole("choose");
+        setError(caught instanceof Error ? caught.message : "Não foi possível retomar a sala.");
+      })
+      .finally(() => {
+        if (active) setIsRestoring(false);
+      });
+    return () => {
+      active = false;
+    };
+    // A sessão é capturada uma vez na montagem; o streaming tem ciclo próprio.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     const handleOffline = () => eventSourceRef.current && setConnectionStatus("offline");
     const handleOnline = () => eventSourceRef.current && setConnectionStatus("reconnecting");
     window.addEventListener("offline", handleOffline);
@@ -103,6 +196,11 @@ export function useLocalRoom() {
       }>("create", { settings });
       hostTokenRef.current = payload.hostToken;
       codeRef.current = payload.code;
+      writeStoredLocalRoomSession({
+        role: "host",
+        code: payload.code,
+        credential: payload.hostToken,
+      });
       setState(payload.state);
       setRole("host");
       startStreaming(payload.streamUrl);
@@ -131,6 +229,11 @@ export function useLocalRoom() {
       }>("join", { code: roomCode, displayName });
       setParticipantId(payload.participantId);
       codeRef.current = roomCode;
+      writeStoredLocalRoomSession({
+        role: "participant",
+        code: roomCode,
+        credential: payload.participantId,
+      });
       setState(payload.state);
       setRole("participant");
       startStreaming(payload.streamUrl);
@@ -209,6 +312,7 @@ export function useLocalRoom() {
 
   function reset() {
     stopStreaming();
+    clearStoredLocalRoomSession();
     setState(undefined);
     setError("");
     setRole("choose");
@@ -223,6 +327,7 @@ export function useLocalRoom() {
     error,
     isHost: role === "host",
     participantId,
+    isRestoring,
     connectionStatus,
     setRole,
     createRoom,

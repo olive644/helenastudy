@@ -17,6 +17,7 @@ const LOBBY_STATE: PublicLocalRoomState = {
 
 let setRoomState:
   ((updater: (state: PublicLocalRoomState) => PublicLocalRoomState) => void) | null = null;
+let restoring = false;
 
 vi.mock("../hooks/use-local-room", () => ({
   useLocalRoom: () => {
@@ -28,6 +29,7 @@ vi.mock("../hooks/use-local-room", () => ({
       error: "",
       isHost: true,
       participantId: "",
+      isRestoring: restoring,
       connectionStatus: "online" as const,
       setRole: vi.fn(),
       createRoom: vi.fn(),
@@ -47,6 +49,7 @@ describe("contagem regressiva do início da rodada", () => {
     vi.restoreAllMocks();
     vi.useRealTimers();
     setRoomState = null;
+    restoring = false;
   });
 
   function countdownText(container: HTMLElement) {
@@ -58,6 +61,12 @@ describe("contagem regressiva do início da rodada", () => {
     expect(screen.getByText("Sala online")).toBeTruthy();
     expect(screen.getByLabelText("Resumo da rodada").textContent).toContain("10 perguntas");
     expect(screen.getByRole("button", { name: /sair da sala/i })).toBeTruthy();
+  });
+
+  it("mostra feedback enquanto recupera a sessão da aba", () => {
+    restoring = true;
+    render(<LocalRoom />);
+    expect(screen.getByRole("status").textContent).toContain("Retomando sala");
   });
 
   it("mostra 3, 2, 1 e Vai! só na transição do lobby pra a primeira pergunta", () => {

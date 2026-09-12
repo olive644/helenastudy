@@ -224,6 +224,9 @@ limiting continuam pendentes.
 O lobby mostra conexão, participantes, convite, resumo e duração estimada. A entrada normaliza o
 código e informa separadamente sala inexistente, iniciada, cheia ou nome duplicado. No celular, o
 cabeçalho da sala permanece visível e oferece uma ação textual para sair.
+Anfitrião e participante guardam a credencial somente na aba atual e retomam a mesma sala após uma
+atualização da página, inclusive durante a rodada. Uma sessão expirada ou inválida é descartada com
+mensagem clara, sem criar um participante duplicado.
 
 ## 13. Experiência de estudo renovada
 

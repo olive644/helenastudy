@@ -106,6 +106,43 @@ describe("handler da sala local", () => {
     expect(joinPayload.streamUrl).toContain(code);
   });
 
+  it("retoma a sessão do host e do participante depois de recarregar", async () => {
+    const { code, hostToken } = await createRoomViaApi();
+    const joinResponse = await handler(post("join", { code, displayName: "Ana" }));
+    const { participantId } = (await joinResponse.json()) as { participantId: string };
+    await handler(post("start", { code, hostToken }));
+
+    const resumedHost = await handler(
+      post("resume", { code, role: "host", credential: hostToken }),
+    );
+    expect(resumedHost.status).toBe(200);
+    expect(await resumedHost.json()).toEqual(
+      expect.objectContaining({
+        state: expect.objectContaining({ phase: "playing" }),
+        streamUrl: expect.stringContaining(code),
+      }),
+    );
+
+    const resumedParticipant = await handler(
+      post("resume", { code, role: "participant", credential: participantId }),
+    );
+    expect(resumedParticipant.status).toBe(200);
+    expect(await resumedParticipant.json()).toEqual(
+      expect.objectContaining({ state: expect.objectContaining({ phase: "playing" }) }),
+    );
+  });
+
+  it("recusa reconexão com uma credencial desconhecida", async () => {
+    const { code } = await createRoomViaApi();
+    const response = await handler(
+      post("resume", { code, role: "participant", credential: "participante-ausente" }),
+    );
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({
+      error: "Não foi possível confirmar sua participação nesta sala.",
+    });
+  });
+
   it("normaliza o código e recusa nome duplicado", async () => {
     const { code } = await createRoomViaApi();
     expect(
