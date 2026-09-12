@@ -209,6 +209,25 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
   }
 });
 
+test("mantém o retorno do Modo Sala livre no celular", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile", "Contrato visual do Modo Sala móvel.");
+  const navigation = page.getByRole("navigation", { name: "Navegação móvel" });
+
+  await navigation.getByRole("button", { name: "Praticar", exact: true }).click();
+  await page.getByRole("button", { name: "Modo Sala", exact: true }).click();
+
+  const dialog = page.getByRole("dialog", { name: "Modo Sala" });
+  const backButton = dialog.getByRole("button", { name: "Voltar", exact: true });
+  const heading = dialog.getByRole("heading", { name: "Modo Sala", exact: true });
+  await expect(backButton.locator(".helena-room-icon")).toBeVisible();
+
+  const backBox = await backButton.boundingBox();
+  const headingBox = await heading.boundingBox();
+  expect(backBox).not.toBeNull();
+  expect(headingBox).not.toBeNull();
+  expect(backBox!.y + backBox!.height).toBeLessThanOrEqual(headingBox!.y);
+});
+
 test("adapta a barra móvel ao tema e anima a troca de aba", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "mobile", "Contrato visual da navegação móvel.");
   const navigation = page.getByRole("navigation", { name: "Navegação móvel" });

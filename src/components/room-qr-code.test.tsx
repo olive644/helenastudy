@@ -11,6 +11,8 @@ describe("RoomQrCode", () => {
     expect(svg).not.toBeNull();
     expect(svg?.getAttribute("aria-label")).toMatch(/qr code/i);
     expect(svg?.getAttribute("width")).toBe("120");
+    expect(container.querySelector(".helena-room-qr")).not.toBeNull();
+    expect(container.querySelectorAll(".helena-room-qr__ear")).toHaveLength(2);
     const path = container.querySelector("path");
     expect(path?.getAttribute("d")?.length).toBeGreaterThan(0);
   });
