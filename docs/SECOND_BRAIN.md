@@ -1,36 +1,116 @@
-# HelenaStudy — Second Brain
+# HelenaStudy: Second Brain
 
 ## Proposta
 
-O HelenaStudy é o segundo aplicativo da marca Oli. Ele ajuda professores de inglês a transformar
-tema, nível, duração e abordagem pedagógica em uma estrutura de aula clara e editável.
+O HelenaStudy é o segundo aplicativo da marca Oli. Ele reúne organização, foco, rotina e
+aprendizado em um único espaço, preservando o planejador de aulas de inglês como uma ferramenta do
+produto.
 
-**Promessa:** Planeje sua aula. A Helena organiza o restante.
+**Promessa:** Estude, organize e avance com a Helena.
 
 ## Público inicial
 
-- professores de inglês;
-- professores particulares;
-- pequenas escolas e cursos livres.
+- estudantes que desejam organizar rotina e matérias;
+- professores de inglês e professores particulares;
+- pessoas que precisam reunir tarefas, foco, hábitos e anotações.
 
-## Fluxo do primeiro produto
+## Fluxo atual
 
-1. Informar tema, nível CEFR, perfil da turma e duração.
-2. Escolher uma abordagem de apresentação.
-3. Montar localmente uma estrutura com objetivo, warm-up, apresentação, prática, produção e tarefa.
-4. Revisar o resultado na interface.
+1. Consultar tarefas, agenda, hábitos e minutos de foco no Espaço do aluno.
+2. Criar matérias, tarefas e compromissos na Agenda.
+3. Registrar sessões no cronômetro de Foco.
+4. Criar e marcar Hábitos diários.
+5. Escrever, desenhar ou anexar uma digitalização nos Cadernos.
+6. Guardar links, textos e flashcards por matéria na Biblioteca.
+7. Revisar flashcards, responder Quizzes, completar Bingos e acompanhar metas em Praticar.
+8. Praticar escuta em rodadas curtas com voz Gemini e fallback do dispositivo.
+9. Criar uma Sala online e sincronizar lobby e rodada entre dispositivos.
+10. Montar planos de aula pelo fluxo determinístico existente.
 
-Nesta fase, “montar” significa aplicar uma estrutura determinística no navegador. Não há IA,
-conta, banco ou sincronização remota.
+Os dados pessoais compartilham um workspace local versionado e não exigem conta. O Modo Sala usa
+Firebase Realtime Database para estado temporário compartilhado; o texto da pergunta de escuta é
+enviado ao Gemini apenas quando a voz neural é usada.
 
 ## Arquitetura atual
 
 - React 19 e TypeScript estrito;
 - Vite para desenvolvimento e build;
-- CSS próprio, mobile-first e sem fonte externa;
+- CSS próprio, mobile-first e Manrope carregada pelo Google Fonts;
+- interface com hierarquia de próxima ação, cartões de progresso, ícones ilustrados preenchidos e
+  movimentos curtos compatíveis com `prefers-reduced-motion`;
 - Vitest e Testing Library para unidade/componente;
 - Playwright para fluxos desktop e mobile;
 - GitHub Actions para qualidade, auditoria, segredos, análise estática e CodeQL.
+- Gemini 2.5 Flash TTS chamado por função same-origin, sem expor a chave no navegador;
+- cache de áudio por texto, voz e velocidade durante a sessão, com fallback imediato para a voz do
+  dispositivo;
+- Firebase Realtime Database como armazenamento temporário da Sala e Server-Sent Events para o
+  estado público realtime;
+- credenciais temporárias da Sala ficam em `sessionStorage`, permitindo retomar a atividade após
+  recarregar a aba sem duplicar participantes.
+
+## Mapa mental vivo
+
+Este diagrama funciona como a rede de navegação do repositório: parte da experiência HelenaStudy e
+liga cada área do produto à sua base técnica e às garantias de qualidade.
+
+```mermaid
+flowchart LR
+  HS[HelenaStudy] --> UX[Experiência]
+  HS --> DATA[Workspace local]
+  HS --> STUDY[Estudo]
+  HS --> ORG[Organização]
+  HS --> QUALITY[Qualidade]
+  HS -. evolução segura .-> INTEL[Helena inteligente]
+
+  UX --> TODAY[Espaço do aluno]
+  UX --> NAV[Navegação responsiva]
+  UX --> BRAND[Helena e identidade visual]
+
+  DATA --> DOMAIN[Domínio e reducer]
+  DATA --> STORAGE[Persistência versionada]
+  DATA --> ROOM[Sala online via Firebase]
+
+  STUDY --> FOCUS[Foco]
+  STUDY --> LIB[Biblioteca e flashcards]
+  STUDY --> PRACTICE[Quizzes e bingo]
+  PRACTICE --> LISTEN[Escuta com Gemini e fallback]
+
+  ORG --> PLAN[Agenda e tarefas]
+  ORG --> HABITS[Hábitos]
+  ORG --> NOTES[Cadernos]
+  ORG --> LESSON[Planos de aula]
+
+  QUALITY --> UNIT[Vitest e Testing Library]
+  QUALITY --> E2E[Playwright desktop e mobile]
+  QUALITY --> CI[GitHub Actions e CodeQL]
+
+  INTEL --> CONSENT[Consentimento por solicitação]
+  INTEL --> BACKEND[Backend sem chave no navegador]
+  INTEL --> SOURCES[Somente fontes escolhidas]
+```
+
+Ao alterar uma área, atualize o nó correspondente e os fluxos ligados a ele. Detalhes de produto
+continuam em [`PRODUCT_MIND_MAP.md`](PRODUCT_MIND_MAP.md); este mapa serve como visão executiva do
+sistema completo.
+
+## Etapas do produto
+
+1. **Núcleo local concluído:** Espaço do aluno, Agenda, Foco, Hábitos, Cadernos e planos de aula.
+2. **Sistema de estudos em evolução:** biblioteca, flashcards, revisão programada, quizzes, bingo,
+   metas, digitalização local e escrita à mão estão funcionais. OCR e banco de questões ainda não.
+3. **Helena inteligente com fundação definida:** contrato, consentimento e fronteira segura do
+   backend estão prontos; provedor e interface ainda não estão ativados. Depois entram tutor,
+   explicações, resumos e planos personalizados.
+4. **Aplicativo mobile:** notificações, sincronização e controle nativo de tempo de tela.
+
+As etapas 2 a 4 entram em mudanças próprias. IA e armazenamento remoto exigem consentimento,
+modelo de ameaça e documentação do fluxo de dados. O bloqueio de outros aplicativos não deve ser
+simulado em uma aplicação web.
+
+A definição do backend de IA está em [`AI_BACKEND.md`](AI_BACKEND.md). O contrato envia somente
+fontes escolhidas pela pessoa e exige consentimento a cada solicitação. Nenhuma chave pode existir
+no bundle do navegador.
 
 ## Identidade
 
@@ -40,17 +120,33 @@ conta, banco ou sincronização remota.
 - lavanda: `#E9E2FF`;
 - creme: `#FFF8ED`.
 
-Helena é a gata preta de olhos amarelos que orienta o fluxo. A assinatura `by Oli` liga o produto
-ao ecossistema sem copiar a identidade visual do OliQualidade.
+Helena é a gata preta de olhos amarelos que orienta o fluxo. O aplicativo usa a silhueta
+assimétrica original em `public/helena.svg`, sem redesenhar a personagem como um gato genérico. O
+nome exibido na interface é somente HelenaStudy. A navegação usa uma família própria de ícones SVG
+lineares, com selos amarelos e traços pretos para manter contraste e consistência sem carregar um
+pacote de ícones adicional.
 
 ## Fora do escopo desta fase
 
 - login e cadastro;
 - banco de dados e colaboração;
 - geração por IA;
-- upload e leitura de PDF/livros;
+- upload e leitura automática de PDF/livros;
 - pagamentos;
 - exportação final em PDF ou slides;
-- acompanhamento de alunos.
+- acompanhamento de alunos;
+- bloqueio de outros aplicativos;
+- notificações nativas.
 
 Cada item entra apenas quando o fluxo local básico estiver validado.
+
+O mapa completo do produto está em [`PRODUCT_MIND_MAP.md`](PRODUCT_MIND_MAP.md), e a ordem de
+implementação com critérios técnicos está em [`IMPLEMENTATION_ROADMAP.md`](IMPLEMENTATION_ROADMAP.md).
+
+# Decisão de interface: navegação lateral
+
+O menu lateral concentra a troca de módulos no desktop. O Espaço do aluno não repete essa lista:
+mantém apenas ações contextuais e o resumo do dia. Em telas móveis, a barra inferior e o menu “Mais
+ferramentas” preservam o acesso completo. A barra inferior usa preto no tema claro, roxo no tema
+escuro e os ícones brancos já existentes, com transições curtas entre módulos e respeito à
+preferência de movimento reduzido do sistema.

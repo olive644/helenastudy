@@ -1,28 +1,211 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { App } from "./app";
 
+function navigate(label: string) {
+  const navigation = screen.getByRole("navigation", { name: "Navegação principal" });
+  fireEvent.click(within(navigation).getByRole("button", { name: label }));
+}
+
 describe("App", () => {
-  it("apresenta o posicionamento e informa que a versão é local", () => {
+  it("apresenta a central sem avisos ou mascote decorativa no cabeçalho", () => {
     render(<App />);
-    expect(screen.getByRole("heading", { name: /sua próxima aula/i })).toBeTruthy();
-    expect(screen.getByText(/sem cadastro e sem envio de dados/i)).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Espaço do aluno" })).toBeTruthy();
+    expect(screen.queryByText(/dados salvos neste dispositivo/i)).toBeNull();
+    expect(screen.queryByLabelText("HelenaStudy")).toBeNull();
+    expect(screen.queryByAltText(/rosto da helena/i)).toBeNull();
+    expect(screen.queryByText(/by oli/i)).toBeNull();
   });
 
-  it("monta uma estrutura de aula pelo fluxo principal", () => {
+  it("expande a navegação lateral para revelar categorias e nomes", () => {
     render(<App />);
-    fireEvent.click(screen.getByRole("button", { name: /criar primeira aula/i }));
-    fireEvent.change(screen.getByLabelText(/tema da aula/i), {
+    const sidebar = screen.getByRole("complementary");
+    const toggle = within(sidebar).getByRole("button", { name: "Expandir menu lateral" });
+
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(toggle);
+    expect(within(sidebar).getByRole("button", { name: "Recolher menu lateral" })).toBeTruthy();
+    expect(sidebar.classList.contains("sidebar--expanded")).toBe(true);
+    expect(within(sidebar).getByLabelText("HelenaStudy")).toBeTruthy();
+    expect(within(sidebar).getByText("Principal")).toBeTruthy();
+  });
+
+  it("mantém as ferramentas na navegação sem duplicá-las no painel principal", () => {
+    render(<App />);
+    const navigation = screen.getByRole("navigation", { name: "Navegação principal" });
+    const main = screen.getByRole("main");
+
+    expect(within(navigation).getByRole("button", { name: "Cadernos" })).toBeTruthy();
+    expect(within(main).queryByRole("button", { name: "Cadernos" })).toBeNull();
+  });
+
+  it("organiza as ferramentas secundárias no menu móvel", () => {
+    render(<App />);
+    const mobileNavigation = screen.getByRole("navigation", { name: "Navegação móvel" });
+    expect(within(mobileNavigation).getAllByRole("button")).toHaveLength(5);
+    fireEvent.click(within(mobileNavigation).getByRole("button", { name: "Mais" }));
+
+    const moreMenu = screen.getByRole("dialog", { name: "Mais ferramentas" });
+    fireEvent.click(within(moreMenu).getByRole("button", { name: "Hábitos" }));
+    expect(
+      screen.getByRole("heading", { name: /consistência antes de intensidade/i }),
+    ).toBeTruthy();
+    expect(screen.queryByRole("dialog", { name: "Mais ferramentas" })).toBeNull();
+  });
+
+  it("usa a iconografia própria da Helena em todas as abas", () => {
+    render(<App />);
+    const navigation = screen.getByRole("navigation", { name: "Navegação principal" });
+    const icons = [
+      ["Espaço do aluno", "today"],
+      ["Agenda", "planner"],
+      ["Foco", "focus"],
+      ["Quizzes e bingo", "learn"],
+      ["Biblioteca", "library"],
+      ["Hábitos", "habits"],
+      ["Cadernos", "notes"],
+      ["Planos de aula", "lesson"],
+      ["Banco de atividades", "activity-bank"],
+    ] as const;
+
+    icons.forEach(([label, icon]) => {
+      const button = within(navigation).getByRole("button", { name: label });
+      const artwork = button.querySelector(`[data-icon="${icon}"]`);
+      expect(artwork).toBeTruthy();
+      expect(artwork?.classList.contains("navigation-icon--brand")).toBe(true);
+      expect(artwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
+      expect(artwork?.querySelector(`img[src="/navigation-icons/claro/${icon}.png"]`)).toBeTruthy();
+    });
+  });
+
+  it("usa a iconografia própria da Helena no seletor de tema", () => {
+    render(<App />);
+    const lightThemeButton = screen.getByRole("button", { name: /tema claro/i });
+    expect(lightThemeButton.getAttribute("data-theme")).toBe("light");
+    const lightArtwork = lightThemeButton.querySelector('[data-icon="theme-light"]');
+    expect(lightArtwork?.classList.contains("navigation-icon--brand")).toBe(true);
+    expect(lightArtwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
+    expect(
+      lightArtwork?.querySelector('img[src="/navigation-icons/claro/theme-light.png"]'),
+    ).toBeTruthy();
+
+    fireEvent.click(lightThemeButton);
+    const darkThemeButton = screen.getByRole("button", { name: /tema escuro/i });
+    expect(darkThemeButton.getAttribute("data-theme")).toBe("dark");
+    const darkArtwork = darkThemeButton.querySelector('[data-icon="theme-dark"]');
+    expect(darkArtwork?.classList.contains("navigation-icon--brand")).toBe(true);
+    expect(darkArtwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
+    expect(
+      darkArtwork?.querySelector('img[src="/navigation-icons/escuro/theme-dark.png"]'),
+    ).toBeTruthy();
+  });
+
+  it("cria uma tarefa, mostra no Espaço do aluno e permite concluí-la", () => {
+    render(<App />);
+    navigate("Agenda");
+    fireEvent.change(screen.getByLabelText(/o que precisa ser feito/i), {
+      target: { value: "Revisar phrasal verbs" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /adicionar tarefa/i }));
+
+    navigate("Espaço do aluno");
+    expect(screen.getByText("Revisar phrasal verbs")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /concluir revisar phrasal verbs/i }));
+    expect(screen.queryByText("Revisar phrasal verbs")).toBeNull();
+  });
+
+  it("cria hábito e anotação usando o mesmo espaço local", async () => {
+    render(<App />);
+    navigate("Hábitos");
+    fireEvent.change(screen.getByLabelText(/nome do hábito/i), {
+      target: { value: "Ler em inglês" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /adicionar hábito/i }));
+    const habitButton = screen.getByRole("button", { name: /ler em inglês/i });
+    fireEvent.click(habitButton);
+    expect(habitButton.getAttribute("aria-pressed")).toBe("true");
+
+    navigate("Cadernos");
+    fireEvent.click(await screen.findByRole("button", { name: /nova anotação/i }));
+    fireEvent.change(screen.getByLabelText(/título da anotação/i), {
+      target: { value: "Vocabulário" },
+    });
+    fireEvent.change(screen.getByLabelText(/conteúdo da anotação/i), {
+      target: { value: "Improve: melhorar" },
+    });
+    expect(screen.getByDisplayValue("Improve: melhorar")).toBeTruthy();
+  });
+
+  it("oferece digitalização e escrita à mão dentro de uma anotação", async () => {
+    render(<App />);
+    navigate("Cadernos");
+    fireEvent.click(await screen.findByRole("button", { name: /nova anotação/i }));
+
+    expect(await screen.findByRole("button", { name: "Digitalizar" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Escrever à mão" })).toBeTruthy();
+  });
+
+  it("cria e completa uma linha no bingo de estudos", async () => {
+    render(<App />);
+    navigate("Quizzes e bingo");
+    fireEvent.click(await screen.findByRole("button", { name: "Bingo" }));
+    fireEvent.click(screen.getByRole("button", { name: "Criar bingo" }));
+
+    const board = screen.getByRole("group", { name: "Cartela de bingo" });
+    const cells = within(board).getAllByRole("button");
+    expect(cells).toHaveLength(9);
+    cells.slice(0, 3).forEach((cell) => fireEvent.click(cell));
+    expect(screen.getByRole("status").textContent).toMatch(/bingo/i);
+  });
+
+  it("abre o quiz de escuta com vocabulário inicial", async () => {
+    render(<App />);
+    navigate("Quizzes e bingo");
+    fireEvent.click(await screen.findByRole("button", { name: "Escuta" }));
+
+    expect(screen.getByRole("heading", { name: /ouça e descubra a palavra/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /iniciar escuta/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /ouvir novamente/i })).toBeTruthy();
+  });
+
+  it("mantém dados após remontar o aplicativo", () => {
+    const firstRender = render(<App />);
+    navigate("Agenda");
+    fireEvent.change(screen.getByLabelText(/o que precisa ser feito/i), {
+      target: { value: "Preparar apresentação" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /adicionar tarefa/i }));
+    firstRender.unmount();
+
+    render(<App />);
+    expect(screen.getByText("Preparar apresentação")).toBeTruthy();
+  });
+
+  it("preserva o criador de planos de aula", async () => {
+    render(<App />);
+    navigate("Planos de aula");
+    fireEvent.change(await screen.findByLabelText(/tema da aula/i), {
       target: { value: "Simple Past" },
     });
-    fireEvent.change(screen.getByLabelText(/perfil da turma/i), {
-      target: { value: "Adultos" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /montar estrutura/i }));
-
+    fireEvent.click(screen.getByRole("button", { name: /criar rascunho/i }));
     expect(screen.getByRole("heading", { name: "Simple Past" })).toBeTruthy();
     expect(screen.getByText("Warm-up")).toBeTruthy();
-    expect(screen.getByText("Produção")).toBeTruthy();
-    expect(screen.getByText(/estrutura determinística/i)).toBeTruthy();
+  });
+
+  it("cria e revisa um flashcard local", async () => {
+    render(<App />);
+    navigate("Biblioteca");
+    const front = await screen.findByLabelText("Frente");
+    fireEvent.change(front, { target: { value: "Improve" } });
+    fireEvent.change(screen.getByLabelText("Verso"), { target: { value: "Melhorar" } });
+    fireEvent.click(screen.getByRole("button", { name: /criar flashcard/i }));
+    expect(screen.getByText("Improve")).toBeTruthy();
+
+    navigate("Quizzes e bingo");
+    expect(await screen.findByRole("heading", { name: "Improve" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /mostrar resposta/i }));
+    expect(screen.getByRole("heading", { name: "Melhorar" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Fácil" }));
+    expect(screen.getByText(/revisão em dia/i)).toBeTruthy();
   });
 });

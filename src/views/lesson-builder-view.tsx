@@ -1,0 +1,356 @@
+import { useState, type FormEvent } from "react";
+import { PageHeader } from "../components/app-navigation";
+import { VocabularySwatActivity } from "../components/vocabulary-swat-activity";
+import {
+  ACTIVITY_LIBRARY,
+  findActivity,
+  listActivitiesByControlLevel,
+} from "../domain/activity-bank";
+import { createLessonDraft } from "../domain/create-lesson-draft";
+import {
+  CEFR_LEVELS,
+  METHODOLOGIES,
+  METHODOLOGY_LABELS,
+  PRODUCTION_VARIANTS,
+  PRODUCTION_VARIANT_LABELS,
+  type LessonDraft,
+  type LessonInput,
+} from "../domain/lesson";
+
+const INITIAL_INPUT: LessonInput = {
+  topic: "",
+  level: "A2",
+  duration: 60,
+  audience: "",
+  aim: "",
+  objective: "",
+  methodology: "inductive",
+  practiceTotalControlledId: "",
+  practiceSemiControlledId: "",
+  extraActivityId: "",
+  productionVariant: "product-pitch",
+  homeworkLinksText: "",
+};
+
+const TOTAL_CONTROLLED_ACTIVITIES = listActivitiesByControlLevel("total-controlled");
+const SEMI_CONTROLLED_ACTIVITIES = listActivitiesByControlLevel("semi-controlled");
+
+function DraftPreview({ draft }: { draft: LessonDraft | null }) {
+  if (!draft) {
+    return (
+      <aside className="preview preview--empty" aria-live="polite">
+        <span className="preview-empty-mark" aria-hidden="true">
+          A
+        </span>
+        <h2>Rascunho da aula</h2>
+        <p>Preencha os campos ao lado para visualizar a distribuição do tempo e das atividades.</p>
+      </aside>
+    );
+  }
+
+  return (
+    <aside className="preview" aria-live="polite" aria-labelledby="draft-title">
+      <div className="preview__topline">
+        <span>Rascunho</span>
+        <div className="draft-meta">
+          <span>{draft.level}</span>
+          <span>{draft.duration} min</span>
+        </div>
+      </div>
+      <h2 id="draft-title">{draft.title}</h2>
+      <p className="draft-audience">{draft.audience}</p>
+      <div className="objective">
+        <span>Aim</span>
+        <p>{draft.aim}</p>
+      </div>
+      <div className="objective">
+        <span>Objective</span>
+        <p>{draft.objective}</p>
+      </div>
+      <ol className="timeline">
+        {draft.sections.map((section, index) => (
+          <li key={section.kind}>
+            <span className="timeline__number">{String(index + 1).padStart(2, "0")}</span>
+            <div className="timeline__content">
+              <div>
+                <strong>{section.title}</strong>
+                <span>{section.minutes} min</span>
+              </div>
+              <p>{section.guidance}</p>
+              {section.activityIds?.map((activityId) => {
+                const activity = findActivity(activityId);
+                if (!activity) return null;
+                return (
+                  <div className="activity-detail" key={activityId}>
+                    <strong>{activity.name}</strong>
+                    <span>
+                      {activity.time} min · {activity.topic}
+                    </span>
+                    <p>{activity.goal}</p>
+                    <ol>
+                      {activity.steps.map((step) => (
+                        <li key={step}>{step}</li>
+                      ))}
+                    </ol>
+                    {activity.supplies.length > 0 && (
+                      <p className="activity-detail__supplies">
+                        Material: {activity.supplies.join(", ")}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+              {section.links && section.links.length > 0 && (
+                <ul className="homework-links">
+                  {section.links.map((link) => (
+                    <li key={link}>
+                      <a href={link} target="_blank" rel="noopener noreferrer">
+                        {link}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+      <p className="preview__footnote">
+        Estrutura criada localmente. Você poderá editar cada etapa em uma próxima versão.
+      </p>
+    </aside>
+  );
+}
+
+export function LessonBuilderView({ onBack }: { onBack: () => void }) {
+  const [input, setInput] = useState<LessonInput>(INITIAL_INPUT);
+  const [draft, setDraft] = useState<LessonDraft | null>(null);
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setDraft(createLessonDraft(input));
+  }
+
+  return (
+    <main className="main-content builder" id="main-content">
+      <PageHeader />
+      <header className="builder__header">
+        <button
+          className="back-button"
+          type="button"
+          onClick={onBack}
+          aria-label="Voltar para Hoje"
+        >
+          <span aria-hidden="true">←</span>
+        </button>
+        <div>
+          <span className="section-label">Planejamento</span>
+          <h1>Novo plano de aula</h1>
+          <p>Preencha apenas o que fizer sentido para sua turma.</p>
+        </div>
+      </header>
+
+      <VocabularySwatActivity />
+
+      <div className="builder-grid">
+        <form className="lesson-form" onSubmit={submit}>
+          <div className="form-heading">
+            <h2>Informações da aula</h2>
+            <span>* campo obrigatório</span>
+          </div>
+          <label className="field field--full">
+            <span>Tema da aula *</span>
+            <input
+              name="topic"
+              value={input.topic}
+              onChange={(event) => setInput({ ...input, topic: event.target.value })}
+              placeholder="Ex.: Simple Past"
+              required
+              autoComplete="off"
+            />
+          </label>
+          <div className="field-row">
+            <label className="field">
+              <span>Nível CEFR</span>
+              <select
+                name="level"
+                value={input.level}
+                onChange={(event) =>
+                  setInput({ ...input, level: event.target.value as LessonInput["level"] })
+                }
+              >
+                {CEFR_LEVELS.map((level) => (
+                  <option key={level} value={level}>
+                    {level}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span>Duração</span>
+              <select
+                name="duration"
+                value={input.duration}
+                onChange={(event) => setInput({ ...input, duration: Number(event.target.value) })}
+              >
+                {[30, 45, 60, 90, 120].map((minutes) => (
+                  <option key={minutes} value={minutes}>
+                    {minutes} minutos
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <label className="field field--full">
+            <span>Perfil da turma</span>
+            <input
+              name="audience"
+              value={input.audience}
+              onChange={(event) => setInput({ ...input, audience: event.target.value })}
+              placeholder="Ex.: Adultos iniciantes"
+              autoComplete="off"
+            />
+          </label>
+          <label className="field field--full">
+            <span>Aim</span>
+            <small className="field-help">O que a aula representa: a intenção pedagógica.</small>
+            <textarea
+              name="aim"
+              value={input.aim}
+              onChange={(event) => setInput({ ...input, aim: event.target.value })}
+              placeholder="Ex.: Ensinar o Simple Past para narrativas curtas"
+              rows={2}
+            />
+          </label>
+          <label className="field field--full">
+            <span>Objective</span>
+            <small className="field-help">
+              O que o aluno consegue fazer na prática, ao final da aula.
+            </small>
+            <textarea
+              name="objective"
+              value={input.objective}
+              onChange={(event) => setInput({ ...input, objective: event.target.value })}
+              placeholder="Ex.: Relatar o que fez no fim de semana"
+              rows={3}
+            />
+          </label>
+          <fieldset className="method-fieldset">
+            <legend>Atividades da Prática</legend>
+            <small className="field-help">
+              Activity 01 é o livro didático; as atividades 02 e 03 vêm do banco de atividades.
+            </small>
+            <div className="field-row">
+              <label className="field">
+                <span>Activity 02 · Total Controlled</span>
+                <select
+                  name="practiceTotalControlledId"
+                  value={input.practiceTotalControlledId}
+                  onChange={(event) =>
+                    setInput({ ...input, practiceTotalControlledId: event.target.value })
+                  }
+                >
+                  <option value="">Nenhuma</option>
+                  {TOTAL_CONTROLLED_ACTIVITIES.map((activity) => (
+                    <option key={activity.id} value={activity.id}>
+                      {activity.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>Activity 03 · Semi Controlled</span>
+                <select
+                  name="practiceSemiControlledId"
+                  value={input.practiceSemiControlledId}
+                  onChange={(event) =>
+                    setInput({ ...input, practiceSemiControlledId: event.target.value })
+                  }
+                >
+                  <option value="">Nenhuma</option>
+                  {SEMI_CONTROLLED_ACTIVITIES.map((activity) => (
+                    <option key={activity.id} value={activity.id}>
+                      {activity.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </fieldset>
+          <label className="field field--full">
+            <span>Extra Activity</span>
+            <small className="field-help">
+              Só aparece se sobrar tempo antes da produção — não entra no cálculo padrão dos minutos
+              da aula.
+            </small>
+            <select
+              name="extraActivityId"
+              value={input.extraActivityId}
+              onChange={(event) => setInput({ ...input, extraActivityId: event.target.value })}
+            >
+              <option value="">Nenhuma</option>
+              {ACTIVITY_LIBRARY.map((activity) => (
+                <option key={activity.id} value={activity.id}>
+                  {activity.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <fieldset className="method-fieldset">
+            <legend>Como apresentar o conteúdo</legend>
+            <div className="method-grid">
+              {METHODOLOGIES.map((methodology) => (
+                <label className="method-option" key={methodology}>
+                  <input
+                    type="radio"
+                    name="methodology"
+                    value={methodology}
+                    checked={input.methodology === methodology}
+                    onChange={() => setInput({ ...input, methodology })}
+                  />
+                  <span>{METHODOLOGY_LABELS[methodology]}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset className="method-fieldset">
+            <legend>Variante da Produção</legend>
+            <div className="method-grid">
+              {PRODUCTION_VARIANTS.map((variant) => (
+                <label className="method-option" key={variant}>
+                  <input
+                    type="radio"
+                    name="productionVariant"
+                    value={variant}
+                    checked={input.productionVariant === variant}
+                    onChange={() => setInput({ ...input, productionVariant: variant })}
+                  />
+                  <span>{PRODUCTION_VARIANT_LABELS[variant]}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <label className="field field--full">
+            <span>Links de apoio (Homework)</span>
+            <small className="field-help">
+              Um link por linha, começando com http:// ou https://.
+            </small>
+            <textarea
+              name="homeworkLinksText"
+              value={input.homeworkLinksText}
+              onChange={(event) => setInput({ ...input, homeworkLinksText: event.target.value })}
+              placeholder={"https://exemplo.com/exercicio-1\nhttps://exemplo.com/exercicio-2"}
+              rows={2}
+            />
+          </label>
+          <button className="primary-button primary-button--wide" type="submit">
+            Criar rascunho
+          </button>
+        </form>
+        <DraftPreview draft={draft} />
+      </div>
+    </main>
+  );
+}
+
+export default LessonBuilderView;
