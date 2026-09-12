@@ -248,6 +248,11 @@ limiting continuam pendentes.
 O lobby mostra conexão, participantes, convite, resumo e duração estimada. A entrada normaliza o
 código e informa separadamente sala inexistente, iniciada, cheia ou nome duplicado. No celular, o
 cabeçalho da sala permanece visível e oferece uma ação textual para sair.
+O lobby do anfitrião usa layout flat responsivo. O convite e a lista de participantes ficam ao lado
+da escolha da atividade no desktop e passam para uma coluna no celular. Escuta coletiva e Bingo
+estão disponíveis; Flashcards em grupo e Quiz competitivo aparecem desabilitados como “Em breve”.
+A barra inferior resume a rodada e mantém a ação de início visível. Os ícones aprovados do projeto,
+a arte da Helena segurando a placa e o QR SVG dinâmico foram preservados.
 Anfitrião e participante guardam a credencial somente na aba atual e retomam a mesma sala após uma
 atualização da página, inclusive durante a rodada. Uma sessão expirada ou inválida é descartada com
 mensagem clara, sem criar um participante duplicado.

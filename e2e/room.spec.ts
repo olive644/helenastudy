@@ -18,8 +18,12 @@ for (const activity of ["listening", "bingo"] as const) {
       },
       streamUrl: (code) => `http://127.0.0.1:4173/test-room/${code}`,
     });
+    const hostViewport =
+      testInfo.project.name === "mobile"
+        ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }
+        : { viewport: { width: 1280, height: 900 }, isMobile: false };
     const contexts = await Promise.all([
-      browser.newContext({ viewport: { width: 1280, height: 900 }, isMobile: false }),
+      browser.newContext(hostViewport),
       browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }),
       browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }),
     ]);
@@ -71,7 +75,12 @@ for (const activity of ["listening", "bingo"] as const) {
       }
       const host = await contexts[0]!.newPage();
       await host.goto("/");
-      await host.getByRole("button", { name: "Quizzes e bingo", exact: true }).click();
+      await host
+        .getByRole("button", {
+          name: testInfo.project.name === "mobile" ? "Praticar" : "Quizzes e bingo",
+          exact: true,
+        })
+        .click();
       await host.getByRole("button", { name: "Modo Sala", exact: true }).click();
       await host.getByRole("button", { name: "Criar sala", exact: true }).click();
       await host.getByRole("combobox", { name: "Perguntas", exact: true }).selectOption("5");
@@ -86,10 +95,12 @@ for (const activity of ["listening", "bingo"] as const) {
           await expect(page.getByText("Aguardando o início")).toBeVisible();
         }),
       );
-      await expect(host.getByText("2 participantes", { exact: true })).toBeVisible();
+      await expect(
+        host.locator(".local-room-session__actions p:not(.local-room-connection)"),
+      ).toContainText("2 participantes");
       await host.screenshot({ path: testInfo.outputPath("lobby-desktop.png") });
       await expect(host.locator("#root")).toHaveAttribute("inert", "");
-      await host.getByRole("button", { name: "Iniciar rodada" }).click();
+      await host.getByRole("button", { name: "Iniciar atividade" }).click();
       await players[0]!.reload();
       for (let question = 0; question < 5; question++) {
         await expect(
