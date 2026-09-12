@@ -2383,12 +2383,24 @@ select {
   background: var(--lavender);
 }
 
+.local-room-podium__place--1 .navigation-icon {
+  color: var(--yellow);
+}
+
 .local-room-podium__place--2 {
   order: 1;
 }
 
+.local-room-podium__place--2 .navigation-icon {
+  color: var(--violet);
+}
+
 .local-room-podium__place--3 {
   order: 3;
+}
+
+.local-room-podium__place--3 .navigation-icon {
+  color: var(--ink);
 }
 
 .local-room-round__host-question {
