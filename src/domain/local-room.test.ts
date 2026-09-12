@@ -10,6 +10,7 @@ import {
   endRoom,
   isValidLocalRoomCode,
   LEADER_WRONG_ANSWER_PENALTY_XP,
+  normalizeLocalRoomCode,
   rankLocalRoomParticipants,
   readLocalRoomCodeFromUrl,
   sanitizeDisplayName,
@@ -45,6 +46,8 @@ describe("sala local", () => {
     expect(code).toBe("AAAAA");
     expect(isValidLocalRoomCode(code)).toBe(true);
     expect(isValidLocalRoomCode("O0I1")).toBe(false);
+    expect(normalizeLocalRoomCode(" ab-c d ")).toBe("ABCD");
+    expect(isValidLocalRoomCode(" ab-c de ")).toBe(true);
   });
 
   it("filtra e limita o nome temporário", () => {

@@ -3,6 +3,9 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "rea
 import { createPortal } from "react-dom";
 import {
   buildLocalRoomJoinUrl,
+  isValidLocalRoomCode,
+  MAX_ROOM_PARTICIPANTS,
+  normalizeLocalRoomCode,
   rankLocalRoomParticipants,
   type LocalRoomParticipant,
   type LocalRoomSettings,
@@ -44,27 +47,52 @@ function LocalRoomFullscreen({ children }: { children: ReactNode }) {
 type LocalRoomProps = { initialJoinCode?: string | undefined; onExit?: () => void };
 
 function ShareRoom({ code }: { code: string }) {
-  const [copied, setCopied] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<"idle" | "link" | "code" | "manual">("idle");
+  const linkInputRef = useRef<HTMLInputElement>(null);
   const joinUrl = buildLocalRoomJoinUrl(window.location.href, code);
 
-  async function copyLink() {
+  async function copy(value: string, success: "link" | "code") {
     try {
-      await navigator.clipboard.writeText(joinUrl);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(value);
+      setCopyStatus(success);
     } catch {
-      // Sem permissão de área de transferência: a pessoa copia o link à mão.
+      setCopyStatus("manual");
+      linkInputRef.current?.select();
     }
+    window.setTimeout(() => setCopyStatus("idle"), 2500);
   }
 
   return (
     <div className="local-room-share">
       <RoomQrCode value={joinUrl} />
       <div className="local-room-share__link">
-        <p>Ou peça para escanear o QR code, ou compartilhe o link direto:</p>
-        <button className="secondary-button" type="button" onClick={() => void copyLink()}>
-          <Copy size={16} /> {copied ? "Link copiado!" : "Copiar link da sala"}
-        </button>
+        <p>Escaneie o QR code ou compartilhe o convite:</p>
+        <input ref={linkInputRef} aria-label="Link da sala" value={joinUrl} readOnly />
+        <div className="local-room-share__actions">
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={() => void copy(joinUrl, "link")}
+          >
+            <Copy size={16} /> Copiar link
+          </button>
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={() => void copy(code, "code")}
+          >
+            <Copy size={16} /> Copiar código
+          </button>
+        </div>
+        <p className="local-room-copy-status" role="status" aria-live="polite">
+          {copyStatus === "link"
+            ? "Link copiado ✓"
+            : copyStatus === "code"
+              ? "Código copiado ✓"
+              : copyStatus === "manual"
+                ? "Selecione e copie o link acima."
+                : ""}
+        </p>
       </div>
     </div>
   );
@@ -129,7 +157,6 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
   const [lastResult, setLastResult] = useState<{ correct: boolean; xpChange: number } | undefined>(
     undefined,
   );
-  const [startRoundWarning, setStartRoundWarning] = useState(false);
   const state = room.state;
 
   const [appliedJoinCode, setAppliedJoinCode] = useState(false);
@@ -147,7 +174,7 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
   }
 
   const participantCount = state?.participants.length ?? 0;
-  const showStartRoundWarning = startRoundWarning && participantCount === 0;
+  const canJoin = isValidLocalRoomCode(code) && name.trim().length > 0;
 
   const isPlaying = state?.phase === "playing";
   const questionStartedAt = state?.questionStartedAt ?? 0;
@@ -226,6 +253,11 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
     setLastResult(result);
   }
 
+  function exitRoom() {
+    room.reset();
+    onExit?.();
+  }
+
   if (room.role === "choose")
     return (
       <LocalRoomFullscreen>
@@ -270,22 +302,43 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
     return (
       <LocalRoomFullscreen>
         <form className="local-room-join" onSubmit={joinRoom}>
+          <button
+            className="secondary-button local-room-back-button"
+            type="button"
+            onClick={() => (initialJoinCode ? onExit?.() : room.setRole("choose"))}
+          >
+            <ArrowLeft size={17} /> Voltar
+          </button>
           <h3>Entrar em uma sala</h3>
           <p>Peça o código de cinco letras para o professor e digite seu nome.</p>
           <label>
             <span>Código</span>
             <input
               value={code}
-              onChange={(event) => setCode(event.target.value.toUpperCase())}
+              onChange={(event) => setCode(normalizeLocalRoomCode(event.target.value).slice(0, 5))}
+              onPaste={(event) => {
+                event.preventDefault();
+                setCode(normalizeLocalRoomCode(event.clipboardData.getData("text")).slice(0, 5));
+              }}
               maxLength={5}
+              autoComplete="off"
+              inputMode="text"
+              className="local-room-code-input"
+              placeholder="ABCDE"
+              required
             />
           </label>
           <label>
             <span>Nome de exibição</span>
-            <input value={name} onChange={(event) => setName(event.target.value)} maxLength={24} />
+            <input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              maxLength={24}
+              required
+            />
           </label>
           {room.error && <p role="alert">{room.error}</p>}
-          <button className="primary-button" type="submit">
+          <button className="primary-button" type="submit" disabled={!canJoin}>
             Entrar
           </button>
         </form>
@@ -295,95 +348,151 @@ export function LocalRoom({ initialJoinCode, onExit }: LocalRoomProps) {
   if (!state) return null;
   const isHost = room.isHost;
   const answered = state.answeredParticipantIds.includes(room.participantId);
+  const questionCount = state.settings.questionCount;
+  const estimatedMinutes =
+    questionCount === "all"
+      ? undefined
+      : Math.max(1, Math.ceil((questionCount * roundSeconds) / 60));
+  const connectionLabel =
+    room.connectionStatus === "online"
+      ? "Sala online"
+      : room.connectionStatus === "offline"
+        ? "Sem conexão"
+        : room.connectionStatus === "reconnecting"
+          ? "Reconectando…"
+          : "Conectando…";
 
   return (
     <LocalRoomFullscreen>
       {countdownValue !== null && <CountdownOverlay value={countdownValue} />}
       <div className="local-room-session">
-        <header>
-          <div>
+        <header className="local-room-session__header">
+          <div className="local-room-session__code">
             <span>Sala</span>
             <strong>{state.code}</strong>
           </div>
-          <p>
-            <Users size={16} /> {state.participants.length} participantes
-          </p>
+          <div className="local-room-session__actions">
+            <p className={`local-room-connection local-room-connection--${room.connectionStatus}`}>
+              <span aria-hidden="true" /> {connectionLabel}
+            </p>
+            <p>
+              <Users size={16} /> {state.participants.length} participantes
+            </p>
+            <button className="secondary-button" type="button" onClick={exitRoom}>
+              <X size={16} /> Sair da sala
+            </button>
+          </div>
         </header>
 
         {state.phase === "lobby" ? (
           isHost ? (
-            <div className="local-room-settings">
-              <ShareRoom code={state.code} />
-              <label>
-                <span>Dificuldade</span>
-                <select
-                  value={state.settings.difficulty}
-                  onChange={(event) =>
-                    void room.updateSettings({
-                      difficulty: event.target.value as LocalRoomSettings["difficulty"],
-                    })
-                  }
+            <div className="local-room-lobby">
+              <div className="local-room-lobby__invite">
+                <ShareRoom code={state.code} />
+                <section className="local-room-participants" aria-labelledby="participants-title">
+                  <div className="local-room-section-heading">
+                    <h3 id="participants-title">Participantes</h3>
+                    <span>
+                      {participantCount}/{MAX_ROOM_PARTICIPANTS}
+                    </span>
+                  </div>
+                  {participantCount === 0 ? (
+                    <div className="local-room-participants__empty">
+                      <div aria-hidden="true">
+                        <span />
+                        <span />
+                        <span />
+                      </div>
+                      <strong>Aguardando participantes…</strong>
+                      <p>Compartilhe o código {state.code}. A rodada começa com uma pessoa.</p>
+                    </div>
+                  ) : (
+                    <Scoreboard participants={state.participants} />
+                  )}
+                </section>
+              </div>
+
+              <div className="local-room-settings">
+                <h3>Configurar rodada</h3>
+                <label>
+                  <span>Dificuldade</span>
+                  <select
+                    value={state.settings.difficulty}
+                    onChange={(event) =>
+                      void room.updateSettings({
+                        difficulty: event.target.value as LocalRoomSettings["difficulty"],
+                      })
+                    }
+                  >
+                    <option value="mixed">Misto</option>
+                    <option value="easy">Fácil</option>
+                    <option value="medium">Médio</option>
+                    <option value="hard">Difícil</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Perguntas</span>
+                  <select
+                    value={state.settings.questionCount}
+                    onChange={(event) =>
+                      void room.updateSettings({
+                        questionCount:
+                          event.target.value === "all"
+                            ? "all"
+                            : (Number(event.target.value) as 5 | 10 | 15),
+                      })
+                    }
+                  >
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                    <option value="all">Todas</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Tempo por pergunta</span>
+                  <select
+                    value={state.settings.roundSeconds}
+                    onChange={(event) =>
+                      void room.updateSettings({
+                        roundSeconds: Number(
+                          event.target.value,
+                        ) as LocalRoomSettings["roundSeconds"],
+                      })
+                    }
+                  >
+                    <option value="15">15s</option>
+                    <option value="30">30s</option>
+                    <option value="45">45s</option>
+                    <option value="60">60s</option>
+                  </select>
+                </label>
+                <div className="local-room-summary" aria-label="Resumo da rodada">
+                  <strong>Quiz de escuta · vocabulário em inglês</strong>
+                  <p>
+                    {questionCount === "all"
+                      ? "Todas as perguntas disponíveis"
+                      : `${questionCount} perguntas`}{" "}
+                    · {state.settings.roundSeconds}s cada
+                    {estimatedMinutes ? ` · cerca de ${estimatedMinutes} min` : ""}
+                  </p>
+                  <small>
+                    Respostas individuais · ordem embaralhada · entrada fecha ao iniciar
+                  </small>
+                </div>
+                <button
+                  className="primary-button"
+                  type="button"
+                  disabled={participantCount === 0}
+                  onClick={() => void room.startRound()}
                 >
-                  <option value="mixed">Misto</option>
-                  <option value="easy">Fácil</option>
-                  <option value="medium">Médio</option>
-                  <option value="hard">Difícil</option>
-                </select>
-              </label>
-              <label>
-                <span>Perguntas</span>
-                <select
-                  value={state.settings.questionCount}
-                  onChange={(event) =>
-                    void room.updateSettings({
-                      questionCount:
-                        event.target.value === "all"
-                          ? "all"
-                          : (Number(event.target.value) as 5 | 10 | 15),
-                    })
-                  }
-                >
-                  <option value="5">5</option>
-                  <option value="10">10</option>
-                  <option value="15">15</option>
-                  <option value="all">Todas</option>
-                </select>
-              </label>
-              <label>
-                <span>Tempo por pergunta</span>
-                <select
-                  value={state.settings.roundSeconds}
-                  onChange={(event) =>
-                    void room.updateSettings({
-                      roundSeconds: Number(event.target.value) as LocalRoomSettings["roundSeconds"],
-                    })
-                  }
-                >
-                  <option value="15">15s</option>
-                  <option value="30">30s</option>
-                  <option value="45">45s</option>
-                  <option value="60">60s</option>
-                </select>
-              </label>
-              {state.participants.length > 0 && <Scoreboard participants={state.participants} />}
-              <button
-                className="primary-button"
-                type="button"
-                onClick={() => {
-                  if (state.participants.length === 0) {
-                    setStartRoundWarning(true);
-                    return;
-                  }
-                  setStartRoundWarning(false);
-                  void room.startRound();
-                }}
-              >
-                <Play size={17} /> Iniciar rodada
-              </button>
-              {showStartRoundWarning && (
-                <p role="alert">Não é possível iniciar a sala sem nenhum participante.</p>
-              )}
-              {room.error && <p role="alert">{room.error}</p>}
+                  <Play size={17} /> Iniciar rodada
+                </button>
+                {participantCount === 0 && (
+                  <p className="local-note">Convide ao menos uma pessoa para liberar o início.</p>
+                )}
+                {room.error && <p role="alert">{room.error}</p>}
+              </div>
             </div>
           ) : (
             <div className="local-room-waiting" role="status">

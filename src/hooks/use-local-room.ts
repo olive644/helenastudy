@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { isValidLocalRoomCode, sanitizeDisplayName } from "../domain/local-room";
+import {
+  isValidLocalRoomCode,
+  normalizeLocalRoomCode,
+  sanitizeDisplayName,
+} from "../domain/local-room";
 import type { LocalRoomSettings, PublicLocalRoomState } from "../domain/local-room";
 
 type Role = "choose" | "host" | "participant";
+export type RoomConnectionStatus =
+  "disconnected" | "connecting" | "online" | "reconnecting" | "offline";
 
 // O Realtime Database do Firebase omite chaves cujo valor é um array vazio
 // (ou objeto vazio) em vez de mandá-las como "[]" — ao contrário do
@@ -39,6 +45,7 @@ export function useLocalRoom() {
   const [state, setState] = useState<PublicLocalRoomState>();
   const [error, setError] = useState("");
   const [participantId, setParticipantId] = useState("");
+  const [connectionStatus, setConnectionStatus] = useState<RoomConnectionStatus>("disconnected");
   const hostTokenRef = useRef("");
   const codeRef = useRef("");
   const eventSourceRef = useRef<EventSource | undefined>(undefined);
@@ -46,6 +53,7 @@ export function useLocalRoom() {
   function stopStreaming() {
     eventSourceRef.current?.close();
     eventSourceRef.current = undefined;
+    setConnectionStatus("disconnected");
   }
 
   // Conecta direto no Realtime Database do Firebase (fora do domínio do
@@ -54,7 +62,10 @@ export function useLocalRoom() {
   // instantaneamente.
   function startStreaming(streamUrl: string) {
     stopStreaming();
+    setConnectionStatus(navigator.onLine ? "connecting" : "offline");
     const source = new EventSource(streamUrl);
+    source.onopen = () => setConnectionStatus("online");
+    source.onerror = () => setConnectionStatus(navigator.onLine ? "reconnecting" : "offline");
     source.addEventListener("put", (event) => {
       try {
         const payload = JSON.parse((event as MessageEvent<string>).data) as {
@@ -69,7 +80,17 @@ export function useLocalRoom() {
     eventSourceRef.current = source;
   }
 
-  useEffect(() => stopStreaming, []);
+  useEffect(() => {
+    const handleOffline = () => eventSourceRef.current && setConnectionStatus("offline");
+    const handleOnline = () => eventSourceRef.current && setConnectionStatus("reconnecting");
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
+    return () => {
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
+      stopStreaming();
+    };
+  }, []);
 
   async function createRoom(settings: LocalRoomSettings) {
     setError("");
@@ -92,7 +113,7 @@ export function useLocalRoom() {
 
   async function joinRoom(code: string, name: string) {
     setError("");
-    const roomCode = code.trim().toUpperCase();
+    const roomCode = normalizeLocalRoomCode(code);
     const displayName = sanitizeDisplayName(name);
     if (!isValidLocalRoomCode(roomCode)) {
       setError("Digite um código de sala válido com cinco caracteres.");
@@ -202,6 +223,7 @@ export function useLocalRoom() {
     error,
     isHost: role === "host",
     participantId,
+    connectionStatus,
     setRole,
     createRoom,
     joinRoom,

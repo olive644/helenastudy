@@ -1,4 +1,4 @@
-import { act, render } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PublicLocalRoomState } from "../domain/local-room";
@@ -28,6 +28,7 @@ vi.mock("../hooks/use-local-room", () => ({
       error: "",
       isHost: true,
       participantId: "",
+      connectionStatus: "online" as const,
       setRole: vi.fn(),
       createRoom: vi.fn(),
       joinRoom: vi.fn(),
@@ -51,6 +52,13 @@ describe("contagem regressiva do início da rodada", () => {
   function countdownText(container: HTMLElement) {
     return container.querySelector(".local-room-countdown__value")?.textContent ?? null;
   }
+
+  it("mostra conexão, resumo e saída textual no lobby", () => {
+    render(<LocalRoom />);
+    expect(screen.getByText("Sala online")).toBeTruthy();
+    expect(screen.getByLabelText("Resumo da rodada").textContent).toContain("10 perguntas");
+    expect(screen.getByRole("button", { name: /sair da sala/i })).toBeTruthy();
+  });
 
   it("mostra 3, 2, 1 e Vai! só na transição do lobby pra a primeira pergunta", () => {
     vi.useFakeTimers();

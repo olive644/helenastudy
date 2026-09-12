@@ -8,10 +8,10 @@ const assetsDirectory = new URL("../dist/assets/", import.meta.url);
 // tema): o hook de tema e o botão adicionam ~1 KiB, já com os ícones
 // otimizados para o menor path possível. Revisar se crescer de novo.
 const MAX_INITIAL_JS_BYTES = 222 * 1024;
-// 333 KiB desde o cronômetro por pergunta, o sistema de XP e o pódio com
-// medalhas do Modo Sala: só lógica e ícones próprios (sem lib nova), ~1,6
-// KiB a mais no chunk sob demanda da sala. Revisar se crescer de novo.
-const MAX_TOTAL_JS_BYTES = 333 * 1024;
+// 336 KiB após o lobby realtime ganhar estado de conexão, entrada validada,
+// cópia com fallback e resumo da rodada. O carregamento inicial segue abaixo
+// do limite próprio; este crescimento fica no módulo sob demanda da Sala.
+const MAX_TOTAL_JS_BYTES = 336 * 1024;
 const MAX_TTS_WORKER_BYTES = 2.25 * 1024 * 1024;
 const MAX_TTS_WASM_BYTES = 22 * 1024 * 1024;
 const manifest = JSON.parse(await readFile(new URL(".vite/manifest.json", distDirectory), "utf8"));
