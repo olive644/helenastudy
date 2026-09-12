@@ -717,8 +717,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                 </div>
                 <p>
                   {state.answeredParticipantIds.length} de {state.participants.length} já
-                  responderam. A rodada passa sozinha quando todo mundo responder ou o tempo
-                  acabar.
+                  responderam. A rodada passa sozinha quando todo mundo responder ou o tempo acabar.
                 </p>
                 <Scoreboard participants={state.participants} />
                 <button
