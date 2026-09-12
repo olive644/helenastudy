@@ -25,6 +25,7 @@ const handler = createLocalRoomHandler({
     "776947909599",
     process.env["FIREBASE_APP_ID"] ?? "",
     process.env["FIREBASE_APPCHECK_ENFORCE"] === "true",
+    (event) => console.info(JSON.stringify({ event: "room_protection", ...event })),
   ),
   observe: (event) => console.info(JSON.stringify({ event: "room_request", ...event })),
   publish: createFirebasePublicRoomPublisher(config),

@@ -276,6 +276,14 @@ ou contrato de domínio foi alterado pelo redesign.
 
 # Navegação e painel principal
 
+## Proteção das salas: observabilidade
+
+O guard emite eventos `room_protection` com ação normalizada, enforcement,
+resultado da verificação e status da proteção. Tokens, IPs, nomes e respostas
+não são registrados. A assinatura também é verificada no modo de observação.
+O status 200 nesse evento significa aprovação do guard, não sucesso da ação.
+Bloqueios por limite de tentativas também são registrados nesse evento.
+
 O convite do Modo Sala usa a arte aprovada da Helena segurando uma placa. O QR
 continua sendo SVG dinâmico com margem branca de quatro módulos, posicionado
 na área livre da placa sem cobrir as patas. A imagem é apenas apresentação;
