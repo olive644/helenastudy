@@ -1,0 +1,35 @@
+# Variante leve do servico de TTS pro tier gratis do Railway (0.5GB de RAM,
+# sem cartao de credito). So o Kokoro e baixado/instalado; o Piper fica de
+# fora porque os dois motores juntos nao cabem nesse limite de memoria. O
+# codigo ja trata "Piper nao carregado" com naturalidade: o roteador cai
+# direto pro fallback do navegador quando o Kokoro falha, sem quebrar nada.
+#
+# Pra voltar a ter Kokoro + Piper juntos, use o Dockerfile normal (raiz desta
+# pasta) num host com mais RAM (~1.5GB), como Hugging Face Spaces (com plano
+# pago) ou uma VM propria.
+FROM python:3.12-slim AS base
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends espeak-ng curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /srv
+
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY app ./app
+COPY scripts/download-voice-models.sh ./scripts/download-voice-models.sh
+RUN chmod +x scripts/download-voice-models.sh \
+    && SKIP_PIPER=1 ./scripts/download-voice-models.sh
+
+ENV PYTHONUNBUFFERED=1
+# O Railway injeta a variavel PORT em tempo de execucao; localmente cai no
+# padrao 7860 usado pelas outras plataformas.
+ENV PORT=7860
+EXPOSE 7860
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s \
+    CMD curl -f http://localhost:${PORT}/health || exit 1
+
+CMD ["sh", "-c", "python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]

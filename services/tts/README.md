@@ -90,11 +90,62 @@ documentacao oficial da imagem `python:3.12-slim` e contra os requisitos de
 permissao do Hugging Face Spaces (usuario nao-root, porta 7860), mas o build
 de verdade fica como validacao pendente antes do primeiro deploy.
 
-## Deploy no Hugging Face Spaces (recomendado, sem custo)
+## Deploy no Railway (recomendado, sem custo)
+
+O plano Free do Railway nao pede cartao de credito e e permanente (nao e
+trial), mas limita a instancia a 0.5GB de RAM — insuficiente pros dois
+motores juntos. Por isso este deploy roda **so o Kokoro**
+(`Dockerfile.railway`, que pula o download do Piper). O codigo ja trata isso
+com naturalidade: `/health` reporta `piper_loaded: false`, e o roteador cai
+direto pro fallback da voz do navegador se o Kokoro falhar, sem quebrar o
+Quiz de Escuta nem o Modo Sala.
+
+1. Crie conta em https://railway.app (sem cartao).
+2. **New Project → Deploy from GitHub repo**, escolha o repositorio
+   `helenastudy`.
+3. Nas configuracoes do servico criado:
+   - **Root Directory**: `services/tts`
+   - **Dockerfile Path**: `Dockerfile.railway` (em vez do `Dockerfile` padrao)
+   - **Watch Paths**: `services/tts/**` (evita redeploy quando o resto do
+     monorepo mudar)
+4. Em **Variables**, adicione:
+
+```
+TTS_SERVICE_TOKEN=<o mesmo valor configurado na Vercel>
+TTS_MAX_CONCURRENT_KOKORO=1
+```
+
+5. Faça o deploy. O primeiro build demora alguns minutos (baixa o modelo do
+   Kokoro). Acompanhe em **Deployments → Logs**.
+6. Em **Settings → Networking**, gere um dominio publico (**Generate
+   Domain**). A URL fica algo como
+   `https://helenastudy-tts-production.up.railway.app`.
+7. Configure na Vercel (nunca com prefixo `VITE_`):
+
+```
+TTS_SERVICE_URL=https://<dominio-gerado-pelo-railway>
+TTS_SERVICE_TOKEN=<o mesmo segredo do passo 4>
+```
+
+**Atencao com um ponto real**: diferente do Cloud Run e do Hugging Face
+Spaces, o plano Free do Railway nao escala a zero — o container fica ligado
+o tempo todo, consumindo do credito de US$1/mes que o plano da. Nao tenho
+certeza se US$1 cobre um mes inteiro de container ligado 24 horas (depende
+do consumo real de CPU/memoria em repouso); acompanhe em **Usage** no
+primeiro mes. Pra nunca ser cobrado por engano, configure em **Settings →
+Usage Limits** um teto de gasto de US$0 acima do credito gratis — se
+estourar, o Railway so pausa o servico em vez de cobrar.
+
+## Deploy no Hugging Face Spaces (exige plano PRO)
+
+**Atualizacao**: o Hugging Face passou a exigir assinatura **PRO** (paga) pra
+criar Spaces com SDK Docker ou Gradio — so o SDK "Static" (sem servidor)
+continua gratis, o que nao serve pra este servico. Deixamos a secao abaixo
+documentada para quem ja tiver o plano PRO; quem nao tem, va direto pra
+[Deploy no Railway](#deploy-no-railway-recomendado-sem-custo) mais abaixo.
 
 O SDK Docker do Hugging Face Spaces le o `sdk: docker` e `app_port: 7860` do
-cabecalho YAML deste proprio README. Nao precisa de cartao de credito nem
-conta de faturamento.
+cabecalho YAML deste proprio README.
 
 1. Crie um novo Space em https://huggingface.co/new-space, escolhendo SDK
    **Docker** e visibilidade **Private** (o segredo no header ja protege o
