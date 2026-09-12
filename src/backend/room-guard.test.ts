@@ -1,6 +1,14 @@
-import { it, expect } from "vitest";
+import { it, expect, vi } from "vitest";
 import { createRoomGuard } from "./room-guard";
 import { createMemoryRoomStore } from "./room-transaction";
+
+vi.mock("jose", () => ({
+  createRemoteJWKSet: () => "fake-jwks",
+  jwtVerify: vi.fn(async (token: string) => {
+    if (token !== "valid-token") throw new Error("invalid signature");
+    return { payload: {}, protectedHeader: {} };
+  }),
+}));
 
 it("limita criação de salas de forma atômica e independente por endereço", async () => {
   const guard = createRoomGuard(createMemoryRoomStore(), "project", "app", false);
@@ -22,4 +30,20 @@ it("exige App Check quando habilitado e recusa configuração incompleta", async
   expect(
     (await createRoomGuard(createMemoryRoomStore(), "project", "", true)(request))?.status,
   ).toBe(503);
+});
+
+it("deixa passar quando o token do App Check é válido", async () => {
+  const guard = createRoomGuard(createMemoryRoomStore(), "project", "app", true);
+  const request = new Request("https://app.example/api/local-room?action=create", {
+    headers: { "X-Firebase-AppCheck": "valid-token" },
+  });
+  expect(await guard(request)).toBeUndefined();
+});
+
+it("recusa quando o token do App Check é inválido", async () => {
+  const guard = createRoomGuard(createMemoryRoomStore(), "project", "app", true);
+  const request = new Request("https://app.example/api/local-room?action=create", {
+    headers: { "X-Firebase-AppCheck": "tampered-token" },
+  });
+  expect((await guard(request))?.status).toBe(403);
 });
