@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, Copy, DoorOpen, Play, Radio, Users, Volume2, X } from "lucide-react";
+import { Check, Copy, DoorOpen, Radio, Users, Volume2 } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -15,6 +15,7 @@ import {
 import { selectFallbackEnglishVoice, speakEnglish } from "../data/speech-voice";
 import { useLocalRoom } from "../hooks/use-local-room";
 import { NavigationIcon } from "./navigation-icon";
+import { HelenaRoomIcon } from "./helena-room-icon";
 import { RoomQrCode } from "./room-qr-code";
 
 const DEFAULT_SETTINGS: LocalRoomSettings = {
@@ -337,7 +338,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
             onClick={onExit}
             aria-label="Voltar"
           >
-            <ArrowLeft size={18} />
+            <HelenaRoomIcon name="back" />
           </button>
         )}
         <div className="local-room-intro">
@@ -377,7 +378,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
             type="button"
             onClick={() => (initialJoinCode ? onExit?.() : room.setRole("choose"))}
           >
-            <ArrowLeft size={17} /> Voltar
+            <HelenaRoomIcon name="back" /> Voltar
           </button>
           <h3>Entrar em uma sala</h3>
           <p>Peça o código de cinco letras para o professor e digite seu nome.</p>
@@ -455,7 +456,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
               <Users size={16} /> {state.participants.length} participantes
             </p>
             <button className="secondary-button" type="button" onClick={exitRoom}>
-              <X size={16} /> Sair da sala
+              <HelenaRoomIcon name="close" size={18} /> Sair da sala
             </button>
           </div>
         </header>
@@ -522,10 +523,6 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                       ))}
                   </select>
                 </label>
-                <p className="local-note">
-                  Ao selecionar seus cartões, você compartilha até 30 deles nesta sala por quatro
-                  horas. Materiais pessoais usam dificuldade média.
-                </p>
                 <label>
                   <span>Atividade</span>
                   <select
@@ -684,11 +681,8 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                   disabled={participantCount === 0 || availableCount === 0}
                   onClick={() => void room.startRound()}
                 >
-                  <Play size={17} /> Iniciar rodada
+                  <HelenaRoomIcon name="play" size={18} /> Iniciar rodada
                 </button>
-                {participantCount === 0 && (
-                  <p className="local-note">Convide ao menos uma pessoa para liberar o início.</p>
-                )}
                 {room.error && <p role="alert">{room.error}</p>}
               </div>
             </div>
@@ -807,7 +801,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
             </div>
             <Podium participants={state.participants} />
             <button className="secondary-button" type="button" onClick={room.reset}>
-              <X size={16} /> Sair
+              <HelenaRoomIcon name="close" size={18} /> Sair
             </button>
           </div>
         )}
