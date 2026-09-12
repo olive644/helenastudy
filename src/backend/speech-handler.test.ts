@@ -8,7 +8,11 @@ function dependencies(): SpeechHandlerDependencies {
   return {
     identifyClient: () => "test-client",
     rateLimiter: { consume: vi.fn().mockResolvedValue(true) },
-    provider: { synthesize: vi.fn().mockResolvedValue(new Uint8Array([82, 73, 70, 70])) },
+    provider: {
+      synthesize: vi
+        .fn()
+        .mockResolvedValue({ audio: new Uint8Array([82, 73, 70, 70]), contentType: "audio/wav" }),
+    },
   };
 }
 

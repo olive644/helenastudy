@@ -39,14 +39,14 @@ produto.
 5. Escrever, desenhar ou anexar uma digitalização nos Cadernos.
 6. Guardar links, textos e flashcards por matéria na Biblioteca.
 7. Revisar flashcards, responder Quizzes, completar Bingos e acompanhar metas em Praticar.
-8. Praticar escuta em rodadas curtas com voz natural (Kokoro, reserva Piper) e fallback do dispositivo.
+8. Praticar escuta em rodadas curtas com voz natural (Cloudflare Workers AI) e fallback do dispositivo.
 9. Criar uma Sala online e sincronizar lobby e rodada entre dispositivos.
 10. Montar planos de aula pelo fluxo determinístico existente.
 
 Os dados pessoais compartilham um workspace local versionado e não exigem conta. O Modo Sala usa
 Firebase Realtime Database para estado temporário compartilhado; o texto da pergunta de escuta é
-enviado ao serviço de voz (Kokoro, com Piper como reserva) apenas quando a voz neural é usada, tanto
-no Quiz de Escuta individual quanto no Modo Sala.
+enviado ao Cloudflare Workers AI apenas quando a voz neural é usada, tanto no Quiz de Escuta
+individual quanto no Modo Sala.
 
 ## Arquitetura atual
 
@@ -58,10 +58,11 @@ no Quiz de Escuta individual quanto no Modo Sala.
 - Vitest e Testing Library para unidade/componente;
 - Playwright para fluxos desktop e mobile;
 - GitHub Actions para qualidade, auditoria, segredos, análise estática e CodeQL.
-- serviço de TTS próprio (`services/tts`, Kokoro principal e Piper de reserva) chamado por função
-  same-origin, sem expor o segredo do serviço no navegador;
-- cache de áudio por texto, voz e velocidade durante a sessão, com fallback imediato para a voz do
-  dispositivo se Kokoro e Piper falharem;
+- Cloudflare Workers AI (modelo MeloTTS) chamado por função same-origin, sem expor o token no
+  navegador; serviço próprio Kokoro+Piper (`services/tts`) implementado e testado, mas fora de uso
+  em produção por falta de hospedagem grátis viável;
+- cache de áudio por texto e velocidade durante a sessão, com fallback imediato para a voz do
+  dispositivo se o Cloudflare Workers AI falhar;
 - Firebase Realtime Database como armazenamento temporário da Sala e Server-Sent Events para o
   estado público realtime;
 - credenciais temporárias da Sala ficam em `sessionStorage`, permitindo retomar a atividade após
@@ -92,7 +93,7 @@ flowchart LR
   STUDY --> FOCUS[Foco]
   STUDY --> LIB[Biblioteca e flashcards]
   STUDY --> PRACTICE[Quizzes e bingo]
-  PRACTICE --> LISTEN[Escuta com Kokoro, reserva Piper, e fallback do dispositivo]
+  PRACTICE --> LISTEN[Escuta com Cloudflare Workers AI e fallback do dispositivo]
 
   ORG --> PLAN[Agenda e tarefas]
   ORG --> HABITS[Hábitos]

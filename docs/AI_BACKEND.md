@@ -10,23 +10,25 @@ descrito abaixo, que recebe somente o texto curto a ser pronunciado.
 
 `POST /api/speech` é uma função Vercel same-origin. Ela aceita texto de até 160 caracteres, velocidade
 entre 0,7 e 1,05 e consentimento explícito no corpo. Origem, tamanho e limite de uso são validados
-antes de repassar o pedido para o serviço de TTS (`services/tts`), que roda em container separado,
-nunca exposto direto ao navegador.
+antes de repassar o pedido para o **Cloudflare Workers AI**, chamando o modelo `@cf/myshell-ai/melotts`
+(MeloTTS, voz natural em inglês) autenticado por token, nunca exposto direto ao navegador.
 
-O serviço de TTS tenta o Kokoro primeiro (voz americana natural, `af_heart` por padrão). Se o Kokoro
-falhar, exceder o tempo limite configurado ou estiver indisponível, o próprio serviço tenta o Piper
-(`en_US-hfc_female-medium` por padrão) automaticamente, sem que o cliente perceba qual dos dois gerou
-o áudio. Se os dois falharem, `/api/speech` responde com erro e o cliente (`NaturalVoicePlayer`, em
-`src/data/listening-audio.ts`) usa a voz em inglês disponível no navegador como último recurso. O
-áudio retorna em WAV e nenhum texto, resposta ou token é registrado em log.
+Se a chamada ao Cloudflare falhar, exceder o tempo limite configurado ou não estiver configurada,
+`/api/speech` responde com erro e o cliente (`NaturalVoicePlayer`, em `src/data/listening-audio.ts`)
+usa a voz em inglês disponível no navegador como último recurso, tanto no Quiz de Escuta quanto no
+Modo Sala. O áudio retorna em MP3 e nenhum texto, resposta ou token é registrado em log.
 
-Configure `TTS_SERVICE_URL` e `TTS_SERVICE_TOKEN` apenas como variáveis protegidas da Vercel (nunca
-com prefixo `VITE_`, que exporia o segredo no navegador). Veja `services/tts/README.md` para como
-rodar, testar e publicar o serviço, incluindo licenças do Kokoro (Apache 2.0) e do Piper (GPL-3.0, isolado
-como processo próprio) e o alerta de licenciamento da voz `en_US-hfc_female-medium` (dataset de
-treinamento sob CC BY-NC-SA, não comercial). O cache de áudio do cliente vive somente na memória da
-sessão; o serviço de TTS mantém um cache próprio, por texto normalizado, voz e velocidade, com limite
-de tamanho e expiração.
+Configure `CLOUDFLARE_ACCOUNT_ID` e `CLOUDFLARE_API_TOKEN` apenas como variáveis protegidas da Vercel
+(nunca com prefixo `VITE_`, que exporia o token no navegador). O cache de áudio do cliente vive somente
+na memória da sessão.
+
+Existe também um serviço próprio Kokoro+Piper (`services/tts`, veja seu `README.md`) que fica **fora
+de uso em produção no momento**: nenhuma hospedagem grátis viável foi encontrada pra rodar os dois
+modelos juntos (Cloud Run exige pré-pagamento de faturamento no Brasil; Hugging Face Spaces Docker
+exige plano PRO; Railway grátis só comporta o Kokoro sozinho; hospedagem própria dependeria de um
+computador ligado 24 horas). Fica documentado e testado caso uma hospedagem própria ou paga volte a
+fazer sentido no futuro — nesse caso, troque o provider em `api/speech.ts` de volta para
+`createTtsServiceProvider`.
 
 ## Fluxo de dados
 

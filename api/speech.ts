@@ -1,5 +1,5 @@
+import { createCloudflareTtsProvider } from "../src/backend/cloudflare-tts-provider.js";
 import { createSpeechHandler } from "../src/backend/speech-handler.js";
-import { createTtsServiceProvider } from "../src/backend/tts-service-provider.js";
 import { createVercelHandler } from "../src/backend/vercel-adapter.js";
 
 const requests = new Map<string, number[]>();
@@ -18,9 +18,9 @@ const handler = createSpeechHandler({
       return true;
     },
   },
-  provider: createTtsServiceProvider(
-    process.env["TTS_SERVICE_URL"] ?? "",
-    process.env["TTS_SERVICE_TOKEN"] ?? "",
+  provider: createCloudflareTtsProvider(
+    process.env["CLOUDFLARE_ACCOUNT_ID"] ?? "",
+    process.env["CLOUDFLARE_API_TOKEN"] ?? "",
     Number(process.env["TTS_TIMEOUT_MS"] ?? "8000"),
   ),
 });

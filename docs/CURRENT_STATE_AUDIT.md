@@ -217,21 +217,23 @@ em inglês, sem duplicar termos. As respostas aceitam a palavra ou expressão ou
 principal e equivalentes cadastrados. Os filtros Fácil, Médio e Difícil continuam sendo calculados
 pela base local de frequência, com os mesmos fallbacks já documentados.
 
-A pronúncia neural usa um serviço de TTS próprio (`services/tts`), rodando em container separado, com
-Kokoro como voz principal (`af_heart`, americana natural) e Piper como reserva automática
-(`en_US-hfc_female-medium`) quando o Kokoro falha, excede o tempo limite ou está indisponível. O
-navegador envia somente o texto da pergunta e a velocidade para `POST /api/speech`; essa função
-repassa o pedido, autenticado por segredo em header, para o serviço de TTS, que fica restrito ao
-ambiente seguro da Vercel e nunca é exposto direto ao navegador.
+A pronúncia neural usa o **Cloudflare Workers AI** (modelo `@cf/myshell-ai/melotts`, voz natural em
+inglês), chamado direto pela função `/api/speech` da Vercel com o token em variável de ambiente
+protegida — nunca exposto ao navegador. O navegador envia somente o texto da pergunta e a velocidade;
+a resposta chega em MP3.
 
-Uma tentativa anterior de rodar o Kokoro-82M direto no navegador (worker) foi removida porque o
-download e a inicialização locais prejudicavam o tempo até a primeira pronúncia. O modelo agora roda
-uma única vez no servidor, aquecido e reaproveitado entre requisições, então esse problema não se
-repete. O áudio devolvido é encapsulado como WAV e reutilizado por texto normalizado, voz e velocidade
-tanto no cache do navegador (durante a sessão) quanto no cache do próprio serviço de TTS (com limite
-de tamanho e expiração). Requisições antigas são canceladas quando a seleção muda. Se o serviço de TTS
-inteiro falhar (Kokoro e Piper), a melhor voz em inglês instalada no dispositivo é acionada
-automaticamente, tanto no Quiz de Escuta quanto no Modo Sala.
+Existe um serviço próprio Kokoro+Piper (`services/tts`, container separado, Kokoro como voz principal
+e Piper como reserva automática) totalmente implementado e testado, mas **fora de uso em produção no
+momento**: nenhuma hospedagem grátis viável foi encontrada pra rodar os dois modelos juntos (ver
+`docs/AI_BACKEND.md` para o histórico completo da investigação). O Cloudflare Workers AI resolveu isso
+porque roda na infraestrutura deles mesmo, sem precisar hospedar nada.
+
+Uma tentativa ainda mais antiga de rodar o Kokoro-82M direto no navegador (worker) também foi removida,
+porque o download e a inicialização locais prejudicavam o tempo até a primeira pronúncia — problema que
+nenhuma das abordagens server-side repete. O áudio é reutilizado por texto normalizado e velocidade no
+cache do navegador (durante a sessão). Requisições antigas são canceladas quando a seleção muda. Se o
+Cloudflare Workers AI falhar ou não estiver configurado, a melhor voz em inglês instalada no
+dispositivo é acionada automaticamente, tanto no Quiz de Escuta quanto no Modo Sala.
 
 As rodadas agora são embaralhadas sem repetição e aceitam 5, 10, 15 ou todas as palavras. O catálogo
 pedagógico tipado separa as 30 palavras do componente, com dificuldade, categoria e traduções
@@ -268,9 +270,9 @@ mensagem clara, sem criar um participante duplicado.
 
 A pronúncia das palavras (Escuta coletiva e Bingo) usa o mesmo cliente e o mesmo caminho de geração
 de áudio do Quiz de Escuta individual (`NaturalVoicePlayer`, `POST /api/speech`), em vez de chamar a
-Web Speech API direto. Professor e participantes ouvem a mesma pronúncia gerada pelo serviço de
-Kokoro/Piper, com a voz do navegador entrando só se o serviço inteiro falhar. Trocar de pergunta
-cancela qualquer reprodução ou pedido de áudio pendente da pergunta anterior.
+Web Speech API direto. Professor e participantes ouvem a mesma pronúncia gerada pelo Cloudflare
+Workers AI, com a voz do navegador entrando só se o serviço inteiro falhar. Trocar de pergunta cancela
+qualquer reprodução ou pedido de áudio pendente da pergunta anterior.
 
 ## 13. Experiência de estudo renovada
 
