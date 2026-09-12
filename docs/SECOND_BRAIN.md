@@ -24,26 +24,30 @@ produto.
 6. Guardar links, textos e flashcards por matéria na Biblioteca.
 7. Revisar flashcards, responder Quizzes, completar Bingos e acompanhar metas em Praticar.
 8. Praticar escuta em rodadas curtas com voz Gemini e fallback do dispositivo.
-9. Criar uma Sala local e sincronizar o lobby entre abas do mesmo navegador.
+9. Criar uma Sala online e sincronizar lobby e rodada entre dispositivos.
 10. Montar planos de aula pelo fluxo determinístico existente.
 
-Todos esses dados compartilham um workspace local versionado. Não há conta, banco ou sincronização
-remota. Somente o texto da pergunta de escuta sai do dispositivo quando a voz Gemini é usada.
+Os dados pessoais compartilham um workspace local versionado e não exigem conta. O Modo Sala usa
+Firebase Realtime Database para estado temporário compartilhado; o texto da pergunta de escuta é
+enviado ao Gemini apenas quando a voz neural é usada.
 
 ## Arquitetura atual
 
 - React 19 e TypeScript estrito;
 - Vite para desenvolvimento e build;
-- CSS próprio, mobile-first e sem fonte externa;
+- CSS próprio, mobile-first e Manrope carregada pelo Google Fonts;
 - interface com hierarquia de próxima ação, cartões de progresso, ícones ilustrados preenchidos e
   movimentos curtos compatíveis com `prefers-reduced-motion`;
 - Vitest e Testing Library para unidade/componente;
 - Playwright para fluxos desktop e mobile;
 - GitHub Actions para qualidade, auditoria, segredos, análise estática e CodeQL.
-- Gemini 3.1 Flash TTS chamado por função same-origin, sem expor a chave no navegador;
+- Gemini 2.5 Flash TTS chamado por função same-origin, sem expor a chave no navegador;
 - cache de áudio por texto, voz e velocidade durante a sessão, com fallback imediato para a voz do
   dispositivo;
-- BroadcastChannel como transporte explícito do protótipo de Sala local.
+- Firebase Realtime Database como armazenamento temporário da Sala e Server-Sent Events para o
+  estado público realtime;
+- credenciais temporárias da Sala ficam em `sessionStorage`, permitindo retomar a atividade após
+  recarregar a aba sem duplicar participantes.
 
 ## Mapa mental vivo
 
@@ -65,7 +69,7 @@ flowchart LR
 
   DATA --> DOMAIN[Domínio e reducer]
   DATA --> STORAGE[Persistência versionada]
-  DATA --> ROOM[Sala local via BroadcastChannel]
+  DATA --> ROOM[Sala online via Firebase]
 
   STUDY --> FOCUS[Foco]
   STUDY --> LIB[Biblioteca e flashcards]
@@ -143,4 +147,6 @@ implementação com critérios técnicos está em [`IMPLEMENTATION_ROADMAP.md`](
 
 O menu lateral concentra a troca de módulos no desktop. O Espaço do aluno não repete essa lista:
 mantém apenas ações contextuais e o resumo do dia. Em telas móveis, a barra inferior e o menu “Mais
-ferramentas” preservam o acesso completo.
+ferramentas” preservam o acesso completo. A barra inferior usa preto no tema claro, roxo no tema
+escuro e os ícones brancos já existentes, com transições curtas entre módulos e respeito à
+preferência de movimento reduzido do sistema.

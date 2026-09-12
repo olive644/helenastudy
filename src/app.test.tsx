@@ -8,12 +8,26 @@ function navigate(label: string) {
 }
 
 describe("App", () => {
-  it("apresenta a central local com a Helena original", () => {
+  it("apresenta a central sem avisos ou mascote decorativa no cabeçalho", () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: "Espaço do aluno" })).toBeTruthy();
-    expect(screen.getByText(/dados salvos neste dispositivo/i)).toBeTruthy();
-    expect(screen.getByAltText(/helena, a gata preta/i).getAttribute("src")).toBe("/helena.svg");
+    expect(screen.queryByText(/dados salvos neste dispositivo/i)).toBeNull();
+    expect(screen.queryByLabelText("HelenaStudy")).toBeNull();
+    expect(screen.queryByAltText(/rosto da helena/i)).toBeNull();
     expect(screen.queryByText(/by oli/i)).toBeNull();
+  });
+
+  it("expande a navegação lateral para revelar categorias e nomes", () => {
+    render(<App />);
+    const sidebar = screen.getByRole("complementary");
+    const toggle = within(sidebar).getByRole("button", { name: "Expandir menu lateral" });
+
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(toggle);
+    expect(within(sidebar).getByRole("button", { name: "Recolher menu lateral" })).toBeTruthy();
+    expect(sidebar.classList.contains("sidebar--expanded")).toBe(true);
+    expect(within(sidebar).getByLabelText("HelenaStudy")).toBeTruthy();
+    expect(within(sidebar).getByText("Principal")).toBeTruthy();
   });
 
   it("mantém as ferramentas na navegação sem duplicá-las no painel principal", () => {
@@ -51,12 +65,39 @@ describe("App", () => {
       ["Hábitos", "habits"],
       ["Cadernos", "notes"],
       ["Planos de aula", "lesson"],
+      ["Banco de atividades", "activity-bank"],
     ] as const;
 
     icons.forEach(([label, icon]) => {
       const button = within(navigation).getByRole("button", { name: label });
-      expect(button.querySelector(`[data-icon="${icon}"]`)).toBeTruthy();
+      const artwork = button.querySelector(`[data-icon="${icon}"]`);
+      expect(artwork).toBeTruthy();
+      expect(artwork?.classList.contains("navigation-icon--brand")).toBe(true);
+      expect(artwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
+      expect(artwork?.querySelector(`img[src="/navigation-icons/claro/${icon}.png"]`)).toBeTruthy();
     });
+  });
+
+  it("usa a iconografia própria da Helena no seletor de tema", () => {
+    render(<App />);
+    const lightThemeButton = screen.getByRole("button", { name: /tema claro/i });
+    expect(lightThemeButton.getAttribute("data-theme")).toBe("light");
+    const lightArtwork = lightThemeButton.querySelector('[data-icon="theme-light"]');
+    expect(lightArtwork?.classList.contains("navigation-icon--brand")).toBe(true);
+    expect(lightArtwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
+    expect(
+      lightArtwork?.querySelector('img[src="/navigation-icons/claro/theme-light.png"]'),
+    ).toBeTruthy();
+
+    fireEvent.click(lightThemeButton);
+    const darkThemeButton = screen.getByRole("button", { name: /tema escuro/i });
+    expect(darkThemeButton.getAttribute("data-theme")).toBe("dark");
+    const darkArtwork = darkThemeButton.querySelector('[data-icon="theme-dark"]');
+    expect(darkArtwork?.classList.contains("navigation-icon--brand")).toBe(true);
+    expect(darkArtwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
+    expect(
+      darkArtwork?.querySelector('img[src="/navigation-icons/escuro/theme-dark.png"]'),
+    ).toBeTruthy();
   });
 
   it("cria uma tarefa, mostra no Espaço do aluno e permite concluí-la", () => {

@@ -182,6 +182,24 @@ function isBingoBoard(value: unknown): boolean {
   );
 }
 
+function isHomeworkList(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isString(value["id"]) &&
+    isString(value["subjectId"]) &&
+    isString(value["title"]) &&
+    isString(value["createdAt"]) &&
+    Array.isArray(value["items"]) &&
+    value["items"].every(
+      (item) =>
+        isRecord(item) &&
+        isString(item["id"]) &&
+        isString(item["title"]) &&
+        typeof item["completed"] === "boolean",
+    )
+  );
+}
+
 type LegacyStudyNote = Omit<StudyNote, "assets">;
 
 type LegacyWorkspace = {
@@ -200,6 +218,11 @@ type WorkspaceV2 = Omit<LegacyWorkspace, "version"> & {
   flashcards: Flashcard[];
   goals: StudyGoal[];
   quizAttempts: QuizAttempt[];
+};
+
+type WorkspaceV3 = Omit<WorkspaceState, "version" | "notes" | "homeworkLists"> & {
+  version: 3;
+  notes: StudyNote[];
 };
 
 function hasCoreCollections(
@@ -242,6 +265,23 @@ function isWorkspaceV2(value: unknown): value is WorkspaceV2 {
   );
 }
 
+function isWorkspaceV3(value: unknown): value is WorkspaceV3 {
+  if (!isRecord(value) || value["version"] !== 3) return false;
+  return (
+    hasCoreCollections(value, isNote) &&
+    Array.isArray(value["materials"]) &&
+    value["materials"].every(isMaterial) &&
+    Array.isArray(value["flashcards"]) &&
+    value["flashcards"].every(isFlashcard) &&
+    Array.isArray(value["goals"]) &&
+    value["goals"].every(isGoal) &&
+    Array.isArray(value["quizAttempts"]) &&
+    value["quizAttempts"].every(isQuizAttempt) &&
+    Array.isArray(value["bingoBoards"]) &&
+    value["bingoBoards"].every(isBingoBoard)
+  );
+}
+
 export function isWorkspaceState(value: unknown): value is WorkspaceState {
   if (!isRecord(value) || value["version"] !== WORKSPACE_VERSION) return false;
 
@@ -256,7 +296,9 @@ export function isWorkspaceState(value: unknown): value is WorkspaceState {
     Array.isArray(value["quizAttempts"]) &&
     value["quizAttempts"].every(isQuizAttempt) &&
     Array.isArray(value["bingoBoards"]) &&
-    value["bingoBoards"].every(isBingoBoard)
+    value["bingoBoards"].every(isBingoBoard) &&
+    Array.isArray(value["homeworkLists"]) &&
+    value["homeworkLists"].every(isHomeworkList)
   );
 }
 
@@ -274,6 +316,7 @@ function migrateLegacyWorkspace(legacy: LegacyWorkspace): WorkspaceState {
     goals: [],
     quizAttempts: [],
     bingoBoards: [],
+    homeworkLists: [],
   };
 }
 
@@ -283,6 +326,15 @@ function migrateWorkspaceV2(workspace: WorkspaceV2): WorkspaceState {
     version: WORKSPACE_VERSION,
     notes: migrateNotes(workspace.notes),
     bingoBoards: [],
+    homeworkLists: [],
+  };
+}
+
+function migrateWorkspaceV3(workspace: WorkspaceV3): WorkspaceState {
+  return {
+    ...workspace,
+    version: WORKSPACE_VERSION,
+    homeworkLists: [],
   };
 }
 
@@ -293,6 +345,7 @@ export function loadWorkspace(storage: Pick<Storage, "getItem">): WorkspaceState
   try {
     const parsed: unknown = JSON.parse(serialized);
     if (isWorkspaceState(parsed)) return parsed;
+    if (isWorkspaceV3(parsed)) return migrateWorkspaceV3(parsed);
     if (isWorkspaceV2(parsed)) return migrateWorkspaceV2(parsed);
     if (isLegacyWorkspace(parsed)) return migrateLegacyWorkspace(parsed);
     return createInitialWorkspace();

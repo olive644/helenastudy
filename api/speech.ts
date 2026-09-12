@@ -1,5 +1,6 @@
-import { createGeminiSpeechProvider } from "../src/backend/gemini-speech-provider";
-import { createSpeechHandler } from "../src/backend/speech-handler";
+import { createGeminiSpeechProvider } from "../src/backend/gemini-speech-provider.js";
+import { createSpeechHandler } from "../src/backend/speech-handler.js";
+import { createVercelHandler } from "../src/backend/vercel-adapter.js";
 
 const requests = new Map<string, number[]>();
 
@@ -20,4 +21,4 @@ const handler = createSpeechHandler({
   provider: createGeminiSpeechProvider(process.env["GEMINI_API_KEY"] ?? ""),
 });
 
-export default { fetch: handler };
+export default createVercelHandler("/api/speech", handler);

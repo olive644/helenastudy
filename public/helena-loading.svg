@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Helena caminhando">
+  <style>
+    .body { animation: bob .8s ease-in-out infinite; }
+    .leg-1 { transform-origin: 111px 167px; animation: step .8s ease-in-out infinite; }
+    .leg-2 { transform-origin: 139px 167px; animation: step .8s ease-in-out -.4s infinite; }
+    .tail { transform-origin: 94px 164px; animation: tail 1.6s ease-in-out infinite; }
+    .eyes { transform-origin: 135px 107px; animation: blink 4s infinite; }
+    @keyframes bob { 0%, 50%, 100% { transform: translateY(0); } 25%, 75% { transform: translateY(-4px); } }
+    @keyframes step { 0%, 100% { transform: rotate(-23deg); } 50% { transform: rotate(23deg); } }
+    @keyframes tail { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(9deg); } }
+    @keyframes blink { 0%, 43%, 47%, 100% { transform: scaleY(1); } 45% { transform: scaleY(.08); } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+  <ellipse cx="124" cy="208" rx="51" ry="5" fill="#7c3aed" opacity=".12"/>
+  <g class="leg-2"><path d="M139 164Q156 164 154 182L145 202Q141 211 130 207Q122 203 127 191L128 178Q126 166 139 164" fill="#111117"/></g>
+  <g class="leg-1"><path d="M109 164Q125 164 124 180L117 198Q127 196 130 205Q130 212 115 212L105 209Q96 206 99 195L98 180Q96 166 109 164" fill="#24232c"/></g>
+  <g class="body">
+    <path class="tail" d="M97 172C58 184 49 154 51 140C52 128 66 127 68 139C67 156 76 161 94 151Z" fill="#202029"/>
+    <rect x="70" y="126" width="43" height="53" rx="15" fill="#7c3aed"/>
+    <rect x="73" y="133" width="20" height="32" rx="8" fill="#a78bfa"/>
+    <rect x="76" y="147" width="7" height="10" rx="2" fill="#facc15"/>
+    <path d="M113 123Q146 120 155 153L158 175Q131 190 98 176Q95 144 113 123" fill="#24232c"/>
+    <path d="M106 56L103 31Q104 19 114 27L137 47Q155 45 166 49L183 35Q193 28 194 41L192 65Q207 86 201 110Q199 139 159 144Q114 147 97 125Q84 104 91 84Q94 68 106 56Z" fill="#202029"/>
+    <g class="eyes">
+      <ellipse cx="127" cy="98" rx="19" ry="25" fill="#facc15"/>
+      <ellipse cx="173" cy="98" rx="17" ry="24" fill="#facc15"/>
+      <ellipse cx="134" cy="99" rx="6" ry="17" fill="#101014"/>
+      <ellipse cx="179" cy="99" rx="5" ry="16" fill="#101014"/>
+      <circle cx="136" cy="88" r="4" fill="#fff9ef"/>
+      <circle cx="181" cy="88" r="3.5" fill="#fff9ef"/>
+    </g>
+    <path d="M184 49Q187 43 190 50L193 56L201 58Q207 60 201 64L195 68L195 77Q194 83 188 79L182 75L174 78Q168 80 169 73L171 66L166 60Q161 55 169 54L178 54Z" fill="#facc15"/>
+    <path d="M116 138L148 142L143 179L111 173Z" fill="#fff9ef" stroke="#e9dcc4" stroke-width="2"/>
+    <path d="M130 150L133 155L139 156L134 160L134 166L129 163L124 165L125 159L121 155L127 155Z" fill="#7c3aed"/>
+    <path d="M108 139Q97 136 96 147Q92 168 120 170Q131 170 131 161Q131 153 118 154L118 149Q119 142 108 139" fill="#302e39"/>
+  </g>
+</svg>

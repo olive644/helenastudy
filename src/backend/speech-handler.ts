@@ -1,12 +1,8 @@
 const MAX_BODY_BYTES = 1_000;
 const MAX_TEXT_LENGTH = 160;
 
-export const GEMINI_SPEECH_VOICES = ["Kore", "Aoede", "Charon"] as const;
-export type GeminiSpeechVoice = (typeof GEMINI_SPEECH_VOICES)[number];
-
 export type SpeechRequest = {
   text: string;
-  voice: GeminiSpeechVoice;
   rate: number;
   consent: true;
 };
@@ -41,12 +37,10 @@ function isSpeechRequest(value: unknown): value is SpeechRequest {
   if (!value || typeof value !== "object") return false;
   const candidate = value as Record<string, unknown>;
   return (
-    Object.keys(candidate).every((key) => ["text", "voice", "rate", "consent"].includes(key)) &&
+    Object.keys(candidate).every((key) => ["text", "rate", "consent"].includes(key)) &&
     typeof candidate["text"] === "string" &&
     candidate["text"].trim().length > 0 &&
     candidate["text"].length <= MAX_TEXT_LENGTH &&
-    typeof candidate["voice"] === "string" &&
-    GEMINI_SPEECH_VOICES.includes(candidate["voice"] as GeminiSpeechVoice) &&
     typeof candidate["rate"] === "number" &&
     Number.isFinite(candidate["rate"]) &&
     candidate["rate"] >= 0.7 &&
@@ -102,8 +96,19 @@ export function createSpeechHandler(dependencies: SpeechHandlerDependencies) {
           "X-Content-Type-Options": "nosniff",
         },
       });
-    } catch {
-      return jsonError(503, "A voz Gemini está indisponível. Usando a voz do dispositivo.");
+    } catch (error) {
+      const response = jsonError(
+        503,
+        "A voz Gemini está indisponível. Usando a voz do dispositivo.",
+      );
+      if (
+        error instanceof Error &&
+        "providerStatus" in error &&
+        typeof error.providerStatus === "number"
+      ) {
+        response.headers.set("X-Provider-Status", String(error.providerStatus));
+      }
+      return response;
     }
   };
 }

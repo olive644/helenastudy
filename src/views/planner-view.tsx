@@ -1,6 +1,14 @@
-import { useState, type Dispatch, type FormEvent } from "react";
+import { lazy, Suspense, useState, type Dispatch, type FormEvent } from "react";
+import { HelenaLoading } from "../components/helena-loading";
 import { PageHeader } from "../components/app-navigation";
 import { toDateKey, type WorkspaceAction, type WorkspaceState } from "../domain/workspace";
+
+const HomeworkSection = lazy(() =>
+  import("./homework-section").then((module) => ({ default: module.HomeworkSection })),
+);
+const GoogleCalendarPanel = lazy(() =>
+  import("./google-calendar-panel").then((module) => ({ default: module.GoogleCalendarPanel })),
+);
 
 type PlannerViewProps = {
   workspace: WorkspaceState;
@@ -249,6 +257,14 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
           )}
         </section>
       </div>
+
+      <Suspense fallback={<HelenaLoading label="Carregando Google Agenda…" compact />}>
+        <GoogleCalendarPanel />
+      </Suspense>
+
+      <Suspense fallback={<HelenaLoading label="Carregando tarefas…" compact />}>
+        <HomeworkSection workspace={workspace} dispatch={dispatch} />
+      </Suspense>
     </main>
   );
 }

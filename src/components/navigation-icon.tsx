@@ -7,33 +7,75 @@ export type NavigationIconName =
   | "notes"
   | "library"
   | "lesson"
+  | "activity-bank"
+  | "theme-light"
+  | "theme-dark"
   | "more"
-  | "close";
+  | "close"
+  | "timer"
+  | "xp"
+  | "medal-first"
+  | "medal-second"
+  | "medal-third";
 
 type NavigationIconProps = {
   name: NavigationIconName;
 };
 
-const ICON_PATHS: Record<NavigationIconName, string> = {
-  today: "m3 11 9-8 9 8v10h-6v-6H9v6H3z",
-  planner: "M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2zm-2 6h18M8 2v4m8-4v4",
-  focus: "M9 2h6m-3 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16zm0 3v5l3 2",
-  learn:
-    "M7 8h10a5 5 0 0 1 4.8 6.4l-1 3.2a2 2 0 0 1-3.4.7L15 16H9l-2.4 2.3a2 2 0 0 1-3.4-.7l-1-3.2A5 5 0 0 1 7 8zm0 4v4m-2-2h4m7-1h.01m3 2h.01",
-  habits:
-    "M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z",
-  notes: "M6 3h11a2 2 0 0 1 2 2v16H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 0v18m3-13h5m-5 4h5m-5 4h3",
-  library: "M4 19V5h5v14H4zm5 0V3h6v16H9zm6 0V7h5v12h-5z",
-  lesson: "M4 3h16v12H4V3zm-2 0h20M12 15v6m-4 0h8M8 8l2 2 5-4",
-  more: "M5 12h.01M12 12h.01M19 12h.01",
-  close: "M6 6l12 12M18 6 6 18",
-};
+const BRAND_ICON_NAMES = new Set<NavigationIconName>([
+  "today",
+  "planner",
+  "focus",
+  "learn",
+  "more",
+  "library",
+  "habits",
+  "notes",
+  "lesson",
+  "activity-bank",
+  "theme-light",
+  "theme-dark",
+]);
 
 export function NavigationIcon({ name }: NavigationIconProps) {
+  if (BRAND_ICON_NAMES.has(name)) {
+    return (
+      <span className="navigation-icon navigation-icon--brand" data-icon={name} aria-hidden="true">
+        {(["claro", "roxo", "escuro"] as const).map((variant) => (
+          <img
+            className={`navigation-icon__variant navigation-icon__variant--${variant}`}
+            src={`/navigation-icons/${variant}/${name}.png`}
+            alt=""
+            decoding="async"
+            // "claro" e "escuro" podem ser a variante visível por padrão
+            // dependendo do contexto (tema claro/escuro, sidebar vs. navegação
+            // móvel) — ver styles.css — então seguem carregamento normal.
+            // "roxo" só aparece em estados de hover/ativo/foco, nunca como
+            // variante padrão visível em nenhum contexto: pode ser
+            // despriorizada com segurança, tirando-a da disputa de rede com o
+            // ícone que realmente é pintado primeiro e reduzindo o atraso de
+            // LCP na navegação.
+            loading={variant === "roxo" ? "lazy" : "eager"}
+            fetchPriority={variant === "roxo" ? "low" : "auto"}
+            key={variant}
+          />
+        ))}
+      </span>
+    );
+  }
+
+  const symbol = `/navigation-icons.svg#${name}`;
   return (
     <span className="navigation-icon" data-icon={name} aria-hidden="true">
       <svg className="navigation-icon__glyph" viewBox="0 0 24 24" focusable="false">
-        <path className="navigation-icon__stroke" d={ICON_PATHS[name]} />
+        <use className="navigation-icon__secondary" href={`${symbol}-secondary`} />
+        <use className="navigation-icon__base" href={`${symbol}-base`} />
+        <use className="navigation-icon__detail" href={`${symbol}-detail`} />
+        <use className="navigation-icon__accent" href={`${symbol}-accent`} />
+        <use
+          className="navigation-icon__line navigation-icon__line--base"
+          href={`${symbol}-line`}
+        />
       </svg>
     </span>
   );

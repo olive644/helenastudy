@@ -17,6 +17,8 @@ mindmap
       Planner semanal
       Checklists
       Hábitos
+      Planos de aula
+      Banco de atividades
     Foco
       Cronômetro
       Relógio flip

@@ -1,11 +1,18 @@
 import { useState, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
 import { VocabularySwatActivity } from "../components/vocabulary-swat-activity";
+import {
+  ACTIVITY_LIBRARY,
+  findActivity,
+  listActivitiesByControlLevel,
+} from "../domain/activity-bank";
 import { createLessonDraft } from "../domain/create-lesson-draft";
 import {
   CEFR_LEVELS,
   METHODOLOGIES,
   METHODOLOGY_LABELS,
+  PRODUCTION_VARIANTS,
+  PRODUCTION_VARIANT_LABELS,
   type LessonDraft,
   type LessonInput,
 } from "../domain/lesson";
@@ -15,9 +22,18 @@ const INITIAL_INPUT: LessonInput = {
   level: "A2",
   duration: 60,
   audience: "",
+  aim: "",
   objective: "",
   methodology: "inductive",
+  practiceTotalControlledId: "",
+  practiceSemiControlledId: "",
+  extraActivityId: "",
+  productionVariant: "product-pitch",
+  homeworkLinksText: "",
 };
+
+const TOTAL_CONTROLLED_ACTIVITIES = listActivitiesByControlLevel("total-controlled");
+const SEMI_CONTROLLED_ACTIVITIES = listActivitiesByControlLevel("semi-controlled");
 
 function DraftPreview({ draft }: { draft: LessonDraft | null }) {
   if (!draft) {
@@ -44,7 +60,11 @@ function DraftPreview({ draft }: { draft: LessonDraft | null }) {
       <h2 id="draft-title">{draft.title}</h2>
       <p className="draft-audience">{draft.audience}</p>
       <div className="objective">
-        <span>Objetivo</span>
+        <span>Aim</span>
+        <p>{draft.aim}</p>
+      </div>
+      <div className="objective">
+        <span>Objective</span>
         <p>{draft.objective}</p>
       </div>
       <ol className="timeline">
@@ -57,6 +77,40 @@ function DraftPreview({ draft }: { draft: LessonDraft | null }) {
                 <span>{section.minutes} min</span>
               </div>
               <p>{section.guidance}</p>
+              {section.activityIds?.map((activityId) => {
+                const activity = findActivity(activityId);
+                if (!activity) return null;
+                return (
+                  <div className="activity-detail" key={activityId}>
+                    <strong>{activity.name}</strong>
+                    <span>
+                      {activity.time} min · {activity.topic}
+                    </span>
+                    <p>{activity.goal}</p>
+                    <ol>
+                      {activity.steps.map((step) => (
+                        <li key={step}>{step}</li>
+                      ))}
+                    </ol>
+                    {activity.supplies.length > 0 && (
+                      <p className="activity-detail__supplies">
+                        Material: {activity.supplies.join(", ")}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+              {section.links && section.links.length > 0 && (
+                <ul className="homework-links">
+                  {section.links.map((link) => (
+                    <li key={link}>
+                      <a href={link} target="_blank" rel="noopener noreferrer">
+                        {link}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </li>
         ))}
@@ -158,7 +212,21 @@ export function LessonBuilderView({ onBack }: { onBack: () => void }) {
             />
           </label>
           <label className="field field--full">
-            <span>Objetivo comunicativo</span>
+            <span>Aim</span>
+            <small className="field-help">O que a aula representa: a intenção pedagógica.</small>
+            <textarea
+              name="aim"
+              value={input.aim}
+              onChange={(event) => setInput({ ...input, aim: event.target.value })}
+              placeholder="Ex.: Ensinar o Simple Past para narrativas curtas"
+              rows={2}
+            />
+          </label>
+          <label className="field field--full">
+            <span>Objective</span>
+            <small className="field-help">
+              O que o aluno consegue fazer na prática, ao final da aula.
+            </small>
             <textarea
               name="objective"
               value={input.objective}
@@ -166,6 +234,67 @@ export function LessonBuilderView({ onBack }: { onBack: () => void }) {
               placeholder="Ex.: Relatar o que fez no fim de semana"
               rows={3}
             />
+          </label>
+          <fieldset className="method-fieldset">
+            <legend>Atividades da Prática</legend>
+            <small className="field-help">
+              Activity 01 é o livro didático; as atividades 02 e 03 vêm do banco de atividades.
+            </small>
+            <div className="field-row">
+              <label className="field">
+                <span>Activity 02 · Total Controlled</span>
+                <select
+                  name="practiceTotalControlledId"
+                  value={input.practiceTotalControlledId}
+                  onChange={(event) =>
+                    setInput({ ...input, practiceTotalControlledId: event.target.value })
+                  }
+                >
+                  <option value="">Nenhuma</option>
+                  {TOTAL_CONTROLLED_ACTIVITIES.map((activity) => (
+                    <option key={activity.id} value={activity.id}>
+                      {activity.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>Activity 03 · Semi Controlled</span>
+                <select
+                  name="practiceSemiControlledId"
+                  value={input.practiceSemiControlledId}
+                  onChange={(event) =>
+                    setInput({ ...input, practiceSemiControlledId: event.target.value })
+                  }
+                >
+                  <option value="">Nenhuma</option>
+                  {SEMI_CONTROLLED_ACTIVITIES.map((activity) => (
+                    <option key={activity.id} value={activity.id}>
+                      {activity.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </fieldset>
+          <label className="field field--full">
+            <span>Extra Activity</span>
+            <small className="field-help">
+              Só aparece se sobrar tempo antes da produção — não entra no cálculo padrão dos minutos
+              da aula.
+            </small>
+            <select
+              name="extraActivityId"
+              value={input.extraActivityId}
+              onChange={(event) => setInput({ ...input, extraActivityId: event.target.value })}
+            >
+              <option value="">Nenhuma</option>
+              {ACTIVITY_LIBRARY.map((activity) => (
+                <option key={activity.id} value={activity.id}>
+                  {activity.name}
+                </option>
+              ))}
+            </select>
           </label>
           <fieldset className="method-fieldset">
             <legend>Como apresentar o conteúdo</legend>
@@ -184,6 +313,36 @@ export function LessonBuilderView({ onBack }: { onBack: () => void }) {
               ))}
             </div>
           </fieldset>
+          <fieldset className="method-fieldset">
+            <legend>Variante da Produção</legend>
+            <div className="method-grid">
+              {PRODUCTION_VARIANTS.map((variant) => (
+                <label className="method-option" key={variant}>
+                  <input
+                    type="radio"
+                    name="productionVariant"
+                    value={variant}
+                    checked={input.productionVariant === variant}
+                    onChange={() => setInput({ ...input, productionVariant: variant })}
+                  />
+                  <span>{PRODUCTION_VARIANT_LABELS[variant]}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <label className="field field--full">
+            <span>Links de apoio (Homework)</span>
+            <small className="field-help">
+              Um link por linha, começando com http:// ou https://.
+            </small>
+            <textarea
+              name="homeworkLinksText"
+              value={input.homeworkLinksText}
+              onChange={(event) => setInput({ ...input, homeworkLinksText: event.target.value })}
+              placeholder={"https://exemplo.com/exercicio-1\nhttps://exemplo.com/exercicio-2"}
+              rows={2}
+            />
+          </label>
           <button className="primary-button primary-button--wide" type="submit">
             Criar rascunho
           </button>

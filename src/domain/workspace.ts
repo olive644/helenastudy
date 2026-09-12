@@ -1,4 +1,4 @@
-export const WORKSPACE_VERSION = 3 as const;
+export const WORKSPACE_VERSION = 4 as const;
 
 export type Subject = {
   id: string;
@@ -102,6 +102,20 @@ export type BingoBoard = {
   createdAt: string;
 };
 
+export type HomeworkItem = {
+  id: string;
+  title: string;
+  completed: boolean;
+};
+
+export type HomeworkList = {
+  id: string;
+  subjectId: string;
+  title: string;
+  items: HomeworkItem[];
+  createdAt: string;
+};
+
 export type WorkspaceState = {
   version: typeof WORKSPACE_VERSION;
   subjects: Subject[];
@@ -115,6 +129,7 @@ export type WorkspaceState = {
   goals: StudyGoal[];
   quizAttempts: QuizAttempt[];
   bingoBoards: BingoBoard[];
+  homeworkLists: HomeworkList[];
 };
 
 export type WorkspaceAction =
@@ -178,7 +193,12 @@ export type WorkspaceAction =
       completedAt: string;
     }
   | { type: "bingo/created"; subjectId: string; labels: string[]; createdAt: string }
-  | { type: "bingo/cell-toggled"; boardId: string; cellId: string };
+  | { type: "bingo/cell-toggled"; boardId: string; cellId: string }
+  | { type: "homework-list/added"; subjectId: string; title: string; createdAt: string }
+  | { type: "homework-list/removed"; id: string }
+  | { type: "homework-item/added"; listId: string; title: string }
+  | { type: "homework-item/toggled"; listId: string; itemId: string }
+  | { type: "homework-item/removed"; listId: string; itemId: string };
 
 function createId(prefix: string): string {
   const suffix = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
@@ -206,6 +226,7 @@ export function createInitialWorkspace(): WorkspaceState {
     goals: [],
     quizAttempts: [],
     bingoBoards: [],
+    homeworkLists: [],
   };
 }
 
@@ -476,6 +497,63 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
                 ),
               }
             : board,
+        ),
+      };
+    case "homework-list/added":
+      return {
+        ...state,
+        homeworkLists: [
+          {
+            id: createId("homework-list"),
+            subjectId: action.subjectId,
+            title: action.title,
+            items: [],
+            createdAt: action.createdAt,
+          },
+          ...state.homeworkLists,
+        ],
+      };
+    case "homework-list/removed":
+      return {
+        ...state,
+        homeworkLists: state.homeworkLists.filter((list) => list.id !== action.id),
+      };
+    case "homework-item/added":
+      return {
+        ...state,
+        homeworkLists: state.homeworkLists.map((list) =>
+          list.id === action.listId
+            ? {
+                ...list,
+                items: [
+                  ...list.items,
+                  { id: createId("homework-item"), title: action.title, completed: false },
+                ],
+              }
+            : list,
+        ),
+      };
+    case "homework-item/toggled":
+      return {
+        ...state,
+        homeworkLists: state.homeworkLists.map((list) =>
+          list.id === action.listId
+            ? {
+                ...list,
+                items: list.items.map((item) =>
+                  item.id === action.itemId ? { ...item, completed: !item.completed } : item,
+                ),
+              }
+            : list,
+        ),
+      };
+    case "homework-item/removed":
+      return {
+        ...state,
+        homeworkLists: state.homeworkLists.map((list) =>
+          list.id === action.listId
+            ? { ...list, items: list.items.filter((item) => item.id !== action.itemId) }
+            : list,
         ),
       };
   }
