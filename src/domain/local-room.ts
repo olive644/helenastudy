@@ -48,7 +48,7 @@ export type PublicLocalRoomState = {
 };
 
 const ROOM_CODE = /^[A-HJ-NP-Z2-9]{5}$/;
-const MAX_PARTICIPANTS = 30;
+export const MAX_ROOM_PARTICIPANTS = 30;
 export const ROOM_TTL_SECONDS = 60 * 60 * 4;
 
 // Quanto vale acertar, e quanto quem está na liderança perde ao errar — dá
@@ -57,8 +57,12 @@ export const ROOM_TTL_SECONDS = 60 * 60 * 4;
 export const CORRECT_ANSWER_XP = 10;
 export const LEADER_WRONG_ANSWER_PENALTY_XP = 5;
 
+export function normalizeLocalRoomCode(value: string): string {
+  return value.replace(/[\s-]+/g, "").toUpperCase();
+}
+
 export function isValidLocalRoomCode(code: string): boolean {
-  return ROOM_CODE.test(code.trim().toUpperCase());
+  return ROOM_CODE.test(normalizeLocalRoomCode(code));
 }
 
 export function createLocalRoomCode(random: () => number = Math.random): string {
@@ -84,7 +88,7 @@ export function buildLocalRoomJoinUrl(origin: string, code: string): string {
 
 export function readLocalRoomCodeFromUrl(href: string): string | undefined {
   const code = new URL(href).searchParams.get(LOCAL_ROOM_JOIN_PARAM);
-  return code && isValidLocalRoomCode(code) ? code.toUpperCase() : undefined;
+  return code && isValidLocalRoomCode(code) ? normalizeLocalRoomCode(code) : undefined;
 }
 
 export function createRoom(
@@ -111,7 +115,7 @@ export function addLocalParticipant(
   participant: LocalRoomParticipant,
   now: number,
 ): LocalRoomState {
-  if (state.phase !== "lobby" || state.participants.length >= MAX_PARTICIPANTS) return state;
+  if (state.phase !== "lobby" || state.participants.length >= MAX_ROOM_PARTICIPANTS) return state;
   if (state.participants.some((item) => item.id === participant.id)) return state;
   return { ...state, participants: [...state.participants, participant], updatedAt: now };
 }

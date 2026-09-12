@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createLocalRoomHandler } from "./local-room-handler";
 import type { KvStore } from "./kv-store";
-import type { PublicLocalRoomState } from "../domain/local-room";
+import { MAX_ROOM_PARTICIPANTS, type PublicLocalRoomState } from "../domain/local-room";
 
 const origin = "https://helena.example";
 
@@ -104,6 +104,73 @@ describe("handler da sala local", () => {
     expect(joinPayload.participantId).toBeTruthy();
     expect(joinPayload.state.participants).toHaveLength(1);
     expect(joinPayload.streamUrl).toContain(code);
+  });
+
+  it("retoma a sessão do host e do participante depois de recarregar", async () => {
+    const { code, hostToken } = await createRoomViaApi();
+    const joinResponse = await handler(post("join", { code, displayName: "Ana" }));
+    const { participantId } = (await joinResponse.json()) as { participantId: string };
+    await handler(post("start", { code, hostToken }));
+
+    const resumedHost = await handler(
+      post("resume", { code, role: "host", credential: hostToken }),
+    );
+    expect(resumedHost.status).toBe(200);
+    expect(await resumedHost.json()).toEqual(
+      expect.objectContaining({
+        state: expect.objectContaining({ phase: "playing" }),
+        streamUrl: expect.stringContaining(code),
+      }),
+    );
+
+    const resumedParticipant = await handler(
+      post("resume", { code, role: "participant", credential: participantId }),
+    );
+    expect(resumedParticipant.status).toBe(200);
+    expect(await resumedParticipant.json()).toEqual(
+      expect.objectContaining({ state: expect.objectContaining({ phase: "playing" }) }),
+    );
+  });
+
+  it("recusa reconexão com uma credencial desconhecida", async () => {
+    const { code } = await createRoomViaApi();
+    const response = await handler(
+      post("resume", { code, role: "participant", credential: "participante-ausente" }),
+    );
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({
+      error: "Não foi possível confirmar sua participação nesta sala.",
+    });
+  });
+
+  it("normaliza o código e recusa nome duplicado", async () => {
+    const { code } = await createRoomViaApi();
+    expect(
+      (
+        await handler(
+          post("join", { code: `${code.slice(0, 2)}-${code.slice(2)}`, displayName: "Ana" }),
+        )
+      ).status,
+    ).toBe(200);
+
+    const duplicate = await handler(post("join", { code, displayName: "ana" }));
+    expect(duplicate.status).toBe(409);
+    expect(await duplicate.json()).toEqual({ error: "Esse nome já está em uso nesta sala." });
+  });
+
+  it("recusa entrada quando a sala atinge o limite", async () => {
+    const { code } = await createRoomViaApi();
+    for (let index = 0; index < MAX_ROOM_PARTICIPANTS; index += 1) {
+      expect((await handler(post("join", { code, displayName: `Pessoa ${index}` }))).status).toBe(
+        200,
+      );
+    }
+
+    const full = await handler(post("join", { code, displayName: "Pessoa extra" }));
+    expect(full.status).toBe(409);
+    expect(await full.json()).toEqual({
+      error: "Esta sala atingiu o limite de participantes.",
+    });
   });
 
   it("recusa entrada em sala inexistente ou já iniciada", async () => {

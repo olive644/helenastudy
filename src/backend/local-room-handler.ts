@@ -6,6 +6,8 @@ import {
   createRoom,
   endRoom,
   isValidLocalRoomCode,
+  MAX_ROOM_PARTICIPANTS,
+  normalizeLocalRoomCode,
   localRoomStorageKey,
   ROOM_TTL_SECONDS,
   sanitizeDisplayName,
@@ -127,7 +129,7 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
 
     if (action === "join" && request.method === "POST") {
       const body = await readJsonBody(request);
-      const code = typeof body["code"] === "string" ? body["code"].trim().toUpperCase() : "";
+      const code = typeof body["code"] === "string" ? normalizeLocalRoomCode(body["code"]) : "";
       const displayName = sanitizeDisplayName(
         typeof body["displayName"] === "string" ? body["displayName"] : "",
       );
@@ -136,19 +138,58 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
       }
       const state = await loadRoom(dependencies.store, code);
       if (!state) return jsonResponse(404, { error: "Sala não encontrada." });
+      if (state.phase !== "lobby") {
+        return jsonResponse(409, { error: "Esta sala já começou a atividade." });
+      }
+      if (state.participants.length >= MAX_ROOM_PARTICIPANTS) {
+        return jsonResponse(409, { error: "Esta sala atingiu o limite de participantes." });
+      }
+      if (
+        state.participants.some(
+          (participant) => participant.displayName.toLowerCase() === displayName.toLowerCase(),
+        )
+      ) {
+        return jsonResponse(409, { error: "Esse nome já está em uso nesta sala." });
+      }
       const participantId = randomId();
       const updated = addLocalParticipant(
         state,
         { id: participantId, displayName, score: 0 },
         now(),
       );
-      if (updated === state && state.phase !== "lobby") {
-        return jsonResponse(409, { error: "Esta sala já começou a atividade." });
-      }
       const publicState = await saveRoom(updated);
       return jsonResponse(200, {
         participantId,
         state: publicState,
+        streamUrl: dependencies.streamUrl(code),
+      });
+    }
+
+    if (action === "resume" && request.method === "POST") {
+      const body = await readJsonBody(request);
+      const code = typeof body["code"] === "string" ? normalizeLocalRoomCode(body["code"]) : "";
+      const role = body["role"];
+      const credential = typeof body["credential"] === "string" ? body["credential"] : "";
+      if (
+        !isValidLocalRoomCode(code) ||
+        !["host", "participant"].includes(role as string) ||
+        !credential
+      ) {
+        return jsonResponse(400, { error: "Dados de reconexão inválidos." });
+      }
+      const state = await loadRoom(dependencies.store, code);
+      if (!state) return jsonResponse(404, { error: "Esta sala não está mais disponível." });
+      const isAuthorized =
+        role === "host"
+          ? state.hostToken === credential
+          : state.participants.some((participant) => participant.id === credential);
+      if (!isAuthorized) {
+        return jsonResponse(403, {
+          error: "Não foi possível confirmar sua participação nesta sala.",
+        });
+      }
+      return jsonResponse(200, {
+        state: toPublicRoomState(state),
         streamUrl: dependencies.streamUrl(code),
       });
     }
@@ -183,7 +224,7 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
 
     if (action === "answer" && request.method === "POST") {
       const body = await readJsonBody(request);
-      const code = typeof body["code"] === "string" ? body["code"].trim().toUpperCase() : "";
+      const code = typeof body["code"] === "string" ? normalizeLocalRoomCode(body["code"]) : "";
       const participantId = typeof body["participantId"] === "string" ? body["participantId"] : "";
       const answer = typeof body["answer"] === "string" ? body["answer"] : "";
       const questionIndex = Number(body["questionIndex"]);
@@ -231,7 +272,7 @@ export function createLocalRoomHandler(dependencies: LocalRoomHandlerDependencie
     store: KvStore,
     body: Record<string, unknown>,
   ): Promise<LocalRoomState | Response> {
-    const code = typeof body["code"] === "string" ? body["code"].trim().toUpperCase() : "";
+    const code = typeof body["code"] === "string" ? normalizeLocalRoomCode(body["code"]) : "";
     const hostToken = typeof body["hostToken"] === "string" ? body["hostToken"] : "";
     if (!isValidLocalRoomCode(code) || !hostToken) {
       return jsonResponse(400, { error: "Código ou credencial de organizador inválidos." });

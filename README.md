@@ -4,7 +4,8 @@ Central de estudos, foco e rotina da marca Oli.
 
 O HelenaStudy reúne agenda, tarefas, hábitos, cronômetro, anotações, digitalizações, escrita à mão,
 materiais, flashcards, quizzes, bingo e planejamento de aulas em um único espaço. A base atual
-funciona localmente, sem autenticação ou armazenamento remoto. A única integração ativa com IA é a
+mantém o workspace pessoal no dispositivo, sem conta. O Modo Sala usa Firebase Realtime Database
+para sincronizar participantes e rodadas entre dispositivos. A única integração ativa com IA é a
 voz opcional do quiz de escuta, gerada pelo Gemini por uma função segura de servidor.
 
 A fronteira segura da futura Helena inteligente já possui contrato e testes, mas permanece sem

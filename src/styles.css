@@ -1897,10 +1897,41 @@ select {
 }
 
 .local-room-intro,
+.local-room-restoring,
 .local-room-join,
 .local-room-session {
   min-height: 330px;
   padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.local-room-restoring {
+  display: grid;
+  min-height: min(420px, 70vh);
+  text-align: center;
+  place-content: center;
+  gap: 0.55rem;
+}
+
+.local-room-restoring svg {
+  margin-inline: auto;
+  color: var(--violet);
+  animation: local-room-reconnect-pulse 1s ease-in-out infinite alternate;
+}
+
+.local-room-restoring h3,
+.local-room-restoring p {
+  margin: 0;
+}
+
+.local-room-restoring p {
+  color: var(--muted);
+}
+
+@keyframes local-room-reconnect-pulse {
+  to {
+    opacity: 0.45;
+    transform: scale(0.88);
+  }
 }
 
 .local-room-intro {
@@ -1938,6 +1969,17 @@ select {
   gap: 0.8rem;
 }
 
+.local-room-back-button {
+  width: fit-content;
+  justify-self: start;
+}
+
+.local-room-fullscreen .secondary-button,
+.local-room-fullscreen .back-button {
+  color: var(--text);
+  background: var(--surface);
+}
+
 .local-room-join label,
 .local-room-settings label {
   display: grid;
@@ -1957,12 +1999,20 @@ select {
   background: var(--surface);
 }
 
+.local-room-code-input {
+  font-family: "Courier New", monospace;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
 .local-room-join [role="alert"] {
   color: #8c2525;
   font-size: 0.75rem;
 }
 
-.local-room-session header {
+.local-room-session__header {
   display: flex;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--line);
@@ -1971,47 +2021,87 @@ select {
   gap: 1rem;
 }
 
-.local-room-session header div {
+.local-room-session__code {
   display: flex;
   flex-direction: column;
 }
 
-.local-room-session header span {
+.local-room-session__code > span {
   color: var(--muted);
   font-size: 0.7rem;
   font-weight: 750;
   text-transform: uppercase;
 }
 
-.local-room-session header strong {
+.local-room-session__code strong {
   font-size: 2rem;
   letter-spacing: 0.12em;
 }
 
-.local-room-session header p {
+.local-room-session__actions {
   display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.local-room-session__header p {
+  display: flex;
+  margin: 0;
   align-items: center;
   gap: 0.35rem;
   color: var(--muted);
   font-size: 0.78rem;
 }
 
-.local-room-settings {
+.local-room-connection > span {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #c47a00;
+}
+
+.local-room-connection--online > span {
+  background: #25804a;
+}
+
+.local-room-connection--offline > span {
+  background: #a43c3c;
+}
+
+.local-room-lobby {
   display: grid;
   padding-top: 1.2rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: end;
-  gap: 0.7rem;
+  grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
+  align-items: start;
+  gap: 1rem;
+}
+
+.local-room-lobby__invite,
+.local-room-settings {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.local-room-settings {
+  padding: 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.local-room-settings h3,
+.local-room-section-heading h3 {
+  margin: 0;
+  font-size: 1rem;
 }
 
 .local-room-settings .primary-button {
-  grid-column: 1 / -1;
-  justify-self: start;
+  justify-self: stretch;
 }
 
 .local-room-share {
   display: flex;
-  grid-column: 1 / -1;
   align-items: center;
   padding: 1rem;
   border: 1px solid var(--line-strong);
@@ -2027,6 +2117,7 @@ select {
 
 .local-room-share__link {
   display: grid;
+  min-width: 0;
   gap: 0.5rem;
 }
 
@@ -2034,6 +2125,93 @@ select {
   margin: 0;
   color: var(--muted);
   font-size: 0.8rem;
+}
+
+.local-room-share__link input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0.5rem 0.65rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--muted);
+  background: var(--surface);
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+}
+
+.local-room-share__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.local-room-copy-status {
+  min-height: 1.1rem;
+  color: var(--violet-dark) !important;
+  font-weight: 750;
+}
+
+.local-room-participants {
+  padding: 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.local-room-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.local-room-section-heading span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.local-room-participants__empty {
+  display: grid;
+  min-height: 8rem;
+  place-items: center;
+  align-content: center;
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.local-room-participants__empty > div {
+  display: flex;
+}
+
+.local-room-participants__empty > div span {
+  width: 2rem;
+  height: 2rem;
+  margin-left: -0.35rem;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--lavender);
+}
+
+.local-room-participants__empty > div span:nth-child(2) {
+  background: color-mix(in srgb, var(--yellow) 42%, var(--surface));
+}
+
+.local-room-participants__empty p,
+.local-room-summary p,
+.local-room-summary small {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.local-room-summary {
+  display: grid;
+  padding: 0.8rem;
+  border-radius: 10px;
+  gap: 0.2rem;
+  background: var(--soft);
 }
 
 @media (max-width: 599px) {
@@ -2253,6 +2431,11 @@ select {
 
 .local-room-fullscreen > * {
   width: 100%;
+  max-width: 1080px;
+}
+
+.local-room-fullscreen > .local-room-intro,
+.local-room-fullscreen > .local-room-join {
   max-width: 640px;
 }
 
@@ -2302,6 +2485,7 @@ body.local-room-active {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .local-room-restoring svg,
   .local-room-countdown__value {
     animation: none;
   }
@@ -2309,7 +2493,7 @@ body.local-room-active {
 
 @media (max-width: 599px) {
   .local-room-intro,
-  .local-room-settings {
+  .local-room-lobby {
     grid-template-columns: 1fr;
   }
 
@@ -2318,9 +2502,44 @@ body.local-room-active {
     flex-direction: column;
   }
 
-  .local-room-session header {
+  .local-room-fullscreen {
     align-items: flex-start;
-    flex-direction: column;
+    padding: 0;
+  }
+
+  .local-room-session {
+    min-height: 100dvh;
+    padding: 1.25rem;
+  }
+
+  .local-room-session__header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    margin: -1.25rem -1.25rem 0;
+    padding: 0.85rem 1.25rem;
+    background: var(--page);
+  }
+
+  .local-room-session__actions > p:not(.local-room-connection) {
+    display: none;
+  }
+
+  .local-room-session__actions {
+    gap: 0.45rem;
+  }
+
+  .local-room-session__actions .secondary-button {
+    min-height: 38px;
+    padding: 0.45rem 0.6rem;
+  }
+
+  .local-room-connection {
+    font-size: 0 !important;
+  }
+
+  .local-room-share__actions {
+    justify-content: center;
   }
 
   .local-room-podium {

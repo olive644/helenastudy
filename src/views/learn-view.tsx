@@ -1,5 +1,5 @@
 import { Check, Plus } from "lucide-react";
-import { lazy, Suspense, useState, type Dispatch, type FormEvent } from "react";
+import { lazy, Suspense, useEffect, useState, type Dispatch, type FormEvent } from "react";
 import { HelenaLoading } from "../components/helena-loading";
 import { PageHeader } from "../components/app-navigation";
 import { ListeningQuiz } from "../components/listening-quiz";
@@ -257,6 +257,13 @@ export function LearnView({ workspace, dispatch, joinCode }: LearnViewProps) {
   const [targetMinutes, setTargetMinutes] = useState(300);
   const [deadline, setDeadline] = useState(toDateKey(new Date()));
 
+  useEffect(() => {
+    if (mode !== "room") return;
+    const leaveRoom = () => setMode("review");
+    window.addEventListener("popstate", leaveRoom);
+    return () => window.removeEventListener("popstate", leaveRoom);
+  }, [mode]);
+
   if (!defaultSubject) return null;
   const selectedSubject =
     workspace.subjects.find((subject) => subject.id === subjectId) ?? defaultSubject;
@@ -268,6 +275,16 @@ export function LearnView({ workspace, dispatch, joinCode }: LearnViewProps) {
     if (!title) return;
     dispatch({ type: "goal/added", subjectId: selectedSubject.id, title, targetMinutes, deadline });
     setGoalTitle("");
+  }
+
+  function enterRoom() {
+    window.history.pushState({ ...window.history.state, helenaRoom: true }, "");
+    setMode("room");
+  }
+
+  function leaveRoom() {
+    if (window.history.state?.helenaRoom) window.history.back();
+    else setMode("review");
   }
 
   return (
@@ -327,7 +344,7 @@ export function LearnView({ workspace, dispatch, joinCode }: LearnViewProps) {
               <button
                 className={mode === "room" ? "is-active" : undefined}
                 type="button"
-                onClick={() => setMode("room")}
+                onClick={enterRoom}
               >
                 Modo Sala
               </button>
@@ -362,7 +379,7 @@ export function LearnView({ workspace, dispatch, joinCode }: LearnViewProps) {
             />
           ) : (
             <Suspense fallback={<HelenaLoading label="Preparando o Modo Sala…" />}>
-              <LocalRoom initialJoinCode={joinCode} onExit={() => setMode("review")} />
+              <LocalRoom initialJoinCode={joinCode} onExit={leaveRoom} />
             </Suspense>
           )}
         </section>

@@ -210,17 +210,25 @@ pedagógico tipado separa as 30 palavras do componente, com dificuldade, categor
 equivalentes. O feedback correto e incorreto possui ícones, textos e ações distintos, e uma trava
 impede que a mesma submissão altere a pontuação duas vezes.
 
-## 12. Modo Sala local
+## 12. Modo Sala online
 
-O primeiro Modo Sala é deliberadamente local. O professor cria um código temporário, escolhe Quiz de
-escuta ou Bingo, dificuldade e quantidade de perguntas. Participantes em outras abas da mesma origem
-entram com nome temporário e recebem o estado por `BroadcastChannel`. A interface diz explicitamente
-que isso não funciona pela internet.
+O Modo Sala usa uma função same-origin como autoridade e o Firebase Realtime Database como
+armazenamento temporário e transporte realtime. O professor cria um código temporário, configura a
+rodada e compartilha link ou QR code. Participantes entram em outros dispositivos com nome de
+exibição e recebem as mudanças por Server-Sent Events nativos do navegador.
 
-Não há backend, conta, dados públicos, ranking global ou autoridade remota nesta fase. As interfaces
-de estado e transporte ficam separadas para permitir uma futura implementação online com validação
-no servidor, expiração, rate limit e retenção documentada. O Bingo está preparado como atividade no
-lobby, mas sorteio, cartelas distintas e validação sincronizada permanecem para uma próxima entrega.
+Tokens do anfitrião e o baralho completo ficam apenas no armazenamento privado. A projeção pública
+expõe somente o estado necessário à partida; o servidor valida início, respostas, cronômetro e
+placar. Salas expiram após quatro horas e aceitam até 30 participantes. Não há conta ou ranking
+global. Reconexão com identidade preservada, presença após fechamento abrupto, App Check e rate
+limiting continuam pendentes.
+
+O lobby mostra conexão, participantes, convite, resumo e duração estimada. A entrada normaliza o
+código e informa separadamente sala inexistente, iniciada, cheia ou nome duplicado. No celular, o
+cabeçalho da sala permanece visível e oferece uma ação textual para sair.
+Anfitrião e participante guardam a credencial somente na aba atual e retomam a mesma sala após uma
+atualização da página, inclusive durante a rodada. Uma sessão expirada ou inválida é descartada com
+mensagem clara, sem criar um participante duplicado.
 
 ## 13. Experiência de estudo renovada
 
