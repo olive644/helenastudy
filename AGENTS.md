@@ -31,6 +31,7 @@ Estas regras herdam o padrão de engenharia do OliQualidade e valem para todo o 
 
 ## Produto e documentação
 
+- É proibido usar travessões em textos da interface, documentação, comentários ou qualquer outro conteúdo do repositório. Reescrever a frase com vírgula, ponto, dois-pontos ou parênteses.
 - Registrar decisões arquiteturais e mudanças de estado em `docs/CURRENT_STATE_AUDIT.md`.
 - Atualizar `docs/SECOND_BRAIN.md` quando o fluxo, a arquitetura ou os comandos mudarem.
 - Usar nomes honestos: recursos simulados ou locais não podem ser apresentados como IA, sincronização ou persistência em nuvem.

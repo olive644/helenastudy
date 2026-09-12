@@ -105,7 +105,7 @@ describe("contagem regressiva do início da rodada", () => {
     expect(countdownText(document.body)).toBeNull();
 
     // Passar pra próxima pergunta da mesma rodada não deve reabrir a
-    // contagem — ela é só pro início do jogo, não pra cada pergunta.
+    // contagem. Ela é só pro início do jogo, não pra cada pergunta.
     act(() => {
       setRoomState!((state) => ({
         ...state,

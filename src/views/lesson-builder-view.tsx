@@ -280,7 +280,7 @@ export function LessonBuilderView({ onBack }: { onBack: () => void }) {
           <label className="field field--full">
             <span>Extra Activity</span>
             <small className="field-help">
-              Só aparece se sobrar tempo antes da produção — não entra no cálculo padrão dos minutos
+              Só aparece se sobrar tempo antes da produção. Não entra no cálculo padrão dos minutos
               da aula.
             </small>
             <select

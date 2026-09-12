@@ -49,7 +49,7 @@ export function NavigationIcon({ name }: NavigationIconProps) {
             decoding="async"
             // "claro" e "escuro" podem ser a variante visível por padrão
             // dependendo do contexto (tema claro/escuro, sidebar vs. navegação
-            // móvel) — ver styles.css — então seguem carregamento normal.
+            // móvel), ver styles.css, então seguem carregamento normal.
             // "roxo" só aparece em estados de hover/ativo/foco, nunca como
             // variante padrão visível em nenhum contexto: pode ser
             // despriorizada com segurança, tirando-a da disputa de rede com o

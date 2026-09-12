@@ -94,7 +94,7 @@ export const MAX_ROOM_PARTICIPANTS = 30;
 export const ROOM_TTL_SECONDS = 60 * 60 * 4;
 export const ROOM_PRESENCE_GRACE_MS = 120_000;
 
-// Quanto vale acertar, e quanto quem está na liderança perde ao errar — dá
+// Quanto vale acertar, e quanto quem está na liderança perde ao errar. Dá
 // um motivo real pra quem está na frente continuar prestando atenção, em
 // vez de só acumular pontos sem risco.
 export const CORRECT_ANSWER_XP = 10;
@@ -288,7 +288,7 @@ export function submitRoomAnswer(
 }
 
 // O organizador só consegue avançar manualmente quando o tempo da rodada
-// esgotou — nunca antes disso, mesmo que só reste um participante sem
+// esgotou. Nunca antes disso, mesmo que só reste um participante sem
 // responder. Quando todo mundo já respondeu, submitRoomAnswer já avança
 // sozinho, então essa checagem existe principalmente para o botão manual
 // (e como rede de segurança contra uma corrida entre duas respostas).
