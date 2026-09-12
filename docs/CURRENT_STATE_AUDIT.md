@@ -6,6 +6,8 @@
 - A mesma geometria assume grafite sobre superfícies claras, roxo no estado ativo e creme sobre a navegação escura.
 - O amarelo permanece reservado aos pequenos acentos de cada símbolo, de acordo com a identidade da HelenaStudy.
 - Os mesmos componentes são reutilizados na barra lateral, na navegação móvel, no menu Mais, nos atalhos e no botão Começar prática.
+- No celular, a barra é preta no tema claro e roxa no tema escuro; em ambos os casos ela reutiliza a variante branca dos ícones oficiais.
+- A aba ativa recebe um pulso curto e o novo módulo entra suavemente, com as animações removidas quando `prefers-reduced-motion` está ativo.
 
 ## Dificuldade automática do vocabulário
 
@@ -208,19 +210,30 @@ pedagógico tipado separa as 30 palavras do componente, com dificuldade, categor
 equivalentes. O feedback correto e incorreto possui ícones, textos e ações distintos, e uma trava
 impede que a mesma submissão altere a pontuação duas vezes.
 
-## 12. Modo Sala local
+## 12. Modo Sala online
 
-O primeiro Modo Sala é deliberadamente local. O professor cria um código temporário, escolhe Quiz de
-escuta ou Bingo, dificuldade e quantidade de perguntas. Participantes em outras abas da mesma origem
-entram com nome temporário e recebem o estado por `BroadcastChannel`. A interface diz explicitamente
-que isso não funciona pela internet.
+O Modo Sala usa uma função same-origin como autoridade e o Firebase Realtime Database como
+armazenamento temporário e transporte realtime. O professor cria um código temporário, configura a
+rodada e compartilha link ou QR code. Participantes entram em outros dispositivos com nome de
+exibição e recebem as mudanças por Server-Sent Events nativos do navegador.
 
-Não há backend, conta, dados públicos, ranking global ou autoridade remota nesta fase. As interfaces
-de estado e transporte ficam separadas para permitir uma futura implementação online com validação
-no servidor, expiração, rate limit e retenção documentada. O Bingo está preparado como atividade no
-lobby, mas sorteio, cartelas distintas e validação sincronizada permanecem para uma próxima entrega.
+Tokens do anfitrião e o baralho completo ficam apenas no armazenamento privado. A projeção pública
+expõe somente o estado necessário à partida; o servidor valida início, respostas, cronômetro e
+placar. Salas expiram após quatro horas e aceitam até 30 participantes. Não há conta ou ranking
+global. Reconexão com identidade preservada, presença após fechamento abrupto, App Check e rate
+limiting continuam pendentes.
+
+O lobby mostra conexão, participantes, convite, resumo e duração estimada. A entrada normaliza o
+código e informa separadamente sala inexistente, iniciada, cheia ou nome duplicado. No celular, o
+cabeçalho da sala permanece visível e oferece uma ação textual para sair.
+Anfitrião e participante guardam a credencial somente na aba atual e retomam a mesma sala após uma
+atualização da página, inclusive durante a rodada. Uma sessão expirada ou inválida é descartada com
+mensagem clara, sem criar um participante duplicado.
 
 ## 13. Experiência de estudo renovada
+
+A foto aprovada da Helena, sem óculos e com fundo roxo, é usada no ícone da aba e na marca do menu,
+por meio do arquivo local `public/helena-portrait.png`.
 
 O painel e a navegação adotam uma hierarquia inspirada em aplicativos de revisão como SimpleStudy:
 próxima ação evidente, atalhos de prática, progresso diário visível e cartões fáceis de reconhecer.
@@ -230,6 +243,10 @@ A identidade HelenaStudy permanece baseada em preto, amarelo, violeta e na masco
 família de ícones usa traço consistente e pequenos acentos da marca, sem substituir a Helena por uma
 identidade genérica. As animações são curtas, comunicam mudança de estado e são removidas quando o
 sistema solicita redução de movimento.
+
+Os carregamentos de módulos e ferramentas usam uma única animação vetorial da Helena caminhando,
+com mensagem anunciada por leitor de tela, tipografia Manrope e versões responsivas para telas
+completas ou painéis compactos. O ciclo fica estático quando `prefers-reduced-motion` está ativo.
 
 No celular, a navegação flutua acima do conteúdo, os atalhos aparecem em uma grade de toque amplo e
 o painel mantém resumo, prioridades e início rápido sem rolagem horizontal. Nenhum fluxo, dado local

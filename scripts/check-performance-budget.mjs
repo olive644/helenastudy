@@ -8,11 +8,10 @@ const assetsDirectory = new URL("../dist/assets/", import.meta.url);
 // tema): o hook de tema e o botão adicionam ~1 KiB, já com os ícones
 // otimizados para o menor path possível. Revisar se crescer de novo.
 const MAX_INITIAL_JS_BYTES = 222 * 1024;
-// 330 KiB desde o QR code e o link de convite do Modo Sala: o gerador de QR
-// (qrcode-generator) soma ~23 KiB ao chunk sob demanda da sala, carregado só
-// quando alguém abre o Modo Sala (comprime para ~8 KiB com gzip). Revisar se
-// crescer de novo.
-const MAX_TOTAL_JS_BYTES = 330 * 1024;
+// 340 KiB após o lobby realtime ganhar estado de conexão, entrada validada,
+// retomada segura da sessão e resumo da rodada. O carregamento inicial segue
+// abaixo do limite próprio; este crescimento fica no módulo sob demanda da Sala.
+const MAX_TOTAL_JS_BYTES = 340 * 1024;
 const MAX_TTS_WORKER_BYTES = 2.25 * 1024 * 1024;
 const MAX_TTS_WASM_BYTES = 22 * 1024 * 1024;
 const manifest = JSON.parse(await readFile(new URL(".vite/manifest.json", distDirectory), "utf8"));

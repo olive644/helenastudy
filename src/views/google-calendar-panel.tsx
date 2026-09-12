@@ -1,4 +1,5 @@
 import { useGoogleCalendar, type GoogleCalendarEvent } from "../hooks/use-google-calendar";
+import { HelenaLoading } from "../components/helena-loading";
 
 function formatGoogleEventWhen(event: GoogleCalendarEvent): string {
   if (event.allDay) return new Date(`${event.start}T00:00:00`).toLocaleDateString("pt-BR");
@@ -27,7 +28,9 @@ export function GoogleCalendarPanel() {
           </button>
         )}
       </div>
-      {googleCalendar.status === "checking" && <p className="local-note">Verificando conexão…</p>}
+      {googleCalendar.status === "checking" && (
+        <HelenaLoading label="Verificando conexão…" compact />
+      )}
       {googleCalendar.status === "disconnected" && (
         <div className="empty-state">
           <p>Conecte seu Google Agenda para ver seus próximos compromissos aqui.</p>
