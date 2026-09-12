@@ -31,6 +31,23 @@ describe("provedor Cloudflare Workers AI (MeloTTS)", () => {
     expect(JSON.parse(init.body as string)).toEqual({ prompt: "hello", lang: "en" });
   });
 
+  it("decodifica o audio quando a resposta vem em JSON com base64 (formato real da API)", async () => {
+    const audioBytes = new Uint8Array([10, 20, 30, 40]);
+    const base64Audio = Buffer.from(audioBytes).toString("base64");
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ result: { audio: base64Audio }, success: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const provider = createCloudflareTtsProvider("account-123", "token-abc", 5000);
+    const result = await provider.synthesize({ text: "hello", rate: 0.86, consent: true });
+
+    expect(result).toEqual({ audio: audioBytes, contentType: "audio/mpeg" });
+  });
+
   it("lanca erro quando a resposta HTTP nao e ok", async () => {
     global.fetch = vi
       .fn()
