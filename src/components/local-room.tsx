@@ -12,6 +12,7 @@ import {
   type LocalRoomParticipant,
   type LocalRoomSettings,
 } from "../domain/local-room";
+import { parseManualListeningCards } from "../domain/listening-quiz";
 import { selectFallbackEnglishVoice, speakEnglish } from "../data/speech-voice";
 import { useLocalRoom } from "../hooks/use-local-room";
 import { ThemeToggle } from "./app-navigation";
@@ -56,6 +57,7 @@ const ROOM_ACTIVITY_OPTIONS = [
 ] as const;
 
 const MEDAL_ICON_BY_RANK = ["medal-first", "medal-second", "medal-third"] as const;
+const MANUAL_LISTENING_SOURCE = "Palavras manuais";
 
 // Passos da contagem regressiva antes de liberar a primeira pergunta:
 // 3, 2, 1 e "Vai!" (representado por 0), cada um por COUNTDOWN_STEP_MS.
@@ -268,6 +270,8 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
   const room = useLocalRoom(initialJoinCode);
   const [code, setCode] = useState(initialJoinCode ?? "");
   const [name, setName] = useState("");
+  const [manualWords, setManualWords] = useState("");
+  const [manualMode, setManualMode] = useState(false);
   const [answer, setAnswer] = useState("");
   const [lastResult, setLastResult] = useState<{ correct: boolean; xpChange: number } | undefined>(
     undefined,
@@ -481,6 +485,11 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
   const actualCount =
     questionCount === "all" ? availableCount : Math.min(questionCount, availableCount);
   const estimatedMinutes = Math.ceil((actualCount * roundSeconds) / 60);
+  const manualDeck = parseManualListeningCards(manualWords);
+  const manualLineCount = manualWords.split(/\r?\n/).filter((line) => line.trim()).length;
+  const manualDeckIsValid = manualDeck.length === manualLineCount && manualLineCount > 0;
+  const manualSelectionPending =
+    manualMode && state.settings.subjectName !== MANUAL_LISTENING_SOURCE;
   const ownParticipant = state.participants.find((p) => p.id === room.participantId);
   const teamScores = ["Roxo", "Amarelo"].map((team) => ({
     team,
@@ -597,8 +606,15 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                   <label>
                     <span>Material da sala</span>
                     <select
-                      value={state.settings.subjectName ?? ""}
+                      value={
+                        manualMode ? MANUAL_LISTENING_SOURCE : (state.settings.subjectName ?? "")
+                      }
                       onChange={(event) => {
+                        if (event.target.value === MANUAL_LISTENING_SOURCE) {
+                          setManualMode(true);
+                          return;
+                        }
+                        setManualMode(false);
                         const material = materials.find((item) => item.name === event.target.value);
                         void room.updateSettings(
                           { subjectName: material?.name ?? "", difficulty: "mixed", category: "" },
@@ -607,6 +623,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                       }}
                     >
                       <option value="">Catálogo de inglês</option>
+                      <option value={MANUAL_LISTENING_SOURCE}>Escrever palavras manualmente</option>
                       {materials
                         .filter((item) => item.cards.length)
                         .map((item) => (
@@ -616,6 +633,52 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                         ))}
                     </select>
                   </label>
+                  {(manualMode || state.settings.subjectName === MANUAL_LISTENING_SOURCE) &&
+                    state.settings.activity !== "bingo" && (
+                      <div className="local-room-manual">
+                        <div>
+                          <strong>Palavras da rodada</strong>
+                          <span>{manualLineCount}/30</span>
+                        </div>
+                        <label htmlFor="local-room-manual-words">
+                          Uma por linha, no formato inglês = tradução
+                        </label>
+                        <textarea
+                          id="local-room-manual-words"
+                          value={manualWords}
+                          onChange={(event) => setManualWords(event.target.value)}
+                          placeholder={"school = escola\nfriend = amigo\nbook = livro"}
+                          rows={6}
+                          spellCheck={false}
+                        />
+                        <div className="local-room-manual__action">
+                          <p aria-live="polite">
+                            {manualDeckIsValid
+                              ? `${manualLineCount} palavras prontas para aplicar.`
+                              : manualLineCount > 30
+                                ? "Use no máximo 30 palavras."
+                                : "Preencha cada linha com uma palavra e sua tradução."}
+                          </p>
+                          <button
+                            className="secondary-button"
+                            type="button"
+                            disabled={!manualDeckIsValid}
+                            onClick={() =>
+                              void room.updateSettings(
+                                {
+                                  subjectName: MANUAL_LISTENING_SOURCE,
+                                  difficulty: "mixed",
+                                  category: "",
+                                },
+                                manualDeck,
+                              )
+                            }
+                          >
+                            Aplicar palavras
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   <label className="local-room-activity-native">
                     <span>Atividade</span>
                     <select
@@ -789,14 +852,24 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                   <button
                     className="primary-button"
                     type="button"
-                    disabled={participantCount === 0 || availableCount === 0}
+                    disabled={
+                      participantCount === 0 || availableCount === 0 || manualSelectionPending
+                    }
                     onClick={() => void room.startRound()}
-                    aria-describedby={participantCount === 0 ? "local-room-start-help" : undefined}
+                    aria-describedby={
+                      participantCount === 0 || manualSelectionPending
+                        ? "local-room-start-help"
+                        : undefined
+                    }
                   >
                     <HelenaRoomIcon name="play" size={18} /> Iniciar atividade
                   </button>
-                  {participantCount === 0 && (
-                    <small id="local-room-start-help">Aguarde pelo menos um aluno entrar</small>
+                  {(participantCount === 0 || manualSelectionPending) && (
+                    <small id="local-room-start-help">
+                      {participantCount === 0
+                        ? "Aguarde pelo menos um aluno entrar"
+                        : "Aplique as palavras antes de iniciar"}
+                    </small>
                   )}
                 </div>
               </div>

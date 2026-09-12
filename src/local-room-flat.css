@@ -356,6 +356,49 @@
   font-size: 0.75rem;
 }
 
+.local-room-manual {
+  display: grid;
+  padding: 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  grid-column: 1 / -1;
+  gap: 0.55rem;
+}
+
+.local-room-manual > div:first-child,
+.local-room-manual__action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.local-room-manual > div:first-child span,
+.local-room-manual > label,
+.local-room-manual__action p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.local-room-manual textarea {
+  width: 100%;
+  min-height: 132px;
+  padding: 0.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.local-room-manual textarea:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--purple) 30%, transparent);
+  outline-offset: 2px;
+}
+
 .local-room-activity-native {
   position: absolute;
   width: 1px;
