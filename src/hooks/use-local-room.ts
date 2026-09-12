@@ -62,7 +62,7 @@ function clearStoredLocalRoomSession() {
 }
 
 // O Realtime Database do Firebase omite chaves cujo valor é um array vazio
-// (ou objeto vazio) em vez de mandá-las como "[]" — ao contrário do
+// (ou objeto vazio) em vez de mandá-las como "[]", ao contrário do
 // JSON.stringify comum, que preserva arrays vazios. Isso só afeta o estado
 // que chega pelo EventSource (lido direto do Firebase); as respostas da
 // nossa própria API usam JSON.stringify normal e não têm esse problema.
@@ -233,7 +233,7 @@ export function useLocalRoom(initialJoinCode?: string) {
   }
 
   // Conecta direto no Realtime Database do Firebase (fora do domínio do
-  // app) por Server-Sent Events nativos do navegador — sem SDK, sem
+  // app) por Server-Sent Events nativos do navegador, sem SDK, sem
   // polling: cada mudança que o servidor grava em /rooms/<code> chega aqui
   // instantaneamente.
   function startStreaming(streamUrl: string) {

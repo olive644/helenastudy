@@ -39,7 +39,7 @@ function CountdownOverlay({ value }: { value: number }) {
   );
 }
 
-// Um portal direto pro <body> — não pro elemento pai mais próximo — porque
+// Um portal direto pro <body>, não pro elemento pai mais próximo, porque
 // qualquer ancestral com transform (como o hover de .module-panel) vira um
 // "containing block" e faz position:fixed grudar nele em vez da tela toda.
 function LocalRoomFullscreen({ children }: { children: ReactNode }) {
@@ -242,7 +242,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
   );
 
   // Modo Sala toma a tela toda enquanto estiver aberto, pra ficar bem
-  // visível projetado ou compartilhado — some de novo assim que a pessoa
+  // visível projetado ou compartilhado. Some de novo assim que a pessoa
   // troca de aba/modo e este componente é desmontado.
   useEffect(() => {
     document.body.classList.add("local-room-active");
@@ -252,7 +252,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
   }, []);
 
   // Contagem regressiva (3, 2, 1, Vai!) antes da primeira pergunta de cada
-  // sala — dispara só na transição do lobby pra a rodada, nunca de novo
+  // sala. Dispara só na transição do lobby pra a rodada, nunca de novo
   // entre perguntas nem se a pessoa entrar com a sala já em andamento.
   const previousPhaseRef = useRef(state?.phase);
   const [countdownValue, setCountdownValue] = useState<number | null>(null);
@@ -272,7 +272,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
   }, [countdownValue]);
 
   // Só o navegador do organizador tenta avançar a rodada quando o tempo
-  // acaba — ninguém tem um botão para pular antes disso. Quando todo mundo
+  // acaba. Ninguém tem um botão para pular antes disso. Quando todo mundo
   // já respondeu, o próprio servidor avança sozinho (submitRoomAnswer); o
   // "advancing" evita pedidos repetidos enquanto um já está a caminho, e o
   // intervalo de 500ms tenta de novo sozinho se o primeiro pedido falhar
@@ -717,7 +717,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                 </div>
                 <p>
                   {state.answeredParticipantIds.length} de {state.participants.length} já
-                  responderam — a rodada passa sozinha quando todo mundo responder ou o tempo
+                  responderam. A rodada passa sozinha quando todo mundo responder ou o tempo
                   acabar.
                 </p>
                 <Scoreboard participants={state.participants} />

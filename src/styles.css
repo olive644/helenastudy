@@ -15,7 +15,7 @@
   /* Tokens de cor base: mantidos alinhados à paleta oficial HelenaStudy
      (Creme/Roxo/Amarelo/Grafite). O bloco :root em "Paleta oficial da marca"
      mais abaixo neste arquivo redeclara os mesmos valores e é a referência
-     final — mantenha os dois sincronizados ao alterar qualquer tom de marca. */
+     final. Mantenha os dois sincronizados ao alterar qualquer tom de marca. */
   --ink: #0f0f14;
   --text: var(--ink);
   --muted: #716e76;
@@ -2442,7 +2442,7 @@ select {
 }
 
 /* Modo Sala ocupa a tela toda (posição fixa por cima de tudo) em vez de
-   ficar como um cartão na página — fica bem visível quando projetado ou
+   ficar como um cartão na página. Fica bem visível quando projetado ou
    compartilhado. body.local-room-active trava o scroll de fundo enquanto
    isso, e o conteúdo interno mantém as mesmas classes/estilos de antes. */
 .local-room-fullscreen {
@@ -4721,8 +4721,8 @@ body.local-room-active {
 }
 
 /* Paleta oficial da marca (guia HelenaStudy): Creme, Roxo, Amarelo, Grafite.
-   Sobrescreve as variáveis herdadas acima — mesmo padrão de camadas já usado
-   neste arquivo — e acrescenta um tema escuro opcional, alternável em tempo
+   Sobrescreve as variáveis herdadas acima, seguindo o padrão de camadas já usado
+   neste arquivo, e acrescenta um tema escuro opcional, alternável em tempo
    real (ver .theme-toggle em app-navigation) e persistido no dispositivo. */
 :root {
   --ink: #0f0f14;
