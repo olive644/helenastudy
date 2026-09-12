@@ -5,7 +5,7 @@ export function RoomQrCode({ value, size = 152 }: { value: string; size?: number
   qr.addData(value);
   qr.make();
   const count = qr.getModuleCount();
-  const quietZone = 12;
+  const quietZone = (size * 4) / (count + 8);
   const qrSize = size - quietZone * 2;
   const cell = qrSize / count;
   let path = "";
@@ -17,9 +17,13 @@ export function RoomQrCode({ value, size = 152 }: { value: string; size?: number
     }
   }
   return (
-    <div className="helena-room-qr">
-      <span className="helena-room-qr__ear helena-room-qr__ear--left" aria-hidden="true" />
-      <span className="helena-room-qr__ear helena-room-qr__ear--right" aria-hidden="true" />
+    <div className="helena-room-qr helena-room-qr--holding">
+      <img
+        src="/helena-holding-qr.png"
+        alt="Helena segurando a placa de convite da sala"
+        width="1254"
+        height="1254"
+      />
       <svg
         viewBox={`0 0 ${size} ${size}`}
         width={size}
@@ -30,13 +34,6 @@ export function RoomQrCode({ value, size = 152 }: { value: string; size?: number
         <rect width={size} height={size} rx="10" fill="#fff" />
         <path d={path} fill="#0f0f14" />
       </svg>
-      <span className="helena-room-qr__face" aria-hidden="true">
-        <i />
-        <i />
-      </span>
-      <span className="helena-room-qr__star" aria-hidden="true">
-        ★
-      </span>
     </div>
   );
 }
