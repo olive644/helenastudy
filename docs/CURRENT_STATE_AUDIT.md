@@ -6,6 +6,8 @@
 - A mesma geometria assume grafite sobre superfícies claras, roxo no estado ativo e creme sobre a navegação escura.
 - O amarelo permanece reservado aos pequenos acentos de cada símbolo, de acordo com a identidade da HelenaStudy.
 - Os mesmos componentes são reutilizados na barra lateral, na navegação móvel, no menu Mais, nos atalhos e no botão Começar prática.
+- No celular, a barra é preta no tema claro e roxa no tema escuro; em ambos os casos ela reutiliza a variante branca dos ícones oficiais.
+- A aba ativa recebe um pulso curto e o novo módulo entra suavemente, com as animações removidas quando `prefers-reduced-motion` está ativo.
 
 ## Dificuldade automática do vocabulário
 
