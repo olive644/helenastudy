@@ -99,7 +99,7 @@ conta de faturamento.
 1. Crie um novo Space em https://huggingface.co/new-space, escolhendo SDK
    **Docker** e visibilidade **Private** (o segredo no header ja protege o
    endpoint, mas deixar privado evita que o Space apareca em buscas).
-2. Em **Settings → Variables and secrets** do Space, adicione como *Secret*:
+2. Em **Settings → Variables and secrets** do Space, adicione como _Secret_:
    `TTS_SERVICE_TOKEN` (o mesmo valor configurado na Vercel). As demais
    variaveis (`KOKORO_VOICE`, `PIPER_VOICE`, etc.) sao opcionais; os padroes
    ja servem.
@@ -114,14 +114,12 @@ git commit -m "Publica servico de TTS"
 git push --force space HEAD:main
 ```
 
-   (Peça login antes com `huggingface-cli login`, instalado via
-   `pip install huggingface_hub`, ou cole um token de acesso quando o git
-   pedir usuario/senha.)
-4. O primeiro build demora alguns minutos (baixa os modelos). Acompanhe em
-   **Logs** na propria pagina do Space.
-5. A URL do serviço fica em
-   `https://<seu-usuario>-<nome-do-space>.hf.space`. Configure na Vercel
-   (nunca com prefixo `VITE_`):
+(Peça login antes com `huggingface-cli login`, instalado via
+`pip install huggingface_hub`, ou cole um token de acesso quando o git
+pedir usuario/senha.) 4. O primeiro build demora alguns minutos (baixa os modelos). Acompanhe em
+**Logs** na propria pagina do Space. 5. A URL do serviço fica em
+`https://<seu-usuario>-<nome-do-space>.hf.space`. Configure na Vercel
+(nunca com prefixo `VITE_`):
 
 ```
 TTS_SERVICE_URL=https://<seu-usuario>-<nome-do-space>.hf.space
