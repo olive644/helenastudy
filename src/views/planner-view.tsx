@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState, type Dispatch, type FormEvent } from "react";
+import { HelenaLoading } from "../components/helena-loading";
 import { PageHeader } from "../components/app-navigation";
 import { toDateKey, type WorkspaceAction, type WorkspaceState } from "../domain/workspace";
 
@@ -257,11 +258,11 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
         </section>
       </div>
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<HelenaLoading label="Carregando Google Agenda…" compact />}>
         <GoogleCalendarPanel />
       </Suspense>
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<HelenaLoading label="Carregando tarefas…" compact />}>
         <HomeworkSection workspace={workspace} dispatch={dispatch} />
       </Suspense>
     </main>

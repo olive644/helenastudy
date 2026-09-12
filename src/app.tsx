@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { MobileNavigation, Sidebar, type AppView } from "./components/app-navigation";
+import { HelenaLoading } from "./components/helena-loading";
 import { readLocalRoomCodeFromUrl } from "./domain/local-room";
 import { useWorkspace } from "./hooks/use-workspace";
 import { FocusView } from "./views/focus-view";
@@ -27,7 +28,7 @@ export function App() {
       <Suspense
         fallback={
           <main className="main-content loading-view" id="main-content">
-            Abrindo módulo…
+            <HelenaLoading label="Abrindo módulo…" />
           </main>
         }
       >

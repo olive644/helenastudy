@@ -43,6 +43,33 @@ body {
   background: var(--page);
 }
 
+.helena-loading {
+  display: grid;
+  width: 100%;
+  min-height: min(56vh, 32rem);
+  place-items: center;
+  align-content: center;
+  gap: 0.25rem;
+  color: var(--muted);
+  font-family: Manrope, Inter, "Segoe UI", system-ui, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.helena-loading img {
+  width: clamp(9.5rem, 24vw, 15rem);
+  height: auto;
+}
+
+.helena-loading--compact {
+  min-height: 8rem;
+}
+
+.helena-loading--compact img {
+  width: 5.75rem;
+}
+
 button,
 input,
 textarea,
