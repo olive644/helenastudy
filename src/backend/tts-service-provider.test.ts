@@ -19,7 +19,7 @@ describe("provedor do servico de TTS", () => {
     const provider = createTtsServiceProvider("https://tts.internal", "segredo", 5000);
     const result = await provider.synthesize({ text: "hello", rate: 0.86, consent: true });
 
-    expect(result).toEqual(audio);
+    expect(result).toEqual({ audio, contentType: "audio/wav" });
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toBe("https://tts.internal/synthesize");
     expect((init.headers as Record<string, string>)["X-TTS-Secret"]).toBe("segredo");

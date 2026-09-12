@@ -7,8 +7,13 @@ export type SpeechRequest = {
   consent: true;
 };
 
+export type SpeechAudio = {
+  audio: Uint8Array;
+  contentType: string;
+};
+
 export type SpeechProvider = {
-  synthesize(request: SpeechRequest): Promise<Uint8Array>;
+  synthesize(request: SpeechRequest): Promise<SpeechAudio>;
 };
 
 export type SpeechRateLimiter = {
@@ -84,14 +89,14 @@ export function createSpeechHandler(dependencies: SpeechHandlerDependencies) {
     }
 
     try {
-      const wave = await dependencies.provider.synthesize({
+      const result = await dependencies.provider.synthesize({
         ...payload,
         text: payload.text.trim(),
       });
-      return new Response(wave.buffer as ArrayBuffer, {
+      return new Response(result.audio.buffer as ArrayBuffer, {
         headers: {
           "Cache-Control": "private, max-age=3600",
-          "Content-Type": "audio/wav",
+          "Content-Type": result.contentType,
           "Referrer-Policy": "no-referrer",
           "X-Content-Type-Options": "nosniff",
         },
