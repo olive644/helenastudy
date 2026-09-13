@@ -149,7 +149,7 @@ export const STUDENT_SPACE_TOOLS = [
     description: "Abrir agenda",
     icon: "planner",
   },
-  { view: "learn", title: "Quizzes e bingo", description: "Praticar e revisar", icon: "learn" },
+  { view: "learn", title: "Praticar", description: "Minigames e Modo Sala", icon: "learn" },
   {
     view: "library",
     title: "Consultar materiais",

@@ -32,7 +32,7 @@ estados das versões 1 e 2 sem apagar tarefas, notas ou materiais. Digitalizaç�
 reduzidos no navegador, limitados a 1 MB por imagem e vinculados à anotação. A implementação local
 pode ser substituída por um repositório remoto no futuro sem mudar as regras do domínio.
 
-Biblioteca, Quizzes e bingo e o planejador de aulas são carregados sob demanda. As ferramentas de
+Biblioteca, Praticar e o planejador de aulas são carregados sob demanda. As ferramentas de
 captura do Caderno também usam um chunk separado. O manifesto do Vite
 permite medir separadamente o JavaScript inicial e o total assíncrono: 220 KiB para a entrada e 300
 KiB para o conjunto.

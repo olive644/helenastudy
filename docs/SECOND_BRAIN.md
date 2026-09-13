@@ -93,7 +93,8 @@ flowchart LR
 
   STUDY --> FOCUS[Foco]
   STUDY --> LIB[Biblioteca e flashcards]
-  STUDY --> PRACTICE[Quizzes e bingo]
+  STUDY --> PRACTICE[Praticar]
+  PRACTICE --> WORLDS[Mundos Solo com níveis progressivos]
   PRACTICE --> LISTEN[Escuta com Cloudflare Workers AI e fallback do dispositivo]
   LISTEN --> CUSTOM[Lista personalizada com validação por linha]
   LISTEN --> FEEDBACK[Feedback individual antes da próxima pergunta]

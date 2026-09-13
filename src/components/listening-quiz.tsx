@@ -26,7 +26,13 @@ const DIFFICULTY_LABELS: Record<DifficultyFilter, string> = {
   hard: "Difícil",
 };
 
-export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[] }) {
+export function ListeningQuiz({
+  flashcards,
+  onComplete,
+}: {
+  flashcards: readonly Flashcard[];
+  onComplete?: () => void;
+}) {
   const initialDeck = useMemo(() => buildListeningDeck(flashcards), [flashcards]);
   const [deck, setDeck] = useState(initialDeck);
   const [index, setIndex] = useState(0);
@@ -48,6 +54,10 @@ export function ListeningQuiz({ flashcards }: { flashcards: readonly Flashcard[]
   const utteranceRef = useRef<SpeechSynthesisUtterance | undefined>(undefined);
   const naturalPlayerRef = useRef<NaturalVoicePlayer | undefined>(undefined);
   const card = deck[index];
+
+  useEffect(() => {
+    if (state === "finished") onComplete?.();
+  }, [onComplete, state]);
 
   useEffect(() => {
     if (state !== "countdown") return;

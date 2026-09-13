@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { App } from "./app";
 
 function navigate(label: string) {
@@ -8,6 +8,8 @@ function navigate(label: string) {
 }
 
 describe("App", () => {
+  beforeEach(() => localStorage.clear());
+
   it("apresenta a central sem avisos ou mascote decorativa no cabeçalho", () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: "Espaço do aluno" })).toBeTruthy();
@@ -60,7 +62,7 @@ describe("App", () => {
       ["Espaço do aluno", "today"],
       ["Agenda", "planner"],
       ["Foco", "focus"],
-      ["Quizzes e bingo", "learn"],
+      ["Praticar", "learn"],
       ["Biblioteca", "library"],
       ["Hábitos", "habits"],
       ["Cadernos", "notes"],
@@ -146,9 +148,11 @@ describe("App", () => {
   });
 
   it("cria e completa uma linha no bingo de estudos", async () => {
+    localStorage.setItem("helena.soloProgress", "4");
     render(<App />);
-    navigate("Quizzes e bingo");
-    fireEvent.click(await screen.findByRole("button", { name: "Bingo" }));
+    navigate("Praticar");
+    fireEvent.click(await screen.findByRole("button", { name: /entrar no mundo/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Nível 4: Bingo/ }));
     fireEvent.click(screen.getByRole("button", { name: "Criar bingo" }));
 
     const board = screen.getByRole("group", { name: "Cartela de bingo" });
@@ -160,12 +164,38 @@ describe("App", () => {
 
   it("abre o quiz de escuta com vocabulário inicial", async () => {
     render(<App />);
-    navigate("Quizzes e bingo");
-    fireEvent.click(await screen.findByRole("button", { name: "Escuta" }));
+    navigate("Praticar");
+    fireEvent.click(await screen.findByRole("button", { name: /entrar no mundo/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Nível 1: Escuta/ }));
 
     expect(screen.getByRole("heading", { name: /ouça e descubra a palavra/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /iniciar escuta/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /ouvir novamente/i })).toBeTruthy();
+  });
+
+  it("permite inspecionar mundos bloqueados e inicia o caminho no nível 1", async () => {
+    render(<App />);
+    navigate("Praticar");
+
+    fireEvent.click(await screen.findByRole("button", { name: "Próximo mundo" }));
+    expect(screen.getByRole("heading", { name: "Cidade das ideias" })).toBeTruthy();
+    expect(screen.getByText("Mundo bloqueado")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Mundo anterior" }));
+    fireEvent.click(screen.getByRole("button", { name: /entrar no mundo/i }));
+
+    expect(
+      (screen.getByRole("button", { name: /Nível 1: Escuta/ }) as HTMLButtonElement).disabled,
+    ).toBe(false);
+    expect(
+      (screen.getByRole("button", { name: /Nível 2: Flashcards/ }) as HTMLButtonElement).disabled,
+    ).toBe(true);
+    expect(
+      (screen.getByRole("button", { name: /Nível 3: Quiz/ }) as HTMLButtonElement).disabled,
+    ).toBe(true);
+    expect(
+      (screen.getByRole("button", { name: /Nível 4: Bingo/ }) as HTMLButtonElement).disabled,
+    ).toBe(true);
   });
 
   it("mantém dados após remontar o aplicativo", () => {
@@ -193,6 +223,7 @@ describe("App", () => {
   });
 
   it("cria e revisa um flashcard local", async () => {
+    localStorage.setItem("helena.soloProgress", "2");
     render(<App />);
     navigate("Biblioteca");
     const front = await screen.findByLabelText("Frente");
@@ -201,7 +232,9 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: /criar flashcard/i }));
     expect(screen.getByText("Improve")).toBeTruthy();
 
-    navigate("Quizzes e bingo");
+    navigate("Praticar");
+    fireEvent.click(await screen.findByRole("button", { name: /entrar no mundo/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Nível 2: Flashcards/ }));
     expect(await screen.findByRole("heading", { name: "Improve" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /mostrar resposta/i }));
     expect(screen.getByRole("heading", { name: "Melhorar" })).toBeTruthy();
