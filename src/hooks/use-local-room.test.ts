@@ -19,6 +19,21 @@ describe("normalizeRoomState", () => {
       }),
     ).toThrow("dados inválidos");
   });
+  it("rejeita configurações de áudio inválidas", () => {
+    expect(() =>
+      normalizeRoomState({
+        code: "ABCDE",
+        phase: "lobby",
+        settings: {
+          difficulty: "mixed",
+          questionCount: 5,
+          roundSeconds: 30,
+          audioRate: 2 as 1,
+        },
+        participants: [],
+      }),
+    ).toThrow("dados inválidos");
+  });
   it("preenche arrays que o Firebase omite quando estão vazios", () => {
     const raw = {
       code: "ABCDE",

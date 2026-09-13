@@ -83,19 +83,20 @@ for (const activity of ["listening", "bingo"] as const) {
         .click();
       await host.getByRole("button", { name: "Modo Sala", exact: true }).click();
       await host.getByRole("button", { name: "Criar sala", exact: true }).click();
-      await host.getByRole("combobox", { name: "Perguntas", exact: true }).selectOption("5");
       await host.getByRole("combobox", { name: "Atividade", exact: true }).selectOption(activity);
       if (activity === "listening") {
         await host
           .getByRole("combobox", { name: "Material da sala", exact: true })
-          .selectOption("Palavras manuais");
+          .selectOption("Lista personalizada");
         await host
-          .getByLabel("Uma por linha, no formato inglês = tradução")
+          .getByLabel(/Digite ou cole palavras e traduções/)
           .fill(
             "school = escola\nfriend = amigo\nbook = livro\nwindow = janela\nteacher = professor",
           );
         await host.getByRole("button", { name: "Aplicar palavras", exact: true }).click();
-        await expect(host.getByText("5 questões disponíveis neste filtro.")).toBeVisible();
+        await expect(host.getByText("5 palavras adicionadas à rodada ✓")).toBeVisible();
+      } else {
+        await host.getByRole("combobox", { name: "Perguntas", exact: true }).selectOption("5");
       }
       const code = await host.locator(".local-room-session__code strong").innerText();
       const players = await Promise.all(contexts.slice(1).map((c) => c.newPage()));
@@ -118,7 +119,10 @@ for (const activity of ["listening", "bingo"] as const) {
         await expect(
           host.getByText(`Pergunta ${question + 1} de 5`, { exact: true }),
         ).toBeVisible();
-        const word = await host.locator(".local-room-round__host-question span").innerText();
+        await expect(host.locator(".local-room-round__host-question span")).toHaveText(
+          "Áudio reproduzido",
+        );
+        const word = states.get(code)!.currentQuestion!.front;
         await Promise.all(
           (activity === "bingo" && question === 4 ? players.slice(0, 1) : players).map(
             async (page) => {

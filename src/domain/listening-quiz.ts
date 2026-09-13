@@ -1,5 +1,6 @@
 import type { Flashcard } from "./workspace.js";
-import { LISTENING_VOCABULARY, type PedagogicalDifficulty } from "../data/listening-vocabulary.js";
+
+export type PedagogicalDifficulty = "easy" | "medium" | "hard";
 
 export type ListeningCard = Pick<Flashcard, "id" | "front" | "back"> & {
   acceptedAnswers?: readonly string[];
@@ -7,32 +8,65 @@ export type ListeningCard = Pick<Flashcard, "id" | "front" | "back"> & {
   category?: string;
 };
 
-export const STARTER_DECK: readonly ListeningCard[] = LISTENING_VOCABULARY.map((item) => ({
-  id: `starter-${item.id}`,
-  front: item.english,
-  back: item.translation,
-  difficulty: item.difficulty,
-  category: item.category,
-  ...(item.acceptedAnswers ? { acceptedAnswers: item.acceptedAnswers } : {}),
-}));
+export const STARTER_DECK: readonly ListeningCard[] = [
+  { id: "starter-school", front: "school", back: "escola", difficulty: "easy" },
+  { id: "starter-friend", front: "friend", back: "amigo", difficulty: "easy" },
+  { id: "starter-book", front: "book", back: "livro", difficulty: "easy" },
+  { id: "starter-world", front: "world", back: "mundo", difficulty: "easy" },
+  { id: "starter-hello", front: "hello", back: "olá", difficulty: "easy" },
+];
+
+export type ManualListeningLine = {
+  lineNumber: number;
+  raw: string;
+  card?: ListeningCard;
+  error?: string;
+};
+
+export type ManualListeningParseResult = {
+  cards: ListeningCard[];
+  lines: ManualListeningLine[];
+};
+
+const MANUAL_SEPARATOR = /\t|=|;|,|\s+-\s+/;
+
+export function parseManualListeningInput(value: string): ManualListeningParseResult {
+  const seen = new Map<string, number>();
+  const lines = value.split(/\r?\n/).flatMap((raw, index): ManualListeningLine[] => {
+    if (!raw.trim()) return [];
+    const lineNumber = index + 1;
+    const separator = raw.match(MANUAL_SEPARATOR);
+    if (!separator || separator.index === undefined) {
+      return [{ lineNumber, raw, error: "falta a tradução" }];
+    }
+    const front = raw.slice(0, separator.index).trim();
+    const back = raw.slice(separator.index + separator[0].length).trim();
+    if (!front) return [{ lineNumber, raw, error: "falta a palavra em inglês" }];
+    if (!back) return [{ lineNumber, raw, error: "falta a tradução" }];
+    if (front.length > 200 || back.length > 200) {
+      return [{ lineNumber, raw, error: "use até 200 caracteres em cada campo" }];
+    }
+    const normalized = normalizeListeningAnswer(front);
+    const firstLine = seen.get(normalized);
+    if (firstLine !== undefined) {
+      return [{ lineNumber, raw, error: `“${front}” já foi usada na linha ${firstLine}` }];
+    }
+    if (seen.size >= 30) return [{ lineNumber, raw, error: "o limite é de 30 palavras" }];
+    seen.set(normalized, lineNumber);
+    return [
+      {
+        lineNumber,
+        raw,
+        card: { id: `manual-${seen.size}`, front, back, difficulty: "medium" },
+      },
+    ];
+  });
+  return { cards: lines.flatMap((line) => (line.card ? [line.card] : [])), lines };
+}
 
 export function parseManualListeningCards(value: string): ListeningCard[] {
-  const lines = value
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  if (lines.length === 0 || lines.length > 30) return [];
-
-  const cards = lines.map((line, index) => {
-    const [front = "", ...answer] = line.split("=");
-    const back = answer.join("=").trim();
-    return { id: `manual-${index + 1}`, front: front.trim(), back, difficulty: "medium" as const };
-  });
-  return cards.every(
-    ({ front, back }) => front && back && front.length <= 200 && back.length <= 200,
-  )
-    ? cards
-    : [];
+  const parsed = parseManualListeningInput(value);
+  return parsed.lines.some((line) => line.error) ? [] : parsed.cards;
 }
 
 export function normalizeListeningAnswer(value: string): string {

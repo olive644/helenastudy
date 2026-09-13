@@ -8,11 +8,13 @@ import {
   normalizeLocalRoomCode,
   rankLocalRoomParticipants,
   localRoomPool,
+  roomSecondsLeft,
+  type LocalRoomAnswerFeedback,
   ROOM_CATEGORIES,
   type LocalRoomParticipant,
   type LocalRoomSettings,
 } from "../domain/local-room";
-import { parseManualListeningCards } from "../domain/listening-quiz";
+import { parseManualListeningInput } from "../domain/listening-quiz";
 import { selectFallbackEnglishVoice, speakEnglish } from "../data/speech-voice";
 import { NaturalVoicePlayer, type NaturalVoiceState } from "../data/listening-audio";
 import { useLocalRoom } from "../hooks/use-local-room";
@@ -23,8 +25,12 @@ import { RoomQrCode } from "./room-qr-code";
 
 const DEFAULT_SETTINGS: LocalRoomSettings = {
   difficulty: "mixed",
-  questionCount: 10,
+  questionCount: "all",
   roundSeconds: 30,
+  subjectName: "Lista personalizada",
+  audioRate: 1,
+  audioRepetitions: "unlimited",
+  autoPlayAudio: false,
 };
 
 const ROOM_ACTIVITY_OPTIONS = [
@@ -58,7 +64,8 @@ const ROOM_ACTIVITY_OPTIONS = [
 ] as const;
 
 const MEDAL_ICON_BY_RANK = ["medal-first", "medal-second", "medal-third"] as const;
-const MANUAL_LISTENING_SOURCE = "Palavras manuais";
+const MANUAL_LISTENING_SOURCE = "Lista personalizada";
+const ANSWER_FEEDBACK_MS = 3_000;
 
 // Passos da contagem regressiva antes de liberar a primeira pergunta:
 // 3, 2, 1 e "Vai!" (representado por 0), cada um por COUNTDOWN_STEP_MS.
@@ -263,14 +270,18 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
   const [code, setCode] = useState(initialJoinCode ?? "");
   const [name, setName] = useState("");
   const [manualWords, setManualWords] = useState("");
-  const [manualMode, setManualMode] = useState(false);
+  const [manualMode, setManualMode] = useState(true);
+  const [appliedManualWords, setAppliedManualWords] = useState("");
+  const [manualApplyStatus, setManualApplyStatus] = useState("");
+  const [revealHostWord, setRevealHostWord] = useState(false);
   const [answer, setAnswer] = useState("");
-  const [lastResult, setLastResult] = useState<{ correct: boolean; xpChange: number } | undefined>(
-    undefined,
-  );
+  const [lastResult, setLastResult] = useState<
+    (LocalRoomAnswerFeedback & { submittedAnswer: string }) | undefined
+  >(undefined);
   const state = room.state;
   const [naturalState, setNaturalState] = useState<NaturalVoiceState>({ status: "idle" });
   const naturalPlayerRef = useRef<NaturalVoicePlayer | undefined>(undefined);
+  const audioPlayCountRef = useRef(0);
 
   useEffect(() => {
     const player = new NaturalVoicePlayer(setNaturalState);
@@ -279,11 +290,18 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
   }, []);
 
   function playQuestionAudio(text: string) {
-    void naturalPlayerRef.current?.generate(text, 0.9, () => {
+    const limit = state?.settings.audioRepetitions ?? "unlimited";
+    if (limit !== "unlimited" && audioPlayCountRef.current >= limit) {
+      setNaturalState({ status: "error", message: `Limite de ${limit} reproduções atingido.` });
+      return;
+    }
+    audioPlayCountRef.current += 1;
+    const rate = state?.settings.audioRate ?? 1;
+    void naturalPlayerRef.current?.generate(text, rate, () => {
       const voices = window.speechSynthesis?.getVoices() ?? [];
       speakEnglish(text, {
         voice: selectFallbackEnglishVoice(voices),
-        rate: 0.9,
+        rate,
         onUnavailable: () => {},
       });
     });
@@ -301,6 +319,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
     setSeenQuestionKey(questionKey);
     setAnswer("");
     setLastResult(undefined);
+    setRevealHostWord(false);
   }
 
   const currentQuestionFront = state?.currentQuestion?.front;
@@ -308,9 +327,23 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
     // Uma pergunta nova nao deve tocar a reproducao (ou pedido de audio) da
     // pergunta anterior por cima; ja aproveita pra pedir o audio dela com
     // antecedencia, antes de alguem clicar em "Ouvir".
+    audioPlayCountRef.current = 0;
     naturalPlayerRef.current?.stop();
-    if (currentQuestionFront) naturalPlayerRef.current?.preload(currentQuestionFront, 0.9);
-  }, [questionKey, currentQuestionFront]);
+    if (currentQuestionFront)
+      naturalPlayerRef.current?.preload(currentQuestionFront, state?.settings.audioRate ?? 1);
+  }, [questionKey, currentQuestionFront, state?.settings.audioRate]);
+
+  useEffect(() => {
+    if (
+      currentQuestionFront &&
+      state?.phase === "playing" &&
+      room.isHost &&
+      state.settings.autoPlayAudio
+    )
+      playQuestionAudio(currentQuestionFront);
+    // A pergunta nova é o único gatilho para a reprodução automática.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questionKey]);
 
   const participantCount = state?.participants.length ?? 0;
   const canJoin = !room.busy && isValidLocalRoomCode(code) && name.trim().length > 0;
@@ -319,7 +352,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
   const questionStartedAt = state?.questionStartedAt ?? 0;
   const roundSeconds = state?.settings.roundSeconds ?? 30;
   const [secondsLeft, setSecondsLeft] = useState(() =>
-    Math.max(0, roundSeconds - Math.floor((Date.now() - questionStartedAt) / 1000)),
+    state ? roomSecondsLeft(state, Date.now()) : roundSeconds,
   );
 
   // Modo Sala toma a tela toda enquanto estiver aberto, pra ficar bem
@@ -352,20 +385,13 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
     return () => window.clearTimeout(timer);
   }, [countdownValue]);
 
-  // Só o navegador do organizador tenta avançar a rodada quando o tempo
-  // acaba. Ninguém tem um botão para pular antes disso. Quando todo mundo
-  // já respondeu, o próprio servidor avança sozinho (submitRoomAnswer); o
-  // "advancing" evita pedidos repetidos enquanto um já está a caminho, e o
-  // intervalo de 500ms tenta de novo sozinho se o primeiro pedido falhar
-  // por uma pequena diferença entre o relógio do navegador e o do servidor.
+  // Só o navegador do organizador tenta avançar quando o tempo acaba.
+  // O intervalo curto também corrige pequenas diferenças entre relógios.
   useEffect(() => {
     if (!isPlaying) return;
     let advancing = false;
     const tick = () => {
-      const remaining = Math.max(
-        0,
-        roundSeconds - Math.floor((Date.now() - questionStartedAt) / 1000),
-      );
+      const remaining = state ? roomSecondsLeft(state, Date.now()) : 0;
       setSecondsLeft(remaining);
       if (remaining === 0 && room.isHost && !advancing) {
         advancing = true;
@@ -378,7 +404,20 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
     const timer = window.setInterval(tick, 500);
     return () => window.clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPlaying, questionStartedAt, roundSeconds, room.isHost]);
+  }, [isPlaying, questionStartedAt, roundSeconds, room.isHost, state]);
+
+  const activeParticipantIds = state?.participants
+    .filter((participant) => participant.online !== false)
+    .map((participant) => participant.id);
+  const everyoneAnswered =
+    Boolean(activeParticipantIds?.length) &&
+    activeParticipantIds!.every((id) => state?.answeredParticipantIds.includes(id));
+  useEffect(() => {
+    if (!isPlaying || !room.isHost || !everyoneAnswered) return;
+    const timer = window.setTimeout(() => void room.nextQuestion(), ANSWER_FEEDBACK_MS);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [everyoneAnswered, isPlaying, questionStartedAt, room.isHost]);
 
   function joinRoom(event: FormEvent) {
     event.preventDefault();
@@ -389,12 +428,26 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
     event.preventDefault();
     if (!state?.currentQuestion || !answer.trim()) return;
     const result = await room.submitAnswer(state.questionIndex, answer);
-    setLastResult(result);
+    setLastResult({ ...result, submittedAnswer: answer.trim() });
   }
 
   function exitRoom() {
     room.reset();
     onExit?.();
+  }
+
+  function selectActivity(activity: "listening" | "bingo") {
+    if (activity === "bingo") {
+      setManualMode(false);
+      void room.updateSettings({
+        activity,
+        subjectName: "",
+        category: "",
+        difficulty: "mixed",
+      });
+      return;
+    }
+    void room.updateSettings({ activity });
   }
 
   if (room.isRestoring)
@@ -502,14 +555,22 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
   const questionCount = state.settings.questionCount;
   const pool = localRoomPool(state.settings);
   const availableCount = state.content?.count ?? pool.length;
-  const actualCount =
-    questionCount === "all" ? availableCount : Math.min(questionCount, availableCount);
-  const estimatedMinutes = Math.ceil((actualCount * roundSeconds) / 60);
-  const manualDeck = parseManualListeningCards(manualWords);
-  const manualLineCount = manualWords.split(/\r?\n/).filter((line) => line.trim()).length;
-  const manualDeckIsValid = manualDeck.length === manualLineCount && manualLineCount > 0;
+  const manualInput = parseManualListeningInput(manualWords);
+  const manualDeck = manualInput.cards;
+  const manualErrors = manualInput.lines.filter((line) => line.error);
+  const manualDeckIsValid = manualDeck.length > 0 && manualErrors.length === 0;
+  const usesManualList = state.settings.activity !== "bingo" && manualMode;
   const manualSelectionPending =
-    manualMode && state.settings.subjectName !== MANUAL_LISTENING_SOURCE;
+    usesManualList &&
+    (!manualWords.trim() ||
+      state.settings.subjectName !== MANUAL_LISTENING_SOURCE ||
+      appliedManualWords !== manualWords);
+  const actualCount = usesManualList
+    ? manualDeck.length
+    : questionCount === "all"
+      ? availableCount
+      : Math.min(questionCount, availableCount);
+  const estimatedMinutes = Math.ceil((actualCount * roundSeconds) / 60);
   const ownParticipant = state.participants.find((p) => p.id === room.participantId);
   const teamScores = ["Roxo", "Amarelo"].map((team) => ({
     team,
@@ -604,9 +665,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                           ? (state.settings.activity ?? "listening") === activity.key
                           : undefined
                       }
-                      onClick={() =>
-                        activity.enabled && void room.updateSettings({ activity: activity.key })
-                      }
+                      onClick={() => activity.enabled && selectActivity(activity.key)}
                       key={activity.key}
                     >
                       <span className="local-room-activity__icon">
@@ -642,8 +701,8 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                         );
                       }}
                     >
-                      <option value="">Catálogo de inglês</option>
-                      <option value={MANUAL_LISTENING_SOURCE}>Escrever palavras manualmente</option>
+                      <option value="">Modelo básico</option>
+                      <option value={MANUAL_LISTENING_SOURCE}>Lista personalizada</option>
                       {materials
                         .filter((item) => item.cards.length)
                         .map((item) => (
@@ -657,44 +716,84 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                     state.settings.activity !== "bingo" && (
                       <div className="local-room-manual">
                         <div>
-                          <strong>Palavras da rodada</strong>
-                          <span>{manualLineCount}/30</span>
+                          <strong>Lista personalizada</strong>
+                          <span>
+                            {manualDeck.length} válidas
+                            {manualErrors.length > 0
+                              ? ` · ${manualErrors.length} precisam de correção`
+                              : ""}
+                          </span>
                         </div>
                         <label htmlFor="local-room-manual-words">
-                          Uma por linha, no formato inglês = tradução
+                          Digite ou cole palavras e traduções. Use =, ;, vírgula, tabulação ou
+                          hífen.
                         </label>
                         <textarea
                           id="local-room-manual-words"
                           value={manualWords}
-                          onChange={(event) => setManualWords(event.target.value)}
+                          onChange={(event) => {
+                            setManualWords(event.target.value);
+                            setManualApplyStatus("");
+                          }}
                           placeholder={"school = escola\nfriend = amigo\nbook = livro"}
                           rows={6}
                           spellCheck={false}
                         />
+                        {manualErrors.length > 0 && (
+                          <ul className="local-room-manual__errors" aria-live="polite">
+                            {manualErrors.map((line) => (
+                              <li key={line.lineNumber}>
+                                Linha {line.lineNumber}: {line.error}.
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {manualDeck.length > 0 && (
+                          <div
+                            className="local-room-manual__preview"
+                            aria-label="Prévia das palavras"
+                          >
+                            {manualDeck.slice(0, 6).map((card) => (
+                              <span key={card.id}>
+                                {card.front} → {card.back}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         <div className="local-room-manual__action">
                           <p aria-live="polite">
-                            {manualDeckIsValid
-                              ? `${manualLineCount} palavras prontas para aplicar.`
-                              : manualLineCount > 30
-                                ? "Use no máximo 30 palavras."
-                                : "Preencha cada linha com uma palavra e sua tradução."}
+                            {manualApplyStatus ||
+                              (manualSelectionPending && manualWords.trim()
+                                ? "● Alterações ainda não aplicadas"
+                                : manualDeckIsValid
+                                  ? `${manualDeck.length} palavras prontas para aplicar.`
+                                  : "Adicione pelo menos uma palavra e sua tradução.")}
                           </p>
                           <button
                             className="secondary-button"
                             type="button"
-                            disabled={!manualDeckIsValid}
-                            onClick={() =>
-                              void room.updateSettings(
-                                {
-                                  subjectName: MANUAL_LISTENING_SOURCE,
-                                  difficulty: "mixed",
-                                  category: "",
-                                },
-                                manualDeck,
-                              )
-                            }
+                            disabled={!manualDeckIsValid || !manualSelectionPending}
+                            onClick={() => {
+                              void room
+                                .updateSettings(
+                                  {
+                                    subjectName: MANUAL_LISTENING_SOURCE,
+                                    difficulty: "mixed",
+                                    category: "",
+                                    questionCount: "all",
+                                  },
+                                  manualDeck,
+                                )
+                                .then((saved) => {
+                                  if (!saved) return;
+                                  setAppliedManualWords(manualWords);
+                                  setManualApplyStatus(
+                                    `${manualDeck.length} palavras adicionadas à rodada ✓`,
+                                  );
+                                });
+                            }}
                           >
-                            Aplicar palavras
+                            {manualApplyStatus ? "Palavras aplicadas ✓" : "Aplicar palavras"}
                           </button>
                         </div>
                       </div>
@@ -704,39 +803,41 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                     <select
                       value={state.settings.activity ?? "listening"}
                       onChange={(event) =>
-                        void room.updateSettings({
-                          activity: event.target.value as "listening" | "bingo",
-                        })
+                        selectActivity(event.target.value as "listening" | "bingo")
                       }
                     >
                       <option value="listening">Quiz de escuta</option>
                       <option value="bingo">Bingo de vocabulário</option>
                     </select>
                   </label>
-                  <label>
-                    <span>Matéria / tema</span>
-                    <select
-                      value={state.settings.category ?? ""}
-                      disabled={Boolean(state.settings.subjectName)}
-                      onChange={(event) =>
-                        void room.updateSettings({ category: event.target.value })
-                      }
-                    >
-                      <option value="">Inglês · todos os temas</option>
-                      {ROOM_CATEGORIES.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <p>
-                    {availableCount} questões disponíveis neste filtro. Prévia:{" "}
-                    {(state.content?.preview ?? pool.slice(0, 3).map((card) => card.front)).join(
-                      ", ",
-                    ) || "Nenhuma questão"}
-                    .
-                  </p>
+                  {!usesManualList && (
+                    <>
+                      <label>
+                        <span>Matéria / tema</span>
+                        <select
+                          value={state.settings.category ?? ""}
+                          disabled={Boolean(state.settings.subjectName)}
+                          onChange={(event) =>
+                            void room.updateSettings({ category: event.target.value })
+                          }
+                        >
+                          <option value="">Inglês · todos os temas</option>
+                          {ROOM_CATEGORIES.map((category) => (
+                            <option key={category} value={category}>
+                              {category}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <p>
+                        {availableCount} questões disponíveis neste filtro. Prévia:{" "}
+                        {(
+                          state.content?.preview ?? pool.slice(0, 3).map((card) => card.front)
+                        ).join(", ") || "Nenhuma questão"}
+                        .
+                      </p>
+                    </>
+                  )}
                   <label>
                     <span>Respostas</span>
                     <select
@@ -769,57 +870,65 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                     />{" "}
                     Permitir entrada após iniciar
                   </label>
-                  <label>
-                    <span>Dificuldade</span>
-                    <select
-                      value={state.settings.difficulty}
-                      onChange={(event) =>
-                        void room.updateSettings({
-                          difficulty: event.target.value as LocalRoomSettings["difficulty"],
-                        })
-                      }
-                    >
-                      <option value="mixed">
-                        Misto ·{" "}
-                        {state.content?.difficultyCounts?.mixed ??
-                          localRoomPool({ ...state.settings, difficulty: "mixed" }).length}
-                      </option>
-                      <option value="easy">
-                        Fácil ·{" "}
-                        {state.content?.difficultyCounts?.easy ??
-                          localRoomPool({ ...state.settings, difficulty: "easy" }).length}
-                      </option>
-                      <option value="medium">
-                        Médio ·{" "}
-                        {state.content?.difficultyCounts?.medium ??
-                          localRoomPool({ ...state.settings, difficulty: "medium" }).length}
-                      </option>
-                      <option value="hard">
-                        Difícil ·{" "}
-                        {state.content?.difficultyCounts?.hard ??
-                          localRoomPool({ ...state.settings, difficulty: "hard" }).length}
-                      </option>
-                    </select>
-                  </label>
-                  <label>
-                    <span>Perguntas</span>
-                    <select
-                      value={state.settings.questionCount}
-                      onChange={(event) =>
-                        void room.updateSettings({
-                          questionCount:
-                            event.target.value === "all"
-                              ? "all"
-                              : (Number(event.target.value) as 5 | 10 | 15),
-                        })
-                      }
-                    >
-                      <option value="5">5</option>
-                      <option value="10">10</option>
-                      <option value="15">15</option>
-                      <option value="all">Todas</option>
-                    </select>
-                  </label>
+                  {!usesManualList && (
+                    <label>
+                      <span>Dificuldade</span>
+                      <select
+                        value={state.settings.difficulty}
+                        onChange={(event) =>
+                          void room.updateSettings({
+                            difficulty: event.target.value as LocalRoomSettings["difficulty"],
+                          })
+                        }
+                      >
+                        <option value="mixed">
+                          Misto ·{" "}
+                          {state.content?.difficultyCounts?.mixed ??
+                            localRoomPool({ ...state.settings, difficulty: "mixed" }).length}
+                        </option>
+                        <option value="easy">
+                          Fácil ·{" "}
+                          {state.content?.difficultyCounts?.easy ??
+                            localRoomPool({ ...state.settings, difficulty: "easy" }).length}
+                        </option>
+                        <option value="medium">
+                          Médio ·{" "}
+                          {state.content?.difficultyCounts?.medium ??
+                            localRoomPool({ ...state.settings, difficulty: "medium" }).length}
+                        </option>
+                        <option value="hard">
+                          Difícil ·{" "}
+                          {state.content?.difficultyCounts?.hard ??
+                            localRoomPool({ ...state.settings, difficulty: "hard" }).length}
+                        </option>
+                      </select>
+                    </label>
+                  )}
+                  {usesManualList ? (
+                    <p className="local-room-manual__quantity">
+                      Quantidade: {manualDeck.length || availableCount} · todas as palavras
+                    </p>
+                  ) : (
+                    <label>
+                      <span>Perguntas</span>
+                      <select
+                        value={state.settings.questionCount}
+                        onChange={(event) =>
+                          void room.updateSettings({
+                            questionCount:
+                              event.target.value === "all"
+                                ? "all"
+                                : (Number(event.target.value) as 5 | 10 | 15),
+                          })
+                        }
+                      >
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="all">Todas</option>
+                      </select>
+                    </label>
+                  )}
                   <label>
                     <span>Tempo por pergunta</span>
                     <select
@@ -838,6 +947,57 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                       <option value="60">60s</option>
                     </select>
                   </label>
+                  {state.settings.activity !== "bingo" && (
+                    <details className="listening-audio-settings">
+                      <summary>Configurações de áudio</summary>
+                      <div className="local-room-audio-settings-grid">
+                        <label>
+                          <span>Repetições permitidas</span>
+                          <select
+                            value={state.settings.audioRepetitions ?? "unlimited"}
+                            onChange={(event) =>
+                              void room.updateSettings({
+                                audioRepetitions:
+                                  event.target.value === "unlimited"
+                                    ? "unlimited"
+                                    : (Number(event.target.value) as 1 | 2 | 3),
+                              })
+                            }
+                          >
+                            <option value="unlimited">Ilimitadas</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                          </select>
+                        </label>
+                        <label>
+                          <span>Velocidade</span>
+                          <select
+                            value={state.settings.audioRate ?? 1}
+                            onChange={(event) =>
+                              void room.updateSettings({
+                                audioRate: Number(event.target.value) as 0.75 | 1,
+                              })
+                            }
+                          >
+                            <option value="0.75">0,75×</option>
+                            <option value="1">1×</option>
+                          </select>
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={state.settings.autoPlayAudio ?? false}
+                            onChange={(event) =>
+                              void room.updateSettings({ autoPlayAudio: event.target.checked })
+                            }
+                          />{" "}
+                          Reproduzir automaticamente
+                        </label>
+                        <p>Voz em inglês americano, com alternativa do dispositivo.</p>
+                      </div>
+                    </details>
+                  )}
                   <div className="local-room-summary" aria-label="Resumo da rodada">
                     <strong>
                       {state.settings.activity === "bingo" ? "Bingo" : "Quiz de escuta"} ·{" "}
@@ -915,11 +1075,31 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
               <>
                 <div className="local-room-round__host-question">
                   <Volume2 size={20} />
-                  <span>{state.currentQuestion.front}</span>
+                  <span>{revealHostWord ? state.currentQuestion.front : "Áudio reproduzido"}</span>
                 </div>
+                <button
+                  className="secondary-button local-room-host-audio"
+                  type="button"
+                  onClick={() => playQuestionAudio(state.currentQuestion!.front)}
+                >
+                  <Volume2 size={18} /> Reproduzir áudio
+                </button>
+                <button
+                  className="secondary-button local-room-host-reveal"
+                  type="button"
+                  aria-pressed={revealHostWord}
+                  onClick={() => setRevealHostWord((visible) => !visible)}
+                >
+                  {revealHostWord ? "Ocultar palavra" : "Revelar palavra"}
+                </button>
+                {naturalState.message && naturalState.status !== "ready" && (
+                  <p className="local-room-audio-status" role="status">
+                    {naturalState.message}
+                  </p>
+                )}
                 <p>
                   {state.answeredParticipantIds.length} de {state.participants.length} já
-                  responderam. A rodada passa sozinha quando todo mundo responder ou o tempo acabar.
+                  responderam. Quando todos responderem, o resultado permanece por três segundos.
                 </p>
                 <Scoreboard participants={state.participants} />
                 <button
@@ -972,16 +1152,40 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                 </button>
               </div>
             ) : answered ? (
-              <div className="local-room-waiting" role="status">
+              <div
+                className={`local-room-answer-feedback ${lastResult?.correct ? "is-correct" : "is-wrong"}`}
+                role="status"
+                aria-live="polite"
+              >
                 {lastResult?.correct ? <Check size={28} /> : <Radio size={28} />}
-                <h3>{lastResult?.correct ? "Boa! Resposta certa." : "Resposta enviada."}</h3>
+                <h3>{lastResult?.correct ? "Correto!" : "Ainda não foi dessa vez"}</h3>
+                {!lastResult?.correct && lastResult?.submittedAnswer && (
+                  <p>
+                    Você respondeu: <strong>{lastResult.submittedAnswer}</strong>
+                  </p>
+                )}
+                {lastResult?.question && (
+                  <div className="local-room-answer-feedback__pair">
+                    <strong>{lastResult.question.front}</strong>
+                    <span>{lastResult.question.back}</span>
+                  </div>
+                )}
                 {lastResult && lastResult.xpChange !== 0 && (
                   <p className="local-room-xp-feedback">
                     <NavigationIcon name="xp" /> {lastResult.xpChange > 0 ? "+" : ""}
                     {lastResult.xpChange} XP
                   </p>
                 )}
-                <p>Aguardando a próxima pergunta.</p>
+                {lastResult?.question && (
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => playQuestionAudio(lastResult.question!.front)}
+                  >
+                    <Volume2 size={18} /> Ouvir novamente
+                  </button>
+                )}
+                <p>A próxima pergunta aparece quando todos responderem ou o tempo terminar.</p>
               </div>
             ) : (
               <form className="local-room-answer" onSubmit={submitAnswer}>

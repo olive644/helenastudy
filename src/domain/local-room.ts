@@ -21,6 +21,9 @@ export type LocalRoomSettings = {
   teams?: boolean;
   allowLateJoin?: boolean;
   subjectName?: string;
+  audioRate?: 0.75 | 1;
+  audioRepetitions?: 1 | 2 | 3 | "unlimited";
+  autoPlayAudio?: boolean;
 };
 
 export type LocalRoomParticipant = {
@@ -36,6 +39,12 @@ export type LocalRoomParticipant = {
 };
 
 export type LocalRoomQuestion = { id: string; front: string };
+
+export type LocalRoomAnswerFeedback = {
+  correct: boolean;
+  xpChange: number;
+  question?: { front: string; back: string };
+};
 
 export type LocalRoomState = {
   code: string;
@@ -54,7 +63,13 @@ export type LocalRoomState = {
   expiresAt?: number;
   receipts?: Record<
     string,
-    { correct?: boolean; xpChange?: number; participantId?: string; participantToken?: string }
+    {
+      correct?: boolean;
+      xpChange?: number;
+      question?: { front: string; back: string };
+      participantId?: string;
+      participantToken?: string;
+    }
   >;
   createRequestId?: string;
   generation?: string;
@@ -225,7 +240,7 @@ function isLeading(participants: readonly LocalRoomParticipant[], participantId:
 export function submitRoomAnswer(
   state: LocalRoomState,
   dependencies: { participantId: string; questionIndex: number; answer: string; now: number },
-): { state: LocalRoomState; correct: boolean; xpChange: number } {
+): { state: LocalRoomState } & LocalRoomAnswerFeedback {
   const card = state.deck[dependencies.questionIndex];
   if (
     state.phase !== "playing" ||
@@ -268,9 +283,10 @@ export function submitRoomAnswer(
     answeredParticipantIds: [...state.answeredParticipantIds, dependencies.participantId],
     updatedAt: dependencies.now,
   };
-  const active = answered.participants.filter((p) => p.online !== false);
+  const active = answered.participants.filter((participant) => participant.online !== false);
   const allAnswered =
-    active.length > 0 && active.every((p) => answered.answeredParticipantIds.includes(p.id));
+    active.length > 0 &&
+    active.every((participant) => answered.answeredParticipantIds.includes(participant.id));
   const bingo =
     state.settings.activity === "bingo" &&
     participants.some(
@@ -279,23 +295,39 @@ export function submitRoomAnswer(
   return {
     state: bingo
       ? endRoom(answered, dependencies.now)
-      : allAnswered
+      : state.settings.activity === "bingo" && allAnswered
         ? advanceRoomQuestion(answered, dependencies.now)
         : answered,
     correct,
     xpChange,
+    question: { front: card.front, back: card.back },
   };
 }
 
-// O organizador só consegue avançar manualmente quando o tempo da rodada
-// esgotou. Nunca antes disso, mesmo que só reste um participante sem
-// responder. Quando todo mundo já respondeu, submitRoomAnswer já avança
-// sozinho, então essa checagem existe principalmente para o botão manual
-// (e como rede de segurança contra uma corrida entre duas respostas).
+// A pergunta permanece visível por alguns instantes após a última resposta.
+// O organizador pode avançar quando todos responderem ou quando o tempo acabar.
 export function canAdvanceRoomQuestion(state: LocalRoomState, now: number): boolean {
   if (state.phase !== "playing") return false;
-  if (state.answeredParticipantIds.length >= state.participants.length) return true;
+  const activeParticipants = state.participants.filter(
+    (participant) => participant.online !== false,
+  );
+  if (
+    activeParticipants.length > 0 &&
+    activeParticipants.every((participant) => state.answeredParticipantIds.includes(participant.id))
+  )
+    return true;
   return now >= state.questionStartedAt + state.settings.roundSeconds * 1000;
+}
+
+export function roomSecondsLeft(state: PublicLocalRoomState, now: number): number {
+  const duration = state.settings.roundSeconds * 1000;
+  return Math.max(
+    0,
+    Math.min(
+      state.settings.roundSeconds,
+      Math.ceil((state.questionStartedAt + duration - now) / 1000),
+    ),
+  );
 }
 
 export function advanceRoomQuestion(state: LocalRoomState, now: number): LocalRoomState {

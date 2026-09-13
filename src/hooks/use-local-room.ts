@@ -5,7 +5,11 @@ import {
   normalizeLocalRoomCode,
   sanitizeDisplayName,
 } from "../domain/local-room";
-import type { LocalRoomSettings, PublicLocalRoomState } from "../domain/local-room";
+import type {
+  LocalRoomAnswerFeedback,
+  LocalRoomSettings,
+  PublicLocalRoomState,
+} from "../domain/local-room";
 
 type Role = "choose" | "host" | "participant";
 export type StoredLocalRoomSession = {
@@ -80,6 +84,11 @@ export function normalizeRoomState(data: Partial<PublicLocalRoomState>): PublicL
     ![15, 30, 45, 60].includes(data.settings.roundSeconds) ||
     !["mixed", "easy", "medium", "hard"].includes(data.settings.difficulty) ||
     ![5, 10, 15, "all"].includes(data.settings.questionCount) ||
+    (data.settings.audioRate !== undefined && ![0.75, 1].includes(data.settings.audioRate)) ||
+    (data.settings.audioRepetitions !== undefined &&
+      ![1, 2, 3, "unlimited"].includes(data.settings.audioRepetitions)) ||
+    (data.settings.autoPlayAudio !== undefined &&
+      typeof data.settings.autoPlayAudio !== "boolean") ||
     [
       data.questionIndex,
       data.questionStartedAt,
@@ -459,8 +468,10 @@ export function useLocalRoom(initialJoinCode?: string) {
         ...(sourceDeck ? { sourceDeck } : {}),
       });
       setState(payload.state);
+      return true;
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Não foi possível salvar.");
+      return false;
     }
   }
 
@@ -505,11 +516,12 @@ export function useLocalRoom(initialJoinCode?: string) {
   async function submitAnswer(
     questionIndex: number,
     answer: string,
-  ): Promise<{ correct: boolean; xpChange: number }> {
+  ): Promise<LocalRoomAnswerFeedback> {
     try {
       const payload = await requestRoom<{
         correct: boolean;
         xpChange: number;
+        question?: { front: string; back: string };
         state: PublicLocalRoomState;
       }>("answer", {
         code: codeRef.current,
@@ -519,7 +531,11 @@ export function useLocalRoom(initialJoinCode?: string) {
         answer,
       });
       setState(payload.state);
-      return { correct: payload.correct, xpChange: payload.xpChange };
+      return {
+        correct: payload.correct,
+        xpChange: payload.xpChange,
+        ...(payload.question ? { question: payload.question } : {}),
+      };
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Não foi possível enviar a resposta.");
       return { correct: false, xpChange: 0 };

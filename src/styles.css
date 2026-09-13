@@ -2544,6 +2544,47 @@ select {
   gap: 0.6rem;
 }
 
+.local-room-host-reveal {
+  justify-self: center;
+}
+
+.local-room-answer-feedback {
+  display: grid;
+  justify-items: center;
+  padding: 1.5rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--surface);
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.local-room-answer-feedback.is-correct {
+  border-color: #49a56f;
+}
+
+.local-room-answer-feedback.is-wrong {
+  border-color: #d96b61;
+}
+
+.local-room-answer-feedback h3,
+.local-room-answer-feedback p {
+  margin: 0;
+}
+
+.local-room-answer-feedback__pair {
+  display: grid;
+  min-width: min(100%, 280px);
+  padding: 0.9rem;
+  border-radius: 12px;
+  background: var(--soft);
+  gap: 0.25rem;
+}
+
+.local-room-answer-feedback__pair strong {
+  font-size: 1.35rem;
+}
+
 .local-room-answer {
   display: grid;
   gap: 0.7rem;

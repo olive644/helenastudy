@@ -1,6 +1,6 @@
 # HelenaStudy: Second Brain
 
-## Decisões do Modo Sala — 12/09/2026
+## Decisões do Modo Sala, 12/09/2026
 
 A limpeza passou a processar múltiplos lotes com prazo de 45 segundos, timeout de
 rede e indicação explícita de backlog. O CI da PR #98 validou Chromium/WebKit;
@@ -10,7 +10,7 @@ isso não substitui a validação física nem ativa App Check/cron em produção
 - Sessão temporária possui credencial privada distinta do ID exibido. Presença usa heartbeat e encerra após 2 minutos sem anfitrião; sala tem prazo absoluto de 4 horas.
 - Quiz e bingo compartilham rodada, equipes, prévia e seleção de material. Flashcards pessoais selecionados são compartilhados temporariamente, com aviso na interface.
 - O lobby flat mantém a arte aprovada da Helena no convite, usa os ícones existentes e apresenta atividades futuras desabilitadas. Somente Escuta coletiva e Bingo iniciam rodadas.
-- O Quiz de Escuta aceita um baralho manual de até 30 pares no formato `inglês = tradução`, usando o mesmo armazenamento temporário e as mesmas validações do material pessoal.
+- O Quiz de Escuta prioriza uma lista personalizada de até 30 pares, aceita separadores comuns, explica erros por linha e não expõe a palavra na tela projetada. A resposta privada inclui correção, par esperado e XP por três segundos. A sala sincroniza limite de repetições, velocidade e reprodução automática.
 - SDK Firebase App Check é importado dinamicamente apenas se configurado. JWT é verificado com jose no servidor; configuração externa ainda pendente, sem enforcement ativo declarado.
 - Limpeza autenticada diária em `api/room-cleanup.ts` depende de CRON_SECRET e regras/índices em `firebase-room.rules.json`. Não publicar as regras sem considerar salas legadas sem expiresAt.
 - `npm run verify` reúne lint, formatação, testes, build e orçamento. `PLAYWRIGHT_SYSTEM_EDGE=1` permite validar com Edge local quando os browsers Playwright não estão disponíveis; CI mantém Chromium/WebKit. E2E multiplayer usa transportes de teste, não produção.
@@ -94,6 +94,8 @@ flowchart LR
   STUDY --> LIB[Biblioteca e flashcards]
   STUDY --> PRACTICE[Quizzes e bingo]
   PRACTICE --> LISTEN[Escuta com Cloudflare Workers AI e fallback do dispositivo]
+  LISTEN --> CUSTOM[Lista personalizada com validação por linha]
+  LISTEN --> FEEDBACK[Feedback individual antes da próxima pergunta]
 
   ORG --> PLAN[Agenda e tarefas]
   ORG --> HABITS[Hábitos]
