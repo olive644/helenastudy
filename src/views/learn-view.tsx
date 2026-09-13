@@ -118,18 +118,21 @@ function PracticeHub({
               <button className="link-button" type="button" onClick={() => setInsideWorld(false)}>
                 <HelenaRoomIcon name="back" size={18} /> Voltar aos mundos
               </button>
-              <span className="section-label">Mundo 1</span>
-              <h2 id="solo-world-title">Bosque das palavras</h2>
+              <span className="section-label">Mundo {world.number}</span>
+              <h2 id="solo-world-title">{world.title}</h2>
               <p>Avance pelo caminho e libere um desafio de cada vez.</p>
             </div>
-            <div className="solo-journey__progress" aria-label="Progresso no Mundo 1">
+            <div className="solo-journey__progress" aria-label={`Progresso no Mundo ${world.number}`}>
               <NavigationIcon name="xp" />
               <span>Seu progresso</span>
               <strong>{Math.min(unlockedLevel, SOLO_LEVELS.length)}/4 níveis</strong>
             </div>
           </div>
 
-          <div className="solo-level-path" aria-label="Caminho de níveis do Mundo 1">
+          <div
+            className={`solo-level-path solo-level-path--world-${world.number}`}
+            aria-label={`Caminho de níveis do Mundo ${world.number}`}
+          >
             <svg
               className="solo-level-path__trail"
               viewBox="0 0 360 720"

@@ -111,6 +111,7 @@
 }
 .solo-level-path {
   display: block;
+  isolation: isolate;
   height: 760px;
   min-height: 760px;
   max-width: 660px;
@@ -121,6 +122,29 @@
   border: 0;
   border-radius: 0;
   box-shadow: none;
+}
+.solo-level-path::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: min(108%, 690px) auto;
+  opacity: 0.2;
+  pointer-events: none;
+}
+.solo-level-path--world-1::before {
+  background-image: url("/solo-world-1.png");
+}
+.solo-level-path--world-2::before {
+  background-image: url("/solo-world-2.png");
+}
+.solo-level-path--world-3::before {
+  background-image: url("/solo-world-3.png");
+}
+:root[data-theme="dark"] .solo-level-path::before {
+  opacity: 0.34;
 }
 .solo-level-path__trail {
   inset: 20px 0;
@@ -234,6 +258,9 @@
   .solo-level-path {
     height: 760px;
     padding: 0;
+  }
+  .solo-level-path::before {
+    background-size: 145% auto;
   }
   .solo-path-level {
     width: 100px;
