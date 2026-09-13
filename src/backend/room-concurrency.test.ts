@@ -117,7 +117,7 @@ describe("sala concorrente", () => {
     );
     expect(answers.every((r) => r.status === 200)).toBe(true);
     expect(h.state().participants.every((p) => p.score === 10)).toBe(true);
-    expect(h.state().questionIndex).toBe(1);
+    expect(h.state().questionIndex).toBe(0);
     await h.post("answer", { code: room.code, ...users[0], questionIndex: 0, answer: "again" });
     expect(h.state().participants[0]!.score).toBe(10);
   });

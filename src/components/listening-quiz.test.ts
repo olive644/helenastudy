@@ -5,6 +5,7 @@ import {
   buildListeningDeck,
   createListeningRound,
   isListeningAnswerCorrect,
+  parseManualListeningInput,
   parseManualListeningCards,
   normalizeListeningAnswer,
 } from "../domain/listening-quiz";
@@ -32,8 +33,8 @@ describe("quiz de escuta", () => {
     expect(deck.filter((item) => item.front === "School")).toHaveLength(1);
   });
 
-  it("oferece vocabulário amplo quando faltam flashcards", () => {
-    expect(buildListeningDeck([])).toHaveLength(30);
+  it("oferece somente um modelo básico quando faltam flashcards", () => {
+    expect(buildListeningDeck([])).toHaveLength(5);
   });
 
   it("aceita traduções equivalentes cadastradas", () => {
@@ -49,16 +50,16 @@ describe("quiz de escuta", () => {
 
   it("embaralha a rodada sem repetir palavras", () => {
     const deck = buildListeningDeck([]);
-    const round = createListeningRound(deck, 10, () => 0.42);
-    expect(round).toHaveLength(10);
-    expect(new Set(round.map((item) => item.id)).size).toBe(10);
+    const round = createListeningRound(deck, 5, () => 0.42);
+    expect(round).toHaveLength(5);
+    expect(new Set(round.map((item) => item.id)).size).toBe(5);
   });
 
   it("respeita os limites de cinco, quinze e todas", () => {
     const deck = buildListeningDeck([]);
     expect(createListeningRound(deck, 5)).toHaveLength(5);
-    expect(createListeningRound(deck, 15)).toHaveLength(15);
-    expect(createListeningRound(deck, "all")).toHaveLength(30);
+    expect(createListeningRound(deck, 15)).toHaveLength(5);
+    expect(createListeningRound(deck, "all")).toHaveLength(5);
   });
 
   it("aceita equivalências, acentos e pontuação sem aproximação semântica", () => {
@@ -81,5 +82,16 @@ describe("quiz de escuta", () => {
 
   it("informa linhas manuais sem palavra ou tradução", () => {
     expect(parseManualListeningCards("school = escola\nsem tradução\n= resposta")).toEqual([]);
+  });
+
+  it("aceita listas coladas e explica erros por linha", () => {
+    const parsed = parseManualListeningInput(
+      "school; escola\nfriend, amigo\nbook\t livro\n= vazio\nschool - colégio",
+    );
+    expect(parsed.cards.map((item) => item.front)).toEqual(["school", "friend", "book"]);
+    expect(parsed.lines.filter((line) => line.error).map((line) => line.error)).toEqual([
+      "falta a palavra em inglês",
+      "“school” já foi usada na linha 1",
+    ]);
   });
 });

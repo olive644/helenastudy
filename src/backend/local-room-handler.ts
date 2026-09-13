@@ -65,6 +65,9 @@ function isSettingsPayload(value: unknown): value is Partial<LocalRoomSettings> 
           "teams",
           "allowLateJoin",
           "subjectName",
+          "audioRate",
+          "audioRepetitions",
+          "autoPlayAudio",
         ].includes(key),
     )
   )
@@ -83,7 +86,7 @@ function isSettingsPayload(value: unknown): value is Partial<LocalRoomSettings> 
   )
     return false;
   if (
-    ["shuffle", "teams", "allowLateJoin"].some(
+    ["shuffle", "teams", "allowLateJoin", "autoPlayAudio"].some(
       (key) => key in candidate && typeof candidate[key] !== "boolean",
     )
   )
@@ -103,6 +106,15 @@ function isSettingsPayload(value: unknown): value is Partial<LocalRoomSettings> 
   if (
     "roundSeconds" in candidate &&
     ![15, 30, 45, 60].includes(candidate["roundSeconds"] as number)
+  ) {
+    return false;
+  }
+  if ("audioRate" in candidate && ![0.75, 1].includes(candidate["audioRate"] as number)) {
+    return false;
+  }
+  if (
+    "audioRepetitions" in candidate &&
+    ![1, 2, 3, "unlimited"].includes(candidate["audioRepetitions"] as number | string)
   ) {
     return false;
   }
@@ -415,12 +427,17 @@ function createRoomAttempt(dependencies: LocalRoomHandlerDependencies) {
       const result = submitRoomAnswer(state, { participantId, questionIndex, answer, now: now() });
       result.state.receipts = {
         ...result.state.receipts,
-        [key]: { correct: result.correct, xpChange: result.xpChange },
+        [key]: {
+          correct: result.correct,
+          xpChange: result.xpChange,
+          ...(result.question ? { question: result.question } : {}),
+        },
       };
       const publicState = await saveRoom(result.state);
       return jsonResponse(200, {
         correct: result.correct,
         xpChange: result.xpChange,
+        question: result.question,
         state: publicState,
       });
     }

@@ -69,6 +69,12 @@ describe("handler da sala local", () => {
       post("create", { settings: { difficulty: "easy", questionCount: 10, roundSeconds: 5 } }),
     );
     expect(invalidRound.status).toBe(400);
+    const invalidAudio = await handler(
+      post("create", {
+        settings: { difficulty: "easy", questionCount: 5, audioRepetitions: 0 },
+      }),
+    );
+    expect(invalidAudio.status).toBe(400);
   });
 
   it("aplica 30s como tempo padrão da rodada quando não informado", async () => {
@@ -180,7 +186,7 @@ describe("handler da sala local", () => {
     expect((await handler(post("start", { code, hostToken: "errado" }))).status).toBe(403);
 
     const settingsResponse = await handler(
-      post("settings", { code, hostToken, settings: { difficulty: "hard" } }),
+      post("settings", { code, hostToken, settings: { difficulty: "easy" } }),
     );
     expect(settingsResponse.status).toBe(200);
 
@@ -199,7 +205,7 @@ describe("handler da sala local", () => {
     expect(response.status).toBe(409);
   });
 
-  it("dá xp na resposta e avança sozinho quando todo mundo já respondeu", async () => {
+  it("dá feedback e mantém a pergunta por alguns segundos", async () => {
     const { code, hostToken } = await createRoomViaApi();
     const joinResponse = await handler(post("join", { code, displayName: "Ana" }));
     const { participantId, participantToken } = (await joinResponse.json()) as {
@@ -221,12 +227,13 @@ describe("handler da sala local", () => {
     const answerPayload = (await answerResponse.json()) as {
       correct: boolean;
       xpChange: number;
+      question: { front: string; back: string };
       state: { questionIndex: number };
     };
     expect(typeof answerPayload.correct).toBe("boolean");
-    // Único participante da sala: ao responder, já passou a ser "todo mundo
-    // respondeu" e a rodada avança sozinha, sem precisar de action=next.
-    expect(answerPayload.state.questionIndex).toBe(1);
+    expect(answerPayload.state.questionIndex).toBe(0);
+    expect(answerPayload.question.front).toBeTruthy();
+    expect(answerPayload.question.back).toBeTruthy();
   });
 
   it("recusa avançar manualmente antes do tempo, e aceita depois que o tempo acaba", async () => {

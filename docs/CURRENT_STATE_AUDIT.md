@@ -1,6 +1,6 @@
 # Auditoria do estado atual
 
-## Modo Sala — endurecimento em revisão (12/09/2026)
+## Modo Sala, endurecimento em revisão (12/09/2026)
 
 Esta seção atualiza o diagnóstico histórico abaixo; código na branch não significa configuração ativa em produção.
 
@@ -15,6 +15,7 @@ pendente a ativação externa e a validação em aparelhos físicos/Firebase rea
 - Abuso: limites distribuídos por origem de rede e ação; App Check com verificação de assinatura/claims implementado, mas **não ativado**. O projeto appstudyoli não tinha aplicativo Web registrado na consulta desta execução. Falta chave pública reCAPTCHA Enterprise/domínio e configuração do app.
 - Expiração: prazo absoluto de 4 horas, regras de leitura por expiresAt e limpeza autenticada agendada de projeção pública/privada/contadores. **Regras e cron ainda não publicados**. O lote atual remove até 100 itens por caminho/execução; monitorar acúmulo e ampliar frequência/capacidade antes de maior escala. Projeções legadas sem expiresAt exigem migração/remoção separada.
 - Rodada: categoria, contagem por dificuldade, prévia, até 30 flashcards de matéria própria, equipes alternadas, embaralhamento e entrada tardia configuráveis. Compartilhar matéria envia frente/verso temporariamente ao servidor; aviso explícito no seletor. Material próprio usa dificuldade média.
+- Escuta em sala: a lista personalizada aceita pares colados com `=`, ponto e vírgula, vírgula, tabulação ou hífen, informa erros por linha e substitui o antigo catálogo extenso por cinco exemplos básicos. A tela do anfitrião oculta a palavra por padrão; cada participante recebe feedback privado com resposta, tradução e XP antes do avanço. Repetições, velocidade e reprodução automática são sincronizadas na sala.
 - Bingo: cartelas e marcas validadas no servidor; primeira cartela completa encerra a partida. Entrada tardia recebe até 9 itens restantes e pode ter cartela menor; desabilitar entrada tardia quando a igualdade competitiva for importante.
 - Resiliência: Error Boundary da sala, cancelamento de requisições, timeout, retomada com retry sem apagar credencial em falha transitória, validação de payloads, logs de ação/status/duração, foco de teclado contido no diálogo.
 - Evidência local: concorrência de 30 entradas/respostas em armazenamento atômico de teste; ETags/412 com HTTP simulado; partidas completas de quiz e bingo com anfitrião e dois jogadores em contextos separados, incluindo reload. Transporte E2E usa handler real + adaptador em memória, **não Firebase real**. Edge instalado substituiu browsers cujo download falhou; Safari/WebKit, bloqueio físico de celular, carga real de 30 dispositivos e auditoria assistiva completa continuam pendentes.
@@ -212,14 +213,14 @@ acessível de cada aba.
 
 ## 11. Vocabulário e voz do quiz de escuta
 
-O quiz de escuta combina os flashcards do aluno com um conjunto local de 30 palavras e expressões
+O quiz de escuta combina os flashcards do aluno com um modelo local pequeno de cinco palavras
 em inglês, sem duplicar termos. As respostas aceitam a palavra ou expressão ouvida, a tradução
 principal e equivalentes cadastrados. Os filtros Fácil, Médio e Difícil continuam sendo calculados
 pela base local de frequência, com os mesmos fallbacks já documentados.
 
 A pronúncia neural usa o **Cloudflare Workers AI** (modelo `@cf/myshell-ai/melotts`, voz natural em
 inglês), chamado direto pela função `/api/speech` da Vercel com o token em variável de ambiente
-protegida — nunca exposto ao navegador. O navegador envia somente o texto da pergunta e a velocidade;
+protegida, nunca exposto ao navegador. O navegador envia somente o texto da pergunta e a velocidade;
 a resposta chega em MP3.
 
 Existe um serviço próprio Kokoro+Piper (`services/tts`, container separado, Kokoro como voz principal
@@ -229,16 +230,16 @@ momento**: nenhuma hospedagem grátis viável foi encontrada pra rodar os dois m
 porque roda na infraestrutura deles mesmo, sem precisar hospedar nada.
 
 Uma tentativa ainda mais antiga de rodar o Kokoro-82M direto no navegador (worker) também foi removida,
-porque o download e a inicialização locais prejudicavam o tempo até a primeira pronúncia — problema que
+porque o download e a inicialização locais prejudicavam o tempo até a primeira pronúncia, problema que
 nenhuma das abordagens server-side repete. O áudio é reutilizado por texto normalizado e velocidade no
 cache do navegador (durante a sessão). Requisições antigas são canceladas quando a seleção muda. Se o
 Cloudflare Workers AI falhar ou não estiver configurado, a melhor voz em inglês instalada no
 dispositivo é acionada automaticamente, tanto no Quiz de Escuta quanto no Modo Sala.
 
-As rodadas agora são embaralhadas sem repetição e aceitam 5, 10, 15 ou todas as palavras. O catálogo
-pedagógico tipado separa as 30 palavras do componente, com dificuldade, categoria e traduções
-equivalentes. O feedback correto e incorreto possui ícones, textos e ações distintos, e uma trava
-impede que a mesma submissão altere a pontuação duas vezes.
+As rodadas são embaralhadas sem repetição e aceitam 5, 10, 15 ou todas as palavras disponíveis. O
+modelo embutido foi reduzido a cinco exemplos; listas personalizadas e cartões do aluno são o fluxo
+principal. O feedback correto e incorreto possui ícones, textos e ações distintos, e uma trava impede
+que a mesma submissão altere a pontuação duas vezes.
 
 ## 12. Modo Sala online
 
@@ -261,9 +262,11 @@ da escolha da atividade no desktop e passam para uma coluna no celular. Escuta c
 estão disponíveis; Flashcards em grupo e Quiz competitivo aparecem desabilitados como “Em breve”.
 A barra inferior resume a rodada e mantém a ação de início visível. Os ícones aprovados do projeto,
 a arte da Helena segurando a placa e o QR SVG dinâmico foram preservados.
-No quiz de escuta, o professor também pode montar a rodada manualmente com até 30 pares no formato
-`inglês = tradução`. O formulário valida linhas incompletas antes de enviar o baralho temporário e
-mantém o início bloqueado até que as palavras sejam aplicadas à sala.
+No quiz de escuta, a Lista personalizada é o fluxo principal. Ela aceita até 30 pares separados por
+igual, ponto e vírgula, vírgula, tabulação ou hífen. O formulário aponta erros e duplicatas por linha,
+mostra uma prévia e confirma quando as palavras são aplicadas. Controles incompatíveis ficam ocultos.
+Durante a rodada, o projetor esconde a palavra por padrão. Cada aluno recebe a resposta esperada e o
+XP após responder; quando todos terminam, há três segundos de feedback antes da próxima pergunta.
 Anfitrião e participante guardam a credencial somente na aba atual e retomam a mesma sala após uma
 atualização da página, inclusive durante a rodada. Uma sessão expirada ou inválida é descartada com
 mensagem clara, sem criar um participante duplicado.

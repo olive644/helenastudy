@@ -13,6 +13,7 @@ import {
   normalizeLocalRoomCode,
   rankLocalRoomParticipants,
   readLocalRoomCodeFromUrl,
+  roomSecondsLeft,
   sanitizeDisplayName,
   startRoom,
   submitRoomAnswer,
@@ -142,7 +143,6 @@ describe("sala local", () => {
       CORRECT_ANSWER_XP,
     );
 
-    const nextCard = leading.state.deck[leading.state.questionIndex]!;
     const stillTwoAnswered = submitRoomAnswer(leading.state, {
       participantId: "p2",
       questionIndex: leading.state.questionIndex,
@@ -152,11 +152,13 @@ describe("sala local", () => {
     // p2 não lidera (0 contra CORRECT_ANSWER_XP de p1), então não perde nada.
     expect(stillTwoAnswered.xpChange).toBe(0);
 
-    const p1Wrong = submitRoomAnswer(stillTwoAnswered.state, {
+    const nextState = advanceRoomQuestion(stillTwoAnswered.state, 6);
+    const nextCard = nextState.deck[nextState.questionIndex]!;
+    const p1Wrong = submitRoomAnswer(nextState, {
       participantId: "p1",
-      questionIndex: stillTwoAnswered.state.questionIndex,
+      questionIndex: nextState.questionIndex,
       answer: "errada",
-      now: 6,
+      now: 7,
     });
     expect(p1Wrong.xpChange).toBe(-LEADER_WRONG_ANSWER_PENALTY_XP);
     expect(p1Wrong.state.participants.find((item) => item.id === "p1")?.score).toBe(
@@ -165,7 +167,7 @@ describe("sala local", () => {
     expect(nextCard).toBeTruthy();
   });
 
-  it("avança a rodada sozinha assim que todo mundo responde", () => {
+  it("mantém a pergunta para mostrar feedback quando todo mundo responde", () => {
     const started = startedWithTwo();
     const card = started.deck[0]!;
     const first = submitRoomAnswer(started, {
@@ -181,9 +183,9 @@ describe("sala local", () => {
       answer: card.back,
       now: 5,
     });
-    expect(second.state.questionIndex).toBe(1);
-    expect(second.state.answeredParticipantIds).toEqual([]);
-    expect(second.state.questionStartedAt).toBe(5);
+    expect(second.state.questionIndex).toBe(0);
+    expect(second.state.answeredParticipantIds).toEqual(["p1", "p2"]);
+    expect(second.question).toEqual({ front: card.front, back: card.back });
   });
 
   it("recusa resposta de participante desconhecido ou de pergunta errada", () => {
@@ -218,6 +220,17 @@ describe("sala local", () => {
       now: 4,
     }).state;
     expect(canAdvanceRoomQuestion(oneAnswered, 5)).toBe(false);
+    expect(
+      canAdvanceRoomQuestion(
+        {
+          ...oneAnswered,
+          participants: oneAnswered.participants.map((participant) =>
+            participant.id === "p2" ? { ...participant, online: false } : participant,
+          ),
+        },
+        5,
+      ),
+    ).toBe(true);
   });
 
   it("avança perguntas e termina no fim do baralho", () => {
@@ -265,5 +278,12 @@ describe("sala local", () => {
     });
     expect(publicState.totalQuestions).toBe(5);
     expect(publicState.questionStartedAt).toBe(started.questionStartedAt);
+  });
+
+  it("limita o cronômetro ao tempo configurado mesmo com relógio adiantado", () => {
+    const state = toPublicRoomState(startedWithTwo());
+    expect(roomSecondsLeft(state, state.questionStartedAt - 500)).toBe(30);
+    expect(roomSecondsLeft(state, state.questionStartedAt + 1)).toBe(30);
+    expect(roomSecondsLeft(state, state.questionStartedAt + 30_000)).toBe(0);
   });
 });
