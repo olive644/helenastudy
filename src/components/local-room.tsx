@@ -25,6 +25,7 @@ import {
   type RoomConnectionStatus,
 } from "../hooks/use-local-room";
 import { ThemeToggle } from "./app-navigation";
+import { HelenaLoading } from "./helena-loading";
 import { NavigationIcon } from "./navigation-icon";
 import { HelenaRoomIcon } from "./helena-room-icon";
 import { RoomQrCode } from "./room-qr-code";
@@ -36,7 +37,7 @@ const DEFAULT_SETTINGS: LocalRoomSettings = {
   subjectName: "Lista personalizada",
   audioRate: 1,
   audioRepetitions: "unlimited",
-  autoPlayAudio: false,
+  autoPlayAudio: true,
 };
 
 const ROOM_ACTIVITY_OPTIONS = [
@@ -72,10 +73,15 @@ const ROOM_ACTIVITY_OPTIONS = [
 const MEDAL_ICON_BY_RANK = ["medal-first", "medal-second", "medal-third"] as const;
 const MANUAL_LISTENING_SOURCE = "Lista personalizada";
 const ANSWER_FEEDBACK_MS = 3_000;
+const AUDIO_REPLAY_COOLDOWN_MS = 5_000;
 
 // Passos da contagem regressiva antes de liberar a primeira pergunta:
 // 3, 2, 1 e "Vai!" (representado por 0), cada um por COUNTDOWN_STEP_MS.
 const COUNTDOWN_STEP_MS = 700;
+
+function countLabel(count: number, singular: string, plural: string) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
 
 function CountdownOverlay({ value }: { value: number }) {
   return (
@@ -297,7 +303,7 @@ function ProjectorRoom({
           <span aria-hidden="true" /> {connectionLabel}
         </p>
         <p>
-          <Users size={22} /> {connected.length} participantes
+          <Users size={22} /> {countLabel(connected.length, "participante", "participantes")}
         </p>
         <button
           className="secondary-button"
@@ -352,7 +358,7 @@ function ProjectorRoom({
       ) : (
         <main className="local-room-projector__results">
           <NavigationIcon name="medal-first" />
-          <h1>Resultado da turma</h1>
+          <h1>{state.phase === "finished" ? "Sala encerrada" : "Resultado da turma"}</h1>
           <Podium participants={state.participants} />
         </main>
       )}
@@ -384,6 +390,10 @@ export function LocalRoom({
   const [naturalState, setNaturalState] = useState<NaturalVoiceState>({ status: "idle" });
   const naturalPlayerRef = useRef<NaturalVoicePlayer | undefined>(undefined);
   const audioPlayCountRef = useRef(0);
+  const countdownAudioQuestionRef = useRef<string | undefined>(undefined);
+  const countdownHasRenderedRef = useRef(false);
+  const [replayCooldownUntil, setReplayCooldownUntil] = useState(0);
+  const [replayCooldownSeconds, setReplayCooldownSeconds] = useState(0);
 
   useEffect(() => {
     const player = new NaturalVoicePlayer(setNaturalState);
@@ -409,6 +419,14 @@ export function LocalRoom({
     });
   }
 
+  function replayQuestionAudio(text: string) {
+    if (Date.now() < replayCooldownUntil) return;
+    playQuestionAudio(text);
+    const cooldownUntil = Date.now() + AUDIO_REPLAY_COOLDOWN_MS;
+    setReplayCooldownUntil(cooldownUntil);
+    setReplayCooldownSeconds(5);
+  }
+
   const [appliedJoinCode, setAppliedJoinCode] = useState(false);
   if (initialJoinCode && !appliedJoinCode && room.role === "choose") {
     setAppliedJoinCode(true);
@@ -424,6 +442,8 @@ export function LocalRoom({
     setRevealHostWord(false);
     setConfirmRevealHostWord(false);
     setIsSubmittingAnswer(false);
+    setReplayCooldownUntil(0);
+    setReplayCooldownSeconds(0);
   }
 
   const currentQuestionFront = state?.currentQuestion?.front;
@@ -436,19 +456,6 @@ export function LocalRoom({
     if (currentQuestionFront)
       naturalPlayerRef.current?.preload(currentQuestionFront, state?.settings.audioRate ?? 1);
   }, [questionKey, currentQuestionFront, state?.settings.audioRate]);
-
-  useEffect(() => {
-    if (
-      currentQuestionFront &&
-      state?.phase === "playing" &&
-      room.isHost &&
-      !projectorMode &&
-      state.settings.autoPlayAudio
-    )
-      playQuestionAudio(currentQuestionFront);
-    // A pergunta nova é o único gatilho para a reprodução automática.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionKey]);
 
   const participantCount = state?.participants.length ?? 0;
   const canJoin = !room.busy && isValidLocalRoomCode(code) && name.trim().length > 0;
@@ -478,10 +485,16 @@ export function LocalRoom({
   useEffect(() => {
     const previousPhase = previousPhaseRef.current;
     previousPhaseRef.current = state?.phase;
-    if (previousPhase === "lobby" && state?.phase === "playing" && state.questionIndex === 0) {
+    if (
+      (previousPhase === "lobby" || previousPhase === "results") &&
+      state?.phase === "playing" &&
+      state.questionIndex === 0
+    ) {
+      countdownAudioQuestionRef.current = questionKey;
+      countdownHasRenderedRef.current = false;
       setCountdownValue(3);
     }
-  }, [state?.phase, state?.questionIndex]);
+  }, [questionKey, state?.phase, state?.questionIndex]);
   useEffect(() => {
     if (countdownValue === null) return;
     const timer = window.setTimeout(() => {
@@ -489,6 +502,33 @@ export function LocalRoom({
     }, COUNTDOWN_STEP_MS);
     return () => window.clearTimeout(timer);
   }, [countdownValue]);
+
+  useEffect(() => {
+    if (!currentQuestionFront || state?.phase !== "playing" || projectorMode) return;
+    if (countdownAudioQuestionRef.current === questionKey) {
+      if (countdownValue !== null) {
+        countdownHasRenderedRef.current = true;
+        return;
+      }
+      if (!countdownHasRenderedRef.current) return;
+      countdownAudioQuestionRef.current = undefined;
+    }
+    if (state.settings.autoPlayAudio) playQuestionAudio(currentQuestionFront);
+    // Uma pergunta nova ou o fim da contagem são os únicos gatilhos automáticos.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countdownValue, currentQuestionFront, projectorMode, questionKey, state?.phase]);
+
+  useEffect(() => {
+    if (!replayCooldownUntil) return;
+    const update = () => {
+      const remaining = Math.max(0, Math.ceil((replayCooldownUntil - Date.now()) / 1000));
+      setReplayCooldownSeconds(remaining);
+      if (!remaining) setReplayCooldownUntil(0);
+    };
+    update();
+    const timer = window.setInterval(update, 250);
+    return () => window.clearInterval(timer);
+  }, [replayCooldownUntil]);
 
   // Só o navegador do organizador tenta avançar quando o tempo acaba.
   // O intervalo curto também corrige pequenas diferenças entre relógios.
@@ -775,8 +815,12 @@ export function LocalRoom({
           </div>
         </header>
         <p className="local-note" role="status" aria-live="polite">
-          {state.participants.filter((p) => p.online !== false).length} participantes conectados ·{" "}
-          {connectionLabel}
+          {countLabel(
+            state.participants.filter((p) => p.online !== false).length,
+            "participante conectado",
+            "participantes conectados",
+          )}{" "}
+          · {connectionLabel}
         </p>
         {room.error && <p role="alert">{room.error}</p>}
         {state.settings.teams && (
@@ -923,7 +967,8 @@ export function LocalRoom({
                           >
                             {manualDeck.slice(0, 6).map((card) => (
                               <span key={card.id}>
-                                {card.front} → {card.back}
+                                {card.front} →{" "}
+                                {[card.back, ...(card.acceptedAnswers ?? [])].join(" | ")}
                               </span>
                             ))}
                           </div>
@@ -934,7 +979,7 @@ export function LocalRoom({
                               (manualSelectionPending && manualWords.trim()
                                 ? "● Alterações ainda não aplicadas"
                                 : manualDeckIsValid
-                                  ? `${manualDeck.length} palavras prontas para aplicar.`
+                                  ? `${countLabel(manualDeck.length, "palavra pronta", "palavras prontas")} para aplicar.`
                                   : "Adicione pelo menos uma palavra e sua tradução.")}
                           </p>
                           <button
@@ -956,7 +1001,7 @@ export function LocalRoom({
                                   if (!saved) return;
                                   setAppliedManualWords(manualWords);
                                   setManualApplyStatus(
-                                    `${manualDeck.length} palavras adicionadas à rodada ✓`,
+                                    `${countLabel(manualDeck.length, "palavra adicionada", "palavras adicionadas")} à rodada ✓`,
                                   );
                                 });
                             }}
@@ -1184,7 +1229,8 @@ export function LocalRoom({
                       {state.settings.subjectName || "vocabulário em inglês"}
                     </strong>
                     <p>
-                      {actualCount} perguntas · {state.settings.roundSeconds}s cada
+                      {countLabel(actualCount, "pergunta", "perguntas")} ·{" "}
+                      {state.settings.roundSeconds}s cada
                       {actualCount ? ` · cerca de ${estimatedDuration}` : ""}
                     </p>
                     <small>
@@ -1203,11 +1249,13 @@ export function LocalRoom({
                     {state.settings.activity === "bingo" ? "Bingo" : "Escuta coletiva"}
                   </strong>
                   <p>
-                    {actualCount} perguntas, {state.settings.roundSeconds}s cada, cerca de{" "}
-                    {estimatedDuration}
+                    {countLabel(actualCount, "pergunta", "perguntas")},{" "}
+                    {state.settings.roundSeconds}s cada, cerca de {estimatedDuration}
                   </p>
                 </div>
-                <span>{participantCount} participantes prontos</span>
+                <span>
+                  {countLabel(participantCount, "participante pronto", "participantes prontos")}
+                </span>
                 <div>
                   <button
                     className="primary-button"
@@ -1380,9 +1428,13 @@ export function LocalRoom({
                   <button
                     className="secondary-button"
                     type="button"
-                    onClick={() => playQuestionAudio(lastResult.question!.front)}
+                    disabled={replayCooldownSeconds > 0 || naturalState.status === "generating"}
+                    onClick={() => replayQuestionAudio(lastResult.question!.front)}
                   >
-                    <Volume2 size={18} /> Ouvir novamente
+                    <Volume2 size={18} />
+                    {replayCooldownSeconds > 0
+                      ? `Ouvir novamente em ${replayCooldownSeconds}s`
+                      : "Ouvir novamente"}
                   </button>
                 )}
                 {everyoneAnswered ? (
@@ -1404,9 +1456,13 @@ export function LocalRoom({
                 <button
                   className="secondary-button"
                   type="button"
-                  onClick={() => playQuestionAudio(state.currentQuestion!.front)}
+                  disabled={replayCooldownSeconds > 0 || naturalState.status === "generating"}
+                  onClick={() => replayQuestionAudio(state.currentQuestion!.front)}
                 >
-                  <Volume2 size={18} /> Ouvir de novo
+                  <Volume2 size={18} />
+                  {replayCooldownSeconds > 0
+                    ? `Ouvir novamente em ${replayCooldownSeconds}s`
+                    : "Ouvir novamente"}
                 </button>
                 {naturalState.message && naturalState.status !== "ready" && (
                   <p className="local-room-audio-status" role="status">
@@ -1429,18 +1485,45 @@ export function LocalRoom({
                 >
                   {isSubmittingAnswer ? "Enviando…" : "Responder"}
                 </button>
+                {isSubmittingAnswer && <HelenaLoading compact label="Enviando resposta…" />}
               </form>
+            )}
+          </div>
+        ) : state.phase === "results" ? (
+          <div className="local-room-finished">
+            <div className="local-room-waiting" role="status">
+              <NavigationIcon name="medal-first" />
+              <h3>Atividade concluída</h3>
+            </div>
+            <Podium participants={state.participants} />
+            {room.isHost ? (
+              <div className="local-room-results-actions">
+                <button className="primary-button" type="button" onClick={room.repeatRound}>
+                  <HelenaRoomIcon name="play" size={18} /> Repetir
+                </button>
+                <button className="secondary-button" type="button" onClick={room.returnToLobby}>
+                  Trocar atividade
+                </button>
+                <button className="secondary-button" type="button" onClick={room.endRoom}>
+                  <HelenaRoomIcon name="close" size={18} /> Encerrar sala
+                </button>
+              </div>
+            ) : (
+              <div className="local-room-answer-received" role="status">
+                <strong>Atividade concluída ✓</strong>
+                <p>Aguardando a próxima escolha do professor.</p>
+              </div>
             )}
           </div>
         ) : (
           <div className="local-room-finished">
             <div className="local-room-waiting" role="status">
-              <NavigationIcon name="medal-first" />
+              <HelenaRoomIcon name="close" size={24} />
               <h3>Sala encerrada</h3>
             </div>
             <Podium participants={state.participants} />
             <button className="secondary-button" type="button" onClick={room.reset}>
-              <HelenaRoomIcon name="close" size={18} /> Sair
+              Sair
             </button>
           </div>
         )}

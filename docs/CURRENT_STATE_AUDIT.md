@@ -270,7 +270,12 @@ digitação em respostas com quatro ou mais caracteres. Essa tolerância permane
 Durante a rodada, o painel do professor esconde a palavra por padrão e exige confirmação antes de
 revelá-la. Cada aluno recebe a resposta esperada e o XP após responder; quando todos terminam, há três
 segundos de feedback com uma barra regressiva antes da próxima pergunta. A estimativa da rodada inclui
-esse intervalo. O envio da resposta fica bloqueado enquanto a rede processa a ação.
+esse intervalo. O envio da resposta fica bloqueado enquanto a rede processa a ação e mostra o loading
+compacto da Helena. Depois de “Vai!”, a palavra é reproduzida automaticamente quando essa opção está
+ativa. O aluno pode ouvi-la novamente, com cinco segundos de espera entre os acionamentos.
+As respostas equivalentes cadastradas no material manual são preservadas pelo backend. Ao terminar a
+atividade, a sala continua ativa: o professor pode repetir a configuração, escolher outra atividade ou
+encerrar a sala explicitamente.
 O anfitrião pode abrir a rota protegida `/sala/<código>/projetor` em outra tela. Ela mantém o código,
 o QR com a arte aprovada da Helena, o cronômetro, as respostas recebidas e o placar, mas não oferece
 controles administrativos nem revela a palavra.

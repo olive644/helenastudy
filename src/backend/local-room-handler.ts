@@ -5,6 +5,8 @@ import {
   createLocalRoomCode,
   createRoom,
   endRoom,
+  repeatRoom,
+  returnRoomToLobby,
   isValidLocalRoomCode,
   MAX_ROOM_PARTICIPANTS,
   normalizeLocalRoomCode,
@@ -365,6 +367,13 @@ function createRoomAttempt(dependencies: LocalRoomHandlerDependencies) {
               typeof card.back !== "string" ||
               !card.front.trim() ||
               !card.back.trim() ||
+              (card.acceptedAnswers !== undefined &&
+                (!Array.isArray(card.acceptedAnswers) ||
+                  card.acceptedAnswers.length > 10 ||
+                  card.acceptedAnswers.some(
+                    (answer: unknown) =>
+                      typeof answer !== "string" || !answer.trim() || answer.length > 200,
+                  ))) ||
               card.id.length > 80 ||
               card.front.length > 200 ||
               card.back.length > 200,
@@ -379,6 +388,9 @@ function createRoomAttempt(dependencies: LocalRoomHandlerDependencies) {
             id: `material-${index}`,
             front: card.front.trim(),
             back: card.back.trim(),
+            ...(card.acceptedAnswers?.length
+              ? { acceptedAnswers: card.acceptedAnswers.map((answer: string) => answer.trim()) }
+              : {}),
             difficulty: "medium",
           }));
       }
@@ -465,6 +477,28 @@ function createRoomAttempt(dependencies: LocalRoomHandlerDependencies) {
       if (state instanceof Response) return state;
       const ended = endRoom(state, now());
       const publicState = await saveRoom(ended);
+      return jsonResponse(200, { state: publicState });
+    }
+
+    if (action === "repeat" && request.method === "POST") {
+      const body = await readJsonBody(request);
+      const state = await requireHost(dependencies.store, body);
+      if (state instanceof Response) return state;
+      const repeated = repeatRoom(state, { now: now() });
+      if (repeated.phase !== "playing")
+        return jsonResponse(409, { error: "A atividade ainda não terminou." });
+      const publicState = await saveRoom(repeated);
+      return jsonResponse(200, { state: publicState });
+    }
+
+    if (action === "lobby" && request.method === "POST") {
+      const body = await readJsonBody(request);
+      const state = await requireHost(dependencies.store, body);
+      if (state instanceof Response) return state;
+      const lobby = returnRoomToLobby(state, now());
+      if (lobby.phase !== "lobby")
+        return jsonResponse(409, { error: "A atividade ainda não terminou." });
+      const publicState = await saveRoom(lobby);
       return jsonResponse(200, { state: publicState });
     }
 
