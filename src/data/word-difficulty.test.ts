@@ -11,13 +11,11 @@ describe("dificuldade de vocabulário", () => {
   });
 
   it("consulta Datamuse e mantém o resultado em cache", async () => {
-    vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(new Response("{}", { status: 404 }))
-      .mockResolvedValueOnce(
-        new Response(JSON.stringify([{ word: "school", tags: ["n", "f:120.5"] }]), {
-          status: 200,
-        }),
-      );
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify([{ word: "school", tags: ["n", "f:120.5"] }]), {
+        status: 200,
+      }),
+    );
     const result = await classifyWordDifficulty("School");
     expect(result.source).toBe("datamuse");
     expect(result.difficulty).toBe("easy");

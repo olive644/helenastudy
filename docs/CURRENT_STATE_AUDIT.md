@@ -35,9 +35,8 @@ Ativação e limites operacionais: ver `ROOM_SETUP.md`.
 ## Dificuldade automática do vocabulário
 
 - O quiz de escuta classifica palavras como fáceis, médias ou difíceis usando frequência Zipf.
-- Uma base inglesa compacta é carregada somente ao abrir a atividade; o pacote Python completo não entra no bundle do navegador.
-- Palavras ausentes consultam a Datamuse e ficam em cache local. Se a rede falhar, uma estimativa determinística mantém a atividade disponível.
-- O script `scripts/generate-word-frequency.py` reproduz a base de 10 mil palavras com `wordfreq==3.1.1` em ambiente de desenvolvimento.
+- Não existe catálogo local extenso nem gerador Python. A lista personalizada é o fluxo principal e o Modelo pronto mantém somente cinco palavras.
+- A classificação opcional consulta a Datamuse e fica em cache local. Se a rede falhar, uma estimativa determinística mantém a atividade disponível.
 - O aluno pode escolher nível misto, fácil, médio ou difícil antes da rodada.
 
 ## Correção da navegação desktop
