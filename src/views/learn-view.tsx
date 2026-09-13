@@ -109,6 +109,12 @@ function PracticeHub({
       document.getElementById("solo-world-title")?.scrollIntoView?.({ block: "start" });
   }, [insideWorld]);
 
+  useEffect(() => {
+    if (!insideWorld) return;
+    document.body.classList.add("solo-world-open");
+    return () => document.body.classList.remove("solo-world-open");
+  }, [insideWorld]);
+
   if (insideWorld) {
     return (
       <div className="practice-hub solo-world-enter">
@@ -133,13 +139,18 @@ function PracticeHub({
             className={`solo-level-path solo-level-path--world-${world.number}`}
             aria-label={`Caminho de níveis do Mundo ${world.number}`}
           >
+            <div className={`solo-level-scenery solo-level-scenery--world-${world.number}`} aria-hidden="true">
+              <img className="solo-level-scenery__art" src={`/solo-world-${world.number}.png`} alt="" />
+            </div>
             <svg
-              className="solo-level-path__trail"
+              className="solo-level-path__route"
               viewBox="0 0 360 720"
               preserveAspectRatio="none"
               aria-hidden="true"
             >
-              <path d="M90 635 C300 635 300 470 180 455 S40 285 180 275 S300 95 180 80" />
+              <path className="solo-level-path__road-shadow" d="M90 635 C300 635 300 470 180 455 S40 285 180 275 S300 95 180 80" />
+              <path className="solo-level-path__road" d="M90 635 C300 635 300 470 180 455 S40 285 180 275 S300 95 180 80" />
+              <path className="solo-level-path__trail" d="M90 635 C300 635 300 470 180 455 S40 285 180 275 S300 95 180 80" />
             </svg>
             {SOLO_LEVELS.map((game) => {
               const unlocked = game.level <= unlockedLevel;

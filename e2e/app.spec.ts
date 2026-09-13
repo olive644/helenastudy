@@ -58,6 +58,7 @@ test("explora mundos com a Helena e abre a trilha de níveis", async ({ page }, 
     "matrix(-1, 0, 0, 1, 0, 0)",
   );
   await page.getByRole("button", { name: "Entrar no mundo", exact: true }).click();
+  await expect(page.locator("body")).toHaveClass(/solo-world-open/);
   await expect(page.locator(".solo-level-path")).toHaveClass(/solo-level-path--world-1/);
   await expect(page.getByRole("button", { name: /Nível 1: Escuta/ })).toBeEnabled();
   await expect(

@@ -117,35 +117,74 @@
   margin: auto;
   width: 100%;
   padding: 0;
-  background-color: #241d31;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+  background: #d7e8a2;
   border: 0;
   border-radius: 0;
   box-shadow: none;
 }
 .solo-level-path--world-1 {
-  background-image: url("/solo-level-world-1.svg");
+  background-color: #aee084;
 }
 .solo-level-path--world-2 {
-  background-color: #1d2937;
-  background-image: url("/solo-level-world-2.svg");
+  background-color: #d9e7bc;
 }
 .solo-level-path--world-3 {
-  background-color: #211f31;
-  background-image: url("/solo-level-world-3.svg");
+  background-color: #30264a;
 }
-.solo-level-path__trail {
+.solo-level-scenery {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.solo-level-scenery__art {
+  position: absolute;
+  top: -90px;
+  left: 50%;
+  width: min(1040px, 95vw);
+  max-width: none;
+  clip-path: inset(0 0 38% 0);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.solo-level-scenery--world-2 .solo-level-scenery__art {
+  top: -130px;
+}
+.solo-level-scenery--world-3 .solo-level-scenery__art {
+  top: -120px;
+}
+.solo-level-path__route {
+  position: absolute;
   inset: 20px 0;
   width: 100%;
   height: 720px;
+  z-index: 1;
+}
+.solo-level-path__road-shadow,
+.solo-level-path__road,
+.solo-level-path__trail {
+  fill: none;
+  stroke-linecap: round;
+}
+.solo-level-path__road-shadow {
+  stroke: #6f5b3d66;
+  stroke-width: 58px;
+}
+.solo-level-path__road {
+  stroke: #fff4d4;
+  stroke-width: 48px;
+}
+.solo-level-path--world-3 .solo-level-path__road {
+  stroke: #f4e9c8;
+}
+.solo-level-path__trail {
+  position: static;
+  inset: auto;
+  width: auto;
+  height: auto;
   border: 0;
   border-radius: 0;
   transform: none;
-}
-.solo-level-path__trail path {
-  fill: none;
   stroke: #fffdf2;
   stroke-width: 9px;
   stroke-linecap: round;
@@ -154,6 +193,7 @@
 }
 .solo-path-level {
   position: absolute;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   width: 110px;
@@ -243,6 +283,104 @@
   z-index: 3;
   pointer-events: none;
 }
+@media (min-width: 900px) {
+  body.solo-world-open {
+    overflow: hidden;
+  }
+  body.solo-world-open .sidebar,
+  body.solo-world-open .page-header,
+  body.solo-world-open .view-heading,
+  body.solo-world-open .learn-grid > :not(.study-panel),
+  body.solo-world-open .goals-panel {
+    display: none;
+  }
+  body.solo-world-open .app-shell > .sidebar ~ .main-content {
+    width: 100vw;
+    max-width: none;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+  }
+  body.solo-world-open .learn-grid,
+  body.solo-world-open .module-panel.study-panel {
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .solo-world-enter {
+    position: absolute;
+    z-index: 50;
+    inset: 0 auto auto 0;
+    width: 100vw;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  .solo-world-enter .solo-journey {
+    display: block;
+    width: 100vw;
+    height: 100dvh;
+  }
+  .solo-world-enter .solo-journey__heading {
+    position: absolute;
+    z-index: 4;
+    top: 1.5rem;
+    left: clamp(1.5rem, 4vw, 4rem);
+    width: min(360px, calc(100vw - 3rem));
+    padding: 0.85rem 1rem;
+    border: 1px solid #fff9e5a6;
+    border-radius: 18px;
+    background: #241d31d9;
+    box-shadow: 0 10px 26px #17151c40;
+  }
+  .solo-world-enter .solo-journey__heading h2,
+  .solo-world-enter .solo-journey__heading p,
+  .solo-world-enter .solo-journey__heading .link-button {
+    color: #fff9e5;
+  }
+  .solo-world-enter .solo-journey__heading .section-label {
+    color: #facc15;
+  }
+  .solo-world-enter .solo-journey__progress {
+    margin-top: 0.8rem;
+    background: #fff9e5;
+  }
+  .solo-level-path {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    min-height: 100dvh;
+    margin: 0;
+  }
+  .solo-level-path__route {
+    top: 12vh;
+    bottom: 4vh;
+    left: 50%;
+    width: 660px;
+    max-width: 82vw;
+    height: auto;
+    transform: translateX(-50%);
+  }
+  .solo-path-level--1 {
+    left: calc(50% - min(165px, 20.5vw));
+    top: 84vh;
+  }
+  .solo-path-level--2 {
+    left: calc(50% + min(86px, 10.7vw));
+    top: 64vh;
+  }
+  .solo-path-level--3 {
+    left: calc(50% - min(99px, 12.3vw));
+    top: 44vh;
+  }
+  .solo-path-level--4 {
+    left: 50%;
+    top: 22vh;
+  }
+}
 @media (max-width: 719px) {
   .solo-world-map {
     overflow: hidden;
@@ -261,7 +399,7 @@
   .solo-path-level {
     width: 100px;
   }
-  .solo-level-path__trail {
+  .solo-level-path__route {
     width: 100%;
   }
 }
