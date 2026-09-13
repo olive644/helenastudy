@@ -48,11 +48,20 @@ test("explora mundos com a Helena e abre a trilha de níveis", async ({ page }, 
     .getByRole("button", { name: "Praticar", exact: true })
     .click();
   await page.getByRole("button", { name: "Próximo mundo" }).click();
+  await expect(page.locator(".solo-island-art")).toHaveCount(1);
+  await expect(page.locator(".solo-island-art")).toHaveAttribute("src", "/solo-world-2.png");
   await expect(page.locator(".solo-traveler")).toHaveClass(/solo-traveler--2/);
   await expect(page.getByText("Mundo bloqueado", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Mundo anterior" }).click();
+  await expect(page.locator(".solo-traveler__jump img")).toHaveCSS(
+    "transform",
+    "matrix(-1, 0, 0, 1, 0, 0)",
+  );
   await page.getByRole("button", { name: "Entrar no mundo", exact: true }).click();
   await expect(page.getByRole("button", { name: /Nível 1: Escuta/ })).toBeEnabled();
+  await expect(
+    page.getByRole("button", { name: /Nível 1: Escuta/ }).getByAltText("Helena no nível 1"),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: /Nível 2: Flashcards/ })).toBeDisabled();
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(page.locator(".solo-level-path")).toHaveCSS("animation-name", "none");
@@ -178,6 +187,16 @@ test("cria um flashcard e conclui a revisão", async ({ page }, testInfo) => {
   await expect(page.getByRole("heading", { name: "Melhorar" })).toBeVisible();
   await page.getByRole("button", { name: "Fácil" }).click();
   await expect(page.getByText(/revisão em dia/i)).toBeVisible();
+  await page.getByRole("button", { name: "Voltar aos mundos", exact: true }).click();
+  await page.getByRole("button", { name: "Entrar no mundo", exact: true }).click();
+  const nextLevel = page.getByRole("button", { name: /Nível 3: Quiz/ });
+  await expect(nextLevel.getByAltText("Helena no nível 3")).toBeVisible();
+  const alignment = await nextLevel.evaluate((element) => {
+    const mascot = element.querySelector(".solo-path-mascot")!.getBoundingClientRect();
+    const tile = element.querySelector(".solo-path-level__badge")!.getBoundingClientRect();
+    return Math.abs(mascot.x + mascot.width / 2 - tile.x - tile.width / 2);
+  });
+  expect(alignment).toBeLessThan(2);
 });
 
 test("mantém os módulos acessíveis e sem rolagem horizontal no celular", async ({
