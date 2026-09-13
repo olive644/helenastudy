@@ -14,6 +14,7 @@ import { NavigationIcon } from "../components/navigation-icon";
 import { RoomErrorBoundary } from "../components/room-error-boundary";
 import { PageHeader } from "../components/app-navigation";
 import { ListeningQuiz } from "../components/listening-quiz";
+import "../solo-journey.css";
 import {
   buildBingoLabels,
   dueFlashcards,
@@ -94,7 +95,14 @@ function PracticeHub({
 }) {
   const [worldIndex, setWorldIndex] = useState(0);
   const [insideWorld, setInsideWorld] = useState(false);
+  const [jump, setJump] = useState({ count: 0, direction: 1 });
   const world = SOLO_WORLDS[worldIndex]!;
+
+  function visitWorld(index: number) {
+    if (index === worldIndex || index < 0 || index >= SOLO_WORLDS.length) return;
+    setJump((current) => ({ count: current.count + 1, direction: index > worldIndex ? 1 : -1 }));
+    setWorldIndex(index);
+  }
 
   useEffect(() => {
     if (insideWorld)
@@ -103,7 +111,7 @@ function PracticeHub({
 
   if (insideWorld) {
     return (
-      <div className="practice-hub">
+      <div className="practice-hub solo-world-enter">
         <section className="solo-journey" aria-labelledby="solo-world-title">
           <div className="solo-journey__heading">
             <div>
@@ -122,7 +130,14 @@ function PracticeHub({
           </div>
 
           <div className="solo-level-path" aria-label="Caminho de níveis do Mundo 1">
-            <span className="solo-level-path__trail" aria-hidden="true" />
+            <svg
+              className="solo-level-path__trail"
+              viewBox="0 0 360 720"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path d="M90 635 C300 635 300 470 180 455 S40 285 180 275 S300 95 180 80" />
+            </svg>
             {SOLO_LEVELS.map((game) => {
               const unlocked = game.level <= unlockedLevel;
               return (
@@ -136,6 +151,7 @@ function PracticeHub({
                 >
                   <span className="solo-path-level__badge">
                     {unlocked ? <NavigationIcon name={game.icon} /> : <Lock size={22} />}
+                    <b>{game.level}</b>
                   </span>
                   <span>
                     <small>Nível {game.level}</small>
@@ -144,7 +160,7 @@ function PracticeHub({
                 </button>
               );
             })}
-            <img src="/helena-portrait.png" alt="Helena acompanhando sua jornada" />
+            <img src="/helena-loading.svg" alt="Helena acompanhando sua jornada" />
           </div>
         </section>
       </div>
@@ -170,11 +186,37 @@ function PracticeHub({
         </div>
 
         <div className={`solo-world-map solo-world-map--${world.number}`}>
-          <img src="/helena-solo-worlds.webp" alt="Mapa com três mundos de estudo da Helena" />
+          <div className="solo-islands" aria-label="Mundos da Helena">
+            {SOLO_WORLDS.map((island, index) => (
+              <button
+                type="button"
+                key={island.number}
+                className={`solo-island solo-island--${island.number}${index === worldIndex ? " is-selected" : ""}`}
+                aria-label={`Inspecionar Mundo ${island.number}: ${island.title}`}
+                aria-pressed={index === worldIndex}
+                onClick={() => visitWorld(index)}
+              >
+                <span className="solo-island__art" aria-hidden="true" />
+                <strong>{island.number}</strong>
+                {index > 0 && <Lock size={16} aria-hidden="true" />}
+              </button>
+            ))}
+            <div className={`solo-traveler solo-traveler--${world.number}`}>
+              <button
+                key={jump.count}
+                className={`solo-traveler__jump${jump.count ? " is-jumping" : ""} ${jump.direction < 0 ? "is-backward" : ""}`}
+                type="button"
+                aria-label="Brincar com a Helena"
+                onClick={() => setJump((current) => ({ ...current, count: current.count + 1 }))}
+              >
+                <img src="/helena-loading.svg" alt="Helena" />
+              </button>
+            </div>
+          </div>
           <button
             className="solo-world-map__arrow solo-world-map__arrow--previous"
             type="button"
-            onClick={() => setWorldIndex((value) => Math.max(0, value - 1))}
+            onClick={() => visitWorld(worldIndex - 1)}
             disabled={worldIndex === 0}
             aria-label="Mundo anterior"
           >
@@ -183,7 +225,7 @@ function PracticeHub({
           <button
             className="solo-world-map__arrow solo-world-map__arrow--next"
             type="button"
-            onClick={() => setWorldIndex((value) => Math.min(SOLO_WORLDS.length - 1, value + 1))}
+            onClick={() => visitWorld(worldIndex + 1)}
             disabled={worldIndex === SOLO_WORLDS.length - 1}
             aria-label="Próximo mundo"
           >

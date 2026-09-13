@@ -95,6 +95,7 @@ flowchart LR
   STUDY --> LIB[Biblioteca e flashcards]
   STUDY --> PRACTICE[Praticar]
   PRACTICE --> WORLDS[Mundos Solo com níveis progressivos]
+  WORLDS --> MOTION[Helena salta entre ilhas e entra na trilha de plataformas]
   PRACTICE --> LISTEN[Escuta com Cloudflare Workers AI e fallback do dispositivo]
   LISTEN --> CUSTOM[Lista personalizada com validação por linha]
   LISTEN --> FEEDBACK[Feedback individual antes da próxima pergunta]

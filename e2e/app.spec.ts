@@ -40,6 +40,24 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
+test("explora mundos com a Helena e abre a trilha de níveis", async ({ page }, testInfo) => {
+  await page
+    .getByRole("navigation", {
+      name: testInfo.project.name === "mobile" ? "Navegação móvel" : "Navegação principal",
+    })
+    .getByRole("button", { name: "Praticar", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Próximo mundo" }).click();
+  await expect(page.locator(".solo-traveler")).toHaveClass(/solo-traveler--2/);
+  await expect(page.getByText("Mundo bloqueado", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Mundo anterior" }).click();
+  await page.getByRole("button", { name: "Entrar no mundo", exact: true }).click();
+  await expect(page.getByRole("button", { name: /Nível 1: Escuta/ })).toBeEnabled();
+  await expect(page.getByRole("button", { name: /Nível 2: Flashcards/ })).toBeDisabled();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.locator(".solo-level-path")).toHaveCSS("animation-name", "none");
+});
+
 test("concentra as ferramentas na navegação lateral", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "Contrato visual da página inicial desktop.");
   const navigation = page.getByRole("navigation", { name: "Navegação principal" });

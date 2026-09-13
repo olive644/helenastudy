@@ -1,0 +1,276 @@
+.solo-islands {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 310px;
+  padding: 65px 24px 0;
+}
+.solo-island {
+  position: relative;
+  width: 29%;
+  max-width: 190px;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 48%;
+  background: #ded2fa;
+  box-shadow:
+    0 14px 0 #a28bc9,
+    0 22px 24px #17151c18;
+  transition:
+    transform 450ms ease,
+    filter 450ms ease;
+}
+.solo-island:not(.is-selected) {
+  transform: scale(0.82);
+  filter: saturate(0.45);
+}
+.solo-island__art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: #fff9ef url("/helena-solo-worlds.webp") no-repeat;
+  background-size: 300% auto;
+  background-position-y: center;
+}
+.solo-island--1 .solo-island__art {
+  background-position: left;
+}
+.solo-island--2 .solo-island__art {
+  background-position: center;
+}
+.solo-island--3 .solo-island__art {
+  background-position: right;
+}
+.solo-island strong {
+  position: absolute;
+  bottom: -12px;
+  left: 40%;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #facc15;
+  color: #17151c;
+}
+.solo-island > svg {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  color: #17151c;
+  background: #fff9ef;
+  border-radius: 4px;
+}
+.solo-traveler {
+  position: absolute;
+  width: 100px;
+  top: 60px;
+  pointer-events: none;
+  transition: left 550ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+  z-index: 3;
+}
+.solo-traveler--1 {
+  left: 18%;
+}
+.solo-traveler--2 {
+  left: 50%;
+}
+.solo-traveler--3 {
+  left: 82%;
+}
+.solo-traveler__jump {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  pointer-events: auto;
+  transform-origin: center bottom;
+}
+.solo-traveler__jump img {
+  display: block;
+  width: 100%;
+}
+.solo-traveler__jump.is-jumping {
+  animation: helena-world-hop 550ms ease-in-out;
+}
+.solo-traveler__jump.is-backward {
+  --hop-turn: -12deg;
+}
+@keyframes helena-world-hop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  20% {
+    transform: translateY(8px) scale(1.12, 0.85);
+  }
+  55% {
+    transform: translateY(-65px) rotate(var(--hop-turn, 12deg));
+  }
+  85% {
+    transform: translateY(4px) scale(1.08, 0.9);
+  }
+}
+.solo-world-enter .solo-level-path {
+  animation: solo-enter 550ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-origin: center top;
+}
+@keyframes solo-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.86) translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.solo-level-path {
+  display: block;
+  height: 760px;
+  min-height: 760px;
+  max-width: 660px;
+  margin: auto;
+  width: 100%;
+  padding: 0;
+  background: var(--page);
+}
+.solo-level-path__trail {
+  inset: 20px 0;
+  width: 100%;
+  height: 720px;
+  border: 0;
+  border-radius: 0;
+  transform: none;
+}
+.solo-level-path__trail path {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 16px;
+  stroke-linecap: round;
+  stroke-dasharray: 3 22;
+}
+.solo-path-level {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 110px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  gap: 16px;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+.solo-path-level--1 {
+  left: 25%;
+  top: 86%;
+}
+.solo-path-level--2 {
+  left: 63%;
+  top: 62%;
+}
+.solo-path-level--3 {
+  left: 35%;
+  top: 38%;
+}
+.solo-path-level--4 {
+  left: 50%;
+  top: 14%;
+}
+.solo-path-level__badge {
+  position: relative;
+  width: 78px;
+  height: 64px;
+  border-radius: 20px;
+  background: #7c3aed;
+  box-shadow:
+    0 9px 0 #4c1d95,
+    0 15px 15px #17151c15;
+  transform: rotate(-12deg) skewX(6deg);
+  transition: translate 160ms ease;
+}
+.solo-path-level:not(:disabled):hover .solo-path-level__badge {
+  translate: 0 -5px;
+}
+.solo-path-level__badge b {
+  position: absolute;
+  right: -10px;
+  top: -12px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #facc15;
+  color: #17151c;
+}
+.solo-path-level.is-locked {
+  opacity: 1;
+  box-shadow: none;
+}
+.solo-path-level.is-locked .solo-path-level__badge {
+  background: var(--surface);
+  box-shadow: 0 9px 0 var(--line-strong);
+}
+.solo-path-level.is-locked .solo-path-level__badge b {
+  background: var(--line-strong);
+  color: var(--text);
+}
+.solo-path-level strong {
+  color: var(--text);
+}
+.solo-level-path > img {
+  width: 115px;
+  height: 115px;
+  left: 42%;
+  bottom: 8%;
+  opacity: 1;
+}
+@media (max-width: 719px) {
+  .solo-islands {
+    height: 250px;
+    padding: 50px 12px 0;
+  }
+  .solo-traveler {
+    width: 78px;
+    top: 48px;
+  }
+  .solo-world-map {
+    overflow: hidden;
+  }
+  .solo-world-map__arrow {
+    top: 32px;
+  }
+  .solo-world-card {
+    margin: 20px 4px 8px;
+  }
+  .solo-level-path {
+    height: 760px;
+    padding: 0;
+  }
+  .solo-path-level {
+    width: 100px;
+  }
+  .solo-level-path__trail {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .solo-traveler,
+  .solo-island,
+  .solo-path-level__badge {
+    transition: none;
+  }
+  .solo-traveler__jump.is-jumping,
+  .solo-world-enter .solo-level-path {
+    animation: none;
+  }
+}
