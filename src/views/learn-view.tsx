@@ -149,6 +149,13 @@ function PracticeHub({
                   aria-label={`Nível ${game.level}: ${game.title}. ${unlocked ? game.description : "Bloqueado"}`}
                   key={game.mode}
                 >
+                  {game.level === unlockedLevel && (
+                    <img
+                      className="solo-path-mascot"
+                      src="/helena-loading.svg"
+                      alt={`Helena no nível ${game.level}`}
+                    />
+                  )}
                   <span className="solo-path-level__badge">
                     {unlocked ? <NavigationIcon name={game.icon} /> : <Lock size={22} />}
                     <b>{game.level}</b>
@@ -160,7 +167,6 @@ function PracticeHub({
                 </button>
               );
             })}
-            <img src="/helena-loading.svg" alt="Helena acompanhando sua jornada" />
           </div>
         </section>
       </div>
@@ -187,20 +193,12 @@ function PracticeHub({
 
         <div className={`solo-world-map solo-world-map--${world.number}`}>
           <div className="solo-islands" aria-label="Mundos da Helena">
-            {SOLO_WORLDS.map((island, index) => (
-              <button
-                type="button"
-                key={island.number}
-                className={`solo-island solo-island--${island.number}${index === worldIndex ? " is-selected" : ""}`}
-                aria-label={`Inspecionar Mundo ${island.number}: ${island.title}`}
-                aria-pressed={index === worldIndex}
-                onClick={() => visitWorld(index)}
-              >
-                <span className="solo-island__art" aria-hidden="true" />
-                <strong>{island.number}</strong>
-                {index > 0 && <Lock size={16} aria-hidden="true" />}
-              </button>
-            ))}
+            <img
+              key={world.number}
+              className={`solo-island-art ${jump.direction < 0 ? "is-backward" : ""}`}
+              src={`/solo-world-${world.number}.png`}
+              alt={`Mundo ${world.number}: ${world.title}`}
+            />
             <div className={`solo-traveler solo-traveler--${world.number}`}>
               <button
                 key={jump.count}
