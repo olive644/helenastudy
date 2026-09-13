@@ -3,14 +3,13 @@ export type WordDifficulty = "easy" | "medium" | "hard";
 export type DifficultyResult = {
   difficulty: WordDifficulty;
   frequency: number;
-  source: "local" | "datamuse" | "estimated";
+  source: "datamuse" | "estimated";
 };
 
 type FrequencyMap = Record<string, number>;
 type DatamuseWord = { word?: string; tags?: string[] };
 
 const CACHE_KEY = "helena-study:word-frequency:v1";
-let localFrequencyPromise: Promise<FrequencyMap> | undefined;
 
 function normalize(value: string): string {
   return value
@@ -24,13 +23,6 @@ export function difficultyFromZipf(frequency: number): WordDifficulty {
   if (frequency >= 5) return "easy";
   if (frequency >= 4) return "medium";
   return "hard";
-}
-
-function loadLocalFrequency(): Promise<FrequencyMap> {
-  localFrequencyPromise ??= fetch("/en-frequency-10k.json")
-    .then((response) => (response.ok ? response.json() : {}))
-    .catch(() => ({})) as Promise<FrequencyMap>;
-  return localFrequencyPromise;
 }
 
 function loadCache(storage: Storage): FrequencyMap {
@@ -69,11 +61,6 @@ export async function classifyWordDifficulty(
   storage: Storage = window.localStorage,
 ): Promise<DifficultyResult> {
   const word = normalize(value);
-  const local = await loadLocalFrequency();
-  const localValue = local[word];
-  if (typeof localValue === "number")
-    return { difficulty: difficultyFromZipf(localValue), frequency: localValue, source: "local" };
-
   const cache = loadCache(storage);
   const cachedValue = cache[word];
   if (typeof cachedValue === "number")
