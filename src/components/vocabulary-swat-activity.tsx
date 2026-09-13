@@ -21,7 +21,7 @@ export function VocabularySwatActivity() {
     <section className="swat-activity" aria-labelledby="swat-activity-title">
       <header className="swat-activity__header">
         <div>
-          <span className="section-label">Atividade pronta · 10–15 min</span>
+          <span className="section-label">Atividade pronta · 10-15 min</span>
           <h2 id="swat-activity-title">Mão no vocabulário</h2>
           <p>Escuta, reconhecimento visual e reflexo em uma disputa rápida entre equipes.</p>
         </div>
@@ -30,7 +30,7 @@ export function VocabularySwatActivity() {
             <Headphones size={16} aria-hidden="true" /> Escuta
           </span>
           <span>
-            <Users size={16} aria-hidden="true" /> Equipes de 3–4
+            <Users size={16} aria-hidden="true" /> Equipes de 3-4
           </span>
         </div>
       </header>

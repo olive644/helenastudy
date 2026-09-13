@@ -23,6 +23,7 @@ type LearnViewProps = {
   workspace: WorkspaceState;
   dispatch: Dispatch<WorkspaceAction>;
   joinCode?: string | undefined;
+  projectorMode?: boolean;
 };
 
 function normalizeAnswer(value: string): string {
@@ -248,7 +249,12 @@ function BingoSession({ workspace, dispatch, subjectId }: LearnViewProps & { sub
   );
 }
 
-export function LearnView({ workspace, dispatch, joinCode }: LearnViewProps) {
+export function LearnView({
+  workspace,
+  dispatch,
+  joinCode,
+  projectorMode = false,
+}: LearnViewProps) {
   const defaultSubject = workspace.subjects[0];
   const [subjectId, setSubjectId] = useState(defaultSubject?.id ?? "");
   const [mode, setMode] = useState<"review" | "quiz" | "listening" | "bingo" | "room">(
@@ -383,6 +389,7 @@ export function LearnView({ workspace, dispatch, joinCode }: LearnViewProps) {
               <RoomErrorBoundary>
                 <LocalRoom
                   initialJoinCode={joinCode}
+                  projectorMode={projectorMode}
                   onExit={leaveRoom}
                   materials={workspace.subjects.map((subject) => ({
                     id: subject.id,

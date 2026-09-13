@@ -27,7 +27,7 @@ de uso em produção no momento**: nenhuma hospedagem grátis viável foi encont
 modelos juntos (Cloud Run exige pré-pagamento de faturamento no Brasil; Hugging Face Spaces Docker
 exige plano PRO; Railway grátis só comporta o Kokoro sozinho; hospedagem própria dependeria de um
 computador ligado 24 horas). Fica documentado e testado caso uma hospedagem própria ou paga volte a
-fazer sentido no futuro — nesse caso, troque o provider em `api/speech.ts` de volta para
+fazer sentido no futuro; nesse caso, troque o provider em `api/speech.ts` de volta para
 `createTtsServiceProvider`.
 
 ## Fluxo de dados

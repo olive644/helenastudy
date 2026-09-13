@@ -111,9 +111,25 @@ for (const activity of ["listening", "bingo"] as const) {
       await expect(
         host.locator(".local-room-session__actions p:not(.local-room-connection)"),
       ).toContainText("2 participantes");
+      const projector =
+        activity === "listening"
+          ? await Promise.all([
+              contexts[0]!.waitForEvent("page"),
+              host.getByRole("button", { name: "Abrir modo projetor" }).click(),
+            ]).then(([page]) => page)
+          : undefined;
+      if (projector) {
+        await expect(projector).toHaveURL(new RegExp(`/sala/${code}/projetor$`));
+        await expect(projector.getByRole("banner").getByText(code, { exact: true })).toBeVisible();
+        await expect(projector.locator(".helena-room-qr--holding")).toBeVisible();
+        await expect(projector.getByRole("button", { name: "Sair da sala" })).toHaveCount(0);
+        await projector.screenshot({ path: testInfo.outputPath("projector-lobby.png") });
+      }
       await host.screenshot({ path: testInfo.outputPath("lobby-desktop.png") });
       await expect(host.locator("#root")).toHaveAttribute("inert", "");
       await host.getByRole("button", { name: "Iniciar atividade" }).click();
+      if (projector)
+        await expect(projector.getByRole("heading", { name: "Ouça com atenção" })).toBeVisible();
       await players[0]!.reload();
       for (let question = 0; question < 5; question++) {
         await expect(
@@ -123,6 +139,15 @@ for (const activity of ["listening", "bingo"] as const) {
           "Áudio reproduzido",
         );
         const word = states.get(code)!.currentQuestion!.front;
+        if (activity === "listening" && question === 0) {
+          await host.getByRole("button", { name: "Revelar palavra" }).click();
+          await expect(host.locator(".local-room-round__host-question span")).toHaveText(
+            "Áudio reproduzido",
+          );
+          await host.getByRole("button", { name: "Confirmar revelação" }).click();
+          await expect(host.locator(".local-room-round__host-question span")).toHaveText(word);
+          await host.getByRole("button", { name: "Ocultar palavra" }).click();
+        }
         await Promise.all(
           (activity === "bingo" && question === 4 ? players.slice(0, 1) : players).map(
             async (page) => {
@@ -147,6 +172,8 @@ for (const activity of ["listening", "bingo"] as const) {
             },
           ),
         );
+        if (activity === "listening")
+          await expect(players[0]!.getByText("Próxima pergunta em 3 segundos.")).toBeVisible();
       }
       await expect(host.getByRole("heading", { name: "Sala encerrada" })).toBeVisible();
       expect(states.get(code)!.participants).toHaveLength(2);

@@ -2,7 +2,7 @@
 
 A integração usa OAuth 2.0 para ler os próximos eventos do Google Agenda do
 usuário (somente leitura). Como o HelenaStudy é uma SPA estática hospedada na
-Vercel, o "backend" é só a função serverless `api/google-calendar.ts` — não
+Vercel, o "backend" é só a função serverless `api/google-calendar.ts`; não
 existe banco de dados; a sessão do Google fica num cookie `HttpOnly` cifrado
 no próprio navegador do usuário.
 
@@ -45,12 +45,12 @@ Vercel (nunca cole o Client Secret em uma conversa ou committe em um arquivo).
 No painel do projeto na Vercel (**Settings → Environment Variables**), nunca
 num arquivo do repositório:
 
-| Variável                | Valor                                                                                                        |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `GOOGLE_CLIENT_ID`      | o Client ID copiado acima                                                                                    |
-| `GOOGLE_CLIENT_SECRET`  | o Client Secret copiado acima                                                                                |
-| `GOOGLE_REDIRECT_URI`   | a mesma URI cadastrada no passo 3                                                                            |
-| `GOOGLE_SESSION_SECRET` | uma chave aleatória — gere com `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
+| Variável                | Valor                                                                                                       |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `GOOGLE_CLIENT_ID`      | o Client ID copiado acima                                                                                   |
+| `GOOGLE_CLIENT_SECRET`  | o Client Secret copiado acima                                                                               |
+| `GOOGLE_REDIRECT_URI`   | a mesma URI cadastrada no passo 3                                                                           |
+| `GOOGLE_SESSION_SECRET` | uma chave aleatória: gere com `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
 
 Depois de configurar, faça um novo deploy para as variáveis entrarem em vigor.
 
@@ -59,6 +59,6 @@ Depois de configurar, faça um novo deploy para as variáveis entrarem em vigor.
 - **Conectar Google Agenda** leva o usuário para `/api/google-calendar?action=connect`, que redireciona para a tela de consentimento do Google.
 - O Google chama de volta `?action=callback`, a função troca o código por tokens e grava a sessão cifrada num cookie.
 - A Agenda do HelenaStudy chama `?action=events` para listar os próximos 14 dias; o access token é renovado automaticamente quando expira.
-- **Desconectar** apaga o cookie de sessão — nada fica salvo em nenhum servidor.
+- **Desconectar** apaga o cookie de sessão. Nada fica salvo em nenhum servidor.
 
 Esta primeira versão é só leitura. Criar eventos do HelenaStudy diretamente no Google Agenda (escrita) é um passo futuro separado.

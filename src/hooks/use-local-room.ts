@@ -89,6 +89,8 @@ export function normalizeRoomState(data: Partial<PublicLocalRoomState>): PublicL
       ![1, 2, 3, "unlimited"].includes(data.settings.audioRepetitions)) ||
     (data.settings.autoPlayAudio !== undefined &&
       typeof data.settings.autoPlayAudio !== "boolean") ||
+    (data.settings.acceptMinorTypos !== undefined &&
+      typeof data.settings.acceptMinorTypos !== "boolean") ||
     [
       data.questionIndex,
       data.questionStartedAt,
@@ -516,7 +518,7 @@ export function useLocalRoom(initialJoinCode?: string) {
   async function submitAnswer(
     questionIndex: number,
     answer: string,
-  ): Promise<LocalRoomAnswerFeedback> {
+  ): Promise<LocalRoomAnswerFeedback | undefined> {
     try {
       const payload = await requestRoom<{
         correct: boolean;
@@ -538,7 +540,7 @@ export function useLocalRoom(initialJoinCode?: string) {
       };
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Não foi possível enviar a resposta.");
-      return { correct: false, xpChange: 0 };
+      return undefined;
     }
   }
 

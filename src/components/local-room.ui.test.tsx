@@ -1,6 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { formatRoomEstimatedDuration } from "../domain/local-room";
 import { LocalRoom } from "./local-room";
+
+describe("resumo da duração da sala", () => {
+  it("inclui o feedback de três segundos por pergunta", () => {
+    expect(formatRoomEstimatedDuration(3, 30)).toBe("1min39s");
+  });
+});
 
 describe("chegada por link de convite", () => {
   afterEach(() => {

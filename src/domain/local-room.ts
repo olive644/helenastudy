@@ -24,6 +24,7 @@ export type LocalRoomSettings = {
   audioRate?: 0.75 | 1;
   audioRepetitions?: 1 | 2 | 3 | "unlimited";
   autoPlayAudio?: boolean;
+  acceptMinorTypos?: boolean;
 };
 
 export type LocalRoomParticipant = {
@@ -108,6 +109,18 @@ export {
 export const MAX_ROOM_PARTICIPANTS = 30;
 export const ROOM_TTL_SECONDS = 60 * 60 * 4;
 export const ROOM_PRESENCE_GRACE_MS = 120_000;
+
+export function formatRoomEstimatedDuration(
+  questionCount: number,
+  secondsPerQuestion: number,
+  feedbackSeconds = 3,
+) {
+  const total = questionCount * (secondsPerQuestion + feedbackSeconds);
+  if (total < 60) return `${total}s`;
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return seconds ? `${minutes}min${seconds}s` : `${minutes} min`;
+}
 
 // Quanto vale acertar, e quanto quem está na liderança perde ao errar. Dá
 // um motivo real pra quem está na frente continuar prestando atenção, em
@@ -260,7 +273,7 @@ export function submitRoomAnswer(
             .find((p) => p.id === dependencies.participantId)
             ?.bingoCard?.includes(card.id),
         )
-      : isListeningAnswerCorrect(card, dependencies.answer);
+      : isListeningAnswerCorrect(card, dependencies.answer, state.settings.acceptMinorTypos);
   const wasLeading =
     state.settings.activity !== "bingo" &&
     !correct &&

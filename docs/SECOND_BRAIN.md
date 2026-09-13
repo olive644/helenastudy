@@ -97,6 +97,8 @@ flowchart LR
   PRACTICE --> LISTEN[Escuta com Cloudflare Workers AI e fallback do dispositivo]
   LISTEN --> CUSTOM[Lista personalizada com validação por linha]
   LISTEN --> FEEDBACK[Feedback individual antes da próxima pergunta]
+  ROOM --> PROJECTOR[Projetor protegido sem controles administrativos]
+  LISTEN --> ALIASES[Respostas equivalentes definidas pelo professor]
 
   ORG --> PLAN[Agenda e tarefas]
   ORG --> HABITS[Hábitos]
@@ -115,6 +117,20 @@ flowchart LR
 Ao alterar uma área, atualize o nó correspondente e os fluxos ligados a ele. Detalhes de produto
 continuam em [`PRODUCT_MIND_MAP.md`](PRODUCT_MIND_MAP.md); este mapa serve como visão executiva do
 sistema completo.
+
+## Decisão de produto: rodada de escuta e projeção
+
+A duração exibida soma o tempo de resposta e três segundos de feedback por pergunta. Quando todas
+as pessoas conectadas respondem, o resultado fica visível por esse intervalo e uma barra mostra o
+avanço. Respostas enviadas ficam bloqueadas até a confirmação do servidor.
+
+O professor pode cadastrar equivalências com `|`. A normalização ignora caixa, acentos, pontuação e
+espaços excedentes. Uma opção desligada por padrão permite aceitar uma inserção, remoção ou troca de
+caractere em respostas com pelo menos quatro caracteres. Assim, a aproximação só entra por decisão
+explícita do professor.
+
+O modo projetor vive em `/sala/<código>/projetor`, reutiliza a sessão temporária do anfitrião e não
+expõe ações de revelar, avançar ou encerrar. O QR code continua usando a composição aprovada da Helena.
 
 ## Etapas do produto
 

@@ -40,10 +40,18 @@ export function parseManualListeningInput(value: string): ManualListeningParseRe
       return [{ lineNumber, raw, error: "falta a tradução" }];
     }
     const front = raw.slice(0, separator.index).trim();
-    const back = raw.slice(separator.index + separator[0].length).trim();
+    const answerVariants = raw
+      .slice(separator.index + separator[0].length)
+      .split("|")
+      .map((answer) => answer.trim());
+    const back = answerVariants[0] ?? "";
+    const acceptedAnswers = answerVariants.slice(1);
     if (!front) return [{ lineNumber, raw, error: "falta a palavra em inglês" }];
     if (!back) return [{ lineNumber, raw, error: "falta a tradução" }];
-    if (front.length > 200 || back.length > 200) {
+    if (acceptedAnswers.some((answer) => !answer)) {
+      return [{ lineNumber, raw, error: "remova alternativas vazias" }];
+    }
+    if ([front, back, ...acceptedAnswers].some((answer) => answer.length > 200)) {
       return [{ lineNumber, raw, error: "use até 200 caracteres em cada campo" }];
     }
     const normalized = normalizeListeningAnswer(front);
@@ -57,7 +65,13 @@ export function parseManualListeningInput(value: string): ManualListeningParseRe
       {
         lineNumber,
         raw,
-        card: { id: `manual-${seen.size}`, front, back, difficulty: "medium" },
+        card: {
+          id: `manual-${seen.size}`,
+          front,
+          back,
+          ...(acceptedAnswers.length ? { acceptedAnswers } : {}),
+          difficulty: "medium",
+        },
       },
     ];
   });
@@ -114,9 +128,39 @@ export function createListeningRound(
   return limit === "all" ? shuffled : shuffled.slice(0, Math.max(0, limit));
 }
 
-export function isListeningAnswerCorrect(card: ListeningCard, answer: string): boolean {
+function differsByOneEdit(left: string, right: string): boolean {
+  if (Math.abs(left.length - right.length) > 1) return false;
+  let leftIndex = 0;
+  let rightIndex = 0;
+  let edits = 0;
+  while (leftIndex < left.length && rightIndex < right.length) {
+    if (left[leftIndex] === right[rightIndex]) {
+      leftIndex += 1;
+      rightIndex += 1;
+      continue;
+    }
+    edits += 1;
+    if (edits > 1) return false;
+    if (left.length >= right.length) leftIndex += 1;
+    if (right.length >= left.length) rightIndex += 1;
+  }
+  return edits + Number(leftIndex < left.length || rightIndex < right.length) <= 1;
+}
+
+export function isListeningAnswerCorrect(
+  card: ListeningCard,
+  answer: string,
+  acceptMinorTypo = false,
+): boolean {
   const normalized = normalizeListeningAnswer(answer);
-  return normalized.length > 0 && acceptedListeningAnswers(card).includes(normalized);
+  const accepted = acceptedListeningAnswers(card);
+  if (!normalized) return false;
+  if (accepted.includes(normalized)) return true;
+  return (
+    acceptMinorTypo &&
+    normalized.length >= 4 &&
+    accepted.some((candidate) => candidate.length >= 4 && differsByOneEdit(normalized, candidate))
+  );
 }
 
 export function acceptedListeningAnswers(card: ListeningCard): string[] {
