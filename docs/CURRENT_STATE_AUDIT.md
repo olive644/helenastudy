@@ -3,7 +3,7 @@
 ## Helena animada, proporções revisadas (13/09/2026)
 
 - O SVG compartilhado pelo loading e pela jornada Solo segue a silhueta original: cabeça ampla, orelhas equilibradas, olhos amarelos e estrela regular de cinco pontas.
-- As duas patas têm espaço entre si e alternam deslocamento vertical, sem a rotação que sobrepunha os pés. Mochila e cartão foram retirados para preservar a silhueta da mascote original.
+- As duas patas têm espaço entre si e alternam deslocamento vertical, sem a rotação que sobrepunha os pés. Mochila roxa e caderninho foram mantidos a pedido do usuário, com balanço suave do braço que segura o caderno, sem encobrir os pés.
 - Mantidos fundo transparente, encaixe no nível atual e suporte a movimento reduzido. Os mundos e a arte aprovada do QR code não foram alterados.
 
 ## Modo Sala, endurecimento em revisão (12/09/2026)

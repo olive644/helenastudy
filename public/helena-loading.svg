@@ -3,10 +3,12 @@
     .body { animation: bob .8s ease-in-out infinite; }
     .leg-1 { animation: step .8s ease-in-out infinite; }
     .leg-2 { animation: step .8s ease-in-out -.4s infinite; }
+    .notebook { transform-origin: 153px 143px; animation: carry .8s ease-in-out infinite; }
     .tail { transform-origin: 158px 169px; animation: tail 1.6s ease-in-out infinite; }
     .eyes { transform-origin: 120px 91px; animation: blink 4s infinite; }
     @keyframes bob { 0%, 50%, 100% { transform: translateY(0); } 25%, 75% { transform: translateY(-2px); } }
     @keyframes step { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+    @keyframes carry { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
     @keyframes tail { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
     @keyframes blink { 0%, 43%, 47%, 100% { transform: scaleY(1); } 45% { transform: scaleY(.08); } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
@@ -16,9 +18,22 @@
   <path class="leg-1" d="M82 166H113V197Q113 212 99 212H94Q80 212 80 198Z" fill="#202027"/>
   <path class="leg-2" d="M127 166H158L160 198Q160 212 146 212H141Q127 212 127 197Z" fill="#202027"/>
   <g class="body">
+    <rect x="54" y="124" width="42" height="55" rx="13" fill="#7c3aed"/>
+    <rect x="56" y="139" width="21" height="28" rx="7" fill="#a78bfa"/>
+    <rect x="65" y="146" width="4" height="8" rx="2" fill="#facc15"/>
     <path d="M92 122Q120 115 148 122Q161 140 161 165Q161 183 147 186H93Q79 183 79 165Q79 140 92 122Z" fill="#24242c"/>
+    <path d="M88 129Q79 143 83 164" fill="none" stroke="#7c3aed" stroke-width="6" stroke-linecap="round"/>
     <path d="M85 126Q73 124 67 138L58 159Q54 172 64 177Q75 182 82 169L94 145Q100 132 85 126Z" fill="#202027"/>
-    <path d="M155 126Q167 124 173 138L182 159Q186 172 176 177Q165 182 158 169L146 145Q140 132 155 126Z" fill="#202027"/>
+    <g class="notebook">
+      <path d="M155 130Q168 129 172 141L176 158Q179 170 166 173L150 164Z" fill="#202027"/>
+      <g transform="rotate(8 139 158)">
+        <rect x="121" y="137" width="35" height="43" rx="4" fill="#7c3aed"/>
+        <rect x="125" y="137" width="31" height="39" rx="3" fill="#fff9ef"/>
+        <path d="M140 145L143 151L149 152L145 157L146 163L140 160L134 163L135 157L131 152L137 151Z" fill="#7c3aed"/>
+        <path d="M126 177H152" stroke="#e9dcc4" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <path d="M166 148Q176 147 177 157Q178 166 168 170L155 173Q145 175 143 167Q141 159 151 157L162 154Z" fill="#303039"/>
+    </g>
     <path d="M54 61L61 28Q63 18 72 23L96 40Q120 35 144 40L168 23Q177 18 179 28L186 61Q197 83 194 101Q191 137 120 138Q49 137 46 101Q43 83 54 61Z" fill="#202027"/>
     <g class="eyes">
       <ellipse cx="91" cy="91" rx="23" ry="27" fill="#facc15"/>
