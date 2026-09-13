@@ -51,7 +51,7 @@ describe("sala concorrente", () => {
       });
       expect(response.status).toBe(200);
     }
-    expect(h.state().phase).toBe("finished");
+    expect(h.state().phase).toBe("results");
     expect(h.state().participants[0]!.bingoMarks).toHaveLength(5);
     expect(h.state().participants[0]!.score).toBe(50);
   });
