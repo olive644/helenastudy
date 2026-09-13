@@ -1,5 +1,13 @@
-import { Check, Plus } from "lucide-react";
-import { lazy, Suspense, useEffect, useState, type Dispatch, type FormEvent } from "react";
+import { Check, Lock, Plus } from "lucide-react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useState,
+  type Dispatch,
+  type FormEvent,
+} from "react";
 import { HelenaLoading } from "../components/helena-loading";
 import { HelenaRoomIcon } from "../components/helena-room-icon";
 import { NavigationIcon } from "../components/navigation-icon";
@@ -67,48 +75,133 @@ const SOLO_LEVELS: Array<{
   },
 ];
 
+const SOLO_WORLDS = [
+  { number: 1, title: "Bosque das palavras", description: "Escuta, memória e desafios." },
+  { number: 2, title: "Cidade das ideias", description: "Novas aventuras em breve." },
+  { number: 3, title: "Observatório do saber", description: "Novas aventuras em breve." },
+] as const;
+
+const SOLO_PROGRESS_KEY = "helena.soloProgress";
+
 function PracticeHub({
   onSelect,
   onEnterRoom,
+  unlockedLevel,
 }: {
   onSelect: (mode: SoloMode) => void;
   onEnterRoom: () => void;
+  unlockedLevel: number;
 }) {
+  const [worldIndex, setWorldIndex] = useState(0);
+  const [insideWorld, setInsideWorld] = useState(false);
+  const world = SOLO_WORLDS[worldIndex]!;
+
+  useEffect(() => {
+    if (insideWorld)
+      document.getElementById("solo-world-title")?.scrollIntoView({ block: "start" });
+  }, [insideWorld]);
+
+  if (insideWorld) {
+    return (
+      <div className="practice-hub">
+        <section className="solo-journey" aria-labelledby="solo-world-title">
+          <div className="solo-journey__heading">
+            <div>
+              <button className="link-button" type="button" onClick={() => setInsideWorld(false)}>
+                <HelenaRoomIcon name="back" size={18} /> Voltar aos mundos
+              </button>
+              <span className="section-label">Mundo 1</span>
+              <h2 id="solo-world-title">Bosque das palavras</h2>
+              <p>Avance pelo caminho e libere um desafio de cada vez.</p>
+            </div>
+            <div className="solo-journey__progress" aria-label="Progresso no Mundo 1">
+              <NavigationIcon name="xp" />
+              <span>Seu progresso</span>
+              <strong>{Math.min(unlockedLevel, SOLO_LEVELS.length)}/4 níveis</strong>
+            </div>
+          </div>
+
+          <div className="solo-level-path" aria-label="Caminho de níveis do Mundo 1">
+            <span className="solo-level-path__trail" aria-hidden="true" />
+            {SOLO_LEVELS.map((game) => {
+              const unlocked = game.level <= unlockedLevel;
+              return (
+                <button
+                  className={`solo-path-level solo-path-level--${game.level}${unlocked ? " is-unlocked" : " is-locked"}`}
+                  type="button"
+                  onClick={() => unlocked && onSelect(game.mode)}
+                  disabled={!unlocked}
+                  aria-label={`Nível ${game.level}: ${game.title}. ${unlocked ? game.description : "Bloqueado"}`}
+                  key={game.mode}
+                >
+                  <span className="solo-path-level__badge">
+                    {unlocked ? <NavigationIcon name={game.icon} /> : <Lock size={22} />}
+                  </span>
+                  <span>
+                    <small>Nível {game.level}</small>
+                    <strong>{game.title}</strong>
+                  </span>
+                </button>
+              );
+            })}
+            <img src="/helena-portrait.png" alt="Helena acompanhando sua jornada" />
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="practice-hub">
       <section className="solo-journey" aria-labelledby="solo-journey-title">
         <div className="solo-journey__heading">
           <div>
             <span className="section-label">Minigames Solo</span>
-            <h2 id="solo-journey-title">Sua jornada de estudos</h2>
-            <p>Explore os mundos e escolha seu próximo desafio.</p>
+            <h2 id="solo-journey-title">Escolha um mundo</h2>
+            <p>Use as setas para explorar sua próxima aventura.</p>
           </div>
           <div className="solo-journey__progress" aria-label="Progresso no mundo atual">
             <NavigationIcon name="xp" />
-            <span>Mundo 1</span>
-            <strong>4 níveis</strong>
+            <span>Mundo {world.number}</span>
+            <strong>
+              {world.number === 1 ? `${Math.min(unlockedLevel, 4)}/4 níveis` : "Bloqueado"}
+            </strong>
           </div>
         </div>
 
-        <div className="solo-world-map">
-          <img src="/helena-solo-worlds.webp" alt="Helena explorando três mundos de estudo" />
-          <div className="solo-levels">
-            {SOLO_LEVELS.map((game) => (
-              <button
-                className={`solo-level solo-level--${game.level}`}
-                type="button"
-                onClick={() => onSelect(game.mode)}
-                aria-label={`Nível ${game.level}: ${game.title}. ${game.description}`}
-                key={game.mode}
-              >
-                <span className="solo-level__number">{game.level}</span>
-                <NavigationIcon name={game.icon} />
-                <span>
-                  <strong>{game.title}</strong>
-                  <small>{game.description}</small>
-                </span>
+        <div className={`solo-world-map solo-world-map--${world.number}`}>
+          <img src="/helena-solo-worlds.webp" alt="Mapa com três mundos de estudo da Helena" />
+          <button
+            className="solo-world-map__arrow solo-world-map__arrow--previous"
+            type="button"
+            onClick={() => setWorldIndex((value) => Math.max(0, value - 1))}
+            disabled={worldIndex === 0}
+            aria-label="Mundo anterior"
+          >
+            <HelenaRoomIcon name="back" />
+          </button>
+          <button
+            className="solo-world-map__arrow solo-world-map__arrow--next"
+            type="button"
+            onClick={() => setWorldIndex((value) => Math.min(SOLO_WORLDS.length - 1, value + 1))}
+            disabled={worldIndex === SOLO_WORLDS.length - 1}
+            aria-label="Próximo mundo"
+          >
+            <HelenaRoomIcon name="back" />
+          </button>
+          <div className="solo-world-card" aria-live="polite">
+            <span className="section-label">Mundo {world.number}</span>
+            <h3>{world.title}</h3>
+            <p>{world.description}</p>
+            {world.number === 1 ? (
+              <button className="primary-button" type="button" onClick={() => setInsideWorld(true)}>
+                <HelenaRoomIcon name="play" /> Entrar no mundo
               </button>
-            ))}
+            ) : (
+              <span className="solo-world-card__locked">
+                <Lock size={16} /> Mundo bloqueado
+              </span>
+            )}
           </div>
         </div>
       </section>
@@ -136,7 +229,12 @@ function normalizeAnswer(value: string): string {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-function ReviewSession({ workspace, dispatch, subjectId }: LearnViewProps & { subjectId: string }) {
+function ReviewSession({
+  workspace,
+  dispatch,
+  subjectId,
+  onComplete,
+}: LearnViewProps & { subjectId: string; onComplete?: () => void }) {
   const today = toDateKey(new Date());
   const [queue, setQueue] = useState(() =>
     dueFlashcards(workspace, today)
@@ -149,6 +247,7 @@ function ReviewSession({ workspace, dispatch, subjectId }: LearnViewProps & { su
   function rate(rating: FlashcardRating) {
     if (!card) return;
     dispatch({ type: "flashcard/reviewed", id: card.id, rating, reviewedOn: today });
+    if (queue.length === 1) onComplete?.();
     setQueue((current) => current.slice(1));
     setRevealed(false);
   }
@@ -198,7 +297,12 @@ function ReviewSession({ workspace, dispatch, subjectId }: LearnViewProps & { su
   );
 }
 
-function QuizSession({ workspace, dispatch, subjectId }: LearnViewProps & { subjectId: string }) {
+function QuizSession({
+  workspace,
+  dispatch,
+  subjectId,
+  onComplete,
+}: LearnViewProps & { subjectId: string; onComplete?: () => void }) {
   const cards = workspace.flashcards.filter((card) => card.subjectId === subjectId).slice(0, 5);
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState("");
@@ -240,6 +344,7 @@ function QuizSession({ workspace, dispatch, subjectId }: LearnViewProps & { subj
           total: cards.length,
           completedAt: new Date().toISOString(),
         });
+        onComplete?.();
         setFinished(true);
       } else {
         setIndex(nextIndex);
@@ -360,6 +465,10 @@ export function LearnView({
   const defaultSubject = workspace.subjects[0];
   const [subjectId, setSubjectId] = useState(defaultSubject?.id ?? "");
   const [mode, setMode] = useState<"hub" | SoloMode | "room">(joinCode ? "room" : "hub");
+  const [unlockedLevel, setUnlockedLevel] = useState(() => {
+    const saved = Number(window.localStorage.getItem(SOLO_PROGRESS_KEY));
+    return Number.isInteger(saved) && saved >= 1 ? Math.min(saved, SOLO_LEVELS.length) : 1;
+  });
   const [goalTitle, setGoalTitle] = useState("");
   const [targetMinutes, setTargetMinutes] = useState(300);
   const [deadline, setDeadline] = useState(toDateKey(new Date()));
@@ -370,6 +479,14 @@ export function LearnView({
     window.addEventListener("popstate", leaveRoom);
     return () => window.removeEventListener("popstate", leaveRoom);
   }, [mode]);
+
+  const completeLevel = useCallback((level: number) => {
+    setUnlockedLevel((current) => {
+      const next = Math.max(current, Math.min(level + 1, SOLO_LEVELS.length));
+      window.localStorage.setItem(SOLO_PROGRESS_KEY, String(next));
+      return next;
+    });
+  }, []);
 
   if (!defaultSubject) return null;
   const selectedSubject =
@@ -418,7 +535,7 @@ export function LearnView({
       <div className={`learn-grid${mode === "hub" ? " learn-grid--practice-hub" : ""}`}>
         <section className="module-panel study-panel" aria-label="Praticar">
           {mode === "hub" ? (
-            <PracticeHub onSelect={setMode} onEnterRoom={enterRoom} />
+            <PracticeHub onSelect={setMode} onEnterRoom={enterRoom} unlockedLevel={unlockedLevel} />
           ) : mode === "room" ? (
             <Suspense fallback={<HelenaLoading label="Preparando o Modo Sala…" />}>
               <RoomErrorBoundary>
@@ -480,6 +597,7 @@ export function LearnView({
                   workspace={workspace}
                   dispatch={dispatch}
                   subjectId={selectedSubject.id}
+                  onComplete={() => completeLevel(2)}
                 />
               ) : mode === "quiz" ? (
                 <QuizSession
@@ -487,6 +605,7 @@ export function LearnView({
                   workspace={workspace}
                   dispatch={dispatch}
                   subjectId={selectedSubject.id}
+                  onComplete={() => completeLevel(3)}
                 />
               ) : mode === "listening" ? (
                 <ListeningQuiz
@@ -494,6 +613,7 @@ export function LearnView({
                   flashcards={workspace.flashcards.filter(
                     (card) => card.subjectId === selectedSubject.id,
                   )}
+                  onComplete={() => completeLevel(1)}
                 />
               ) : (
                 <BingoSession

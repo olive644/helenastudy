@@ -193,8 +193,9 @@ a 1 MB por item. A digitalização atual não executa OCR; reconhecimento de tex
 para uma mudança com modelo de ameaça e estratégia de processamento próprios.
 
 O módulo antes chamado Aprender agora aparece como **Praticar** no desktop e no celular. A entrada
-organiza Escuta, Flashcards, Quiz e Bingo como minigames Solo em uma jornada por mundos e níveis,
-com o Modo Sala destacado logo abaixo. A cartela 3 por 3 combina
+organiza Escuta, Flashcards, Quiz e Bingo como minigames Solo em três mundos navegáveis, com o
+Modo Sala destacado logo abaixo. O Mundo 1 possui um caminho de quatro níveis com desbloqueio
+progressivo local; os Mundos 2 e 3 podem ser inspecionados e permanecem bloqueados. A cartela 3 por 3 combina
 desafios gerais com flashcards da matéria, salva o progresso no workspace e reconhece linhas,
 colunas e diagonais.
 

@@ -4736,6 +4736,10 @@ body.local-room-active {
   letter-spacing: -0.04em;
 }
 
+#solo-world-title {
+  scroll-margin-top: 88px;
+}
+
 .solo-journey__heading p,
 .room-entry-card p {
   margin: 0;
@@ -4781,91 +4785,196 @@ body.local-room-active {
   height: 100%;
   min-height: 520px;
   object-fit: cover;
+  transition: transform 240ms ease;
 }
 
-.solo-levels {
-  position: absolute;
-  inset: 0;
+.solo-world-map--1 > img {
+  transform: translateX(20%);
 }
 
-.solo-level {
+.solo-world-map--2 > img {
+  transform: translateX(0);
+}
+
+.solo-world-map--3 > img {
+  transform: translateX(-20%);
+}
+
+.solo-world-map__arrow {
   position: absolute;
+  top: 50%;
+  z-index: 2;
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
-  align-items: center;
-  width: min(230px, 25%);
-  min-height: 64px;
-  padding: 0.55rem;
+  width: 46px;
+  height: 46px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 4px 0 var(--ink);
+  place-items: center;
+  translate: 0 -50%;
+}
+
+.solo-world-map__arrow:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.solo-world-map__arrow--previous {
+  left: 1rem;
+}
+
+.solo-world-map__arrow--next {
+  right: 1rem;
+}
+
+.solo-world-map__arrow--next .helena-room-icon {
+  transform: rotate(180deg);
+}
+
+.solo-world-card {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  display: grid;
+  width: min(360px, calc(100% - 8rem));
+  padding: 1rem 1.15rem;
   border: 2px solid var(--ink);
   border-radius: 18px;
   color: var(--text);
   background: var(--surface);
   box-shadow: 0 5px 0 var(--ink);
-  text-align: left;
-  gap: 0.5rem;
-  transition:
-    translate 160ms ease,
-    box-shadow 160ms ease;
+  gap: 0.35rem;
+  transform: translateX(-50%);
 }
 
-.solo-level:hover,
-.solo-level:focus-visible {
-  box-shadow: 0 2px 0 var(--ink);
-  translate: 0 3px;
+.solo-world-card h3,
+.solo-world-card p {
+  margin: 0;
 }
 
-.solo-level--1 {
-  left: 10%;
-  top: 24%;
+.solo-world-card h3 {
+  font-size: 1.1rem;
 }
 
-.solo-level--2 {
-  left: 39%;
-  top: 67%;
+.solo-world-card p {
+  color: var(--muted);
+  font-size: 0.7rem;
 }
 
-.solo-level--3 {
-  right: 8%;
-  top: 22%;
+.solo-world-card .primary-button {
+  position: relative;
+  z-index: 1;
+  justify-self: start;
+  margin-top: 0.35rem;
 }
 
-.solo-level--4 {
-  right: 13%;
-  top: 66%;
+.solo-world-card__locked {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  gap: 0.35rem;
 }
 
-.solo-level__number {
+.solo-level-path {
+  position: relative;
   display: grid;
-  width: 31px;
-  height: 31px;
+  min-height: 590px;
+  overflow: hidden;
+  padding: 2.5rem 8%;
+  border: 1px solid var(--line-strong);
+  border-radius: 24px;
+  background: var(--cream);
+}
+
+.solo-level-path__trail {
+  position: absolute;
+  top: 12%;
+  bottom: 12%;
+  left: 50%;
+  width: 180px;
+  border: 10px dotted color-mix(in srgb, var(--violet) 38%, transparent);
+  border-top: 0;
+  border-bottom: 0;
+  border-radius: 50%;
+  transform: translateX(-50%) rotate(18deg);
+}
+
+.solo-path-level {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 66px minmax(0, 1fr);
+  align-items: center;
+  width: min(280px, 46%);
+  min-height: 82px;
+  padding: 0.65rem;
+  border: 2px solid var(--ink);
+  border-radius: 22px;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 5px 0 var(--ink);
+  text-align: left;
+  gap: 0.7rem;
+}
+
+.solo-path-level:nth-of-type(even) {
+  justify-self: end;
+}
+
+.solo-path-level.is-locked {
+  border-color: var(--line-strong);
+  box-shadow: 0 4px 0 var(--line-strong);
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+.solo-path-level__badge {
+  display: grid;
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
   color: var(--ink);
   background: var(--yellow);
-  font-size: 0.72rem;
-  font-weight: 900;
   place-items: center;
 }
 
-.solo-level .navigation-icon {
-  width: 27px;
-  height: 27px;
+.solo-path-level.is-locked .solo-path-level__badge {
+  color: var(--muted);
+  background: var(--page);
 }
 
-.solo-level > span:last-child {
+.solo-path-level__badge .navigation-icon {
+  width: 38px;
+  height: 38px;
+}
+
+.solo-path-level > span:last-child {
   display: grid;
-  min-width: 0;
   gap: 0.1rem;
 }
 
-.solo-level strong {
-  font-size: 0.75rem;
+.solo-path-level small {
+  color: var(--muted);
+  font-size: 0.62rem;
 }
 
-.solo-level small {
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 0.58rem;
-  line-height: 1.25;
+.solo-path-level strong {
+  font-size: 0.85rem;
+}
+
+.solo-level-path > img {
+  position: absolute;
+  right: 2%;
+  bottom: -4%;
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  opacity: 0.22;
 }
 
 .room-entry-card {
@@ -4909,10 +5018,12 @@ body.local-room-active {
 @media (max-width: 719px) {
   .solo-journey__heading {
     align-items: flex-start;
+    flex-direction: column;
   }
 
   .solo-journey__progress {
-    min-width: 112px;
+    width: 100%;
+    min-width: 0;
   }
 
   .solo-world-map {
@@ -4931,23 +5042,58 @@ body.local-room-active {
     object-position: center;
   }
 
-  .solo-levels {
-    position: static;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    margin-top: 0.75rem;
-    gap: 0.65rem;
+  .solo-world-map--1 > img {
+    transform: translateX(14%);
   }
 
-  .solo-level {
-    position: static;
-    grid-template-columns: auto minmax(0, 1fr);
+  .solo-world-map--3 > img {
+    transform: translateX(-14%);
+  }
+
+  .solo-world-map__arrow {
+    top: 42%;
+    width: 42px;
+    height: 42px;
+  }
+
+  .solo-world-map__arrow--previous {
+    left: 0.5rem;
+  }
+
+  .solo-world-map__arrow--next {
+    right: 0.5rem;
+  }
+
+  .solo-world-card {
+    position: relative;
+    bottom: auto;
+    left: auto;
     width: auto;
-    min-height: 76px;
+    margin: -1rem 0.75rem 0;
+    transform: none;
   }
 
-  .solo-level .navigation-icon {
-    display: none;
+  .solo-world-card .primary-button,
+  .room-entry-card .primary-button {
+    scroll-margin-block: 96px 112px;
+  }
+
+  .solo-level-path {
+    min-height: 560px;
+    padding: 2rem 0.75rem;
+  }
+
+  .solo-level-path__trail {
+    width: 90px;
+  }
+
+  .solo-path-level {
+    width: 78%;
+  }
+
+  .solo-level-path > img {
+    width: 110px;
+    height: 110px;
   }
 
   .room-entry-card {

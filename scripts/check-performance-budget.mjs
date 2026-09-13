@@ -14,9 +14,9 @@ const MAX_INITIAL_JS_BYTES = 222 * 1024;
 // Modo Sala também passou a reusar o mesmo cliente de voz natural do Quiz
 // de Escuta (NaturalVoicePlayer) em vez de chamar a Web Speech API direto.
 // Controles de áudio sincronizados, cooldown, feedback com a Helena e ações de
-// resultado acrescentam menos de 5 KiB. A jornada Solo acrescenta menos de
-// 3 KiB ao módulo Praticar carregado sob demanda. A entrada inicial mantém 222 KiB.
-const MAX_TOTAL_JS_BYTES = 410 * 1024;
+// resultado acrescentam menos de 5 KiB. Os mundos Solo interativos acrescentam
+// menos de 7 KiB ao módulo Praticar carregado sob demanda. A entrada inicial mantém 222 KiB.
+const MAX_TOTAL_JS_BYTES = 414 * 1024;
 const MAX_TTS_WORKER_BYTES = 2.25 * 1024 * 1024;
 const MAX_TTS_WASM_BYTES = 22 * 1024 * 1024;
 const manifest = JSON.parse(await readFile(new URL(".vite/manifest.json", distDirectory), "utf8"));

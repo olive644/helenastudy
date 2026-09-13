@@ -137,6 +137,7 @@ test("preserva o criador de planos de aula", async ({ page }, testInfo) => {
 });
 
 test("cria um flashcard e conclui a revisão", async ({ page }, testInfo) => {
+  await page.evaluate(() => localStorage.setItem("helena.soloProgress", "2"));
   await navigateToTool(page, testInfo.project.name, "Biblioteca", "Biblioteca");
   await page.getByLabel("Frente").fill("Improve");
   await page.getByLabel("Verso").fill("Melhorar");
@@ -152,6 +153,7 @@ test("cria um flashcard e conclui a revisão", async ({ page }, testInfo) => {
       exact: true,
     })
     .click();
+  await page.getByRole("button", { name: /entrar no mundo/i }).click();
   await page.getByRole("button", { name: /Nível 2: Flashcards/ }).click();
   await expect(page.getByRole("heading", { name: "Improve" })).toBeVisible();
   await page.getByRole("button", { name: /mostrar resposta/i }).click();
@@ -255,6 +257,7 @@ test("adapta a barra móvel ao tema e anima a troca de aba", async ({ page }, te
 });
 
 test("abre digitalização, escrita à mão e completa um bingo", async ({ page }, testInfo) => {
+  await page.evaluate(() => localStorage.setItem("helena.soloProgress", "4"));
   await navigateToTool(page, testInfo.project.name, "Cadernos", "Notas");
   await page.getByRole("button", { name: /nova anotação/i }).click();
 
@@ -276,6 +279,7 @@ test("abre digitalização, escrita à mão e completa um bingo", async ({ page 
       exact: true,
     })
     .click();
+  await page.getByRole("button", { name: /entrar no mundo/i }).click();
   await page.getByRole("button", { name: /Nível 4: Bingo/ }).click();
   await page.getByRole("button", { name: "Criar bingo" }).click();
   const board = page.getByRole("group", { name: "Cartela de bingo" });
