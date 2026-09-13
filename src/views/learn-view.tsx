@@ -98,7 +98,7 @@ function PracticeHub({
 
   useEffect(() => {
     if (insideWorld)
-      document.getElementById("solo-world-title")?.scrollIntoView({ block: "start" });
+      document.getElementById("solo-world-title")?.scrollIntoView?.({ block: "start" });
   }, [insideWorld]);
 
   if (insideWorld) {
