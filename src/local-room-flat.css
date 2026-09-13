@@ -534,6 +534,18 @@
   animation: local-room-feedback-progress 3s linear forwards;
 }
 
+.local-room-results-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.local-room-answer .helena-loading--compact {
+  margin: 0;
+  justify-content: center;
+}
+
 @keyframes local-room-feedback-progress {
   to {
     transform: scaleX(0);

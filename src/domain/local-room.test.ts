@@ -12,7 +12,9 @@ import {
   LEADER_WRONG_ANSWER_PENALTY_XP,
   normalizeLocalRoomCode,
   rankLocalRoomParticipants,
+  repeatRoom,
   readLocalRoomCodeFromUrl,
+  returnRoomToLobby,
   roomSecondsLeft,
   sanitizeDisplayName,
   startRoom,
@@ -251,13 +253,24 @@ describe("sala local", () => {
     ).toBe(true);
   });
 
-  it("avança perguntas e termina no fim do baralho", () => {
+  it("avança perguntas e mostra o resultado no fim do baralho", () => {
     let state = startedWithTwo();
     for (let index = 0; index < 5; index += 1) {
       expect(state.phase).toBe("playing");
       state = advanceRoomQuestion(state, 4 + index);
     }
-    expect(state.phase).toBe("finished");
+    expect(state.phase).toBe("results");
+  });
+
+  it("repete a atividade ou volta ao lobby sem recriar a sala", () => {
+    let results = startedWithTwo();
+    for (let index = 0; index < 5; index += 1) results = advanceRoomQuestion(results, 4 + index);
+    const lobby = returnRoomToLobby(results, 20);
+    expect(lobby.phase).toBe("lobby");
+    expect(lobby.participants).toHaveLength(2);
+    const repeated = repeatRoom(results, { now: 21, random: () => 0 });
+    expect(repeated.phase).toBe("playing");
+    expect(repeated.participants.every((item) => item.score === 0)).toBe(true);
   });
 
   it("permite encerrar a sala a qualquer momento", () => {

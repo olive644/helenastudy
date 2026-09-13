@@ -38,6 +38,8 @@ vi.mock("../hooks/use-local-room", () => ({
       startRound: vi.fn(),
       nextQuestion: vi.fn().mockResolvedValue(undefined),
       endRoom: vi.fn(),
+      repeatRound: vi.fn(),
+      returnToLobby: vi.fn(),
       submitAnswer: vi.fn(),
       reset: vi.fn(),
     };

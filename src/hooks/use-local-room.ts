@@ -79,7 +79,7 @@ export function normalizeRoomState(data: Partial<PublicLocalRoomState>): PublicL
     typeof data !== "object" ||
     typeof data.code !== "string" ||
     !isValidLocalRoomCode(data.code) ||
-    !["lobby", "playing", "finished"].includes(data.phase ?? "") ||
+    !["lobby", "playing", "results", "finished"].includes(data.phase ?? "") ||
     !data.settings ||
     ![15, 30, 45, 60].includes(data.settings.roundSeconds) ||
     !["mixed", "easy", "medium", "hard"].includes(data.settings.difficulty) ||
@@ -460,7 +460,12 @@ export function useLocalRoom(initialJoinCode?: string) {
 
   async function updateSettings(
     settings: Partial<LocalRoomSettings>,
-    sourceDeck?: { id: string; front: string; back: string }[],
+    sourceDeck?: {
+      id: string;
+      front: string;
+      back: string;
+      acceptedAnswers?: readonly string[];
+    }[],
   ) {
     try {
       const payload = await requestRoom<{ state: PublicLocalRoomState }>("settings", {
@@ -512,6 +517,30 @@ export function useLocalRoom(initialJoinCode?: string) {
       stopStreaming();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Não foi possível encerrar a sala.");
+    }
+  }
+
+  async function repeatRound() {
+    try {
+      const payload = await requestRoom<{ state: PublicLocalRoomState }>("repeat", {
+        code: codeRef.current,
+        hostToken: hostTokenRef.current,
+      });
+      setState(payload.state);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Não foi possível repetir a atividade.");
+    }
+  }
+
+  async function returnToLobby() {
+    try {
+      const payload = await requestRoom<{ state: PublicLocalRoomState }>("lobby", {
+        code: codeRef.current,
+        hostToken: hostTokenRef.current,
+      });
+      setState(payload.state);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Não foi possível trocar a atividade.");
     }
   }
 
@@ -579,6 +608,8 @@ export function useLocalRoom(initialJoinCode?: string) {
     startRound,
     nextQuestion,
     endRoom,
+    repeatRound,
+    returnToLobby,
     submitAnswer,
     reset,
   };

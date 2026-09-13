@@ -5,7 +5,7 @@ import {
   type ListeningCard,
 } from "./listening-quiz.js";
 
-export type LocalRoomPhase = "lobby" | "playing" | "finished";
+export type LocalRoomPhase = "lobby" | "playing" | "results" | "finished";
 
 export type LocalRoomDifficulty = "mixed" | "easy" | "medium" | "hard";
 
@@ -230,6 +230,9 @@ export function startRoom(
     questionIndex: 0,
     questionStartedAt: dependencies.now,
     answeredParticipantIds: [],
+    receipts: Object.fromEntries(
+      Object.entries(state.receipts ?? {}).filter(([key]) => !key.startsWith("answer:")),
+    ),
     participants: state.participants.map((participant, index) => ({
       ...participant,
       ...(state.settings.teams ? { team: index % 2 === 0 ? "Roxo" : "Amarelo" } : { team: "" }),
@@ -307,7 +310,7 @@ export function submitRoomAnswer(
     );
   return {
     state: bingo
-      ? endRoom(answered, dependencies.now)
+      ? { ...answered, phase: "results" }
       : state.settings.activity === "bingo" && allAnswered
         ? advanceRoomQuestion(answered, dependencies.now)
         : answered,
@@ -347,7 +350,7 @@ export function advanceRoomQuestion(state: LocalRoomState, now: number): LocalRo
   if (state.phase !== "playing") return state;
   const nextIndex = state.questionIndex + 1;
   if (nextIndex >= state.deck.length) {
-    return { ...state, phase: "finished", updatedAt: now };
+    return { ...state, phase: "results", updatedAt: now };
   }
   return {
     ...state,
@@ -356,6 +359,26 @@ export function advanceRoomQuestion(state: LocalRoomState, now: number): LocalRo
     answeredParticipantIds: [],
     updatedAt: now,
   };
+}
+
+export function returnRoomToLobby(state: LocalRoomState, now: number): LocalRoomState {
+  if (state.phase !== "results") return state;
+  return {
+    ...state,
+    phase: "lobby",
+    deck: [],
+    questionIndex: 0,
+    questionStartedAt: now,
+    answeredParticipantIds: [],
+    updatedAt: now,
+  };
+}
+
+export function repeatRoom(
+  state: LocalRoomState,
+  dependencies: { random?: () => number; now: number },
+): LocalRoomState {
+  return startRoom(returnRoomToLobby(state, dependencies.now), dependencies);
 }
 
 export function endRoom(state: LocalRoomState, now: number): LocalRoomState {

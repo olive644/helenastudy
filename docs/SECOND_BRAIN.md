@@ -122,12 +122,18 @@ sistema completo.
 
 A duração exibida soma o tempo de resposta e três segundos de feedback por pergunta. Quando todas
 as pessoas conectadas respondem, o resultado fica visível por esse intervalo e uma barra mostra o
-avanço. Respostas enviadas ficam bloqueadas até a confirmação do servidor.
+avanço. Respostas enviadas ficam bloqueadas até a confirmação do servidor e usam o loading compacto
+da Helena. A reprodução automática aguarda o fim de “3, 2, 1, Vai!”. A repetição manual do áudio tem
+cooldown de cinco segundos, comunicado no próprio botão.
 
 O professor pode cadastrar equivalências com `|`. A normalização ignora caixa, acentos, pontuação e
 espaços excedentes. Uma opção desligada por padrão permite aceitar uma inserção, remoção ou troca de
 caractere em respostas com pelo menos quatro caracteres. Assim, a aproximação só entra por decisão
 explícita do professor.
+
+O backend conserva as alternativas no baralho privado. O fim do baralho entra no estado de resultados,
+sem encerrar a sala. O anfitrião pode repetir a atividade, voltar ao lobby para trocar a configuração ou
+encerrar a sala; participantes permanecem na mesma sessão enquanto aguardam a escolha.
 
 O modo projetor vive em `/sala/<código>/projetor`, reutiliza a sessão temporária do anfitrião e não
 expõe ações de revelar, avançar ou encerrar. O QR code continua usando a composição aprovada da Helena.

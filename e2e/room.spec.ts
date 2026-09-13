@@ -175,7 +175,10 @@ for (const activity of ["listening", "bingo"] as const) {
         if (activity === "listening")
           await expect(players[0]!.getByText("Próxima pergunta em 3 segundos.")).toBeVisible();
       }
-      await expect(host.getByRole("heading", { name: "Sala encerrada" })).toBeVisible();
+      await expect(host.getByRole("heading", { name: "Atividade concluída" })).toBeVisible();
+      await expect(host.getByRole("button", { name: "Repetir" })).toBeVisible();
+      await expect(host.getByRole("button", { name: "Trocar atividade" })).toBeVisible();
+      await expect(host.getByRole("button", { name: "Encerrar sala" })).toBeVisible();
       expect(states.get(code)!.participants).toHaveLength(2);
       if (activity === "listening")
         expect(states.get(code)!.participants.map((p) => p.score)).toEqual([50, 50]);

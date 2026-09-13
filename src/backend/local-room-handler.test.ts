@@ -242,6 +242,72 @@ describe("handler da sala local", () => {
     expect(answerPayload.question.back).toBeTruthy();
   });
 
+  it("preserva respostas equivalentes no material manual", async () => {
+    const { code, hostToken } = await createRoomViaApi();
+    const joinResponse = await handler(post("join", { code, displayName: "Ana" }));
+    const { participantId, participantToken } = (await joinResponse.json()) as {
+      participantId: string;
+      participantToken: string;
+    };
+    const settingsResponse = await handler(
+      post("settings", {
+        code,
+        hostToken,
+        settings: { questionCount: "all", shuffle: false },
+        sourceDeck: [
+          {
+            id: "manual-1",
+            front: "bus",
+            back: "ônibus",
+            acceptedAnswers: ["autocarro"],
+          },
+        ],
+      }),
+    );
+    expect(settingsResponse.status).toBe(200);
+    await handler(post("start", { code, hostToken }));
+
+    const answerResponse = await handler(
+      post("answer", {
+        code,
+        participantId,
+        participantToken,
+        questionIndex: 0,
+        answer: "autocarro",
+      }),
+    );
+    expect(answerResponse.status).toBe(200);
+    expect(await answerResponse.json()).toEqual(expect.objectContaining({ correct: true }));
+  });
+
+  it("repete ou troca a atividade mantendo a mesma sala", async () => {
+    const { code, hostToken } = await createRoomViaApi();
+    const joinResponse = await handler(post("join", { code, displayName: "Ana" }));
+    const { participantId, participantToken } = (await joinResponse.json()) as {
+      participantId: string;
+      participantToken: string;
+    };
+    await handler(
+      post("settings", {
+        code,
+        hostToken,
+        settings: { questionCount: "all", shuffle: false },
+        sourceDeck: [{ id: "manual-1", front: "book", back: "livro" }],
+      }),
+    );
+    await handler(post("start", { code, hostToken }));
+    await handler(
+      post("answer", { code, participantId, participantToken, questionIndex: 0, answer: "livro" }),
+    );
+    const resultResponse = await handler(post("next", { code, hostToken, questionIndex: 0 }));
+    expect((await resultResponse.json()).state.phase).toBe("results");
+
+    const repeatResponse = await handler(post("repeat", { code, hostToken }));
+    expect((await repeatResponse.json()).state).toEqual(
+      expect.objectContaining({ code, phase: "playing", questionIndex: 0 }),
+    );
+  });
+
   it("recusa avançar manualmente antes do tempo, e aceita depois que o tempo acaba", async () => {
     const { code, hostToken } = await createRoomViaApi(15);
     await handler(post("join", { code, displayName: "Ana" }));
