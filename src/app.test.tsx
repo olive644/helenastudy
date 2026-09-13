@@ -60,7 +60,7 @@ describe("App", () => {
       ["Espaço do aluno", "today"],
       ["Agenda", "planner"],
       ["Foco", "focus"],
-      ["Quizzes e bingo", "learn"],
+      ["Praticar", "learn"],
       ["Biblioteca", "library"],
       ["Hábitos", "habits"],
       ["Cadernos", "notes"],
@@ -147,8 +147,8 @@ describe("App", () => {
 
   it("cria e completa uma linha no bingo de estudos", async () => {
     render(<App />);
-    navigate("Quizzes e bingo");
-    fireEvent.click(await screen.findByRole("button", { name: "Bingo" }));
+    navigate("Praticar");
+    fireEvent.click(await screen.findByRole("button", { name: /Nível 4: Bingo/ }));
     fireEvent.click(screen.getByRole("button", { name: "Criar bingo" }));
 
     const board = screen.getByRole("group", { name: "Cartela de bingo" });
@@ -160,8 +160,8 @@ describe("App", () => {
 
   it("abre o quiz de escuta com vocabulário inicial", async () => {
     render(<App />);
-    navigate("Quizzes e bingo");
-    fireEvent.click(await screen.findByRole("button", { name: "Escuta" }));
+    navigate("Praticar");
+    fireEvent.click(await screen.findByRole("button", { name: /Nível 1: Escuta/ }));
 
     expect(screen.getByRole("heading", { name: /ouça e descubra a palavra/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /iniciar escuta/i })).toBeTruthy();
@@ -201,7 +201,8 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: /criar flashcard/i }));
     expect(screen.getByText("Improve")).toBeTruthy();
 
-    navigate("Quizzes e bingo");
+    navigate("Praticar");
+    fireEvent.click(await screen.findByRole("button", { name: /Nível 2: Flashcards/ }));
     expect(await screen.findByRole("heading", { name: "Improve" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /mostrar resposta/i }));
     expect(screen.getByRole("heading", { name: "Melhorar" })).toBeTruthy();

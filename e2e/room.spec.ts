@@ -77,11 +77,11 @@ for (const activity of ["listening", "bingo"] as const) {
       await host.goto("/");
       await host
         .getByRole("button", {
-          name: testInfo.project.name === "mobile" ? "Praticar" : "Quizzes e bingo",
+          name: "Praticar",
           exact: true,
         })
         .click();
-      await host.getByRole("button", { name: "Modo Sala", exact: true }).click();
+      await host.getByRole("button", { name: "Abrir Modo Sala", exact: true }).click();
       await host.getByRole("button", { name: "Criar sala", exact: true }).click();
       await host.getByRole("combobox", { name: "Atividade", exact: true }).selectOption(activity);
       if (activity === "listening") {

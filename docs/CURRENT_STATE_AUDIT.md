@@ -192,8 +192,9 @@ As imagens são processadas no navegador, não são enviadas para serviços exte
 a 1 MB por item. A digitalização atual não executa OCR; reconhecimento de texto continua planejado
 para uma mudança com modelo de ameaça e estratégia de processamento próprios.
 
-O módulo antes chamado Aprender passa a aparecer como **Quizzes e bingo** no desktop e **Praticar**
-no celular. Flashcards, Quizzes e Bingo são modos explícitos da sessão. A cartela 3 por 3 combina
+O módulo antes chamado Aprender agora aparece como **Praticar** no desktop e no celular. A entrada
+organiza Escuta, Flashcards, Quiz e Bingo como minigames Solo em uma jornada por mundos e níveis,
+com o Modo Sala destacado logo abaixo. A cartela 3 por 3 combina
 desafios gerais com flashcards da matéria, salva o progresso no workspace e reconhece linhas,
 colunas e diagonais.
 

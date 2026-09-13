@@ -148,10 +148,11 @@ test("cria um flashcard e conclui a revisão", async ({ page }, testInfo) => {
       name: testInfo.project.name === "mobile" ? "Navegação móvel" : "Navegação principal",
     })
     .getByRole("button", {
-      name: testInfo.project.name === "mobile" ? "Praticar" : "Quizzes e bingo",
+      name: "Praticar",
       exact: true,
     })
     .click();
+  await page.getByRole("button", { name: /Nível 2: Flashcards/ }).click();
   await expect(page.getByRole("heading", { name: "Improve" })).toBeVisible();
   await page.getByRole("button", { name: /mostrar resposta/i }).click();
   await expect(page.getByRole("heading", { name: "Melhorar" })).toBeVisible();
@@ -214,7 +215,7 @@ test("mantém o retorno do Modo Sala livre no celular", async ({ page }, testInf
   const navigation = page.getByRole("navigation", { name: "Navegação móvel" });
 
   await navigation.getByRole("button", { name: "Praticar", exact: true }).click();
-  await page.getByRole("button", { name: "Modo Sala", exact: true }).click();
+  await page.getByRole("button", { name: "Abrir Modo Sala", exact: true }).click();
 
   const dialog = page.getByRole("dialog", { name: "Modo Sala" });
   const backButton = dialog.getByRole("button", { name: "Voltar", exact: true });
@@ -271,11 +272,11 @@ test("abre digitalização, escrita à mão e completa um bingo", async ({ page 
       name: testInfo.project.name === "mobile" ? "Navegação móvel" : "Navegação principal",
     })
     .getByRole("button", {
-      name: testInfo.project.name === "mobile" ? "Praticar" : "Quizzes e bingo",
+      name: "Praticar",
       exact: true,
     })
     .click();
-  await page.getByRole("button", { name: "Bingo", exact: true }).click();
+  await page.getByRole("button", { name: /Nível 4: Bingo/ }).click();
   await page.getByRole("button", { name: "Criar bingo" }).click();
   const board = page.getByRole("group", { name: "Cartela de bingo" });
   const cells = board.getByRole("button");

@@ -1,6 +1,8 @@
 import { Check, Plus } from "lucide-react";
 import { lazy, Suspense, useEffect, useState, type Dispatch, type FormEvent } from "react";
 import { HelenaLoading } from "../components/helena-loading";
+import { HelenaRoomIcon } from "../components/helena-room-icon";
+import { NavigationIcon } from "../components/navigation-icon";
 import { RoomErrorBoundary } from "../components/room-error-boundary";
 import { PageHeader } from "../components/app-navigation";
 import { ListeningQuiz } from "../components/listening-quiz";
@@ -25,6 +27,106 @@ type LearnViewProps = {
   joinCode?: string | undefined;
   projectorMode?: boolean;
 };
+
+type SoloMode = "review" | "quiz" | "listening" | "bingo";
+
+const SOLO_LEVELS: Array<{
+  mode: SoloMode;
+  level: number;
+  title: string;
+  description: string;
+  icon: "learn" | "library" | "xp";
+}> = [
+  {
+    mode: "listening",
+    level: 1,
+    title: "Escuta",
+    description: "Ouça, reconheça e traduza palavras.",
+    icon: "learn",
+  },
+  {
+    mode: "review",
+    level: 2,
+    title: "Flashcards",
+    description: "Revise no seu ritmo e fortaleça a memória.",
+    icon: "library",
+  },
+  {
+    mode: "quiz",
+    level: 3,
+    title: "Quiz",
+    description: "Responda desafios e acompanhe seus acertos.",
+    icon: "xp",
+  },
+  {
+    mode: "bingo",
+    level: 4,
+    title: "Bingo",
+    description: "Complete a cartela com seus conteúdos.",
+    icon: "learn",
+  },
+];
+
+function PracticeHub({
+  onSelect,
+  onEnterRoom,
+}: {
+  onSelect: (mode: SoloMode) => void;
+  onEnterRoom: () => void;
+}) {
+  return (
+    <div className="practice-hub">
+      <section className="solo-journey" aria-labelledby="solo-journey-title">
+        <div className="solo-journey__heading">
+          <div>
+            <span className="section-label">Minigames Solo</span>
+            <h2 id="solo-journey-title">Sua jornada de estudos</h2>
+            <p>Explore os mundos e escolha seu próximo desafio.</p>
+          </div>
+          <div className="solo-journey__progress" aria-label="Progresso no mundo atual">
+            <NavigationIcon name="xp" />
+            <span>Mundo 1</span>
+            <strong>4 níveis</strong>
+          </div>
+        </div>
+
+        <div className="solo-world-map">
+          <img src="/helena-solo-worlds.webp" alt="Helena explorando três mundos de estudo" />
+          <div className="solo-levels">
+            {SOLO_LEVELS.map((game) => (
+              <button
+                className={`solo-level solo-level--${game.level}`}
+                type="button"
+                onClick={() => onSelect(game.mode)}
+                aria-label={`Nível ${game.level}: ${game.title}. ${game.description}`}
+                key={game.mode}
+              >
+                <span className="solo-level__number">{game.level}</span>
+                <NavigationIcon name={game.icon} />
+                <span>
+                  <strong>{game.title}</strong>
+                  <small>{game.description}</small>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="room-entry-card" aria-labelledby="room-entry-title">
+        <img src="/helena-holding-qr.png" alt="Helena segurando o convite do Modo Sala" />
+        <div>
+          <span className="section-label">Jogar com a turma</span>
+          <h2 id="room-entry-title">Modo Sala</h2>
+          <p>Crie uma sala, convide seus alunos e conduza atividades ao vivo.</p>
+        </div>
+        <button className="primary-button" type="button" onClick={onEnterRoom}>
+          <HelenaRoomIcon name="play" /> Abrir Modo Sala
+        </button>
+      </section>
+    </div>
+  );
+}
 
 function normalizeAnswer(value: string): string {
   return value
@@ -257,16 +359,14 @@ export function LearnView({
 }: LearnViewProps) {
   const defaultSubject = workspace.subjects[0];
   const [subjectId, setSubjectId] = useState(defaultSubject?.id ?? "");
-  const [mode, setMode] = useState<"review" | "quiz" | "listening" | "bingo" | "room">(
-    joinCode ? "room" : "review",
-  );
+  const [mode, setMode] = useState<"hub" | SoloMode | "room">(joinCode ? "room" : "hub");
   const [goalTitle, setGoalTitle] = useState("");
   const [targetMinutes, setTargetMinutes] = useState(300);
   const [deadline, setDeadline] = useState(toDateKey(new Date()));
 
   useEffect(() => {
     if (mode !== "room") return;
-    const leaveRoom = () => setMode("review");
+    const leaveRoom = () => setMode("hub");
     window.addEventListener("popstate", leaveRoom);
     return () => window.removeEventListener("popstate", leaveRoom);
   }, [mode]);
@@ -291,7 +391,7 @@ export function LearnView({
 
   function leaveRoom() {
     if (window.history.state?.helenaRoom) window.history.back();
-    else setMode("review");
+    else setMode("hub");
   }
 
   return (
@@ -315,76 +415,11 @@ export function LearnView({
         </label>
       </header>
 
-      <div className="learn-grid">
-        <section className="module-panel study-panel" aria-labelledby="study-mode-title">
-          <div className="module-heading">
-            <h2 id="study-mode-title">Sessão de estudo</h2>
-            <div className="mode-switch">
-              <button
-                className={mode === "listening" ? "is-active" : undefined}
-                type="button"
-                onClick={() => setMode("listening")}
-              >
-                Escuta
-              </button>
-              <button
-                className={mode === "review" ? "is-active" : undefined}
-                type="button"
-                onClick={() => setMode("review")}
-              >
-                Flashcards
-              </button>
-              <button
-                className={mode === "quiz" ? "is-active" : undefined}
-                type="button"
-                onClick={() => setMode("quiz")}
-              >
-                Quizzes
-              </button>
-              <button
-                className={mode === "bingo" ? "is-active" : undefined}
-                type="button"
-                onClick={() => setMode("bingo")}
-              >
-                Bingo
-              </button>
-              <button
-                className={mode === "room" ? "is-active" : undefined}
-                type="button"
-                onClick={enterRoom}
-              >
-                Modo Sala
-              </button>
-            </div>
-          </div>
-          {mode === "review" ? (
-            <ReviewSession
-              key={`review-${selectedSubject.id}`}
-              workspace={workspace}
-              dispatch={dispatch}
-              subjectId={selectedSubject.id}
-            />
-          ) : mode === "quiz" ? (
-            <QuizSession
-              key={`quiz-${selectedSubject.id}`}
-              workspace={workspace}
-              dispatch={dispatch}
-              subjectId={selectedSubject.id}
-            />
-          ) : mode === "listening" ? (
-            <ListeningQuiz
-              key={`listening-${selectedSubject.id}`}
-              flashcards={workspace.flashcards.filter(
-                (card) => card.subjectId === selectedSubject.id,
-              )}
-            />
-          ) : mode === "bingo" ? (
-            <BingoSession
-              workspace={workspace}
-              dispatch={dispatch}
-              subjectId={selectedSubject.id}
-            />
-          ) : (
+      <div className={`learn-grid${mode === "hub" ? " learn-grid--practice-hub" : ""}`}>
+        <section className="module-panel study-panel" aria-label="Praticar">
+          {mode === "hub" ? (
+            <PracticeHub onSelect={setMode} onEnterRoom={enterRoom} />
+          ) : mode === "room" ? (
             <Suspense fallback={<HelenaLoading label="Preparando o Modo Sala…" />}>
               <RoomErrorBoundary>
                 <LocalRoom
@@ -401,6 +436,73 @@ export function LearnView({
                 />
               </RoomErrorBoundary>
             </Suspense>
+          ) : (
+            <>
+              <div className="module-heading solo-session-heading">
+                <button className="link-button" type="button" onClick={() => setMode("hub")}>
+                  <HelenaRoomIcon name="back" size={18} /> Voltar aos mundos
+                </button>
+                <h2 id="study-mode-title">Minigame Solo</h2>
+              </div>
+              <div className="mode-switch" role="navigation" aria-label="Minigames Solo">
+                <button
+                  className={mode === "listening" ? "is-active" : undefined}
+                  type="button"
+                  onClick={() => setMode("listening")}
+                >
+                  Escuta
+                </button>
+                <button
+                  className={mode === "review" ? "is-active" : undefined}
+                  type="button"
+                  onClick={() => setMode("review")}
+                >
+                  Flashcards
+                </button>
+                <button
+                  className={mode === "quiz" ? "is-active" : undefined}
+                  type="button"
+                  onClick={() => setMode("quiz")}
+                >
+                  Quizzes
+                </button>
+                <button
+                  className={mode === "bingo" ? "is-active" : undefined}
+                  type="button"
+                  onClick={() => setMode("bingo")}
+                >
+                  Bingo
+                </button>
+              </div>
+              {mode === "review" ? (
+                <ReviewSession
+                  key={`review-${selectedSubject.id}`}
+                  workspace={workspace}
+                  dispatch={dispatch}
+                  subjectId={selectedSubject.id}
+                />
+              ) : mode === "quiz" ? (
+                <QuizSession
+                  key={`quiz-${selectedSubject.id}`}
+                  workspace={workspace}
+                  dispatch={dispatch}
+                  subjectId={selectedSubject.id}
+                />
+              ) : mode === "listening" ? (
+                <ListeningQuiz
+                  key={`listening-${selectedSubject.id}`}
+                  flashcards={workspace.flashcards.filter(
+                    (card) => card.subjectId === selectedSubject.id,
+                  )}
+                />
+              ) : (
+                <BingoSession
+                  workspace={workspace}
+                  dispatch={dispatch}
+                  subjectId={selectedSubject.id}
+                />
+              )}
+            </>
           )}
         </section>
 

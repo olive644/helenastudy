@@ -4709,6 +4709,263 @@ body.local-room-active {
   min-height: 470px;
 }
 
+.learn-grid--practice-hub .study-panel {
+  grid-column: 1 / -1;
+}
+
+.practice-hub,
+.solo-journey {
+  display: grid;
+  gap: 1rem;
+}
+
+.solo-journey__heading,
+.room-entry-card,
+.solo-session-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.solo-journey__heading h2,
+.room-entry-card h2 {
+  margin: 0.2rem 0;
+  color: var(--text);
+  font-size: clamp(1.15rem, 3vw, 1.7rem);
+  letter-spacing: -0.04em;
+}
+
+.solo-journey__heading p,
+.room-entry-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.solo-journey__progress {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  min-width: 132px;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--surface);
+  column-gap: 0.5rem;
+}
+
+.solo-journey__progress .navigation-icon {
+  grid-row: 1 / 3;
+  width: 30px;
+  height: 30px;
+}
+
+.solo-journey__progress span,
+.solo-journey__progress strong {
+  font-size: 0.66rem;
+}
+
+.solo-world-map {
+  position: relative;
+  overflow: hidden;
+  min-height: 520px;
+  border: 1px solid var(--line-strong);
+  border-radius: 24px;
+  background: var(--page);
+}
+
+.solo-world-map > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  object-fit: cover;
+}
+
+.solo-levels {
+  position: absolute;
+  inset: 0;
+}
+
+.solo-level {
+  position: absolute;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  width: min(230px, 25%);
+  min-height: 64px;
+  padding: 0.55rem;
+  border: 2px solid var(--ink);
+  border-radius: 18px;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 5px 0 var(--ink);
+  text-align: left;
+  gap: 0.5rem;
+  transition:
+    translate 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.solo-level:hover,
+.solo-level:focus-visible {
+  box-shadow: 0 2px 0 var(--ink);
+  translate: 0 3px;
+}
+
+.solo-level--1 {
+  left: 10%;
+  top: 24%;
+}
+
+.solo-level--2 {
+  left: 39%;
+  top: 67%;
+}
+
+.solo-level--3 {
+  right: 8%;
+  top: 22%;
+}
+
+.solo-level--4 {
+  right: 13%;
+  top: 66%;
+}
+
+.solo-level__number {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--yellow);
+  font-size: 0.72rem;
+  font-weight: 900;
+  place-items: center;
+}
+
+.solo-level .navigation-icon {
+  width: 27px;
+  height: 27px;
+}
+
+.solo-level > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.solo-level strong {
+  font-size: 0.75rem;
+}
+
+.solo-level small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.58rem;
+  line-height: 1.25;
+}
+
+.room-entry-card {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr) auto;
+  min-height: 150px;
+  padding: 1rem 1.25rem;
+  border-radius: 22px;
+  color: #fff;
+  background: var(--violet);
+}
+
+.room-entry-card > img {
+  width: 104px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.room-entry-card h2,
+.room-entry-card p,
+.room-entry-card .section-label {
+  color: #fff;
+}
+
+.room-entry-card .primary-button {
+  color: var(--ink);
+  background: var(--yellow);
+}
+
+.solo-session-heading {
+  flex-wrap: wrap;
+}
+
+.solo-session-heading .link-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 0.35rem;
+}
+
+@media (max-width: 719px) {
+  .solo-journey__heading {
+    align-items: flex-start;
+  }
+
+  .solo-journey__progress {
+    min-width: 112px;
+  }
+
+  .solo-world-map {
+    min-height: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .solo-world-map > img {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 1.3;
+    border: 1px solid var(--line-strong);
+    border-radius: 20px;
+    object-position: center;
+  }
+
+  .solo-levels {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 0.75rem;
+    gap: 0.65rem;
+  }
+
+  .solo-level {
+    position: static;
+    grid-template-columns: auto minmax(0, 1fr);
+    width: auto;
+    min-height: 76px;
+  }
+
+  .solo-level .navigation-icon {
+    display: none;
+  }
+
+  .room-entry-card {
+    grid-template-columns: 76px minmax(0, 1fr);
+    padding: 0.9rem;
+  }
+
+  .room-entry-card > img {
+    width: 72px;
+    height: 92px;
+  }
+
+  .room-entry-card .primary-button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
 .review-session,
 .quiz-session {
   display: grid;
