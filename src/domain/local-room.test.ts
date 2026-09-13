@@ -188,6 +188,24 @@ describe("sala local", () => {
     expect(second.question).toEqual({ front: card.front, back: card.back });
   });
 
+  it("aplica a tolerância de digitação escolhida pelo professor", () => {
+    const started = startedWithTwo();
+    const card = started.deck[0]!;
+    const typo = card.back.slice(0, -1);
+    const strict = submitRoomAnswer(started, {
+      participantId: "p1",
+      questionIndex: 0,
+      answer: typo,
+      now: 4,
+    });
+    expect(strict.correct).toBe(false);
+    const tolerant = submitRoomAnswer(
+      { ...started, settings: { ...started.settings, acceptMinorTypos: true } },
+      { participantId: "p1", questionIndex: 0, answer: typo, now: 4 },
+    );
+    expect(tolerant.correct).toBe(true);
+  });
+
   it("recusa resposta de participante desconhecido ou de pergunta errada", () => {
     const started = startedWithTwo();
     const card = started.deck[0]!;

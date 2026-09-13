@@ -93,7 +93,7 @@ de verdade fica como validacao pendente antes do primeiro deploy.
 ## Deploy no Railway (recomendado, sem custo)
 
 O plano Free do Railway nao pede cartao de credito e e permanente (nao e
-trial), mas limita a instancia a 0.5GB de RAM — insuficiente pros dois
+trial), mas limita a instancia a 0.5GB de RAM, insuficiente pros dois
 motores juntos. Por isso este deploy roda **so o Kokoro**
 (`Dockerfile.railway`, que pula o download do Piper). O codigo ja trata isso
 com naturalidade: `/health` reporta `piper_loaded: false`, e o roteador cai
@@ -128,18 +128,18 @@ TTS_SERVICE_TOKEN=<o mesmo segredo do passo 4>
 ```
 
 **Atencao com um ponto real**: diferente do Cloud Run e do Hugging Face
-Spaces, o plano Free do Railway nao escala a zero — o container fica ligado
+Spaces, o plano Free do Railway nao escala a zero. O container fica ligado
 o tempo todo, consumindo do credito de US$1/mes que o plano da. Nao tenho
 certeza se US$1 cobre um mes inteiro de container ligado 24 horas (depende
 do consumo real de CPU/memoria em repouso); acompanhe em **Usage** no
 primeiro mes. Pra nunca ser cobrado por engano, configure em **Settings →
-Usage Limits** um teto de gasto de US$0 acima do credito gratis — se
+Usage Limits** um teto de gasto de US$0 acima do credito gratis. Se
 estourar, o Railway so pausa o servico em vez de cobrar.
 
 ## Deploy no Hugging Face Spaces (exige plano PRO)
 
 **Atualizacao**: o Hugging Face passou a exigir assinatura **PRO** (paga) pra
-criar Spaces com SDK Docker ou Gradio — so o SDK "Static" (sem servidor)
+criar Spaces com SDK Docker ou Gradio. So o SDK "Static" (sem servidor)
 continua gratis, o que nao serve pra este servico. Deixamos a secao abaixo
 documentada para quem ja tiver o plano PRO; quem nao tem, va direto pra
 [Deploy no Railway](#deploy-no-railway-recomendado-sem-custo) mais abaixo.

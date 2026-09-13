@@ -262,10 +262,18 @@ estão disponíveis; Flashcards em grupo e Quiz competitivo aparecem desabilitad
 A barra inferior resume a rodada e mantém a ação de início visível. Os ícones aprovados do projeto,
 a arte da Helena segurando a placa e o QR SVG dinâmico foram preservados.
 No quiz de escuta, a Lista personalizada é o fluxo principal. Ela aceita até 30 pares separados por
-igual, ponto e vírgula, vírgula, tabulação ou hífen. O formulário aponta erros e duplicatas por linha,
-mostra uma prévia e confirma quando as palavras são aplicadas. Controles incompatíveis ficam ocultos.
-Durante a rodada, o projetor esconde a palavra por padrão. Cada aluno recebe a resposta esperada e o
-XP após responder; quando todos terminam, há três segundos de feedback antes da próxima pergunta.
+igual, ponto e vírgula, vírgula, tabulação ou hífen. Respostas equivalentes podem ser cadastradas com
+barra vertical, por exemplo `bus = ônibus | autocarro | o ônibus`. O formulário aponta erros e
+duplicatas por linha, mostra uma prévia e confirma quando as palavras são aplicadas. Controles
+incompatíveis ficam ocultos. O professor também pode habilitar a aceitação de um único erro de
+digitação em respostas com quatro ou mais caracteres. Essa tolerância permanece desligada por padrão.
+Durante a rodada, o painel do professor esconde a palavra por padrão e exige confirmação antes de
+revelá-la. Cada aluno recebe a resposta esperada e o XP após responder; quando todos terminam, há três
+segundos de feedback com uma barra regressiva antes da próxima pergunta. A estimativa da rodada inclui
+esse intervalo. O envio da resposta fica bloqueado enquanto a rede processa a ação.
+O anfitrião pode abrir a rota protegida `/sala/<código>/projetor` em outra tela. Ela mantém o código,
+o QR com a arte aprovada da Helena, o cronômetro, as respostas recebidas e o placar, mas não oferece
+controles administrativos nem revela a palavra.
 Anfitrião e participante guardam a credencial somente na aba atual e retomam a mesma sala após uma
 atualização da página, inclusive durante a rodada. Uma sessão expirada ou inválida é descartada com
 mensagem clara, sem criar um participante duplicado.

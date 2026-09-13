@@ -249,12 +249,12 @@
 }
 
 .local-room-activity:not(:disabled):hover,
-.local-room-activity[aria-pressed="true"] {
+.local-room-activity[aria-checked="true"] {
   border-color: var(--violet-dark);
   background: var(--lavender);
 }
 
-.local-room-activity[aria-pressed="true"] {
+.local-room-activity[aria-checked="true"] {
   box-shadow: inset 0 0 0 1px var(--violet-dark);
 }
 
@@ -283,7 +283,7 @@
   height: 22px;
 }
 
-.local-room-activity[aria-pressed="true"] .local-room-activity__icon {
+.local-room-activity[aria-checked="true"] .local-room-activity__icon {
   color: var(--surface);
   background: var(--violet-dark);
 }
@@ -495,14 +495,239 @@
   min-width: 190px;
 }
 
+.local-room-reveal-warning {
+  margin: 0;
+  color: #8c2525;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.local-room-answer-received,
+.local-room-feedback-countdown {
+  display: grid;
+  width: min(100%, 360px);
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.local-room-answer-received p,
+.local-room-feedback-countdown p {
+  margin: 0;
+}
+
+.local-room-feedback-countdown > span {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--soft);
+}
+
+.local-room-feedback-countdown i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--violet);
+  transform-origin: left;
+  animation: local-room-feedback-progress 3s linear forwards;
+}
+
+@keyframes local-room-feedback-progress {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.local-room-projector {
+  display: grid;
+  width: min(100%, 1440px);
+  min-height: 100dvh;
+  padding: clamp(1.5rem, 4vw, 4rem);
+  align-content: start;
+  gap: clamp(2rem, 5vw, 5rem);
+}
+
+.local-room-projector__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid var(--line);
+  gap: 1.5rem;
+}
+
+.local-room-projector__header > div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.local-room-projector__header strong {
+  font-family: "Courier New", monospace;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  letter-spacing: 0.16em;
+}
+
+.local-room-projector__header p {
+  display: flex;
+  margin: 0;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: clamp(1rem, 1.5vw, 1.3rem);
+  font-weight: 750;
+}
+
+.local-room-projector__lobby {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(360px, 1fr);
+  align-items: center;
+  gap: clamp(2rem, 6vw, 6rem);
+}
+
+.local-room-projector__lobby > div {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.local-room-projector__lobby > div > span {
+  color: var(--violet-dark);
+  font-size: clamp(1.2rem, 2vw, 2rem);
+  font-weight: 800;
+}
+
+.local-room-projector__lobby > div > strong {
+  font-family: "Courier New", monospace;
+  font-size: clamp(4rem, 9vw, 8rem);
+  letter-spacing: 0.12em;
+}
+
+.local-room-projector__lobby .helena-room-qr--holding {
+  width: min(100%, 560px);
+  justify-self: center;
+}
+
+.local-room-projector__round,
+.local-room-projector__results {
+  display: grid;
+  gap: 2rem;
+}
+
+.local-room-projector__round {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.local-room-projector__round > .local-room-round__progress,
+.local-room-projector__round > .local-room-scoreboard {
+  grid-column: 1 / -1;
+}
+
+.local-room-projector__prompt {
+  display: grid;
+  min-height: 40vh;
+  place-items: center;
+  align-content: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.local-room-projector__prompt .navigation-icon,
+.local-room-projector__results > .navigation-icon {
+  width: 72px;
+  height: 72px;
+}
+
+.local-room-projector__prompt h1,
+.local-room-projector__results h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 5.5rem);
+}
+
+.local-room-projector__prompt p {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(1.2rem, 2vw, 2rem);
+}
+
+.local-room-projector__late-join {
+  display: grid;
+  width: 240px;
+  align-content: center;
+  justify-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.local-room-projector__late-join .helena-room-qr--holding {
+  width: 220px;
+}
+
+.local-room-projector__late-join div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.local-room-projector__late-join span {
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.local-room-projector__late-join strong {
+  font-family: "Courier New", monospace;
+  font-size: 1.6rem;
+  letter-spacing: 0.14em;
+}
+
+.local-room-projector .local-room-scoreboard {
+  font-size: clamp(1rem, 1.6vw, 1.35rem);
+}
+
+.local-room-projector__results {
+  justify-items: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .local-room-feedback-countdown i {
+    animation: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .local-room-projector__header {
+    grid-template-columns: 1fr auto;
+  }
+
+  .local-room-projector__lobby {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .local-room-projector__round {
+    grid-template-columns: 1fr;
+  }
+
+  .local-room-projector__late-join {
+    display: none;
+  }
+}
+
 @media (max-width: 760px) {
   .local-room-fullscreen > .local-room-session {
     padding: 0 1rem 9rem;
   }
 
   .local-room-session__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     margin-inline: -1rem;
     padding-inline: 1rem;
+  }
+
+  .local-room-session__actions {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 0.35rem 0.55rem;
   }
 
   .local-room-session__actions > p:not(.local-room-connection) {
@@ -510,7 +735,11 @@
   }
 
   .local-room-session__actions .local-room-connection {
-    display: none;
+    display: flex;
+    grid-column: 1 / -1;
+    justify-self: end;
+    font-size: 0.72rem !important;
+    font-weight: 750;
   }
 
   .local-room-session__actions .secondary-button {
@@ -519,12 +748,24 @@
     font-size: 0;
   }
 
-  .local-room-participant-noun {
+  .local-room-session__actions .local-room-theme-toggle {
+    display: flex;
+  }
+
+  .local-room-session--playing .local-room-theme-toggle,
+  .local-room-session--playing .local-room-open-projector,
+  .local-room-session--playing > .local-note {
     display: none;
   }
 
-  .local-room-session__actions .local-room-theme-toggle {
-    display: flex;
+  .local-room-session--playing .local-room-round {
+    min-height: calc(100dvh - 120px);
+    align-content: center;
+  }
+
+  .local-room-answer,
+  .local-room-answer__submit {
+    width: 100%;
   }
 
   .local-room-lobby {
@@ -585,10 +826,6 @@
 }
 
 @media (max-width: 420px) {
-  .local-room-session__actions .local-room-connection {
-    display: none;
-  }
-
   .local-room-activities {
     gap: 0.6rem;
   }

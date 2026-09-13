@@ -1,8 +1,9 @@
-import { Check, Copy, DoorOpen, Radio, Users, Volume2 } from "lucide-react";
+import { Check, Copy, DoorOpen, Maximize2, MonitorUp, Radio, Users, Volume2 } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
   buildLocalRoomJoinUrl,
+  formatRoomEstimatedDuration,
   isValidLocalRoomCode,
   MAX_ROOM_PARTICIPANTS,
   normalizeLocalRoomCode,
@@ -13,11 +14,16 @@ import {
   ROOM_CATEGORIES,
   type LocalRoomParticipant,
   type LocalRoomSettings,
+  type PublicLocalRoomState,
 } from "../domain/local-room";
 import { parseManualListeningInput } from "../domain/listening-quiz";
 import { selectFallbackEnglishVoice, speakEnglish } from "../data/speech-voice";
 import { NaturalVoicePlayer, type NaturalVoiceState } from "../data/listening-audio";
-import { useLocalRoom } from "../hooks/use-local-room";
+import {
+  LOCAL_ROOM_SESSION_KEY,
+  useLocalRoom,
+  type RoomConnectionStatus,
+} from "../hooks/use-local-room";
 import { ThemeToggle } from "./app-navigation";
 import { NavigationIcon } from "./navigation-icon";
 import { HelenaRoomIcon } from "./helena-room-icon";
@@ -138,6 +144,7 @@ function LocalRoomFullscreen({ children }: { children: ReactNode }) {
 
 type LocalRoomProps = {
   initialJoinCode?: string | undefined;
+  projectorMode?: boolean;
   onExit?: () => void;
   materials?: { id: string; name: string; cards: { id: string; front: string; back: string }[] }[];
 };
@@ -265,7 +272,100 @@ function Podium({ participants }: { participants: readonly LocalRoomParticipant[
   );
 }
 
-export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoomProps) {
+function ProjectorRoom({
+  state,
+  connectionLabel,
+  connectionStatus,
+  secondsLeft,
+}: {
+  state: PublicLocalRoomState;
+  connectionLabel: string;
+  connectionStatus: RoomConnectionStatus;
+  secondsLeft: number;
+}) {
+  const connected = state.participants.filter((participant) => participant.online !== false);
+  const joinUrl = buildLocalRoomJoinUrl(window.location.origin, state.code);
+
+  return (
+    <div className="local-room-projector">
+      <header className="local-room-projector__header">
+        <div>
+          <span>Sala</span>
+          <strong>{state.code}</strong>
+        </div>
+        <p className={`local-room-connection local-room-connection--${connectionStatus}`}>
+          <span aria-hidden="true" /> {connectionLabel}
+        </p>
+        <p>
+          <Users size={22} /> {connected.length} participantes
+        </p>
+        <button
+          className="secondary-button"
+          type="button"
+          onClick={() => void document.documentElement.requestFullscreen?.()}
+        >
+          <Maximize2 size={20} /> Tela cheia
+        </button>
+      </header>
+
+      {state.phase === "lobby" ? (
+        <main className="local-room-projector__lobby">
+          <div>
+            <span>Entre na sala</span>
+            <strong>{state.code}</strong>
+            <p>Aponte a câmera para o QR code.</p>
+          </div>
+          <RoomQrCode value={joinUrl} />
+        </main>
+      ) : state.phase === "playing" ? (
+        <main className="local-room-projector__round">
+          <div className="local-room-round__progress">
+            <span>
+              Pergunta {state.questionIndex + 1} de {state.totalQuestions}
+            </span>
+            <span className="local-room-round__timer">
+              <NavigationIcon name="timer" /> {secondsLeft}s
+            </span>
+          </div>
+          <div className="local-room-projector__prompt">
+            <NavigationIcon
+              name={state.settings.activity === "bingo" ? "activity-bank" : "focus"}
+            />
+            <h1>
+              {state.settings.activity === "bingo" ? "Marque sua cartela" : "Ouça com atenção"}
+            </h1>
+            <p>
+              {state.answeredParticipantIds.length} de {connected.length} respostas recebidas
+            </p>
+          </div>
+          {state.settings.allowLateJoin && (
+            <aside className="local-room-projector__late-join" aria-label="Entrada na sala">
+              <RoomQrCode value={joinUrl} />
+              <div>
+                <span>Entrada aberta</span>
+                <strong>{state.code}</strong>
+              </div>
+            </aside>
+          )}
+          <Scoreboard participants={state.participants} />
+        </main>
+      ) : (
+        <main className="local-room-projector__results">
+          <NavigationIcon name="medal-first" />
+          <h1>Resultado da turma</h1>
+          <Podium participants={state.participants} />
+        </main>
+      )}
+    </div>
+  );
+}
+
+export function LocalRoom({
+  initialJoinCode,
+  projectorMode = false,
+  onExit,
+  materials = [],
+}: LocalRoomProps) {
   const room = useLocalRoom(initialJoinCode);
   const [code, setCode] = useState(initialJoinCode ?? "");
   const [name, setName] = useState("");
@@ -274,7 +374,9 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
   const [appliedManualWords, setAppliedManualWords] = useState("");
   const [manualApplyStatus, setManualApplyStatus] = useState("");
   const [revealHostWord, setRevealHostWord] = useState(false);
+  const [confirmRevealHostWord, setConfirmRevealHostWord] = useState(false);
   const [answer, setAnswer] = useState("");
+  const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false);
   const [lastResult, setLastResult] = useState<
     (LocalRoomAnswerFeedback & { submittedAnswer: string }) | undefined
   >(undefined);
@@ -320,6 +422,8 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
     setAnswer("");
     setLastResult(undefined);
     setRevealHostWord(false);
+    setConfirmRevealHostWord(false);
+    setIsSubmittingAnswer(false);
   }
 
   const currentQuestionFront = state?.currentQuestion?.front;
@@ -338,6 +442,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
       currentQuestionFront &&
       state?.phase === "playing" &&
       room.isHost &&
+      !projectorMode &&
       state.settings.autoPlayAudio
     )
       playQuestionAudio(currentQuestionFront);
@@ -393,7 +498,13 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
     const tick = () => {
       const remaining = state ? roomSecondsLeft(state, Date.now()) : 0;
       setSecondsLeft(remaining);
-      if (remaining === 0 && room.isHost && !advancing) {
+      const activeIds =
+        state?.participants
+          .filter((participant) => participant.online !== false)
+          .map((participant) => participant.id) ?? [];
+      const allAnswered =
+        activeIds.length > 0 && activeIds.every((id) => state?.answeredParticipantIds.includes(id));
+      if (remaining === 0 && room.isHost && !projectorMode && !allAnswered && !advancing) {
         advancing = true;
         void room.nextQuestion().finally(() => {
           advancing = false;
@@ -404,7 +515,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
     const timer = window.setInterval(tick, 500);
     return () => window.clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPlaying, questionStartedAt, roundSeconds, room.isHost, state]);
+  }, [isPlaying, projectorMode, questionStartedAt, roundSeconds, room.isHost, state]);
 
   const activeParticipantIds = state?.participants
     .filter((participant) => participant.online !== false)
@@ -413,11 +524,11 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
     Boolean(activeParticipantIds?.length) &&
     activeParticipantIds!.every((id) => state?.answeredParticipantIds.includes(id));
   useEffect(() => {
-    if (!isPlaying || !room.isHost || !everyoneAnswered) return;
+    if (!isPlaying || !room.isHost || projectorMode || !everyoneAnswered) return;
     const timer = window.setTimeout(() => void room.nextQuestion(), ANSWER_FEEDBACK_MS);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [everyoneAnswered, isPlaying, questionStartedAt, room.isHost]);
+  }, [everyoneAnswered, isPlaying, projectorMode, questionStartedAt, room.isHost]);
 
   function joinRoom(event: FormEvent) {
     event.preventDefault();
@@ -426,9 +537,28 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
 
   async function submitAnswer(event: FormEvent) {
     event.preventDefault();
-    if (!state?.currentQuestion || !answer.trim()) return;
-    const result = await room.submitAnswer(state.questionIndex, answer);
-    setLastResult({ ...result, submittedAnswer: answer.trim() });
+    if (!state?.currentQuestion || !answer.trim() || isSubmittingAnswer) return;
+    setIsSubmittingAnswer(true);
+    const submittedAnswer = answer.trim();
+    try {
+      const result = await room.submitAnswer(state.questionIndex, submittedAnswer);
+      if (result) setLastResult({ ...result, submittedAnswer });
+    } finally {
+      setIsSubmittingAnswer(false);
+    }
+  }
+
+  function openProjector() {
+    const projector = window.open("", "_blank");
+    if (!projector) return;
+    try {
+      const session = window.sessionStorage.getItem(LOCAL_ROOM_SESSION_KEY);
+      if (session) projector.sessionStorage.setItem(LOCAL_ROOM_SESSION_KEY, session);
+      projector.opener = null;
+      projector.location.href = `/sala/${state?.code ?? ""}/projetor`;
+    } catch {
+      projector.close();
+    }
   }
 
   function exitRoom() {
@@ -457,6 +587,17 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
           <Radio size={34} aria-hidden="true" />
           <h3>Retomando sala…</h3>
           <p>Reconectando você à atividade em andamento.</p>
+        </div>
+      </LocalRoomFullscreen>
+    );
+
+  if (projectorMode && (!state || !room.isHost))
+    return (
+      <LocalRoomFullscreen>
+        <div className="local-room-restoring" role="alert">
+          <MonitorUp size={34} aria-hidden="true" />
+          <h3>Modo projetor protegido</h3>
+          <p>Abra esta tela pelo painel do professor que criou a sala.</p>
         </div>
       </LocalRoomFullscreen>
     );
@@ -570,7 +711,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
     : questionCount === "all"
       ? availableCount
       : Math.min(questionCount, availableCount);
-  const estimatedMinutes = Math.ceil((actualCount * roundSeconds) / 60);
+  const estimatedDuration = formatRoomEstimatedDuration(actualCount, roundSeconds);
   const ownParticipant = state.participants.find((p) => p.id === room.participantId);
   const teamScores = ["Roxo", "Amarelo"].map((team) => ({
     team,
@@ -578,17 +719,29 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
   }));
   const connectionLabel =
     room.connectionStatus === "online"
-      ? "Sala online"
+      ? "Online"
       : room.connectionStatus === "offline"
         ? "Sem conexão"
         : room.connectionStatus === "reconnecting"
           ? "Reconectando…"
           : "Conectando…";
 
+  if (projectorMode)
+    return (
+      <LocalRoomFullscreen>
+        <ProjectorRoom
+          state={state}
+          connectionLabel={connectionLabel}
+          connectionStatus={room.connectionStatus}
+          secondsLeft={secondsLeft}
+        />
+      </LocalRoomFullscreen>
+    );
+
   return (
     <LocalRoomFullscreen>
       {countdownValue !== null && <CountdownOverlay value={countdownValue} />}
-      <div className="local-room-session">
+      <div className={`local-room-session local-room-session--${state.phase}`}>
         <header className="local-room-session__header">
           <div className="local-room-session__code">
             <span>Sala</span>
@@ -600,11 +753,22 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
             </p>
             <p>
               <Users size={16} /> <strong>{state.participants.length}</strong>{" "}
-              <span className="local-room-participant-noun">participantes</span>
+              <span className="local-room-participant-noun">
+                {state.participants.length === 1 ? "participante" : "participantes"}
+              </span>
             </p>
             <span className="local-room-theme-toggle">
               <ThemeToggle />
             </span>
+            {isHost && (
+              <button
+                className="secondary-button local-room-open-projector"
+                type="button"
+                onClick={openProjector}
+              >
+                <MonitorUp size={18} /> Abrir modo projetor
+              </button>
+            )}
             <button className="secondary-button" type="button" onClick={exitRoom}>
               <HelenaRoomIcon name="close" size={18} /> Sair da sala
             </button>
@@ -654,16 +818,20 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                   <h2>Escolha uma atividade</h2>
                   <p>Uma nova experiência, sem trocar de sala.</p>
                 </div>
-                <div className="local-room-activities" aria-label="Atividades da sala">
+                <div
+                  className="local-room-activities"
+                  role="radiogroup"
+                  aria-label="Atividades da sala"
+                >
                   {ROOM_ACTIVITY_OPTIONS.map((activity) => (
                     <button
                       className="local-room-activity"
                       type="button"
                       disabled={!activity.enabled}
-                      aria-pressed={
-                        activity.enabled
-                          ? (state.settings.activity ?? "listening") === activity.key
-                          : undefined
+                      role="radio"
+                      aria-checked={
+                        activity.enabled &&
+                        (state.settings.activity ?? "listening") === activity.key
                       }
                       onClick={() => activity.enabled && selectActivity(activity.key)}
                       key={activity.key}
@@ -726,7 +894,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                         </div>
                         <label htmlFor="local-room-manual-words">
                           Digite ou cole palavras e traduções. Use =, ;, vírgula, tabulação ou
-                          hífen.
+                          hífen. Separe respostas equivalentes com |.
                         </label>
                         <textarea
                           id="local-room-manual-words"
@@ -735,7 +903,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                             setManualWords(event.target.value);
                             setManualApplyStatus("");
                           }}
-                          placeholder={"school = escola\nfriend = amigo\nbook = livro"}
+                          placeholder={"bus = ônibus | autocarro\nschool = escola\nbook = livro"}
                           rows={6}
                           spellCheck={false}
                         />
@@ -870,6 +1038,18 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                     />{" "}
                     Permitir entrada após iniciar
                   </label>
+                  {state.settings.activity !== "bingo" && (
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={state.settings.acceptMinorTypos ?? false}
+                        onChange={(event) =>
+                          void room.updateSettings({ acceptMinorTypos: event.target.checked })
+                        }
+                      />{" "}
+                      Aceitar um pequeno erro de digitação
+                    </label>
+                  )}
                   {!usesManualList && (
                     <label>
                       <span>Dificuldade</span>
@@ -1005,7 +1185,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                     </strong>
                     <p>
                       {actualCount} perguntas · {state.settings.roundSeconds}s cada
-                      {estimatedMinutes ? ` · cerca de ${estimatedMinutes} min` : ""}
+                      {actualCount ? ` · cerca de ${estimatedDuration}` : ""}
                     </p>
                     <small>
                       {state.settings.teams ? "Equipes" : "Respostas individuais"} ·{" "}
@@ -1024,7 +1204,7 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                   </strong>
                   <p>
                     {actualCount} perguntas, {state.settings.roundSeconds}s cada, cerca de{" "}
-                    {estimatedMinutes} min
+                    {estimatedDuration}
                   </p>
                 </div>
                 <span>{participantCount} participantes prontos</span>
@@ -1088,10 +1268,30 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                   className="secondary-button local-room-host-reveal"
                   type="button"
                   aria-pressed={revealHostWord}
-                  onClick={() => setRevealHostWord((visible) => !visible)}
+                  title="A palavra ficará visível para quem estiver vendo este painel."
+                  onClick={() => {
+                    if (revealHostWord) {
+                      setRevealHostWord(false);
+                      setConfirmRevealHostWord(false);
+                    } else if (confirmRevealHostWord) {
+                      setRevealHostWord(true);
+                      setConfirmRevealHostWord(false);
+                    } else {
+                      setConfirmRevealHostWord(true);
+                    }
+                  }}
                 >
-                  {revealHostWord ? "Ocultar palavra" : "Revelar palavra"}
+                  {revealHostWord
+                    ? "Ocultar palavra"
+                    : confirmRevealHostWord
+                      ? "Confirmar revelação"
+                      : "Revelar palavra"}
                 </button>
+                {confirmRevealHostWord && (
+                  <p className="local-room-reveal-warning" role="status">
+                    Confirme apenas se quiser mostrar a resposta para quem vê este painel.
+                  </p>
+                )}
                 {naturalState.message && naturalState.status !== "ready" && (
                   <p className="local-room-audio-status" role="status">
                     {naturalState.message}
@@ -1185,7 +1385,19 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                     <Volume2 size={18} /> Ouvir novamente
                   </button>
                 )}
-                <p>A próxima pergunta aparece quando todos responderem ou o tempo terminar.</p>
+                {everyoneAnswered ? (
+                  <div className="local-room-feedback-countdown">
+                    <p>Próxima pergunta em 3 segundos.</p>
+                    <span aria-hidden="true">
+                      <i />
+                    </span>
+                  </div>
+                ) : (
+                  <div className="local-room-answer-received">
+                    <strong>Resposta recebida ✓</strong>
+                    <p>Aguardando a turma.</p>
+                  </div>
+                )}
               </div>
             ) : (
               <form className="local-room-answer" onSubmit={submitAnswer}>
@@ -1206,11 +1418,16 @@ export function LocalRoom({ initialJoinCode, onExit, materials = [] }: LocalRoom
                   <input
                     value={answer}
                     onChange={(event) => setAnswer(event.target.value)}
+                    disabled={isSubmittingAnswer}
                     autoFocus
                   />
                 </label>
-                <button className="primary-button" type="submit">
-                  Responder
+                <button
+                  className="primary-button local-room-answer__submit"
+                  type="submit"
+                  disabled={isSubmittingAnswer}
+                >
+                  {isSubmittingAnswer ? "Enviando…" : "Responder"}
                 </button>
               </form>
             )}

@@ -68,6 +68,7 @@ function isSettingsPayload(value: unknown): value is Partial<LocalRoomSettings> 
           "audioRate",
           "audioRepetitions",
           "autoPlayAudio",
+          "acceptMinorTypos",
         ].includes(key),
     )
   )
@@ -86,7 +87,7 @@ function isSettingsPayload(value: unknown): value is Partial<LocalRoomSettings> 
   )
     return false;
   if (
-    ["shuffle", "teams", "allowLateJoin", "autoPlayAudio"].some(
+    ["shuffle", "teams", "allowLateJoin", "autoPlayAudio", "acceptMinorTypos"].some(
       (key) => key in candidate && typeof candidate[key] !== "boolean",
     )
   )

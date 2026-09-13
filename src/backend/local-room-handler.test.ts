@@ -75,6 +75,12 @@ describe("handler da sala local", () => {
       }),
     );
     expect(invalidAudio.status).toBe(400);
+    const invalidTypoTolerance = await handler(
+      post("create", {
+        settings: { difficulty: "easy", questionCount: 5, acceptMinorTypos: "sim" },
+      }),
+    );
+    expect(invalidTypoTolerance.status).toBe(400);
   });
 
   it("aplica 30s como tempo padrão da rodada quando não informado", async () => {

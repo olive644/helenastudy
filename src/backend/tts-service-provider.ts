@@ -5,7 +5,7 @@ import type { SpeechAudio, SpeechProvider, SpeechRequest } from "./speech-handle
  * Nao usado em producao no momento (nenhuma hospedagem gratis viavel foi
  * encontrada para os dois modelos juntos); mantido caso um host proprio ou
  * pago volte a fazer sentido no futuro. A Vercel usa createCloudflareTtsProvider
- * (Cloudflare Workers AI) por padrao — ver api/speech.ts.
+ * (Cloudflare Workers AI) por padrao. Consulte api/speech.ts.
  */
 export function createTtsServiceProvider(
   serviceUrl: string,

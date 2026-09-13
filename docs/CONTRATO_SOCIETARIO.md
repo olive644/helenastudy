@@ -1,4 +1,4 @@
-# Contrato de Parceria e Divisão de Receitas — HelenaStudy
+# Contrato de Parceria e Divisão de Receitas: HelenaStudy
 
 **Aviso importante:** este documento é um modelo redigido para formalizar o
 entendimento entre as partes abaixo. Ele não substitui a orientação de um
@@ -53,10 +53,10 @@ partes acordarem expressamente de outra forma, por escrito.
 
 ## 3. Divisão de receitas
 
-3.1. Caso o Aplicativo venha a gerar qualquer forma de receita — incluindo,
+3.1. Caso o Aplicativo venha a gerar qualquer forma de receita, incluindo,
 mas não se limitando a, assinaturas, vendas avulsas, publicidade,
 patrocínios, licenciamento, venda do próprio Aplicativo ou de sua base de
-usuários, ou qualquer outra forma de monetização — a receita líquida (após
+usuários, ou qualquer outra forma de monetização, a receita líquida (após
 dedução de custos diretos de operação, como taxas de processamento de
 pagamento, custos de infraestrutura/hospedagem e taxas de plataformas de
 distribuição de aplicativos) será dividida da seguinte forma:
@@ -144,12 +144,12 @@ Contrato em duas vias de igual teor e forma.
 <br>
 
 **\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_**
-Parte 1 — Desenvolvedor
+Parte 1: Desenvolvedor
 
 <br>
 
 **\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_**
-Parte 2 — Helena
+Parte 2: Helena
 
 ---
 

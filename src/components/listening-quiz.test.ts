@@ -73,11 +73,31 @@ describe("quiz de escuta", () => {
     expect(isListeningAnswerCorrect(journey, "viajante")).toBe(false);
   });
 
+  it("aceita um erro de digitação apenas quando o professor habilita", () => {
+    const bus = { id: "bus", front: "bus", back: "ônibus" };
+    expect(isListeningAnswerCorrect(bus, "onibs")).toBe(false);
+    expect(isListeningAnswerCorrect(bus, "onibs", true)).toBe(true);
+    expect(isListeningAnswerCorrect(bus, "onus", true)).toBe(false);
+  });
+
   it("cria cartões manuais a partir de uma palavra e tradução por linha", () => {
     expect(parseManualListeningCards("school = escola\n\nfriend = amigo")).toEqual([
       { id: "manual-1", front: "school", back: "escola", difficulty: "medium" },
       { id: "manual-2", front: "friend", back: "amigo", difficulty: "medium" },
     ]);
+  });
+
+  it("cadastra respostas equivalentes separadas por barra vertical", () => {
+    const [bus] = parseManualListeningCards("bus = ônibus | autocarro | o ônibus");
+    expect(bus).toEqual({
+      id: "manual-1",
+      front: "bus",
+      back: "ônibus",
+      acceptedAnswers: ["autocarro", "o ônibus"],
+      difficulty: "medium",
+    });
+    expect(bus && isListeningAnswerCorrect(bus, "AUTOCARRO")).toBe(true);
+    expect(bus && isListeningAnswerCorrect(bus, "o onibus")).toBe(true);
   });
 
   it("informa linhas manuais sem palavra ou tradução", () => {

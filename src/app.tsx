@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { MobileNavigation, Sidebar, type AppView } from "./components/app-navigation";
 import { HelenaLoading } from "./components/helena-loading";
-import { readLocalRoomCodeFromUrl } from "./domain/room-code";
+import { readLocalRoomCodeFromUrl, readLocalRoomProjectorCodeFromUrl } from "./domain/room-code";
 import { useWorkspace } from "./hooks/use-workspace";
 import { FocusView } from "./views/focus-view";
 import { HabitsView } from "./views/habits-view";
@@ -15,7 +15,10 @@ const NotesView = lazy(() => import("./views/notes-view"));
 const ActivityBankView = lazy(() => import("./views/activity-bank-view"));
 
 export function App() {
-  const [joinCode] = useState(() => readLocalRoomCodeFromUrl(window.location.href));
+  const [projectorCode] = useState(() => readLocalRoomProjectorCodeFromUrl(window.location.href));
+  const [joinCode] = useState(
+    () => projectorCode ?? readLocalRoomCodeFromUrl(window.location.href),
+  );
   const [view, setView] = useState<AppView>(joinCode ? "learn" : "today");
   const { workspace, dispatch } = useWorkspace();
 
@@ -41,7 +44,12 @@ export function App() {
         {view === "notes" && <NotesView workspace={workspace} dispatch={dispatch} />}
         {view === "lesson-builder" && <LessonBuilderView onBack={() => setView("today")} />}
         {view === "learn" && (
-          <LearnView workspace={workspace} dispatch={dispatch} joinCode={joinCode} />
+          <LearnView
+            workspace={workspace}
+            dispatch={dispatch}
+            joinCode={joinCode}
+            projectorMode={Boolean(projectorCode)}
+          />
         )}
         {view === "library" && <LibraryView workspace={workspace} dispatch={dispatch} />}
         {view === "activity-bank" && <ActivityBankView onBack={() => setView("today")} />}

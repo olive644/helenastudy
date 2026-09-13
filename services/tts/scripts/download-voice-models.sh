@@ -4,8 +4,8 @@
 # repositorio; rode este script antes de construir a imagem ou rodar os
 # testes de integracao reais (tests/test_integration_real_models.py).
 #
-# Defina SKIP_PIPER=1 pra baixar so o Kokoro — usado no build pro tier
-# gratuito do Railway, onde o limite de RAM (0.5GB) nao sobra espaco pros
+# Defina SKIP_PIPER=1 pra baixar so o Kokoro (usado no build pro tier
+# gratuito do Railway), onde o limite de RAM (0.5GB) nao sobra espaco pros
 # dois motores juntos. O servico continua funcionando normalmente sem o
 # Piper: ele so vira "nao carregado" no /health, e o roteador de fallback
 # ja cai direto pra voz do navegador quando o Kokoro falha.
