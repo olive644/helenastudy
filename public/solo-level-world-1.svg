@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 760" fill="none">
+  <rect width="660" height="760" fill="#241D31"/>
+  <path d="M0 88 110 42l88 54 95-60 103 57 115-40 149 52v224L0 349V88Z" fill="#382851"/>
+  <path d="M0 160 124 115l108 47 111-56 102 51 126-46 89 28v192L0 344V160Z" fill="#51386E"/>
+  <path d="M0 477 105 432l84 38 121-62 108 61 128-51 114 42v300H0V477Z" fill="#352647"/>
+  <path d="M153 705C480 705 496 526 330 503S73 316 330 292 525 104 330 83" stroke="#17131F" stroke-width="68" stroke-linecap="round"/>
+  <path d="M153 705C480 705 496 526 330 503S73 316 330 292 525 104 330 83" stroke="#8868A8" stroke-width="52" stroke-linecap="round"/>
+  <path d="M153 705C480 705 496 526 330 503S73 316 330 292 525 104 330 83" stroke="#B59AD2" stroke-opacity=".45" stroke-width="32" stroke-linecap="round"/>
+  <g fill="#8061A4"><path d="m37 230 38-70 38 70H37Z"/><path d="m518 307 34-63 35 63h-69Z"/><path d="m71 515 36-66 36 66H71Z"/><path d="m500 621 40-72 40 72h-80Z"/></g>
+  <g fill="#A983D2"><path d="m17 244 38-70 38 70H17Z"/><path d="m498 321 34-63 35 63h-69Z"/><path d="m51 529 36-66 36 66H51Z"/><path d="m480 635 40-72 40 72h-80Z"/></g>
+  <g fill="#D7B55C"><path d="m111 207 15 24-15 24-15-24 15-24Z"/><path d="m549 441 13 20-13 21-13-21 13-20Z"/><path d="m152 572 12 19-12 20-12-20 12-19Z"/><path d="m453 191 14 23-14 22-14-22 14-23Z"/></g>
+  <g transform="translate(447 62)"><path d="M9 71V26l41-20 41 20v45H9Z" fill="#EBDDBA"/><path d="M0 30 50 0l50 30-50 16L0 30Z" fill="#A983D2"/><rect x="24" y="35" width="15" height="36" rx="7" fill="#352647"/><rect x="59" y="35" width="15" height="21" rx="7" fill="#FFDD72"/></g>
+  <g transform="translate(78 635)"><rect width="77" height="22" rx="11" fill="#5D427A"/><rect x="10" y="-19" width="57" height="24" rx="6" fill="#9778B5"/><path d="M14-18 37-35 63-18H14Z" fill="#EBDDBA"/></g>
+  <g fill="#6B4A8E"><circle cx="566" cy="162" r="30"/><circle cx="584" cy="183" r="23"/><circle cx="87" cy="358" r="31"/><circle cx="61" cy="382" r="24"/></g>
+  <g fill="#A983D2"><circle cx="558" cy="153" r="30"/><circle cx="576" cy="174" r="23"/><circle cx="79" cy="349" r="31"/><circle cx="53" cy="373" r="24"/></g>
+</svg>
