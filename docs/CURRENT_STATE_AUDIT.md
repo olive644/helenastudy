@@ -199,8 +199,8 @@ a 1 MB por item. A digitalização atual não executa OCR; reconhecimento de tex
 para uma mudança com modelo de ameaça e estratégia de processamento próprios.
 
 O módulo antes chamado Aprender agora aparece como **Praticar** no desktop e no celular. A entrada
-mostra um mundo por vez, com três PNGs transparentes sem personagens incorporados. As setas trocam
-as ilhas e Helena vira para a direção do salto. Na trilha sem moldura, a mascote fica sobre o nível
+mostra um mundo por vez, com três PNGs transparentes em estilo de papel recortado e sem personagens
+incorporados. As setas trocam as ilhas e Helena vira para a direção do salto. Na trilha sem moldura, a mascote fica sobre o nível
 liberado, acompanhando o progresso local. A entrada mantém a transição para a trilha.
 A trilha usa plataformas numeradas em um caminho sinuoso, respeitando movimento reduzido.
 A entrada
