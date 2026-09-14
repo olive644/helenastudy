@@ -128,7 +128,10 @@ function PracticeHub({
               <h2 id="solo-world-title">{world.title}</h2>
               <p>Avance pelo caminho e libere um desafio de cada vez.</p>
             </div>
-            <div className="solo-journey__progress" aria-label={`Progresso no Mundo ${world.number}`}>
+            <div
+              className="solo-journey__progress"
+              aria-label={`Progresso no Mundo ${world.number}`}
+            >
               <NavigationIcon name="xp" />
               <span>Seu progresso</span>
               <strong>{Math.min(unlockedLevel, SOLO_LEVELS.length)}/4 níveis</strong>
@@ -139,48 +142,66 @@ function PracticeHub({
             className={`solo-level-path solo-level-path--world-${world.number}`}
             aria-label={`Caminho de níveis do Mundo ${world.number}`}
           >
-            <div className={`solo-level-scenery solo-level-scenery--world-${world.number}`} aria-hidden="true">
-              <img className="solo-level-scenery__art" src={`/solo-world-${world.number}.png`} alt="" />
-            </div>
-            <svg
-              className="solo-level-path__route"
-              viewBox="0 0 360 720"
-              preserveAspectRatio="none"
+            <div
+              className={`solo-level-scenery solo-level-scenery--world-${world.number}`}
               aria-hidden="true"
             >
-              <path className="solo-level-path__road-shadow" d="M90 635 C300 635 300 470 180 455 S40 285 180 275 S300 95 180 80" />
-              <path className="solo-level-path__road" d="M90 635 C300 635 300 470 180 455 S40 285 180 275 S300 95 180 80" />
-              <path className="solo-level-path__trail" d="M90 635 C300 635 300 470 180 455 S40 285 180 275 S300 95 180 80" />
-            </svg>
-            {SOLO_LEVELS.map((game) => {
-              const unlocked = game.level <= unlockedLevel;
-              return (
-                <button
-                  className={`solo-path-level solo-path-level--${game.level}${unlocked ? " is-unlocked" : " is-locked"}`}
-                  type="button"
-                  onClick={() => unlocked && onSelect(game.mode)}
-                  disabled={!unlocked}
-                  aria-label={`Nível ${game.level}: ${game.title}. ${unlocked ? game.description : "Bloqueado"}`}
-                  key={game.mode}
-                >
-                  {game.level === unlockedLevel && (
-                    <img
-                      className="solo-path-mascot"
-                      src="/helena-loading.svg"
-                      alt={`Helena no nível ${game.level}`}
-                    />
-                  )}
-                  <span className="solo-path-level__badge">
-                    {unlocked ? <NavigationIcon name={game.icon} /> : <Lock size={22} />}
-                    <b>{game.level}</b>
-                  </span>
-                  <span>
-                    <small>Nível {game.level}</small>
-                    <strong>{game.title}</strong>
-                  </span>
-                </button>
-              );
-            })}
+              <img
+                className="solo-level-scenery__art"
+                src={`/solo-interior-${world.number}.png`}
+                alt=""
+              />
+            </div>
+            <div className="solo-level-track">
+              <svg
+                className="solo-level-path__route"
+                viewBox="0 0 360 720"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <path
+                  className="solo-level-path__road-shadow"
+                  d="M135 620 C135 550 225 540 225 450 S135 370 135 280 S180 190 180 100"
+                />
+                <path
+                  className="solo-level-path__road"
+                  d="M135 620 C135 550 225 540 225 450 S135 370 135 280 S180 190 180 100"
+                />
+                <path
+                  className="solo-level-path__trail"
+                  d="M135 620 C135 550 225 540 225 450 S135 370 135 280 S180 190 180 100"
+                />
+              </svg>
+              {SOLO_LEVELS.map((game) => {
+                const unlocked = game.level <= unlockedLevel;
+                return (
+                  <button
+                    className={`solo-path-level solo-path-level--${game.level}${unlocked ? " is-unlocked" : " is-locked"}`}
+                    type="button"
+                    onClick={() => unlocked && onSelect(game.mode)}
+                    disabled={!unlocked}
+                    aria-label={`Nível ${game.level}: ${game.title}. ${unlocked ? game.description : "Bloqueado"}`}
+                    key={game.mode}
+                  >
+                    {game.level === unlockedLevel && (
+                      <img
+                        className="solo-path-mascot"
+                        src="/helena-loading.svg"
+                        alt={`Helena no nível ${game.level}`}
+                      />
+                    )}
+                    <span className="solo-path-level__badge">
+                      {unlocked ? <NavigationIcon name={game.icon} /> : <Lock size={22} />}
+                      <b>{game.level}</b>
+                    </span>
+                    <span>
+                      <small>Nível {game.level}</small>
+                      <strong>{game.title}</strong>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </section>
       </div>

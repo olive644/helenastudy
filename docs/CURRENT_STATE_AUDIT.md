@@ -1,5 +1,12 @@
 # Auditoria do estado atual
 
+## Interiores dos mundos Solo (13/09/2026)
+
+- As trilhas usam cenários contínuos próprios em `public/solo-interior-1.png`, `public/solo-interior-2.png` e `public/solo-interior-3.png`, em vez da ilha de seleção ampliada.
+- Artes criadas com a ferramenta integrada Imagegen, usando cada `solo-world` aprovado como referência. Brief aplicado: ambiente visto de cima dentro do mundo, papel recortado facetado, terreno até as bordas, centro livre para estrada interativa, sem personagens, texto ou interface. Variações: bosque com bibliotecas e lanternas, cidade com prédios-livro e canais, observatório com cúpulas e jardins rochosos.
+- Estrada e níveis compartilham um quadro proporcional, com os centros dos marcadores nos pontos da curva. Mascote, ilhas de seleção e bloqueios foram preservados.
+- Alteração local em revisão visual, sem publicação ou merge nesta etapa.
+
 ## Helena animada, proporções revisadas (13/09/2026)
 
 - O SVG compartilhado pelo loading e pela jornada Solo segue a silhueta original: cabeça ampla, orelhas equilibradas, olhos amarelos e estrela regular de cinco pontas.

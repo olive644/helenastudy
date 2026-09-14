@@ -139,25 +139,29 @@
 }
 .solo-level-scenery__art {
   position: absolute;
-  top: -90px;
+  top: 0;
   left: 50%;
-  width: min(1040px, 95vw);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   max-width: none;
-  clip-path: inset(0 0 38% 0);
   transform: translateX(-50%);
   pointer-events: none;
 }
-.solo-level-scenery--world-2 .solo-level-scenery__art {
-  top: -130px;
-}
-.solo-level-scenery--world-3 .solo-level-scenery__art {
-  top: -120px;
-}
-.solo-level-path__route {
+.solo-level-track {
   position: absolute;
-  inset: 20px 0;
+  inset: 0;
+  width: min(480px, 100%);
+  height: 100%;
+  margin: auto;
+}
+.solo-level-track .solo-level-path__route {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: 720px;
+  max-width: none;
+  height: 100%;
+  transform: none;
   z-index: 1;
 }
 .solo-level-path__road-shadow,
@@ -204,23 +208,23 @@
   box-shadow: none;
   gap: 16px;
   text-align: center;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -39px);
 }
 .solo-path-level--1 {
-  left: 25%;
-  top: 86%;
+  left: 37.5%;
+  top: 86.1111%;
 }
 .solo-path-level--2 {
-  left: 63%;
-  top: 62%;
+  left: 62.5%;
+  top: 62.5%;
 }
 .solo-path-level--3 {
-  left: 35%;
-  top: 38%;
+  left: 37.5%;
+  top: 38.8889%;
 }
 .solo-path-level--4 {
   left: 50%;
-  top: 14%;
+  top: 13.8889%;
 }
 .solo-path-level__badge {
   position: relative;
@@ -266,6 +270,11 @@
 .solo-path-level strong {
   color: #241d31;
   text-shadow: 0 1px 0 #fff9e5;
+}
+.solo-path-level > span:last-child {
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: #fff9e5;
 }
 .solo-path-level small {
   color: #51445f;
@@ -354,31 +363,6 @@
     height: 100dvh;
     min-height: 100dvh;
     margin: 0;
-  }
-  .solo-level-path__route {
-    top: 12vh;
-    bottom: 4vh;
-    left: 50%;
-    width: 660px;
-    max-width: 82vw;
-    height: auto;
-    transform: translateX(-50%);
-  }
-  .solo-path-level--1 {
-    left: calc(50% - min(165px, 20.5vw));
-    top: 84vh;
-  }
-  .solo-path-level--2 {
-    left: calc(50% + min(86px, 10.7vw));
-    top: 64vh;
-  }
-  .solo-path-level--3 {
-    left: calc(50% - min(99px, 12.3vw));
-    top: 44vh;
-  }
-  .solo-path-level--4 {
-    left: 50%;
-    top: 22vh;
   }
 }
 @media (max-width: 719px) {
