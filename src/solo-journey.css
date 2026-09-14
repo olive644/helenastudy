@@ -117,28 +117,87 @@
   margin: auto;
   width: 100%;
   padding: 0;
-  background: transparent;
+  background: #d7e8a2;
   border: 0;
   border-radius: 0;
   box-shadow: none;
 }
-.solo-level-path__trail {
-  inset: 20px 0;
+.solo-level-path--world-1 {
+  background-color: #aee084;
+}
+.solo-level-path--world-2 {
+  background-color: #d9e7bc;
+}
+.solo-level-path--world-3 {
+  background-color: #30264a;
+}
+.solo-level-scenery {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.solo-level-scenery__art {
+  position: absolute;
+  top: 0;
+  left: 50%;
   width: 100%;
-  height: 720px;
+  height: 100%;
+  object-fit: cover;
+  max-width: none;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.solo-level-track {
+  position: absolute;
+  inset: 0;
+  width: min(480px, 100%);
+  height: 100%;
+  margin: auto;
+}
+.solo-level-track .solo-level-path__route {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  transform: none;
+  z-index: 1;
+}
+.solo-level-path__road-shadow,
+.solo-level-path__road,
+.solo-level-path__trail {
+  fill: none;
+  stroke-linecap: round;
+}
+.solo-level-path__road-shadow {
+  stroke: #6f5b3d66;
+  stroke-width: 58px;
+}
+.solo-level-path__road {
+  stroke: #fff4d4;
+  stroke-width: 48px;
+}
+.solo-level-path--world-3 .solo-level-path__road {
+  stroke: #f4e9c8;
+}
+.solo-level-path__trail {
+  position: static;
+  inset: auto;
+  width: auto;
+  height: auto;
   border: 0;
   border-radius: 0;
   transform: none;
-}
-.solo-level-path__trail path {
-  fill: none;
-  stroke: var(--line-strong);
-  stroke-width: 16px;
+  stroke: #fffdf2;
+  stroke-width: 9px;
   stroke-linecap: round;
-  stroke-dasharray: 3 22;
+  stroke-dasharray: 12 25;
+  filter: drop-shadow(0 2px 0 #6d583d66);
 }
 .solo-path-level {
   position: absolute;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   width: 110px;
@@ -149,34 +208,36 @@
   box-shadow: none;
   gap: 16px;
   text-align: center;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -39px);
 }
 .solo-path-level--1 {
-  left: 25%;
-  top: 86%;
+  left: 37.5%;
+  top: 86.1111%;
 }
 .solo-path-level--2 {
-  left: 63%;
-  top: 62%;
+  left: 62.5%;
+  top: 62.5%;
 }
 .solo-path-level--3 {
-  left: 35%;
-  top: 38%;
+  left: 37.5%;
+  top: 38.8889%;
 }
 .solo-path-level--4 {
   left: 50%;
-  top: 14%;
+  top: 13.8889%;
 }
 .solo-path-level__badge {
   position: relative;
+  display: grid;
+  place-items: center;
   width: 78px;
-  height: 64px;
-  border-radius: 20px;
-  background: #7c3aed;
+  height: 78px;
+  border: 4px solid #fff9e5;
+  border-radius: 50%;
+  background: #facc15;
   box-shadow:
-    0 9px 0 #4c1d95,
-    0 15px 15px #17151c15;
-  transform: rotate(-12deg) skewX(6deg);
+    0 8px 0 #bf8417,
+    0 14px 16px #17151c2b;
   transition: translate 160ms ease;
 }
 .solo-path-level:not(:disabled):hover .solo-path-level__badge {
@@ -184,8 +245,8 @@
 }
 .solo-path-level__badge b {
   position: absolute;
-  right: -10px;
-  top: -12px;
+  right: -8px;
+  bottom: -11px;
   display: grid;
   place-items: center;
   width: 28px;
@@ -199,15 +260,26 @@
   box-shadow: none;
 }
 .solo-path-level.is-locked .solo-path-level__badge {
-  background: var(--surface);
-  box-shadow: 0 9px 0 var(--line-strong);
+  background: #e8dfc9;
+  box-shadow: 0 8px 0 #a79d88;
 }
 .solo-path-level.is-locked .solo-path-level__badge b {
-  background: var(--line-strong);
-  color: var(--text);
+  background: #a79d88;
+  color: #fffdf2;
 }
 .solo-path-level strong {
-  color: var(--text);
+  color: #241d31;
+  text-shadow: 0 1px 0 #fff9e5;
+}
+.solo-path-level > span:last-child {
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: #fff9e5;
+}
+.solo-path-level small {
+  color: #51445f;
+  font-weight: 800;
+  text-shadow: 0 1px 0 #fff9e5;
 }
 .solo-path-mascot {
   position: absolute;
@@ -219,6 +291,79 @@
   transform: translateX(-50%);
   z-index: 3;
   pointer-events: none;
+}
+@media (min-width: 900px) {
+  body.solo-world-open {
+    overflow: hidden;
+  }
+  body.solo-world-open .sidebar,
+  body.solo-world-open .page-header,
+  body.solo-world-open .view-heading,
+  body.solo-world-open .learn-grid > :not(.study-panel),
+  body.solo-world-open .goals-panel {
+    display: none;
+  }
+  body.solo-world-open .app-shell > .sidebar ~ .main-content {
+    width: 100vw;
+    max-width: none;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+  }
+  body.solo-world-open .learn-grid,
+  body.solo-world-open .module-panel.study-panel {
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .solo-world-enter {
+    position: absolute;
+    z-index: 50;
+    inset: 0 auto auto 0;
+    width: 100vw;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  .solo-world-enter .solo-journey {
+    display: block;
+    width: 100vw;
+    height: 100dvh;
+  }
+  .solo-world-enter .solo-journey__heading {
+    position: absolute;
+    z-index: 4;
+    top: 1.5rem;
+    left: clamp(1.5rem, 4vw, 4rem);
+    width: min(360px, calc(100vw - 3rem));
+    padding: 0.85rem 1rem;
+    border: 1px solid #fff9e5a6;
+    border-radius: 18px;
+    background: #241d31d9;
+    box-shadow: 0 10px 26px #17151c40;
+  }
+  .solo-world-enter .solo-journey__heading h2,
+  .solo-world-enter .solo-journey__heading p,
+  .solo-world-enter .solo-journey__heading .link-button {
+    color: #fff9e5;
+  }
+  .solo-world-enter .solo-journey__heading .section-label {
+    color: #facc15;
+  }
+  .solo-world-enter .solo-journey__progress {
+    margin-top: 0.8rem;
+    background: #fff9e5;
+  }
+  .solo-level-path {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    min-height: 100dvh;
+    margin: 0;
+  }
 }
 @media (max-width: 719px) {
   .solo-world-map {
@@ -238,7 +383,7 @@
   .solo-path-level {
     width: 100px;
   }
-  .solo-level-path__trail {
+  .solo-level-path__route {
     width: 100%;
   }
 }
