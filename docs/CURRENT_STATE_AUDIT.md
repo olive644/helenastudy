@@ -1,5 +1,12 @@
 # Auditoria do estado atual
 
+## Trilhas panorâmicas no desktop (14/09/2026)
+
+- Acima de 900px, `picture` seleciona `public/solo-interior-{1,2,3}-desktop.webp`. No celular, os PNGs aprovados continuam inalterados.
+- WebP sem perda, sem redimensionamento artificial. Resolução entregue: 1672 por 941 pixels. Melhora o enquadramento panorâmico, mas não equivale a uma fonte 4K.
+- Ferramenta integrada Imagegen. Prompt aplicado às três referências `solo-interior`: expandir horizontalmente a cena aprovada para 16:9, solicitar 3840 por 2160, preservar centro, câmera, cores e papel recortado, completar laterais com cenário correspondente, sem esticar, personagens, texto, interface ou estrada. A resolução solicitada não foi entregue; foi preservada a resolução real.
+- Arte original, progressão, animação e posições dos níveis preservadas. Em revisão local, sem merge.
+
 ## Interiores dos mundos Solo (13/09/2026)
 
 - As trilhas usam cenários contínuos próprios em `public/solo-interior-1.png`, `public/solo-interior-2.png` e `public/solo-interior-3.png`, em vez da ilha de seleção ampliada.

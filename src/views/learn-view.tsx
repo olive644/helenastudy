@@ -83,6 +83,7 @@ const SOLO_WORLDS = [
 ] as const;
 
 const SOLO_PROGRESS_KEY = "helena.soloProgress";
+const SOLO_ROUTE = "M135 620 C135 550 225 540 225 450 S135 370 135 280 S180 190 180 100";
 
 function PracticeHub({
   onSelect,
@@ -142,16 +143,17 @@ function PracticeHub({
             className={`solo-level-path solo-level-path--world-${world.number}`}
             aria-label={`Caminho de níveis do Mundo ${world.number}`}
           >
-            <div
-              className={`solo-level-scenery solo-level-scenery--world-${world.number}`}
-              aria-hidden="true"
-            >
+            <picture className="solo-level-scenery" aria-hidden="true">
+              <source
+                media="(min-width: 900px)"
+                srcSet={`/solo-interior-${world.number}-desktop.webp`}
+              />
               <img
                 className="solo-level-scenery__art"
                 src={`/solo-interior-${world.number}.png`}
                 alt=""
               />
-            </div>
+            </picture>
             <div className="solo-level-track">
               <svg
                 className="solo-level-path__route"
@@ -159,18 +161,9 @@ function PracticeHub({
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <path
-                  className="solo-level-path__road-shadow"
-                  d="M135 620 C135 550 225 540 225 450 S135 370 135 280 S180 190 180 100"
-                />
-                <path
-                  className="solo-level-path__road"
-                  d="M135 620 C135 550 225 540 225 450 S135 370 135 280 S180 190 180 100"
-                />
-                <path
-                  className="solo-level-path__trail"
-                  d="M135 620 C135 550 225 540 225 450 S135 370 135 280 S180 190 180 100"
-                />
+                <path className="solo-level-path__road-shadow" d={SOLO_ROUTE} />
+                <path className="solo-level-path__road" d={SOLO_ROUTE} />
+                <path className="solo-level-path__trail" d={SOLO_ROUTE} />
               </svg>
               {SOLO_LEVELS.map((game) => {
                 const unlocked = game.level <= unlockedLevel;
