@@ -31,6 +31,8 @@ Estas regras herdam o padrão de engenharia do OliQualidade e valem para todo o 
 
 ## Produto e documentação
 
+- Seguir docs/DESIGN_SYSTEM.md: Helena, ícones e novos elementos visuais usam o padrão aprovado de papel recortado. Loadings usam HelenaLoading.
+
 - É proibido usar travessões em textos da interface, documentação, comentários ou qualquer outro conteúdo do repositório. Reescrever a frase com vírgula, ponto, dois-pontos ou parênteses.
 - Registrar decisões arquiteturais e mudanças de estado em `docs/CURRENT_STATE_AUDIT.md`.
 - Atualizar `docs/SECOND_BRAIN.md` quando o fluxo, a arquitetura ou os comandos mudarem.

@@ -1,5 +1,9 @@
 # HelenaStudy: Second Brain
 
+## Onboarding de prévia e padrão visual
+
+Consultar DESIGN_SYSTEM.md para papel recortado, marca e loading compartilhado. /?onboarding=1 abre a experiência aprovada; ainda não é uma barreira de entrada automática. Google Auth é independente da integração com Google Agenda. Estado atual, riscos e requisitos de configuração em CURRENT_STATE_AUDIT.md.
+
 ## Ícones de navegação, 14/09/2026
 
 `NavigationIcon` carrega SVGs autorais de papel recortado em `public/navigation-icons/paper/{claro,roxo,escuro}/`.

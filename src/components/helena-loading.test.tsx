@@ -7,6 +7,7 @@ describe("HelenaLoading", () => {
     const { container } = render(<HelenaLoading label="Abrindo módulo…" />);
 
     expect(screen.getByRole("status").textContent).toBe("Abrindo módulo…");
-    expect(container.querySelector("img")?.getAttribute("aria-hidden")).toBe("true");
+    expect(container.querySelector("svg")?.getAttribute("aria-hidden")).toBe("true");
+    expect(container.querySelector(".helena-pencil__point")).not.toBeNull();
   });
 });

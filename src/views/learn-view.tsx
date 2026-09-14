@@ -109,9 +109,14 @@ function PracticeHub({
   }
 
   useEffect(() => {
-    if (insideWorld)
-      document.getElementById("solo-world-title")?.scrollIntoView?.({ block: "start" });
-  }, [insideWorld]);
+    if (!insideWorld) return;
+    const frame = requestAnimationFrame(() => {
+      document
+        .querySelector(`.solo-path-level--${Math.min(unlockedLevel, 4)}`)
+        ?.scrollIntoView?.({ block: "center", behavior: "instant" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [insideWorld, unlockedLevel]);
 
   useEffect(() => {
     if (!insideWorld) return;
@@ -161,12 +166,7 @@ function PracticeHub({
                 fetchPriority="high"
               />
             </picture>
-            <div
-              className="solo-level-track"
-              style={{
-                transform: `translateY(${[-300, -110, 100, 300][Math.min(unlockedLevel, 4) - 1]}px)`,
-              }}
-            >
+            <div className="solo-level-track">
               <svg
                 className="solo-level-path__route"
                 viewBox="0 0 360 720"

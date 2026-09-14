@@ -332,7 +332,8 @@ test("adapta a barra móvel ao tema e anima a troca de aba", async ({ page }, te
 
   await page.getByRole("button", { name: /tema claro/i }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect(navigation).toHaveCSS("background-color", "rgb(109, 40, 217)");
+  await expect(navigation).toHaveCSS("background-color", "rgb(255, 255, 255)");
+  await expect(navigation.locator(".navigation-icon__variant--claro").first()).toBeVisible();
   await expect(navigation).toHaveCSS("color", "rgb(255, 255, 255)");
 });
 
