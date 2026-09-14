@@ -97,12 +97,15 @@ function PracticeHub({
   const [worldIndex, setWorldIndex] = useState(0);
   const [insideWorld, setInsideWorld] = useState(false);
   const [jump, setJump] = useState({ count: 0, direction: 1 });
+  const [worldTransition, setWorldTransition] = useState(false);
   const world = SOLO_WORLDS[worldIndex]!;
 
   function visitWorld(index: number) {
     if (index === worldIndex || index < 0 || index >= SOLO_WORLDS.length) return;
     setJump((current) => ({ count: current.count + 1, direction: index > worldIndex ? 1 : -1 }));
     setWorldIndex(index);
+    setWorldTransition(true);
+    window.setTimeout(() => setWorldTransition(false), 550);
   }
 
   useEffect(() => {
@@ -118,7 +121,9 @@ function PracticeHub({
 
   if (insideWorld) {
     return (
-      <div className="practice-hub solo-world-enter">
+      <div
+        className={`practice-hub solo-world-enter${worldTransition ? " is-switching-world" : ""}`}
+      >
         <section className="solo-journey" aria-labelledby="solo-world-title">
           <div className="solo-journey__heading">
             <div>
@@ -156,7 +161,12 @@ function PracticeHub({
                 fetchPriority="high"
               />
             </picture>
-            <div className="solo-level-track">
+            <div
+              className="solo-level-track"
+              style={{
+                transform: `translateY(${[-300, -110, 100, 300][Math.min(unlockedLevel, 4) - 1]}px)`,
+              }}
+            >
               <svg
                 className="solo-level-path__route"
                 viewBox="0 0 360 720"
@@ -175,7 +185,7 @@ function PracticeHub({
                     type="button"
                     onClick={() => unlocked && onSelect(game.mode)}
                     disabled={!unlocked}
-                    aria-label={`Nível ${game.level}: ${game.title}. ${unlocked ? game.description : "Bloqueado"}`}
+                    aria-label={`Nível ${game.level}: ${game.title}. ${unlocked ? game.description : "Bloqueado. Complete o nível anterior para desbloquear."}`}
                     key={game.mode}
                   >
                     {game.level === unlockedLevel && (
@@ -192,6 +202,7 @@ function PracticeHub({
                     <span>
                       <small>Nível {game.level}</small>
                       <strong>{game.title}</strong>
+                      {!unlocked && <em>Complete o nível anterior</em>}
                     </span>
                   </button>
                 );
