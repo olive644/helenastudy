@@ -1,5 +1,46 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test("carrega os ícones de papel no desktop e mobile em ambos os temas", async ({
+  page,
+}, testInfo) => {
+  const mobile = testInfo.project.name === "mobile";
+  const navigation = page.getByRole("navigation", {
+    name: mobile ? "Navegação móvel" : "Navegação principal",
+  });
+  for (const theme of ["light", "dark"]) {
+    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    const icons = navigation.locator(".navigation-icon__variant:visible");
+    expect(await icons.count()).toBeGreaterThan(0);
+    for (const icon of await icons.all()) {
+      await expect(icon).toHaveAttribute("src", /\/navigation-icons\/paper\/.*\.svg$/);
+      await expect
+        .poll(() =>
+          icon.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0),
+        )
+        .toBe(true);
+    }
+    if (mobile) {
+      await navigation.getByRole("button", { name: "Mais", exact: true }).click();
+      const menu = page.getByRole("dialog", { name: "Mais ferramentas" });
+      const secondary = menu.locator(".navigation-icon__variant:visible");
+      await expect(secondary).toHaveCount(5);
+      for (const icon of await secondary.all()) {
+        await expect(icon).toHaveAttribute("src", /\/navigation-icons\/paper\/.*\.svg$/);
+        await expect
+          .poll(() =>
+            icon.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0),
+          )
+          .toBe(true);
+      }
+      await menu.getByRole("button", { name: "Fechar menu" }).click();
+    }
+    if (theme === "light") {
+      await page.getByRole("button", { name: /tema claro/i }).click();
+    }
+  }
+  await page.screenshot({ path: testInfo.outputPath("paper-icons.png"), fullPage: true });
+});
+
 function studentSpaceButton(page: Page, projectName: string) {
   const mobile = projectName === "mobile";
   const navigation = page.getByRole("navigation", {

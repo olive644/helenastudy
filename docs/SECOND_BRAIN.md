@@ -1,5 +1,12 @@
 # HelenaStudy: Second Brain
 
+## Ícones de navegação, 14/09/2026
+
+`NavigationIcon` carrega SVGs autorais de papel recortado em `public/navigation-icons/paper/{claro,roxo,escuro}/`.
+Preservar as três variantes: roxo é um estado contextual real, não um terceiro tema.
+Novos ícones devem ter viewBox 0 0 48 48, margem interna, fundo transparente e formas reconhecíveis em 24px.
+Os SVGs de utilidades e a iconografia aprovada da sala são independentes desta família.
+
 ## Decisões do Modo Sala, 12/09/2026
 
 A limpeza passou a processar múltiplos lotes com prazo de 45 segundos, timeout de

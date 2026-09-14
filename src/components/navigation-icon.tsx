@@ -44,7 +44,7 @@ export function NavigationIcon({ name }: NavigationIconProps) {
         {(["claro", "roxo", "escuro"] as const).map((variant) => (
           <img
             className={`navigation-icon__variant navigation-icon__variant--${variant}`}
-            src={`/navigation-icons/${variant}/${name}.png`}
+            src={`/navigation-icons/paper/${variant}/${name}.svg`}
             alt=""
             decoding="async"
             // "claro" e "escuro" podem ser a variante visível por padrão
@@ -56,7 +56,6 @@ export function NavigationIcon({ name }: NavigationIconProps) {
             // ícone que realmente é pintado primeiro e reduzindo o atraso de
             // LCP na navegação.
             loading={variant === "roxo" ? "lazy" : "eager"}
-            fetchPriority={variant === "roxo" ? "low" : "auto"}
             key={variant}
           />
         ))}
