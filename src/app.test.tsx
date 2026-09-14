@@ -76,7 +76,11 @@ describe("App", () => {
       expect(artwork).toBeTruthy();
       expect(artwork?.classList.contains("navigation-icon--brand")).toBe(true);
       expect(artwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
-      expect(artwork?.querySelector(`img[src="/navigation-icons/claro/${icon}.png"]`)).toBeTruthy();
+      for (const variant of ["claro", "roxo", "escuro"]) {
+        expect(
+          artwork?.querySelector(`img[src="/navigation-icons/paper/${variant}/${icon}.svg"]`),
+        ).toBeTruthy();
+      }
     });
   });
 
@@ -88,7 +92,7 @@ describe("App", () => {
     expect(lightArtwork?.classList.contains("navigation-icon--brand")).toBe(true);
     expect(lightArtwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
     expect(
-      lightArtwork?.querySelector('img[src="/navigation-icons/claro/theme-light.png"]'),
+      lightArtwork?.querySelector('img[src="/navigation-icons/paper/claro/theme-light.svg"]'),
     ).toBeTruthy();
 
     fireEvent.click(lightThemeButton);
@@ -98,7 +102,7 @@ describe("App", () => {
     expect(darkArtwork?.classList.contains("navigation-icon--brand")).toBe(true);
     expect(darkArtwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
     expect(
-      darkArtwork?.querySelector('img[src="/navigation-icons/escuro/theme-dark.png"]'),
+      darkArtwork?.querySelector('img[src="/navigation-icons/paper/escuro/theme-dark.svg"]'),
     ).toBeTruthy();
   });
 

@@ -1,5 +1,12 @@
 # Auditoria do estado atual
 
+## Iconografia em papel recortado (14/09/2026)
+
+- Os 12 ícones de marca da navegação e do tema usam 36 SVGs em `public/navigation-icons/paper/`, com fundo transparente, faces poligonais e dobras discretas. Fontes PNG anteriores preservadas.
+- As variantes roxas existem: estados ativos do menu móvel e Mais, hover/foco de ações rápidas, ação principal do Espaço e sol do seletor de tema. A seleção CSS existente foi preservada.
+- Claro usa grafite; escuro usa creme; ativo usa roxo. Amarelo permanece como detalhe. Nenhuma textura raster ou dependência adicional.
+- Ícones utilitários, troféus, Helena animada e artes aprovadas do Modo Sala permanecem inalterados. Todas as abas existentes já possuem ícones, sem novas funções fictícias.
+
 ## Carregamento das artes Solo (14/09/2026)
 
 - Ilhas e trilhas usam WebP otimizado. As ilhas ficam entre 129 e 151 KB, as trilhas móveis entre 207 e 230 KB e as panorâmicas entre 292 e 331 KB.
