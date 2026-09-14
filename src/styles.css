@@ -7349,7 +7349,7 @@ select {
   }
 
   :root[data-theme="dark"] .mobile-nav {
-    background: #6d28d9;
+    background: #fff;
     box-shadow: 0 14px 36px rgb(75 32 160 / 34%);
   }
 
@@ -7380,7 +7380,7 @@ select {
   }
 
   :root[data-theme="dark"] .mobile-nav__item--active .mobile-nav__icon {
-    background: rgb(255 255 255 / 18%);
+    background: #facc15;
   }
 
   .mobile-nav .navigation-icon__variant {
@@ -7388,6 +7388,18 @@ select {
   }
 
   .mobile-nav .navigation-icon__variant--escuro {
+    display: block;
+  }
+
+  :root[data-theme="dark"] .mobile-nav__item {
+    color: #0f0f14;
+  }
+
+  :root[data-theme="dark"] .mobile-nav .navigation-icon__variant {
+    display: none;
+  }
+
+  :root[data-theme="dark"] .mobile-nav .navigation-icon__variant--claro {
     display: block;
   }
 

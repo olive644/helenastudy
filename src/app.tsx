@@ -9,6 +9,7 @@ import { PlannerView } from "./views/planner-view";
 import { TodayView } from "./views/today-view";
 
 const LearnView = lazy(() => import("./views/learn-view"));
+const OnboardingView = lazy(() => import("./views/onboarding-view"));
 const LibraryView = lazy(() => import("./views/library-view"));
 const LessonBuilderView = lazy(() => import("./views/lesson-builder-view"));
 const NotesView = lazy(() => import("./views/notes-view"));
@@ -21,6 +22,16 @@ export function App() {
   );
   const [view, setView] = useState<AppView>(joinCode ? "learn" : "today");
   const { workspace, dispatch } = useWorkspace();
+  const [onboarding, setOnboarding] = useState(
+    () => !joinCode && new URLSearchParams(window.location.search).has("onboarding"),
+  );
+
+  if (onboarding)
+    return (
+      <Suspense fallback={<HelenaLoading label="Preparando sua jornada…" />}>
+        <OnboardingView onFinish={() => setOnboarding(false)} />
+      </Suspense>
+    );
 
   return (
     <div className="app-shell">

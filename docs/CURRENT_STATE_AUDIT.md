@@ -1,5 +1,13 @@
 # Auditoria do estado atual
 
+## Onboarding e loading em papel, 14/09/2026
+
+Preview disponível em /?onboarding=1, sem bloquear visitantes existentes ou convites de sala. Cinco perguntas e cinco poses WebP, com pré-carregamento da próxima imagem. Preferências são locais, salvas somente após login concluído. Login Google requer VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN e VITE_FIREBASE_PROJECT_ID, provedor Google habilitado e domínio autorizado. Não há sincronização de estudos nem autorização de backend baseada nesse login.
+
+Autenticação usa SDK Firebase existente, carregado apenas ao clicar. Popup cancelado ou configuração ausente mostram erro, nunca simulam sucesso; nenhum token é salvo manualmente. Habilitação geral, persistência de rascunho e validação real do provedor continuam pendentes.
+
+Budget revisado com medição: entrada 223,6 KiB (limite 226); total 555,1 KiB (limite 560), incluindo SDK Auth opcional (~124 KiB) e onboarding (~12 KiB). Não é todo baixado na abertura. Padrão visual e atribuição do loading em DESIGN_SYSTEM.md. Navegação móvel no escuro usa barra branca e ícones grafite. Trilha usa rolagem em vez de deslocar a estrada.
+
 ## Iconografia em papel recortado (14/09/2026)
 
 - Os 12 ícones de marca da navegação e do tema usam 36 SVGs em `public/navigation-icons/paper/`, com fundo transparente, faces poligonais e dobras discretas. Fontes PNG anteriores preservadas.

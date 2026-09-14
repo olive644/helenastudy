@@ -7,7 +7,8 @@ const assetsDirectory = new URL("../dist/assets/", import.meta.url);
 // 222 KiB desde a troca de marca (fonte, paleta oficial e alternância de
 // tema): o hook de tema e o botão adicionam ~1 KiB, já com os ícones
 // otimizados para o menor path possível. Revisar se crescer de novo.
-const MAX_INITIAL_JS_BYTES = 222 * 1024;
+// Shared paper-pencil loader and onboarding route: measured 223.6 KiB.
+const MAX_INITIAL_JS_BYTES = 226 * 1024;
 // 400 KiB: App Check oficial adiciona ~44 KiB de chunks carregados somente
 // quando a proteção está configurada e a sala faz uma requisição. Bingo,
 // presença, material próprio e o editor manual completam o crescimento. O
@@ -16,7 +17,9 @@ const MAX_INITIAL_JS_BYTES = 222 * 1024;
 // Controles de áudio sincronizados, cooldown, feedback com a Helena e ações de
 // resultado acrescentam menos de 5 KiB. Os mundos Solo interativos acrescentam
 // menos de 7 KiB ao módulo Praticar carregado sob demanda. A entrada inicial mantém 222 KiB.
-const MAX_TOTAL_JS_BYTES = 414 * 1024;
+// Google Auth SDK is imported only after clicking login (~124 KiB raw).
+// Onboarding art is WebP; UI adds ~12 KiB raw. Measured total: 555.1 KiB.
+const MAX_TOTAL_JS_BYTES = 560 * 1024;
 const MAX_TTS_WORKER_BYTES = 2.25 * 1024 * 1024;
 const MAX_TTS_WASM_BYTES = 22 * 1024 * 1024;
 const manifest = JSON.parse(await readFile(new URL(".vite/manifest.json", distDirectory), "utf8"));
