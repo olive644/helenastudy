@@ -150,8 +150,10 @@ function PracticeHub({
               />
               <img
                 className="solo-level-scenery__art"
-                src={`/solo-interior-${world.number}.png`}
+                src={`/solo-interior-${world.number}.webp`}
                 alt=""
+                decoding="async"
+                fetchPriority="high"
               />
             </picture>
             <div className="solo-level-track">
@@ -224,8 +226,10 @@ function PracticeHub({
             <img
               key={world.number}
               className={`solo-island-art ${jump.direction < 0 ? "is-backward" : ""}`}
-              src={`/solo-world-${world.number}.png`}
+              src={`/solo-world-${world.number}.webp`}
               alt={`Mundo ${world.number}: ${world.title}`}
+              decoding="async"
+              fetchPriority="high"
             />
             <div className={`solo-traveler solo-traveler--${world.number}`}>
               <button
