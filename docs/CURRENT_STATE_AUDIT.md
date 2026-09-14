@@ -1,5 +1,11 @@
 # Auditoria do estado atual
 
+## Carregamento das artes Solo (14/09/2026)
+
+- Ilhas e trilhas usam WebP otimizado. As ilhas ficam entre 129 e 151 KB, as trilhas móveis entre 207 e 230 KB e as panorâmicas entre 292 e 331 KB.
+- O navegador prioriza a ilha e a trilha visíveis. As demais artes só são baixadas quando necessárias, evitando disputar a rede com a imagem atual.
+- PNGs originais permanecem no repositório como fontes aprovadas. A interface usa os WebPs.
+
 ## Trilhas panorâmicas no desktop (14/09/2026)
 
 - Acima de 900px, `picture` seleciona `public/solo-interior-{1,2,3}-desktop.webp`. No celular, os PNGs aprovados continuam inalterados.

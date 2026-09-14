@@ -151,6 +151,7 @@ describe("App", () => {
     localStorage.setItem("helena.soloProgress", "4");
     render(<App />);
     navigate("Praticar");
+
     fireEvent.click(await screen.findByRole("button", { name: /entrar no mundo/i }));
     fireEvent.click(await screen.findByRole("button", { name: /Nível 4: Bingo/ }));
     fireEvent.click(screen.getByRole("button", { name: "Criar bingo" }));
@@ -177,12 +178,22 @@ describe("App", () => {
     render(<App />);
     navigate("Praticar");
 
+    expect(
+      (await screen.findByRole("img", { name: /Mundo 1: Bosque das palavras/ })).getAttribute(
+        "src",
+      ),
+    ).toBe("/solo-world-1.webp");
+
     fireEvent.click(await screen.findByRole("button", { name: "Próximo mundo" }));
     expect(screen.getByRole("heading", { name: "Cidade das ideias" })).toBeTruthy();
     expect(screen.getByText("Mundo bloqueado")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Mundo anterior" }));
     fireEvent.click(screen.getByRole("button", { name: /entrar no mundo/i }));
+
+    expect(document.querySelector(".solo-level-scenery img")?.getAttribute("src")).toBe(
+      "/solo-interior-1.webp",
+    );
 
     expect(
       (screen.getByRole("button", { name: /Nível 1: Escuta/ }) as HTMLButtonElement).disabled,
