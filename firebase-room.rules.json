@@ -8,6 +8,12 @@
       }
     },
     "private-rooms": { ".indexOn": ["expiresAt"], ".read": false, ".write": false },
-    "room-limits": { ".indexOn": ["expiresAt"], ".read": false, ".write": false }
+    "room-limits": { ".indexOn": ["expiresAt"], ".read": false, ".write": false },
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    }
   }
 }

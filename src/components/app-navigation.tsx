@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "../hooks/use-theme";
+import { writeSyncedStorage } from "../data/synced-storage";
 import { NavigationIcon, type NavigationIconName } from "./navigation-icon";
 
 export type AppView =
@@ -297,7 +298,7 @@ export function PageHeader() {
   function chooseProfile(nextProfile: StoredProfile) {
     setProfile(nextProfile);
     try {
-      localStorage.setItem("helena.profile.v1", JSON.stringify(nextProfile));
+      writeSyncedStorage("helena.profile.v1", JSON.stringify(nextProfile));
     } catch {
       /* A escolha continua visível quando o armazenamento não está disponível. */
     }

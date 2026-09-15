@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { writeSyncedStorage } from "../data/synced-storage";
 
 export type Theme = "light" | "dark";
 
@@ -20,7 +21,7 @@ export function useTheme() {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     try {
-      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+      writeSyncedStorage(THEME_STORAGE_KEY, theme);
     } catch {
       // Preferência vale só para esta sessão se não der para salvar.
     }

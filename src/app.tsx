@@ -3,6 +3,7 @@ import { MobileNavigation, Sidebar, type AppView } from "./components/app-naviga
 import { HelenaLoading } from "./components/helena-loading";
 import { readLocalRoomCodeFromUrl, readLocalRoomProjectorCodeFromUrl } from "./domain/room-code";
 import { useWorkspace } from "./hooks/use-workspace";
+import { useCloudSync } from "./hooks/use-cloud-sync";
 import { FocusView } from "./views/focus-view";
 import { HabitsView } from "./views/habits-view";
 import { PlannerView } from "./views/planner-view";
@@ -15,7 +16,7 @@ const LessonBuilderView = lazy(() => import("./views/lesson-builder-view"));
 const NotesView = lazy(() => import("./views/notes-view"));
 const ActivityBankView = lazy(() => import("./views/activity-bank-view"));
 
-export function App() {
+function AppContent() {
   const [projectorCode] = useState(() => readLocalRoomProjectorCodeFromUrl(window.location.href));
   const [joinCode] = useState(
     () => projectorCode ?? readLocalRoomCodeFromUrl(window.location.href),
@@ -74,4 +75,10 @@ export function App() {
       <MobileNavigation view={view} onNavigate={setView} />
     </div>
   );
+}
+
+export function App() {
+  const cloud = useCloudSync();
+  if (!cloud.ready) return <HelenaLoading label="Sincronizando sua conta…" />;
+  return <AppContent key={cloud.revision} />;
 }

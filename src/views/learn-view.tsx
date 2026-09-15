@@ -14,6 +14,7 @@ import { NavigationIcon } from "../components/navigation-icon";
 import { RoomErrorBoundary } from "../components/room-error-boundary";
 import { PageHeader } from "../components/app-navigation";
 import { ListeningQuiz } from "../components/listening-quiz";
+import { writeSyncedStorage } from "../data/synced-storage";
 import "../solo-journey.css";
 import {
   buildBingoLabels,
@@ -562,7 +563,7 @@ export function LearnView({
   const completeLevel = useCallback((level: number) => {
     setUnlockedLevel((current) => {
       const next = Math.max(current, Math.min(level + 1, SOLO_LEVELS.length));
-      window.localStorage.setItem(SOLO_PROGRESS_KEY, String(next));
+      writeSyncedStorage(SOLO_PROGRESS_KEY, String(next));
       return next;
     });
   }, []);
