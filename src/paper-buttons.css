@@ -1,0 +1,173 @@
+/* Papel recortado, derivado dos botões aprovados do onboarding. */
+.app-shell button:not(.mobile-more-backdrop):not(.theme-toggle):not(.solo-helena) {
+  border-radius: 5px 13px 6px 11px;
+  transition:
+    box-shadow 160ms ease,
+    translate 160ms ease,
+    background-color 160ms ease;
+}
+
+.app-shell
+  :is(
+    .primary-button,
+    .secondary-button,
+    .icon-button,
+    .back-button,
+    .sheet-close,
+    .link-button,
+    .text-button,
+    .empty-state button,
+    .preset-switch button,
+    .mode-switch button,
+    .rating-row button,
+    .listening-difficulty button,
+    .listening-limit button,
+    .listening-engine-choice button,
+    .more-item,
+    .sidebar__toggle,
+    .swat-print-button
+  ) {
+  min-height: 44px;
+  min-width: 44px;
+  border: 1px solid #d7cbb7;
+  background-color: #fff9ef;
+  background-image:
+    linear-gradient(135deg, #e9ddc6 0 9%, transparent 9%),
+    linear-gradient(315deg, #eee5d5 0 12%, transparent 12%);
+  color: #292432;
+  box-shadow: 0 4px 0 #c8baa4;
+  font-weight: 800;
+}
+
+.app-shell
+  :is(
+    .primary-button,
+    .preset-switch button.is-active,
+    .mode-switch button.is-active,
+    .more-item--active,
+    .listening-difficulty button.is-active,
+    .listening-limit button.is-active,
+    .listening-engine-choice button.is-active
+  ) {
+  background-color: #7433e0;
+  background-image:
+    linear-gradient(135deg, #8a4ce5 0 9%, transparent 9%),
+    linear-gradient(315deg, #5924b4 0 12%, transparent 12%);
+  border-color: #7433e0;
+  color: #fff9ef;
+  box-shadow: 0 4px 0 #4b209b;
+}
+
+.app-shell button:focus-visible {
+  outline: 3px solid #a779ef;
+  outline-offset: 4px;
+}
+
+.app-shell button:disabled {
+  cursor: not-allowed;
+}
+
+.app-shell
+  :is(
+    .primary-button,
+    .secondary-button,
+    .icon-button,
+    .back-button,
+    .sheet-close,
+    .link-button,
+    .text-button,
+    .more-item,
+    .sidebar__toggle
+  ):active:not(:disabled) {
+  translate: 0 3px;
+  box-shadow: 0 1px 0 #51465d;
+}
+
+/* Menu adaptado de Ali-Tahmazi99 no Uiverse.io, fornecido pelo proprietário.
+   Botão nativo preserva teclado e aria-expanded. */
+.sidebar__toggle,
+.paper-menu {
+  position: relative;
+}
+
+.paper-menu {
+  display: block;
+  width: 28px;
+  height: 28px;
+  color: #292432;
+}
+
+.sidebar__toggle > span,
+.paper-menu > span {
+  position: absolute;
+  display: block;
+  width: 24px;
+  height: 4px;
+  left: calc(50% - 12px);
+  top: calc(50% - 2px);
+  border-radius: 1px 3px 1px 2px;
+  background: linear-gradient(135deg, #a779ef 0 18%, currentcolor 18% 82%, #51465d 82%);
+  box-shadow: 1px 1px 0 #a779ef;
+  transition:
+    transform 220ms ease,
+    opacity 160ms ease;
+}
+
+.sidebar__toggle > span:first-child,
+.paper-menu > span:first-child {
+  transform: translateY(-8px);
+}
+.sidebar__toggle > span:last-child,
+.paper-menu > span:last-child {
+  transform: translateY(8px);
+}
+.sidebar__toggle[aria-expanded="true"] > span:first-child,
+.paper-menu[data-open="true"] > span:first-child {
+  transform: rotate(45deg);
+}
+.sidebar__toggle[aria-expanded="true"] > span:last-child,
+.paper-menu[data-open="true"] > span:last-child {
+  transform: rotate(-45deg);
+}
+.sidebar__toggle[aria-expanded="true"] > span:nth-child(2),
+.paper-menu[data-open="true"] > span:nth-child(2) {
+  transform: translateX(-12px);
+  opacity: 0;
+}
+
+@media (max-width: 899px) {
+  .app-shell .mobile-nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .app-shell .mobile-more-trigger {
+    position: fixed;
+    top: calc(12px + env(safe-area-inset-top));
+    left: calc(16px + env(safe-area-inset-left));
+    width: 54px;
+    min-height: 54px;
+    border: 1px solid #d7cbb7;
+    background: #fff9ef;
+    color: #292432;
+    box-shadow: 0 4px 0 #c8baa4;
+    z-index: 50;
+  }
+
+  .app-shell .mobile-more-trigger .mobile-nav__icon {
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .app-shell .page-header {
+    min-height: 68px;
+    padding-left: 66px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell button,
+  .sidebar__toggle > span,
+  .paper-menu > span {
+    transition: none !important;
+  }
+}

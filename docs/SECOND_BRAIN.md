@@ -209,3 +209,7 @@ mantém apenas ações contextuais e o resumo do dia. Em telas móveis, a barra 
 ferramentas” preservam o acesso completo. A barra inferior usa preto no tema claro, roxo no tema
 escuro e os ícones brancos já existentes, com transições curtas entre módulos e respeito à
 preferência de movimento reduzido do sistema.
+
+# Entrada do aplicativo
+
+App verifica helena.onboarding.v1 para apresentar o onboarding na primeira visita. GoogleLogin registra a conclusão após login bem-sucedido. O parâmetro onboarding permite revisar o fluxo. Links de sala preservam acesso direto.

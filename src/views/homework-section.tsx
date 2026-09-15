@@ -107,7 +107,7 @@ export function HomeworkSection({ workspace, dispatch }: HomeworkSectionProps) {
   return (
     <section className="module-panel" aria-labelledby="homework-section-title">
       <div className="module-heading">
-        <h2 id="homework-section-title">Homework</h2>
+        <h2 id="homework-section-title">Listas de estudo</h2>
         <span>{workspace.homeworkLists.length}</span>
       </div>
       <form className="homework-new-list" onSubmit={addList}>
@@ -127,7 +127,7 @@ export function HomeworkSection({ workspace, dispatch }: HomeworkSectionProps) {
 
       {workspace.homeworkLists.length === 0 ? (
         <div className="empty-state">
-          <p>Nenhuma lista de homework ainda. Crie a primeira acima.</p>
+          <p>Nenhuma lista de estudo ainda. Crie a primeira acima.</p>
         </div>
       ) : (
         <div className="homework-grid">

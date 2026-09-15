@@ -74,6 +74,9 @@ for (const activity of ["listening", "bingo"] as const) {
         });
       }
       const host = await contexts[0]!.newPage();
+      await host.addInitScript(() => {
+        localStorage.setItem("helena.onboarding.v1", JSON.stringify({ completed: true }));
+      });
       await host.goto("/");
       await host
         .getByRole("button", {

@@ -8,7 +8,18 @@ function navigate(label: string) {
 }
 
 describe("App", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {
+    localStorage.clear();
+    localStorage.setItem("helena.onboarding.v1", JSON.stringify({ completed: true }));
+  });
+
+  it("abre o onboarding na primeira visita", async () => {
+    localStorage.removeItem("helena.onboarding.v1");
+    render(<App />);
+    expect(
+      await screen.findByRole("heading", { name: "Em que fase dos estudos você está?" }),
+    ).toBeTruthy();
+  });
 
   it("apresenta a central sem avisos ou mascote decorativa no cabeçalho", () => {
     render(<App />);
@@ -29,7 +40,20 @@ describe("App", () => {
     expect(within(sidebar).getByRole("button", { name: "Recolher menu lateral" })).toBeTruthy();
     expect(sidebar.classList.contains("sidebar--expanded")).toBe(true);
     expect(within(sidebar).getByLabelText("HelenaStudy")).toBeTruthy();
-    expect(within(sidebar).getByText("Principal")).toBeTruthy();
+    expect(within(sidebar).getByText("Área do aluno")).toBeTruthy();
+    expect(within(sidebar).getByText("Meus materiais")).toBeTruthy();
+    expect(within(sidebar).getByText("Área do professor")).toBeTruthy();
+  });
+
+  it("mantém as metas em Foco e deixa Praticar dedicado às atividades", () => {
+    render(<App />);
+
+    navigate("Praticar");
+    expect(screen.queryByRole("heading", { name: /metas de estudo/i })).toBeNull();
+
+    navigate("Foco");
+    expect(screen.getByRole("heading", { name: "Nova meta de foco" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Metas de foco" })).toBeTruthy();
   });
 
   it("mantém as ferramentas na navegação sem duplicá-las no painel principal", () => {
@@ -44,8 +68,8 @@ describe("App", () => {
   it("organiza as ferramentas secundárias no menu móvel", () => {
     render(<App />);
     const mobileNavigation = screen.getByRole("navigation", { name: "Navegação móvel" });
-    expect(within(mobileNavigation).getAllByRole("button")).toHaveLength(5);
-    fireEvent.click(within(mobileNavigation).getByRole("button", { name: "Mais" }));
+    expect(within(mobileNavigation).getAllByRole("button")).toHaveLength(4);
+    fireEvent.click(screen.getByRole("button", { name: "Mais" }));
 
     const moreMenu = screen.getByRole("dialog", { name: "Mais ferramentas" });
     fireEvent.click(within(moreMenu).getByRole("button", { name: "Hábitos" }));
