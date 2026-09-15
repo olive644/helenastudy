@@ -46,6 +46,17 @@ describe("App", () => {
     expect(within(sidebar).getByText("Área do professor")).toBeTruthy();
   });
 
+  it("mostra o perfil Google no canto superior quando estiver disponível", () => {
+    localStorage.setItem(
+      "helena.profile.v1",
+      JSON.stringify({ name: "Ana", photoUrl: "https://example.com/ana.png" }),
+    );
+    render(<App />);
+
+    const profile = screen.getByRole("img", { name: "Perfil de Ana" });
+    expect(profile.querySelector("img")?.getAttribute("src")).toBe("https://example.com/ana.png");
+  });
+
   it("mantém as metas em Foco e deixa Praticar dedicado às atividades", () => {
     render(<App />);
 

@@ -381,7 +381,9 @@ o endereço codificado continua sendo gerado a partir da sala atual.
 - No desktop, a barra lateral é o ponto único de acesso aos módulos.
 - O Espaço do aluno concentra contexto diário, métricas, tarefas e agenda; atalhos que duplicavam a
   navegação foram removidos.
-- No celular, a navegação inferior e a folha “Mais ferramentas” continuam oferecendo todos os módulos.
+- No celular, a navegação inferior e a gaveta esquerda “Mais ferramentas” continuam oferecendo todos os módulos.
+- O acionador de menu compartilha o mesmo estado de papel roxo da navegação, nos temas claro e escuro.
+- O cabeçalho mostra a foto do perfil Google no canto superior direito e usa a Helena como fallback até a seleção de avatares ser entregue.
 
 # Entrada e navegação, setembro de 2026
 

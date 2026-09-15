@@ -62,9 +62,16 @@ export function GoogleLogin({
     setBusy(true);
     setError("");
     try {
-      await start();
+      const credential = await start();
       try {
         localStorage.setItem("helena.onboarding.v1", JSON.stringify({ answers, completed: true }));
+        localStorage.setItem(
+          "helena.profile.v1",
+          JSON.stringify({
+            name: credential.user.displayName ?? undefined,
+            photoUrl: credential.user.photoURL ?? undefined,
+          }),
+        );
       } catch {
         /* Login remains valid when browser storage is unavailable. */
       }

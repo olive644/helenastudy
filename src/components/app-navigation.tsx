@@ -25,6 +25,16 @@ type NavigationItem = {
   icon: NavigationIconName;
 };
 
+type StoredProfile = { name?: string; photoUrl?: string };
+
+function readStoredProfile(): StoredProfile {
+  try {
+    return JSON.parse(localStorage.getItem("helena.profile.v1") ?? "{}") as StoredProfile;
+  } catch {
+    return {};
+  }
+}
+
 const NAVIGATION_SECTIONS: readonly { label: string; items: readonly NavigationItem[] }[] = [
   {
     label: "Área do aluno",
@@ -275,11 +285,29 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
 }
 
 export function PageHeader() {
+  const [profile] = useState(readStoredProfile);
+
   return (
     <header className="page-header">
       <div className="page-header__actions">
         <div className="page-header__theme">
           <ThemeToggle />
+        </div>
+        <div
+          className="user-profile"
+          role="img"
+          aria-label={profile.name ? `Perfil de ${profile.name}` : "Perfil do usuário"}
+          title={profile.name ?? "Perfil do usuário"}
+        >
+          <img
+            src={profile.photoUrl ?? "/helena-portrait.png"}
+            alt=""
+            width="44"
+            height="44"
+            onError={(event) => {
+              event.currentTarget.src = "/helena-portrait.png";
+            }}
+          />
         </div>
       </div>
     </header>
