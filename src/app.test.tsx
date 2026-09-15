@@ -96,6 +96,9 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: "Mais" }));
 
     const moreMenu = screen.getByRole("dialog", { name: "Mais ferramentas" });
+    fireEvent.click(within(moreMenu).getByLabelText("Trocar foto de perfil"));
+    fireEvent.click(within(moreMenu).getByRole("button", { name: "Poliana" }));
+    expect(JSON.parse(localStorage.getItem("helena.profile.v1") ?? "{}").name).toBe("Poliana");
     fireEvent.click(within(moreMenu).getByRole("button", { name: "Hábitos" }));
     expect(
       screen.getByRole("heading", { name: /consistência antes de intensidade/i }),

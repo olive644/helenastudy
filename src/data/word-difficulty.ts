@@ -1,4 +1,5 @@
 export type WordDifficulty = "easy" | "medium" | "hard";
+import { writeSyncedStorage } from "./synced-storage";
 
 export type DifficultyResult = {
   difficulty: WordDifficulty;
@@ -35,7 +36,9 @@ function loadCache(storage: Storage): FrequencyMap {
 
 function saveCache(storage: Storage, values: FrequencyMap) {
   try {
-    storage.setItem(CACHE_KEY, JSON.stringify(values));
+    const serialized = JSON.stringify(values);
+    if (storage === window.localStorage) writeSyncedStorage(CACHE_KEY, serialized);
+    else storage.setItem(CACHE_KEY, serialized);
   } catch {
     // Difficulty still works when private browsing blocks storage.
   }

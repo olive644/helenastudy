@@ -5,7 +5,7 @@ Views React
   -> dispatch de ações tipadas
   -> workspaceReducer
   -> WorkspaceState versionado
-  -> localStorage
+  -> localStorage + conta Firebase sincronizada
 
 Plano de aula
   -> dados validados do formulário
@@ -30,7 +30,14 @@ promessa visível. Somente módulos `available` podem fornecer atalhos executáv
 O armazenamento possui uma versão explícita e rejeita conteúdo inválido. A versão 3 migra os
 estados das versões 1 e 2 sem apagar tarefas, notas ou materiais. Digitalizações e desenhos são
 reduzidos no navegador, limitados a 1 MB por imagem e vinculados à anotação. A implementação local
-pode ser substituída por um repositório remoto no futuro sem mudar as regras do domínio.
+continua oferecendo resposta imediata e a conta Google replica o estado no Realtime Database. A
+nuvem é a fonte oficial quando já existe conteúdo para o usuário; uma conta vazia recebe o estado
+local do primeiro dispositivo. Alterações remotas atualizam a interface sem exigir novo login.
+
+Além do workspace, a conta sincroniza tema, respostas do onboarding, avatar oficial escolhido,
+progresso das trilhas e o cache auxiliar de dificuldade. Cada usuário só pode ler e gravar
+`users/<uid>` pelas regras do Firebase. A URL usa `VITE_FIREBASE_DATABASE_URL` quando definida e,
+caso contrário, o endereço padrão derivado de `VITE_FIREBASE_PROJECT_ID`.
 
 Biblioteca, Praticar e o planejador de aulas são carregados sob demanda. As ferramentas de
 captura do Caderno também usam um chunk separado. O manifesto do Vite
