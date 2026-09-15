@@ -9,7 +9,11 @@ O padrão aprovado para a Helena, mundos, trilhas, ícones, botões e novos elem
 - Ícones: usar os SVGs de public/navigation-icons/paper como referência. Criar símbolos semanticamente adequados, sem reutilizar desenhos aleatórios. Bandeiras conservam suas cores reconhecíveis em facetas de papel.
 - Botões: camadas e facetas discretas, foco visível, área de toque mínima de 44px. Não depender só de sombra para comunicar o material.
 
-## Loading universal
+## Tela de login
+
+Login usa página creme, balão de papel e cartão branco com sombra em camadas. Helena espia por cima do cartão, com as patinhas apoiadas na borda, acima de Bem-vindo ao seu espaço. A placa incorporada na arte fica ocultada pelo recorte CSS. Preservar proporções compactas, Manrope, marca Helena preta e Study roxa, botão roxo facetado e seta de papel. Preview direto: /?onboarding=1&login=1.
+
+## Componente de espera
 
 Usar o componente HelenaLoading, com label contextual e compact quando necessário. O lápis animado é uma adaptação do SVG e CSS de gustavofusco no Uiverse.io, fornecidos pelo proprietário. Manter essa atribuição. Movimento de 3 segundos, cores e ponta/borracha no padrão de papel recortado. O status é anunciado uma vez pelo texto; o SVG é decorativo. Movimento reduzido apresenta desenho estático. Classes exclusivas evitam regras globais de ícones. Não há IDs de clipPath compartilhados entre instâncias.
 

@@ -65,7 +65,9 @@ const onboardingIconNames = [
 export default function OnboardingView({ onFinish }: { onFinish: () => void }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
-  const [showLogin, setShowLogin] = useState(false);
+  const [showLogin, setShowLogin] = useState(() =>
+    new URLSearchParams(window.location.search).has("login"),
+  );
   const title = useRef<HTMLHeadingElement>(null);
   const question = questions[step];
   const poseIndex = question ? step : 3;
@@ -85,6 +87,9 @@ export default function OnboardingView({ onFinish }: { onFinish: () => void }) {
   useEffect(() => {
     title.current?.focus();
   }, [step]);
+
+  if (showLogin)
+    return <GoogleLogin answers={answers} onFinish={onFinish} onBack={() => setShowLogin(false)} />;
 
   return (
     <main className="onboarding" id="main-content">
