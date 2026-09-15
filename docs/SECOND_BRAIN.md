@@ -207,11 +207,11 @@ implementação com critérios técnicos está em [`IMPLEMENTATION_ROADMAP.md`](
 # Decisão de interface: navegação lateral
 
 O menu lateral concentra a troca de módulos no desktop. O Espaço do aluno não repete essa lista:
-mantém apenas ações contextuais e o resumo do dia. Em telas móveis, a barra inferior e o menu “Mais
-ferramentas” preservam o acesso completo. A barra inferior usa preto no tema claro, roxo no tema
-escuro e os ícones brancos já existentes, com transições curtas entre módulos e respeito à
-preferência de movimento reduzido do sistema.
+mantém apenas ações contextuais e o resumo do dia. Em telas móveis, a barra inferior e a gaveta
+esquerda “Mais ferramentas” preservam o acesso completo. A barra inferior usa grafite no tema claro
+e branco no tema escuro. Itens ativos e o menu aberto usam papel roxo facetado com ícones creme,
+transições curtas entre módulos e respeito à preferência de movimento reduzido do sistema.
 
 # Entrada do aplicativo
 
-App verifica helena.onboarding.v1 para apresentar o onboarding na primeira visita. GoogleLogin registra a conclusão após login bem-sucedido. O parâmetro onboarding permite revisar o fluxo. Links de sala preservam acesso direto.
+App verifica helena.onboarding.v1 para apresentar o onboarding na primeira visita. GoogleLogin registra a conclusão após login bem-sucedido e guarda nome e foto Google em helena.profile.v1 para o perfil do cabeçalho. A mesma chave guarda a escolha entre os avatares oficiais Poliana, Oliver, Andreyna, Jairo e Helena. O parâmetro onboarding permite revisar o fluxo. Links de sala preservam acesso direto.

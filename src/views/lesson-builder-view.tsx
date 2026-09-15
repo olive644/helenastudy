@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
+import { PaperArrow } from "../components/paper-arrow";
 import { VocabularySwatActivity } from "../components/vocabulary-swat-activity";
 import {
   ACTIVITY_LIBRARY,
@@ -141,7 +142,7 @@ export function LessonBuilderView({ onBack }: { onBack: () => void }) {
           onClick={onBack}
           aria-label="Voltar para Hoje"
         >
-          <span aria-hidden="true">←</span>
+          <PaperArrow back />
         </button>
         <div>
           <span className="section-label">Planejamento</span>

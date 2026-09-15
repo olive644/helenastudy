@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { OnboardingPaperIcon, PaperArrow } from "../components/onboarding-paper-icon";
+import { OnboardingPaperIcon } from "../components/onboarding-paper-icon";
+import { PaperArrow } from "../components/paper-arrow";
 import "./onboarding.css";
 import { GoogleLogin } from "./google-login";
 

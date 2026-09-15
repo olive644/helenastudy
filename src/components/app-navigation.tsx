@@ -25,6 +25,24 @@ type NavigationItem = {
   icon: NavigationIconName;
 };
 
+type StoredProfile = { name?: string; photoUrl?: string };
+
+const PROFILE_AVATARS = [
+  { name: "Poliana", photoUrl: "/profile-avatars/poliana.webp" },
+  { name: "Oliver", photoUrl: "/profile-avatars/oliver.webp" },
+  { name: "Andreyna", photoUrl: "/profile-avatars/andreyna.webp" },
+  { name: "Jairo", photoUrl: "/profile-avatars/jairo.webp" },
+  { name: "Helena", photoUrl: "/profile-avatars/helena.webp" },
+] as const;
+
+function readStoredProfile(): StoredProfile {
+  try {
+    return JSON.parse(localStorage.getItem("helena.profile.v1") ?? "{}") as StoredProfile;
+  } catch {
+    return {};
+  }
+}
+
 const NAVIGATION_SECTIONS: readonly { label: string; items: readonly NavigationItem[] }[] = [
   {
     label: "Área do aluno",
@@ -275,12 +293,51 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
 }
 
 export function PageHeader() {
+  const [profile, setProfile] = useState(readStoredProfile);
+
+  function chooseProfile(nextProfile: StoredProfile) {
+    setProfile(nextProfile);
+    try {
+      localStorage.setItem("helena.profile.v1", JSON.stringify(nextProfile));
+    } catch {
+      /* A escolha continua visível quando o armazenamento não está disponível. */
+    }
+  }
+
   return (
     <header className="page-header">
       <div className="page-header__actions">
         <div className="page-header__theme">
           <ThemeToggle />
         </div>
+        <details className="profile-menu">
+          <summary
+            className="user-profile"
+            aria-label={profile.name ? `Perfil de ${profile.name}` : "Escolher perfil"}
+          >
+            <img src={profile.photoUrl ?? "/helena-portrait.png"} alt="" width="44" height="44" />
+          </summary>
+          <section className="profile-picker">
+            <div className="profile-picker__heading">
+              <strong>Quem está estudando?</strong>
+            </div>
+            <div className="profile-picker__options">
+              {PROFILE_AVATARS.map((avatar) => (
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    chooseProfile(avatar);
+                    event.currentTarget.closest("details")?.removeAttribute("open");
+                  }}
+                  key={avatar.name}
+                >
+                  <img src={avatar.photoUrl} alt="" width="72" height="72" />
+                  <span>{avatar.name}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        </details>
       </div>
     </header>
   );
