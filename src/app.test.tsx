@@ -21,11 +21,11 @@ describe("App", () => {
     ).toBeTruthy();
   });
 
-  it("apresenta a central sem avisos ou mascote decorativa no cabeçalho", () => {
+  it("apresenta a marca textual sem avisos ou mascote decorativa no cabeçalho", () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: "Espaço do aluno" })).toBeTruthy();
     expect(screen.queryByText(/dados salvos neste dispositivo/i)).toBeNull();
-    expect(screen.queryByLabelText("HelenaStudy")).toBeNull();
+    expect(screen.getByLabelText("HelenaStudy")).toBeTruthy();
     expect(screen.queryByAltText(/rosto da helena/i)).toBeNull();
     expect(screen.queryByAltText("Helena, a mascote do HelenaStudy")).toBeNull();
     expect(screen.queryByText(/by oli/i)).toBeNull();

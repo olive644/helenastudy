@@ -148,7 +148,6 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
         </button>
         {expanded && (
           <div className="sidebar__brand" aria-label="HelenaStudy">
-            <img src="/helena-portrait.png" alt="" width="36" height="36" />
             <strong>
               Helena<span>Study</span>
             </strong>
@@ -306,6 +305,11 @@ export function PageHeader() {
 
   return (
     <header className="page-header">
+      <div className="page-header__mobile-brand" aria-label="HelenaStudy">
+        <strong>
+          Helena<span>Study</span>
+        </strong>
+      </div>
       <div className="page-header__actions">
         <div className="page-header__theme">
           <ThemeToggle />
@@ -315,7 +319,12 @@ export function PageHeader() {
             className="user-profile"
             aria-label={profile.name ? `Perfil de ${profile.name}` : "Escolher perfil"}
           >
-            <img src={profile.photoUrl ?? "/helena-portrait.png"} alt="" width="44" height="44" />
+            <img
+              src={profile.photoUrl ?? "/profile-avatars/helena.webp"}
+              alt=""
+              width="44"
+              height="44"
+            />
           </summary>
           <section className="profile-picker">
             <div className="profile-picker__heading">

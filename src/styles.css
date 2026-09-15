@@ -1,14 +1,9 @@
 :root {
   color: var(--text);
   background: var(--page);
-  font-family:
-    Manrope,
-    Inter,
-    "Segoe UI",
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
+  --font-display: Manrope, Inter, "Segoe UI", system-ui, sans-serif;
+  --font-body: "DIN Next Rounded", "DIN Next Rounded LT Pro", Nunito, "Segoe UI", sans-serif;
+  font-family: var(--font-body);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   color-scheme: light;
@@ -41,6 +36,14 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: var(--page);
+}
+
+h1,
+h2,
+h3,
+.sidebar__brand,
+.page-header__mobile-brand {
+  font-family: var(--font-display);
 }
 
 .helena-loading {
