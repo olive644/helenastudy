@@ -27,6 +27,7 @@ describe("App", () => {
     expect(screen.queryByText(/dados salvos neste dispositivo/i)).toBeNull();
     expect(screen.queryByLabelText("HelenaStudy")).toBeNull();
     expect(screen.queryByAltText(/rosto da helena/i)).toBeNull();
+    expect(screen.queryByAltText("Helena, a mascote do HelenaStudy")).toBeNull();
     expect(screen.queryByText(/by oli/i)).toBeNull();
   });
 

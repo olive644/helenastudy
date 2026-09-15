@@ -60,7 +60,6 @@ export function TodayView({ workspace, dispatch, onNavigate }: TodayViewProps) {
             </button>
           </div>
         </div>
-        <img className="today-helena" src="/helena-2d.png" alt="Helena, a mascote do HelenaStudy" />
       </header>
 
       <section className="metric-row" aria-label="Resumo de hoje">

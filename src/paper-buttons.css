@@ -171,3 +171,61 @@
     transition: none !important;
   }
 }
+
+/* Desktop segue o contraste da barra mobile: escuro no claro, branco no escuro. */
+@media (min-width: 900px) {
+  .view-heading--today {
+    align-items: center;
+    min-height: 210px;
+  }
+
+  :root[data-theme="dark"] .app-shell > .sidebar {
+    background: #fff;
+    color: #292432;
+    border-right: 1px solid #e9ddc6;
+    box-shadow: 10px 0 30px rgb(41 36 50 / 10%);
+  }
+
+  :root[data-theme="dark"] .sidebar .nav-section__label,
+  :root[data-theme="dark"] .sidebar__brand,
+  :root[data-theme="dark"] .app-shell > .sidebar.sidebar--expanded .nav-item > span:last-child {
+    color: #292432;
+  }
+
+  :root[data-theme="dark"] .sidebar__brand strong span {
+    color: #7c3aed;
+  }
+
+  :root[data-theme="dark"] .sidebar .nav-item,
+  :root[data-theme="dark"] .sidebar .nav-item:not(:disabled):hover,
+  :root[data-theme="dark"] .sidebar .nav-item:focus-visible {
+    color: #292432;
+  }
+
+  :root[data-theme="dark"] .sidebar .nav-item:not(:disabled):hover,
+  :root[data-theme="dark"] .sidebar .nav-item:focus-visible {
+    border-color: #e9ddc6;
+    background: #f4efe7;
+  }
+
+  :root[data-theme="dark"] .sidebar .nav-item--active,
+  :root[data-theme="dark"] .sidebar .nav-item--active:not(:disabled):hover {
+    border-color: #d7cbb7;
+    background: #eee5ff;
+    box-shadow: 0 3px 0 #d7cbb7;
+  }
+
+  :root[data-theme="dark"] .sidebar .navigation-icon__variant {
+    display: none;
+  }
+
+  :root[data-theme="dark"] .sidebar .navigation-icon__variant--claro {
+    display: block;
+  }
+
+  :root[data-theme="dark"] .sidebar__toggle {
+    color: #292432;
+    border-color: #d7cbb7;
+    background: #fff9ef;
+  }
+}

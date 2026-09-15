@@ -8,6 +8,7 @@ O padrão aprovado para a Helena, mundos, trilhas, ícones, botões e novos elem
 - Mascote: gata compacta, olhos amarelos, pupilas verticais, estrela amarela na orelha. Manter anatomia clara e consistência entre poses.
 - Ícones: usar os SVGs de public/navigation-icons/paper como referência. Criar símbolos semanticamente adequados, sem reutilizar desenhos aleatórios. Bandeiras conservam suas cores reconhecíveis em facetas de papel.
 - Botões: camadas e facetas discretas, foco visível, área de toque mínima de 44px. Não depender só de sombra para comunicar o material.
+- Navegação desktop: acompanha o contraste da barra mobile. No tema claro, rail grafite e ícones claros. No tema escuro, rail branco e ícones grafite, inclusive no estado ativo. O cartão inicial do Espaço do aluno não apresenta mascote; as poses aprovadas seguem no onboarding e login.
 - O acabamento compartilhado está em src/paper-buttons.css: cantos assimétricos, facetas sólidas e base deslocada. Botões primários usam roxo e secundários usam creme. As transições do menu lateral e Mais usam três tiras de papel que formam um X, com movimento reduzido e estado acessível. A animação foi adaptada do exemplo de Ali-Tahmazi99 no Uiverse.io.
 
 ## Tela de login
