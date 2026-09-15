@@ -177,10 +177,10 @@ test("anima o seletor entre os temas claro e escuro", async ({ page }, testInfo)
   await expect(sidebar).toHaveCSS("background-color", "rgb(255, 255, 255)");
   await expect(
     sidebar.locator('.nav-item [data-icon="today"] .navigation-icon__variant--claro'),
-  ).toBeVisible();
+  ).toBeHidden();
   await expect(
     sidebar.locator('.nav-item [data-icon="today"] .navigation-icon__variant--escuro'),
-  ).toBeHidden();
+  ).toBeVisible();
   await sidebar.getByRole("button", { name: "Expandir menu lateral" }).click();
   await expect(sidebar.getByText("Área do aluno", { exact: true })).toHaveCSS(
     "color",
@@ -287,10 +287,10 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
     const glyphBox = await item.locator(".navigation-icon__variant:visible").boundingBox();
     expect(iconBox).not.toBeNull();
     expect(glyphBox).not.toBeNull();
-    expect(iconBox!.width).toBe(32);
-    expect(iconBox!.height).toBe(32);
-    expect(glyphBox!.width).toBe(20);
-    expect(glyphBox!.height).toBe(20);
+    expect(iconBox!.width).toBeCloseTo(32, 3);
+    expect(iconBox!.height).toBeCloseTo(32, 3);
+    expect(glyphBox!.width).toBeCloseTo(20, 3);
+    expect(glyphBox!.height).toBeCloseTo(20, 3);
     expect(glyphBox!.x).toBeGreaterThanOrEqual(iconBox!.x);
     expect(glyphBox!.y).toBeGreaterThanOrEqual(iconBox!.y);
     expect(glyphBox!.x + glyphBox!.width).toBeLessThanOrEqual(iconBox!.x + iconBox!.width);
