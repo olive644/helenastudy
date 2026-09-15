@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useTheme } from "../hooks/use-theme";
 import { writeSyncedStorage } from "../data/synced-storage";
 import { NavigationIcon, type NavigationIconName } from "./navigation-icon";
@@ -176,7 +176,10 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
 
 export function MobileNavigation({ view, onNavigate }: NavigationProps) {
   const [moreOpen, setMoreOpen] = useState(false);
+  const [profile, setProfile] = useState(readStoredProfile);
+  const [dragX, setDragX] = useState(0);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dragStartX = useRef<number | null>(null);
   const moreActive = MORE_ITEMS.some((item) => item.view === view);
 
   useEffect(() => {
@@ -199,6 +202,28 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
     setMoreOpen(false);
   }
 
+  function chooseProfile(nextProfile: StoredProfile) {
+    setProfile(nextProfile);
+    writeSyncedStorage("helena.profile.v1", JSON.stringify(nextProfile));
+  }
+
+  function startDrag(event: ReactPointerEvent<HTMLElement>) {
+    if ((event.target as HTMLElement).closest("button, summary")) return;
+    dragStartX.current = event.clientX;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function drag(event: ReactPointerEvent<HTMLElement>) {
+    if (dragStartX.current === null) return;
+    setDragX(Math.min(0, event.clientX - dragStartX.current));
+  }
+
+  function finishDrag() {
+    dragStartX.current = null;
+    if (dragX < -80) setMoreOpen(false);
+    setDragX(0);
+  }
+
   return (
     <>
       {moreOpen && (
@@ -211,25 +236,51 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
           />
           <section
             id="mobile-more-panel"
-            className="mobile-more-sheet"
+            className={dragX === 0 ? "mobile-more-sheet" : "mobile-more-sheet is-dragging"}
             role="dialog"
             aria-modal="true"
             aria-labelledby="mobile-more-title"
+            style={{ transform: `translateX(${dragX}px)` }}
+            onPointerDown={startDrag}
+            onPointerMove={drag}
+            onPointerUp={finishDrag}
+            onPointerCancel={finishDrag}
           >
             <header>
               <div>
-                <span>HelenaStudy</span>
+                <span>
+                  Helena<span>Study</span>
+                </span>
                 <h2 id="mobile-more-title">Mais ferramentas</h2>
               </div>
-              <button
-                ref={closeButtonRef}
-                className="sheet-close"
-                type="button"
-                aria-label="Fechar menu"
-                onClick={() => setMoreOpen(false)}
-              >
-                <NavigationIcon name="close" />
-              </button>
+              <details className="mobile-drawer-profile">
+                <summary className="user-profile" aria-label="Trocar foto de perfil">
+                  <img
+                    src={profile.photoUrl ?? "/profile-avatars/helena.webp"}
+                    alt=""
+                    width="54"
+                    height="54"
+                  />
+                </summary>
+                <section className="profile-picker">
+                  <strong>Quem está estudando?</strong>
+                  <div className="profile-picker__options">
+                    {PROFILE_AVATARS.map((avatar) => (
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          chooseProfile(avatar);
+                          event.currentTarget.closest("details")?.removeAttribute("open");
+                        }}
+                        key={avatar.name}
+                      >
+                        <img src={avatar.photoUrl} alt="" width="64" height="64" />
+                        <span>{avatar.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              </details>
             </header>
             <div className="mobile-more-grid">
               {MORE_ITEMS.map((item) => (
@@ -245,6 +296,15 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
                 </button>
               ))}
             </div>
+            <button
+              ref={closeButtonRef}
+              className="mobile-more-edge-close"
+              type="button"
+              aria-label="Fechar menu"
+              onClick={() => setMoreOpen(false)}
+            >
+              <span aria-hidden="true">›</span>
+            </button>
           </section>
         </div>
       )}
@@ -279,14 +339,14 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
         aria-controls="mobile-more-panel"
         onClick={() => setMoreOpen((open) => !open)}
       >
-        <span className="mobile-nav__icon">
-          <span className="paper-menu" aria-hidden="true" data-open={moreOpen}>
-            <span />
-            <span />
-            <span />
-          </span>
-        </span>
-        <span>Mais</span>
+        <img
+          className="mobile-more-avatar"
+          src={profile.photoUrl ?? "/profile-avatars/helena.webp"}
+          alt=""
+          width="48"
+          height="48"
+        />
+        <span className="sr-only">Mais</span>
       </button>
     </>
   );
