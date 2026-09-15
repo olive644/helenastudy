@@ -168,10 +168,28 @@ test("anima o seletor entre os temas claro e escuro", async ({ page }, testInfo)
   expect(initialThumbBox).not.toBeNull();
   await expect(toggle.locator('[data-icon="theme-light"]')).toBeVisible();
   await expect(toggle.locator('[data-icon="theme-dark"]')).toBeVisible();
+  const sidebar = page.locator(".sidebar");
+  await expect(sidebar).toHaveCSS("background-color", "rgb(15, 15, 20)");
 
   await toggle.click();
   await expect(toggle).toHaveAttribute("data-theme", "dark");
   await expect(toggle).toHaveAccessibleName(/tema escuro/i);
+  await expect(sidebar).toHaveCSS("background-color", "rgb(255, 255, 255)");
+  await expect(
+    sidebar.locator('.nav-item [data-icon="today"] .navigation-icon__variant--claro'),
+  ).toBeVisible();
+  await expect(
+    sidebar.locator('.nav-item [data-icon="today"] .navigation-icon__variant--escuro'),
+  ).toBeHidden();
+  await sidebar.getByRole("button", { name: "Expandir menu lateral" }).click();
+  await expect(sidebar.getByText("Área do aluno", { exact: true })).toHaveCSS(
+    "color",
+    "rgb(41, 36, 50)",
+  );
+  await expect(sidebar.getByRole("button", { name: "Agenda" })).toHaveCSS(
+    "color",
+    "rgb(41, 36, 50)",
+  );
   await expect
     .poll(async () => (await thumb.boundingBox())?.x)
     .toBeGreaterThan(initialThumbBox!.x + 20);
@@ -182,6 +200,7 @@ test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }, t
   await expect(page.getByText("Dados salvos neste dispositivo")).toHaveCount(0);
   await expect(page.getByLabel("HelenaStudy")).toHaveCount(0);
   await expect(page.getByAltText(/rosto da helena/i)).toHaveCount(0);
+  await expect(page.getByAltText("Helena, a mascote do HelenaStudy")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Agenda", exact: true }).click();
   await page.getByLabel(/o que precisa ser feito/i).fill("Revisar Simple Past");

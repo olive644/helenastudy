@@ -1,5 +1,9 @@
 # Auditoria do estado atual
 
+## Barra desktop e Espaço do aluno, 15/09/2026
+
+O rail desktop usa fundo grafite e ícones claros no tema claro. No tema escuro, usa fundo branco e ícones grafite em todos os estados. O cartão inicial do Espaço do aluno não mostra a antiga mascote 2D. A identidade aprovada da Helena permanece nos fluxos de onboarding, login e mundos.
+
 ## Onboarding e loading em papel, 14/09/2026
 
 Preview disponível em /?onboarding=1, sem bloquear visitantes existentes ou convites de sala. Cinco perguntas e cinco poses WebP, com pré-carregamento da próxima imagem. Preferências são locais, salvas somente após login concluído. Login Google requer VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN e VITE_FIREBASE_PROJECT_ID, provedor Google habilitado e domínio autorizado. Não há sincronização de estudos nem autorização de backend baseada nesse login.

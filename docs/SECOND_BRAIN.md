@@ -1,5 +1,7 @@
 # HelenaStudy: Second Brain
 
+O rail desktop segue a inversão da barra móvel: escuro no tema claro, branco com ícones grafite no escuro. O Espaço do aluno não renderiza a antiga mascote do cartão inicial.
+
 Configuração e modelo de ameaça do login Google: GOOGLE_LOGIN.md. O resumo abre uma etapa de autenticação com preparação antecipada do SDK.
 
 ## Onboarding de prévia e padrão visual
