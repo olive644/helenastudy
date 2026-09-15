@@ -1,6 +1,7 @@
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
-import { OnboardingPaperIcon, PaperArrow } from "./onboarding-paper-icon";
+import { OnboardingPaperIcon } from "./onboarding-paper-icon";
+import { PaperArrow } from "./paper-arrow";
 
 afterEach(cleanup);
 it("keeps paper fills isolated from navigation line-icon styles", () => {
@@ -16,6 +17,7 @@ it.each(["flag-us", "flag-br", "flag-es"])("renders a separate country design fo
 });
 it("uses the same folded arrow reversed for back", () => {
   const { container } = render(<PaperArrow back />);
-  expect(container.querySelector("g")?.getAttribute("transform")).toContain("rotate(180)");
-  expect(container.querySelectorAll("path")).toHaveLength(4);
+  const arrow = container.querySelector("img");
+  expect(arrow?.getAttribute("src")).toBe("/paper-arrow.svg");
+  expect(arrow?.classList.contains("is-back")).toBe(true);
 });

@@ -246,6 +246,10 @@
   stroke: none;
   fill: none;
 }
+
+.onboarding .onboarding-paper-arrow.is-back {
+  transform: rotate(180deg);
+}
 .onboarding .onboarding-paper-icon *,
 .onboarding .onboarding-paper-arrow * {
   stroke: none;

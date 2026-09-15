@@ -383,7 +383,8 @@ o endereço codificado continua sendo gerado a partir da sala atual.
   navegação foram removidos.
 - No celular, a navegação inferior e a gaveta esquerda “Mais ferramentas” continuam oferecendo todos os módulos.
 - O acionador de menu compartilha o mesmo estado de papel roxo da navegação, nos temas claro e escuro.
-- O cabeçalho mostra a foto do perfil Google no canto superior direito e usa a Helena como fallback até a seleção de avatares ser entregue.
+- O cabeçalho mostra a foto do perfil Google no canto superior direito e permite escolher Poliana, Oliver, Andreyna, Jairo ou Helena.
+- O Espaço do aluno usa cabeçalho neutro e ações de papel branco. Campos no tema escuro usam superfície grafite para evitar branco saturado.
 
 # Entrada e navegação, setembro de 2026
 

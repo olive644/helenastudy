@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { HelenaLoading } from "../components/helena-loading";
-import { PaperArrow } from "../components/onboarding-paper-icon";
+import { PaperArrow } from "../components/paper-arrow";
 import "./google-login.css";
 
 async function prepareGoogle() {

@@ -8,6 +8,7 @@ import {
 import type { AppView } from "../components/app-navigation";
 import { PageHeader } from "../components/app-navigation";
 import { NavigationIcon } from "../components/navigation-icon";
+import { PaperArrow } from "../components/paper-arrow";
 
 type TodayViewProps = {
   workspace: WorkspaceState;
@@ -56,7 +57,7 @@ export function TodayView({ workspace, dispatch, onNavigate }: TodayViewProps) {
               <NavigationIcon name="learn" /> Começar prática
             </button>
             <button type="button" onClick={() => onNavigate("planner")}>
-              Ver meu dia <span aria-hidden="true">→</span>
+              Ver meu dia <PaperArrow />
             </button>
           </div>
         </div>
@@ -90,7 +91,7 @@ export function TodayView({ workspace, dispatch, onNavigate }: TodayViewProps) {
               <h2 id="tasks-today-title">Próximas tarefas</h2>
             </div>
             <button className="link-button" type="button" onClick={() => onNavigate("planner")}>
-              Ver agenda <span aria-hidden="true">→</span>
+              Ver agenda <PaperArrow />
             </button>
           </div>
           {pendingTasks.length === 0 ? (

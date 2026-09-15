@@ -162,6 +162,152 @@
   }
 }
 
+/* Espaço do aluno sem painel roxo e com ações claras em ambos os temas. */
+.app-shell .view-heading--today {
+  border: 1px solid var(--line);
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: var(--shadow-float);
+}
+
+.app-shell .view-heading--today::before {
+  display: none;
+}
+
+.app-shell .view-heading--today h1,
+.app-shell .view-heading--today .section-label,
+.app-shell .view-heading--today > div > p {
+  color: var(--text);
+}
+
+.app-shell .view-heading--today .section-label {
+  color: var(--violet);
+}
+
+.app-shell .today-hero-actions button,
+.app-shell .today-hero-actions .today-hero-primary,
+.app-shell .today-hero-actions button:hover,
+.app-shell .today-hero-actions .today-hero-primary:hover {
+  border-color: #d7cbb7;
+  color: #292432;
+  background-color: #fff;
+  background-image:
+    linear-gradient(135deg, #eee5d5 0 10%, transparent 10%),
+    linear-gradient(315deg, #e9ddc6 0 13%, transparent 13%);
+  box-shadow: 0 4px 0 #c8baa4;
+}
+
+.app-shell .today-hero-actions .navigation-icon__variant {
+  display: none;
+}
+
+.app-shell .today-hero-actions .navigation-icon__variant--claro {
+  display: block;
+}
+
+.app-shell .onboarding-paper-arrow {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+}
+
+.onboarding-paper-arrow.is-back {
+  transform: rotate(180deg);
+}
+
+.app-shell .back-button .onboarding-paper-arrow {
+  width: 28px;
+  height: 28px;
+}
+
+/* Seletor compacto dos avatares oficiais. */
+.page-header__actions {
+  position: relative;
+}
+
+.profile-menu {
+  position: relative;
+}
+
+.profile-menu > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.profile-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.profile-picker {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 12px);
+  right: 0;
+  width: min(360px, calc(100vw - 28px));
+  padding: 16px;
+  border: 1px solid #d7cbb7;
+  border-radius: 9px 22px 12px 18px;
+  color: #292432;
+  background-color: #fff9ef;
+  background-image:
+    linear-gradient(135deg, #eee5d5 0 6%, transparent 6%),
+    linear-gradient(315deg, #e9ddc6 0 7%, transparent 7%);
+  box-shadow: 8px 10px 0 rgb(41 36 50 / 18%);
+}
+
+.profile-picker__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.profile-picker__options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.profile-picker__options button {
+  display: grid;
+  min-width: 0;
+  padding: 8px 5px;
+  place-items: center;
+  gap: 6px;
+  border: 1px solid #d7cbb7;
+  color: #292432;
+  background: #fff;
+  box-shadow: 0 3px 0 #c8baa4;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.profile-picker__options img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Campos escuros deixam de usar blocos brancos saturados. */
+:root[data-theme="dark"]
+  .app-shell
+  :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+    textarea,
+    select
+  ) {
+  border-color: #51465d;
+  color: #fff9ef;
+  background: #292432;
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] .app-shell :is(input, textarea)::placeholder {
+  color: #b9b2c5;
+  opacity: 1;
+}
+
 /* Navegação em papel recortado: o acionador faz parte da própria barra. */
 .sidebar__toggle {
   min-width: 52px;

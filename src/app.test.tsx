@@ -53,8 +53,20 @@ describe("App", () => {
     );
     render(<App />);
 
-    const profile = screen.getByRole("img", { name: "Perfil de Ana" });
+    const profile = screen.getByLabelText("Perfil de Ana");
     expect(profile.querySelector("img")?.getAttribute("src")).toBe("https://example.com/ana.png");
+  });
+
+  it("permite escolher um avatar oficial para o perfil", () => {
+    render(<App />);
+    fireEvent.click(screen.getAllByLabelText("Escolher perfil")[0]!);
+    fireEvent.click(screen.getByRole("button", { name: "Helena" }));
+
+    expect(screen.getByLabelText("Perfil de Helena")).toBeTruthy();
+    expect(JSON.parse(localStorage.getItem("helena.profile.v1") ?? "{}")).toEqual({
+      name: "Helena",
+      photoUrl: "/profile-avatars/helena.webp",
+    });
   });
 
   it("mantém as metas em Foco e deixa Praticar dedicado às atividades", () => {
