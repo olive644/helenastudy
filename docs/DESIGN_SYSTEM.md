@@ -8,6 +8,7 @@ O padrão aprovado para a Helena, mundos, trilhas, ícones, botões e novos elem
 - Mascote: gata compacta, olhos amarelos, pupilas verticais, estrela amarela na orelha. Manter anatomia clara e consistência entre poses.
 - Ícones: usar os SVGs de public/navigation-icons/paper como referência. Criar símbolos semanticamente adequados, sem reutilizar desenhos aleatórios. Bandeiras conservam suas cores reconhecíveis em facetas de papel.
 - Botões: camadas e facetas discretas, foco visível, área de toque mínima de 44px. Não depender só de sombra para comunicar o material.
+- O acabamento compartilhado está em src/paper-buttons.css: cantos assimétricos, facetas sólidas e base deslocada. Botões primários usam roxo e secundários usam creme. As transições do menu lateral e Mais usam três tiras de papel que formam um X, com movimento reduzido e estado acessível. A animação foi adaptada do exemplo de Ali-Tahmazi99 no Uiverse.io.
 
 ## Tela de login
 

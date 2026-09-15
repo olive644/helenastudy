@@ -378,3 +378,7 @@ o endereço codificado continua sendo gerado a partir da sala atual.
 - O Espaço do aluno concentra contexto diário, métricas, tarefas e agenda; atalhos que duplicavam a
   navegação foram removidos.
 - No celular, a navegação inferior e a folha “Mais ferramentas” continuam oferecendo todos os módulos.
+
+# Entrada e navegação, setembro de 2026
+
+Primeira visita abre onboarding e termina no login Google aprovado. A conclusão é guardada na chave helena.onboarding.v1 após autenticação bem-sucedida. Convites de sala mantêm entrada direta. Mais no mobile fica no canto superior esquerdo; a barra inferior mantém quatro destinos. Menus desktop e mobile usam tiras facetadas com transição para X.

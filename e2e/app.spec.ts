@@ -20,7 +20,7 @@ test("carrega os ícones de papel no desktop e mobile em ambos os temas", async 
         .toBe(true);
     }
     if (mobile) {
-      await navigation.getByRole("button", { name: "Mais", exact: true }).click();
+      await page.getByRole("button", { name: "Mais", exact: true }).click();
       const menu = page.getByRole("dialog", { name: "Mais ferramentas" });
       const secondary = menu.locator(".navigation-icon__variant:visible");
       await expect(secondary).toHaveCount(5);
@@ -60,8 +60,7 @@ async function navigateToTool(
   mobileLabel: string,
 ) {
   if (projectName === "mobile") {
-    const navigation = page.getByRole("navigation", { name: "Navegação móvel" });
-    await navigation.getByRole("button", { name: "Mais", exact: true }).click();
+    await page.getByRole("button", { name: "Mais", exact: true }).click();
     await page
       .getByRole("dialog", { name: "Mais ferramentas" })
       .getByRole("button", { name: mobileLabel, exact: true })
@@ -76,9 +75,10 @@ async function navigateToTool(
 }
 
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("helena.onboarding.v1", JSON.stringify({ completed: true }));
+  });
   await page.goto("/");
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
 });
 
 test("explora mundos com a Helena e abre a trilha de níveis", async ({ page }, testInfo) => {
@@ -146,7 +146,7 @@ test("concentra as ferramentas na navegação lateral", async ({ page }, testInf
   await expect(sidebar).toHaveClass(/sidebar--expanded/);
   await expect(sidebar).toHaveCSS("width", "260px");
   await expect(sidebar.getByLabel("HelenaStudy")).toBeVisible();
-  await expect(sidebar.getByText("Principal", { exact: true })).toBeVisible();
+  await expect(sidebar.getByText("Área do aluno", { exact: true })).toBeVisible();
   await expect(sidebar.getByText("Espaço do aluno", { exact: true })).toBeVisible();
 
   const expandedSidebarBox = await sidebar.boundingBox();
@@ -248,7 +248,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
   test.skip(testInfo.project.name !== "mobile", "Contrato específico da navegação móvel.");
   const navigation = page.getByRole("navigation", { name: "Navegação móvel" });
   await expect(navigation).toBeVisible();
-  await expect(navigation.getByRole("button")).toHaveCount(5);
+  await expect(navigation.getByRole("button")).toHaveCount(4);
 
   for (const label of ["Agenda", "Foco", "Praticar", "Espaço"]) {
     await navigation.getByRole("button", { name: label, exact: true }).click();
@@ -256,7 +256,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
     expect(overflow).toBe(false);
   }
 
-  await navigation.getByRole("button", { name: "Mais", exact: true }).click();
+  await page.getByRole("button", { name: "Mais", exact: true }).click();
   const toolsDialog = page.getByRole("dialog", { name: "Mais ferramentas" });
   await expect(toolsDialog).toBeVisible();
   await page.waitForTimeout(350);
@@ -282,7 +282,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
   await expect(toolsDialog).toBeHidden();
 
   for (const label of ["Hábitos", "Notas", "Biblioteca", "Planos de aula"]) {
-    await navigation.getByRole("button", { name: "Mais", exact: true }).click();
+    await page.getByRole("button", { name: "Mais", exact: true }).click();
     const more = page.getByRole("dialog", { name: "Mais ferramentas" });
     await expect(more).toBeVisible();
     await more.getByRole("button", { name: label, exact: true }).click();

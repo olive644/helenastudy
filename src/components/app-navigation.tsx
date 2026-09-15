@@ -27,25 +27,25 @@ type NavigationItem = {
 
 const NAVIGATION_SECTIONS: readonly { label: string; items: readonly NavigationItem[] }[] = [
   {
-    label: "Principal",
+    label: "Área do aluno",
     items: [
       { view: "today", label: "Espaço do aluno", mobileLabel: "Espaço", icon: "today" },
       { view: "planner", label: "Agenda", icon: "planner" },
-    ],
-  },
-  {
-    label: "Estudar",
-    items: [
       { view: "focus", label: "Foco", icon: "focus" },
       { view: "learn", label: "Praticar", mobileLabel: "Praticar", icon: "learn" },
-      { view: "library", label: "Biblioteca", icon: "library" },
     ],
   },
   {
-    label: "Organizar",
+    label: "Meus materiais",
     items: [
-      { view: "habits", label: "Hábitos", icon: "habits" },
+      { view: "library", label: "Biblioteca", icon: "library" },
       { view: "notes", label: "Cadernos", mobileLabel: "Notas", icon: "notes" },
+      { view: "habits", label: "Hábitos", icon: "habits" },
+    ],
+  },
+  {
+    label: "Área do professor",
+    items: [
       { view: "lesson-builder", label: "Planos de aula", icon: "lesson" },
       { view: "activity-bank", label: "Banco de atividades", icon: "activity-bank" },
     ],
@@ -249,23 +249,27 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
             </button>
           );
         })}
-        <button
-          className={
-            moreOpen || moreActive
-              ? "mobile-nav__item mobile-nav__item--active"
-              : "mobile-nav__item"
-          }
-          type="button"
-          aria-expanded={moreOpen}
-          aria-controls="mobile-more-panel"
-          onClick={() => setMoreOpen((open) => !open)}
-        >
-          <span className="mobile-nav__icon">
-            <NavigationIcon name="more" />
-          </span>
-          <span>Mais</span>
-        </button>
       </nav>
+      <button
+        className={
+          moreOpen || moreActive
+            ? "mobile-nav__item mobile-more-trigger mobile-nav__item--active"
+            : "mobile-nav__item mobile-more-trigger"
+        }
+        type="button"
+        aria-expanded={moreOpen}
+        aria-controls="mobile-more-panel"
+        onClick={() => setMoreOpen((open) => !open)}
+      >
+        <span className="mobile-nav__icon">
+          <span className="paper-menu" aria-hidden="true" data-open={moreOpen}>
+            <span />
+            <span />
+            <span />
+          </span>
+        </span>
+        <span>Mais</span>
+      </button>
     </>
   );
 }

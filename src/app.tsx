@@ -22,9 +22,15 @@ export function App() {
   );
   const [view, setView] = useState<AppView>(joinCode ? "learn" : "today");
   const { workspace, dispatch } = useWorkspace();
-  const [onboarding, setOnboarding] = useState(
-    () => !joinCode && new URLSearchParams(window.location.search).has("onboarding"),
-  );
+  const [onboarding, setOnboarding] = useState(() => {
+    if (joinCode) return false;
+    if (new URLSearchParams(window.location.search).has("onboarding")) return true;
+    try {
+      return JSON.parse(localStorage.getItem("helena.onboarding.v1") ?? "null")?.completed !== true;
+    } catch {
+      return true;
+    }
+  });
 
   if (onboarding)
     return (
