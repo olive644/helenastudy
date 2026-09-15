@@ -14,6 +14,10 @@ test("percorre as cinco poses e revisa respostas sem iniciar login", async ({ pa
   }
   await expect(page.getByRole("button", { name: "Entrar com Google" })).toBeVisible();
   await expect(page.locator(".onboarding__summary li")).toHaveCount(5);
+  await page.getByRole("button", { name: "Entrar com Google" }).click();
+  await expect(page.getByRole("heading", { name: "Vamos começar?" })).toBeVisible();
+  await page.getByRole("button", { name: "Voltar", exact: true }).click();
+  await expect(page.locator(".onboarding__summary li")).toHaveCount(5);
   await page.getByRole("button", { name: "Voltar", exact: true }).click();
   await expect(page.getByRole("radio").first()).toBeChecked();
 });

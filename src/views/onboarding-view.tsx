@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { OnboardingPaperIcon, PaperArrow } from "../components/onboarding-paper-icon";
 import "./onboarding.css";
+import { GoogleLogin } from "./google-login";
 
 const questions = [
   {
@@ -64,8 +65,7 @@ const onboardingIconNames = [
 export default function OnboardingView({ onFinish }: { onFinish: () => void }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   const title = useRef<HTMLHeadingElement>(null);
   const question = questions[step];
   const poseIndex = question ? step : 3;
@@ -85,33 +85,6 @@ export default function OnboardingView({ onFinish }: { onFinish: () => void }) {
   useEffect(() => {
     title.current?.focus();
   }, [step]);
-
-  async function login() {
-    setBusy(true);
-    setError("");
-    try {
-      const apiKey = import.meta.env["VITE_FIREBASE_API_KEY"] as string | undefined;
-      const authDomain = import.meta.env["VITE_FIREBASE_AUTH_DOMAIN"] as string | undefined;
-      const projectId = import.meta.env["VITE_FIREBASE_PROJECT_ID"] as string | undefined;
-      if (!apiKey || !authDomain || !projectId) throw new Error("setup");
-      const [{ initializeApp, getApps }, { getAuth, GoogleAuthProvider, signInWithPopup }] =
-        await Promise.all([import("firebase/app"), import("firebase/auth")]);
-      const app =
-        getApps().find((item) => item.name === "helena-account") ??
-        initializeApp({ apiKey, authDomain, projectId }, "helena-account");
-      await signInWithPopup(getAuth(app), new GoogleAuthProvider());
-      localStorage.setItem("helena.onboarding.v1", JSON.stringify({ answers, completed: true }));
-      onFinish();
-    } catch (cause) {
-      setError(
-        cause instanceof Error && cause.message === "setup"
-          ? "O login Google ainda precisa ser configurado neste ambiente. Suas escolhas continuam aqui nesta tela."
-          : "Não foi possível concluir o login. Tente novamente quando estiver pronto.",
-      );
-    } finally {
-      setBusy(false);
-    }
-  }
 
   return (
     <main className="onboarding" id="main-content">
@@ -156,59 +129,64 @@ export default function OnboardingView({ onFinish }: { onFinish: () => void }) {
           />
         </div>
         <div className="onboarding__answers">
-          {question ? (
-            <fieldset className="onboarding__choices">
-              <legend className="sr-only">{question.title}</legend>
-              {question.options.map((option, index) => (
-                <label key={option} className={answers[step] === option ? "is-selected" : ""}>
-                  <input
-                    type="radio"
-                    name={`step-${step}`}
-                    checked={answers[step] === option}
-                    onChange={() =>
-                      setAnswers((previous) => {
-                        const next = [...previous];
-                        next[step] = option;
-                        return next;
-                      })
-                    }
-                  />
-                  <OnboardingPaperIcon name={onboardingIconNames[step]?.[index] ?? "compass"} />
-                  <span>{option}</span>
-                </label>
-              ))}
-            </fieldset>
+          {showLogin ? (
+            <GoogleLogin answers={answers} onFinish={onFinish} onBack={() => setShowLogin(false)} />
           ) : (
-            <ul className="onboarding__summary">
-              {answers.map((answer, index) => (
-                <li key={index}>{answer}</li>
-              ))}
-            </ul>
+            <>
+              {question ? (
+                <fieldset className="onboarding__choices">
+                  <legend className="sr-only">{question.title}</legend>
+                  {question.options.map((option, index) => (
+                    <label key={option} className={answers[step] === option ? "is-selected" : ""}>
+                      <input
+                        type="radio"
+                        name={`step-${step}`}
+                        checked={answers[step] === option}
+                        onChange={() =>
+                          setAnswers((previous) => {
+                            const next = [...previous];
+                            next[step] = option;
+                            return next;
+                          })
+                        }
+                      />
+                      <OnboardingPaperIcon name={onboardingIconNames[step]?.[index] ?? "compass"} />
+                      <span>{option}</span>
+                    </label>
+                  ))}
+                </fieldset>
+              ) : (
+                <ul className="onboarding__summary">
+                  {answers.map((answer, index) => (
+                    <li key={index}>{answer}</li>
+                  ))}
+                </ul>
+              )}
+              <div className="onboarding__actions">
+                <button
+                  type="button"
+                  disabled={step === 0}
+                  onClick={() => setStep((value) => value - 1)}
+                >
+                  <PaperArrow back /> Voltar
+                </button>
+                {question ? (
+                  <button
+                    type="button"
+                    disabled={!answers[step]}
+                    onClick={() => setStep((value) => value + 1)}
+                  >
+                    Continuar <PaperArrow />
+                  </button>
+                ) : (
+                  <button type="button" onClick={() => setShowLogin(true)}>
+                    Entrar com Google
+                    <PaperArrow />
+                  </button>
+                )}
+              </div>
+            </>
           )}
-          {error && <p role="alert">{error}</p>}
-          <div className="onboarding__actions">
-            <button
-              type="button"
-              disabled={step === 0 || busy}
-              onClick={() => setStep((value) => value - 1)}
-            >
-              <PaperArrow back /> Voltar
-            </button>
-            {question ? (
-              <button
-                type="button"
-                disabled={!answers[step]}
-                onClick={() => setStep((value) => value + 1)}
-              >
-                Continuar <PaperArrow />
-              </button>
-            ) : (
-              <button type="button" disabled={busy} onClick={() => void login()}>
-                {busy ? "Conectando…" : "Entrar com Google"}
-                <PaperArrow />
-              </button>
-            )}
-          </div>
           <p className="onboarding__privacy">Só o necessário para conhecer seu jeito de estudar.</p>
         </div>
       </section>
