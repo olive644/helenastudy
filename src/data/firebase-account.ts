@@ -7,18 +7,13 @@ export async function getFirebaseAccountServices() {
     (projectId ? `https://${projectId}-default-rtdb.firebaseio.com` : undefined);
   if (!apiKey || !authDomain || !projectId || !databaseURL) throw new Error("setup");
 
-  const [appApi, authApi, databaseApi] = await Promise.all([
-    import("firebase/app"),
-    import("firebase/auth"),
-    import("firebase/database"),
-  ]);
+  const [appApi, authApi] = await Promise.all([import("firebase/app"), import("firebase/auth")]);
   const app =
     appApi.getApps().find((item) => item.name === "helena-account") ??
     appApi.initializeApp({ apiKey, authDomain, projectId, databaseURL }, "helena-account");
   return {
     auth: authApi.getAuth(app),
     authApi,
-    database: databaseApi.getDatabase(app),
-    databaseApi,
+    databaseURL,
   };
 }

@@ -29,7 +29,7 @@ export function GoogleLogin({
 }: {
   answers: string[];
   onFinish: () => void;
-  onBack: () => void;
+  onBack?: () => void;
 }) {
   const [start, setStart] = useState<Awaited<ReturnType<typeof prepareGoogle>>>();
   const [error, setError] = useState("");
@@ -129,10 +129,12 @@ export function GoogleLogin({
           </div>
           <p className="login-page__local">Seus estudos ficam sincronizados na sua conta.</p>
           <div className="login-page__divider" />
-          <button className="login-page__back" type="button" disabled={busy} onClick={onBack}>
-            <PaperArrow back />
-            Voltar
-          </button>
+          {onBack && (
+            <button className="login-page__back" type="button" disabled={busy} onClick={onBack}>
+              <PaperArrow back />
+              Voltar
+            </button>
+          )}
         </section>
       </div>
       <footer className="login-page__footer">No seu tempo. Do seu jeito. Com a Helena.</footer>

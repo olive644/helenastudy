@@ -16,7 +16,15 @@ const LessonBuilderView = lazy(() => import("./views/lesson-builder-view"));
 const NotesView = lazy(() => import("./views/notes-view"));
 const ActivityBankView = lazy(() => import("./views/activity-bank-view"));
 
-function AppContent() {
+function hasCompletedOnboarding() {
+  try {
+    return JSON.parse(localStorage.getItem("helena.onboarding.v1") ?? "null")?.completed === true;
+  } catch {
+    return false;
+  }
+}
+
+function AppContent({ signedOut = false }: { signedOut?: boolean }) {
   const [projectorCode] = useState(() => readLocalRoomProjectorCodeFromUrl(window.location.href));
   const [joinCode] = useState(
     () => projectorCode ?? readLocalRoomCodeFromUrl(window.location.href),
@@ -25,9 +33,10 @@ function AppContent() {
   const { workspace, dispatch } = useWorkspace();
   const [onboarding, setOnboarding] = useState(() => {
     if (joinCode) return false;
+    if (signedOut) return true;
     if (new URLSearchParams(window.location.search).has("onboarding")) return true;
     try {
-      return JSON.parse(localStorage.getItem("helena.onboarding.v1") ?? "null")?.completed !== true;
+      return !hasCompletedOnboarding();
     } catch {
       return true;
     }
@@ -36,7 +45,10 @@ function AppContent() {
   if (onboarding)
     return (
       <Suspense fallback={<HelenaLoading label="Preparando sua jornada…" />}>
-        <OnboardingView onFinish={() => setOnboarding(false)} />
+        <OnboardingView
+          loginOnly={signedOut && hasCompletedOnboarding()}
+          onFinish={() => setOnboarding(false)}
+        />
       </Suspense>
     );
 
@@ -80,5 +92,7 @@ function AppContent() {
 export function App() {
   const cloud = useCloudSync();
   if (!cloud.ready) return <HelenaLoading label="Sincronizando sua conta…" />;
-  return <AppContent key={cloud.revision} />;
+  return (
+    <AppContent key={cloud.revision} signedOut={cloud.enabled && cloud.authenticated === false} />
+  );
 }

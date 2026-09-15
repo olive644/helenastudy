@@ -16,3 +16,10 @@ it("does not complete login when Firebase configuration is unavailable", async (
   expect(back).toHaveBeenCalledOnce();
   vi.unstubAllEnvs();
 });
+
+it("não oferece voltar ao onboarding para uma conta desconectada", () => {
+  vi.stubEnv("VITE_FIREBASE_API_KEY", "");
+  render(<GoogleLogin answers={[]} onFinish={vi.fn()} />);
+  expect(screen.queryByRole("button", { name: "Voltar" })).toBeNull();
+  vi.unstubAllEnvs();
+});
