@@ -548,6 +548,13 @@
   display: none;
 }
 
+.app-shell .more-item .navigation-icon__variant {
+  position: static;
+  inset: auto;
+  margin: auto;
+  transform: none;
+}
+
 @media (max-width: 899px) {
   .app-shell .page-header {
     position: sticky;
@@ -566,7 +573,9 @@
     background-image:
       linear-gradient(135deg, #292432 0 10%, transparent 10%),
       linear-gradient(315deg, #0f0f14 0 12%, transparent 12%);
-    box-shadow: 0 6px 0 #0b0a0d, 0 14px 28px rgb(23 21 28 / 18%);
+    box-shadow:
+      0 6px 0 #0b0a0d,
+      0 14px 28px rgb(23 21 28 / 18%);
     backdrop-filter: none;
   }
 
@@ -626,7 +635,9 @@
     background-image:
       linear-gradient(135deg, #eee5d5 0 7%, transparent 7%),
       linear-gradient(315deg, #e9ddc6 0 8%, transparent 8%);
-    box-shadow: 0 7px 0 #c8baa4, 0 18px 34px rgb(23 21 28 / 20%);
+    box-shadow:
+      0 7px 0 #c8baa4,
+      0 18px 34px rgb(23 21 28 / 20%);
     backdrop-filter: none;
   }
 
@@ -646,6 +657,8 @@
     background-image:
       linear-gradient(135deg, #f1e9dc 0 7%, transparent 7%),
       linear-gradient(315deg, #e9ddc6 0 8%, transparent 8%);
-    box-shadow: 0 7px 0 #c8baa4, 0 18px 34px rgb(0 0 0 / 30%);
+    box-shadow:
+      0 7px 0 #c8baa4,
+      0 18px 34px rgb(0 0 0 / 30%);
   }
 }
