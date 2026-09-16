@@ -106,6 +106,10 @@ export default function OnboardingView({
 
   return (
     <main className="onboarding" id="main-content">
+      <h1 className="sr-only">
+        HelenaStudy: agenda de estudos, pomodoro, flashcards e quizzes para ENEM, vestibular e
+        concursos
+      </h1>
       <header className="onboarding__header">
         <span className="onboarding__brand">
           Helena<span>Study</span>
@@ -125,9 +129,9 @@ export default function OnboardingView({
         </div>
         <div className="onboarding__conversation">
           <div className="onboarding__bubble">
-            <h1 ref={title} tabIndex={-1}>
+            <h2 ref={title} tabIndex={-1}>
               {question?.title ?? "Sua jornada tem a sua cara."}
-            </h1>
+            </h2>
             <p>
               {question?.hint ??
                 "Entre com Google para continuar. Suas preferências ficam neste dispositivo; seus estudos ainda não são sincronizados na nuvem."}
