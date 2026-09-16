@@ -852,6 +852,71 @@
   height: 30px;
 }
 
+/* Contrato compartilhado: ícone e texto permanecem dentro do papel. */
+.app-shell :is(.primary-button, .secondary-button, .link-button, .empty-state button) {
+  max-width: 100%;
+  min-width: 0;
+  padding-inline: 0.85rem;
+  overflow: hidden;
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
+}
+
+.app-shell :is(.primary-button, .secondary-button, .link-button) > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.app-shell :is(.primary-button, .secondary-button, .icon-button) .onboarding-paper-icon,
+.subject-list .onboarding-paper-icon {
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+}
+
+.app-shell .icon-button .onboarding-paper-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.subject-list .onboarding-paper-icon {
+  margin-right: 0.35rem;
+}
+
+.note-capture-actions .onboarding-paper-icon {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+}
+
+/* O rail desktop recebe as mesmas dobras de papel das barras móveis. */
+@media (min-width: 900px) {
+  .app-shell > .sidebar,
+  :root[data-theme="dark"] .app-shell > .sidebar {
+    border-right-color: #d7cbb7;
+    background-color: #fff9ef;
+    background-image:
+      linear-gradient(135deg, #eee5d5 0 5%, transparent 5%),
+      linear-gradient(315deg, #e9ddc6 0 6%, transparent 6%);
+    box-shadow:
+      7px 0 0 #c8baa4,
+      18px 0 34px rgb(23 21 28 / 14%);
+  }
+
+  :root:not([data-theme="dark"]) .app-shell > .sidebar {
+    border-right-color: #302b38;
+    color: #fff9ef;
+    background-color: #17151c;
+    background-image:
+      linear-gradient(135deg, #292432 0 5%, transparent 5%),
+      linear-gradient(315deg, #0f0f14 0 6%, transparent 6%);
+    box-shadow:
+      7px 0 0 #0b0a0d,
+      18px 0 34px rgb(23 21 28 / 22%);
+  }
+}
+
 @media (max-width: 899px) {
   .app-shell .main-content {
     padding-top: 0;

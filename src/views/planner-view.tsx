@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState, type Dispatch, type FormEvent } from "react";
 import { HelenaLoading } from "../components/helena-loading";
 import { PageHeader } from "../components/app-navigation";
+import { OnboardingPaperIcon } from "../components/onboarding-paper-icon";
 import { toDateKey, type WorkspaceAction, type WorkspaceState } from "../domain/workspace";
 
 const HomeworkSection = lazy(() =>
@@ -14,6 +15,17 @@ type PlannerViewProps = {
   workspace: WorkspaceState;
   dispatch: Dispatch<WorkspaceAction>;
 };
+
+function subjectIcon(name: string) {
+  const normalized = name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  if (normalized.includes("ingles")) return "flag-us";
+  if (normalized.includes("portugues")) return "flag-br";
+  if (normalized.includes("espanhol")) return "flag-es";
+  return "book";
+}
 
 export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
   const today = toDateKey(new Date());
@@ -84,7 +96,7 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
           <ul className="subject-list">
             {workspace.subjects.map((item) => (
               <li key={item.id}>
-                <span style={{ backgroundColor: item.color }} />
+                <OnboardingPaperIcon name={subjectIcon(item.name)} />
                 {item.name}
               </li>
             ))}
@@ -100,7 +112,7 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
               />
             </label>
             <button className="icon-button" type="submit" aria-label="Adicionar matéria">
-              <span aria-hidden="true">+</span>
+              <OnboardingPaperIcon name="plus" />
             </button>
           </form>
         </section>
@@ -142,7 +154,7 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
               </select>
             </label>
             <button className="primary-button" type="submit">
-              <span aria-hidden="true">+</span> Adicionar tarefa
+              <OnboardingPaperIcon name="plus" /> <span>Adicionar tarefa</span>
             </button>
           </form>
         </section>
@@ -195,7 +207,7 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
               </select>
             </label>
             <button className="secondary-button" type="submit">
-              Adicionar compromisso
+              <OnboardingPaperIcon name="plus" /> <span>Adicionar compromisso</span>
             </button>
           </form>
         </section>

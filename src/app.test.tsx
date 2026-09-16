@@ -169,6 +169,12 @@ describe("App", () => {
   it("cria uma tarefa, mostra no Espaço do aluno e permite concluí-la", () => {
     render(<App />);
     navigate("Agenda");
+    expect(document.querySelector('.subject-list [data-paper-icon="flag-us"]')).toBeTruthy();
+    expect(
+      screen
+        .getByRole("button", { name: /adicionar matéria/i })
+        .querySelector('[data-paper-icon="plus"]'),
+    ).toBeTruthy();
     fireEvent.change(screen.getByLabelText(/o que precisa ser feito/i), {
       target: { value: "Revisar phrasal verbs" },
     });

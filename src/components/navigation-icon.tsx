@@ -16,9 +16,7 @@ export type NavigationIconName =
   | "xp"
   | "medal-first"
   | "medal-second"
-  | "medal-third"
-  | "scan"
-  | "handwriting";
+  | "medal-third";
 
 type NavigationIconProps = {
   name: NavigationIconName;
@@ -37,8 +35,6 @@ const BRAND_ICON_NAMES = new Set<NavigationIconName>([
   "activity-bank",
   "theme-light",
   "theme-dark",
-  "scan",
-  "handwriting",
 ]);
 
 export function NavigationIcon({ name }: NavigationIconProps) {

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState, type Dispatch } from "react";
 import { PageHeader } from "../components/app-navigation";
 import { HelenaLoading } from "../components/helena-loading";
+import { OnboardingPaperIcon } from "../components/onboarding-paper-icon";
 import type { WorkspaceAction, WorkspaceState } from "../domain/workspace";
 
 const NoteCaptureTools = lazy(() => import("../components/note-capture-tools"));
@@ -78,7 +79,7 @@ export function NotesView({ workspace, dispatch }: NotesViewProps) {
             </select>
           </label>
           <button className="primary-button" type="button" onClick={createNote}>
-            <span aria-hidden="true">+</span> Nova anotação
+            <OnboardingPaperIcon name="plus" /> <span>Nova anotação</span>
           </button>
         </div>
       </header>
