@@ -2,7 +2,7 @@ import { Camera, RotateCw, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { MAX_NOTE_ASSET_DATA_URL_LENGTH } from "../data/local-workspace";
 import type { NoteAsset } from "../domain/workspace";
-import { NavigationIcon } from "./navigation-icon";
+import { PaperActionIcon } from "./paper-action-icon";
 
 type NoteCaptureToolsProps = {
   onSave: (kind: NoteAsset["kind"], name: string, dataUrl: string) => void;
@@ -314,10 +314,10 @@ export function NoteCaptureTools({ onSave }: NoteCaptureToolsProps) {
     <>
       <div className="note-capture-actions" aria-label="Ferramentas da anotação">
         <button className="secondary-button" type="button" onClick={() => setMode("scan")}>
-          <NavigationIcon name="scan" /> Digitalizar
+          <PaperActionIcon name="scan" /> <span>Digitalizar</span>
         </button>
         <button className="secondary-button" type="button" onClick={() => setMode("drawing")}>
-          <NavigationIcon name="handwriting" /> Escrever à mão
+          <PaperActionIcon name="handwriting" /> <span>Escrever à mão</span>
         </button>
       </div>
 

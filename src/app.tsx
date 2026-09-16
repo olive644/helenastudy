@@ -6,7 +6,6 @@ import { useWorkspace } from "./hooks/use-workspace";
 import { useCloudSync } from "./hooks/use-cloud-sync";
 import { FocusView } from "./views/focus-view";
 import { HabitsView } from "./views/habits-view";
-import { PlannerView } from "./views/planner-view";
 import { TodayView } from "./views/today-view";
 
 const LearnView = lazy(() => import("./views/learn-view"));
@@ -15,6 +14,9 @@ const LibraryView = lazy(() => import("./views/library-view"));
 const LessonBuilderView = lazy(() => import("./views/lesson-builder-view"));
 const NotesView = lazy(() => import("./views/notes-view"));
 const ActivityBankView = lazy(() => import("./views/activity-bank-view"));
+const PlannerView = lazy(() =>
+  import("./views/planner-view").then((module) => ({ default: module.PlannerView })),
+);
 
 function hasCompletedOnboarding() {
   try {
@@ -60,9 +62,9 @@ function AppContent({ signedOut = false }: { signedOut?: boolean }) {
       <Sidebar view={view} onNavigate={setView} />
       <Suspense
         fallback={
-          <main className="main-content loading-view" id="main-content">
+          <div className="main-content loading-view">
             <HelenaLoading label="Abrindo módulo…" />
-          </main>
+          </div>
         }
       >
         {view === "today" && (
