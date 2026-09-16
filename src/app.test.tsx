@@ -106,6 +106,15 @@ describe("App", () => {
     expect(screen.queryByRole("dialog", { name: "Mais ferramentas" })).toBeNull();
   });
 
+  it("abre as ferramentas ao arrastar da borda esquerda", () => {
+    render(<App />);
+    const edge = screen.getByRole("button", { name: "Arraste para abrir as ferramentas" });
+    fireEvent.pointerDown(edge, { clientX: 0, pointerId: 1 });
+    fireEvent.pointerMove(edge, { clientX: 64, pointerId: 1 });
+
+    expect(screen.getByRole("dialog", { name: "Mais ferramentas" })).toBeTruthy();
+  });
+
   it("usa a iconografia própria da Helena em todas as abas", () => {
     render(<App />);
     const navigation = screen.getByRole("navigation", { name: "Navegação principal" });

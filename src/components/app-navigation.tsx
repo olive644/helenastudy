@@ -180,6 +180,7 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
   const [dragX, setDragX] = useState(0);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dragStartX = useRef<number | null>(null);
+  const openDragStartX = useRef<number | null>(null);
   const moreActive = MORE_ITEMS.some((item) => item.view === view);
 
   useEffect(() => {
@@ -210,7 +211,7 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
   function startDrag(event: ReactPointerEvent<HTMLElement>) {
     if ((event.target as HTMLElement).closest("button, summary")) return;
     dragStartX.current = event.clientX;
-    event.currentTarget.setPointerCapture(event.pointerId);
+    event.currentTarget.setPointerCapture?.(event.pointerId);
   }
 
   function drag(event: ReactPointerEvent<HTMLElement>) {
@@ -222,6 +223,23 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
     dragStartX.current = null;
     if (dragX < -80) setMoreOpen(false);
     setDragX(0);
+  }
+
+  function startOpenDrag(event: ReactPointerEvent<HTMLButtonElement>) {
+    openDragStartX.current = event.clientX;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  }
+
+  function openDrag(event: ReactPointerEvent<HTMLButtonElement>) {
+    if (openDragStartX.current === null) return;
+    if (event.clientX - openDragStartX.current > 48) {
+      openDragStartX.current = null;
+      setMoreOpen(true);
+    }
+  }
+
+  function finishOpenDrag() {
+    openDragStartX.current = null;
   }
 
   return (
@@ -303,7 +321,7 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
               aria-label="Fechar menu"
               onClick={() => setMoreOpen(false)}
             >
-              <span aria-hidden="true">›</span>
+              <span aria-hidden="true">‹</span>
             </button>
           </section>
         </div>
@@ -335,6 +353,7 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
             : "mobile-nav__item mobile-more-trigger"
         }
         type="button"
+        aria-label="Mais"
         aria-expanded={moreOpen}
         aria-controls="mobile-more-panel"
         onClick={() => setMoreOpen((open) => !open)}
@@ -346,8 +365,19 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
           width="48"
           height="48"
         />
-        <span className="sr-only">Mais</span>
       </button>
+      {!moreOpen && (
+        <button
+          className="mobile-more-edge-open"
+          type="button"
+          aria-label="Arraste para abrir as ferramentas"
+          onClick={() => setMoreOpen(true)}
+          onPointerDown={startOpenDrag}
+          onPointerMove={openDrag}
+          onPointerUp={finishOpenDrag}
+          onPointerCancel={finishOpenDrag}
+        ></button>
+      )}
     </>
   );
 }
