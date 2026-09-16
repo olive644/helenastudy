@@ -63,11 +63,17 @@ const onboardingIconNames = [
   ["clock-5", "clock-15", "clock-30", "calendar"],
 ] as const;
 
-export default function OnboardingView({ onFinish }: { onFinish: () => void }) {
+export default function OnboardingView({
+  onFinish,
+  loginOnly = false,
+}: {
+  onFinish: () => void;
+  loginOnly?: boolean;
+}) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
-  const [showLogin, setShowLogin] = useState(() =>
-    new URLSearchParams(window.location.search).has("login"),
+  const [showLogin, setShowLogin] = useState(
+    () => loginOnly || new URLSearchParams(window.location.search).has("login"),
   );
   const title = useRef<HTMLHeadingElement>(null);
   const question = questions[step];
@@ -90,7 +96,13 @@ export default function OnboardingView({ onFinish }: { onFinish: () => void }) {
   }, [step]);
 
   if (showLogin)
-    return <GoogleLogin answers={answers} onFinish={onFinish} onBack={() => setShowLogin(false)} />;
+    return (
+      <GoogleLogin
+        answers={answers}
+        onFinish={onFinish}
+        {...(!loginOnly && { onBack: () => setShowLogin(false) })}
+      />
+    );
 
   return (
     <main className="onboarding" id="main-content">

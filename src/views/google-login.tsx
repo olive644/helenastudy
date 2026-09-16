@@ -1,23 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { HelenaLoading } from "../components/helena-loading";
 import { PaperArrow } from "../components/paper-arrow";
+import { getFirebaseAccountServices } from "../data/firebase-account";
+import { writeSyncedStorage } from "../data/synced-storage";
 import "./google-login.css";
 
 async function prepareGoogle() {
-  const apiKey = import.meta.env["VITE_FIREBASE_API_KEY"];
-  const authDomain = import.meta.env["VITE_FIREBASE_AUTH_DOMAIN"];
-  const projectId = import.meta.env["VITE_FIREBASE_PROJECT_ID"];
-  if (!apiKey || !authDomain || !projectId) throw new Error("setup");
-  const [{ initializeApp, getApps }, auth] = await Promise.all([
-    import("firebase/app"),
-    import("firebase/auth"),
-  ]);
-  const app =
-    getApps().find((item) => item.name === "helena-account") ??
-    initializeApp({ apiKey, authDomain, projectId }, "helena-account");
-  const provider = new auth.GoogleAuthProvider();
+  const { auth, authApi } = await getFirebaseAccountServices();
+  const provider = new authApi.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
-  return () => auth.signInWithPopup(auth.getAuth(app), provider);
+  return () => authApi.signInWithPopup(auth, provider);
 }
 
 function googleLoginError(cause: unknown): string {
@@ -37,7 +29,7 @@ export function GoogleLogin({
 }: {
   answers: string[];
   onFinish: () => void;
-  onBack: () => void;
+  onBack?: () => void;
 }) {
   const [start, setStart] = useState<Awaited<ReturnType<typeof prepareGoogle>>>();
   const [error, setError] = useState("");
@@ -64,12 +56,12 @@ export function GoogleLogin({
     try {
       const credential = await start();
       try {
-        localStorage.setItem("helena.onboarding.v1", JSON.stringify({ answers, completed: true }));
-        localStorage.setItem(
+        writeSyncedStorage("helena.onboarding.v1", JSON.stringify({ answers, completed: true }));
+        writeSyncedStorage(
           "helena.profile.v1",
           JSON.stringify({
             name: credential.user.displayName ?? undefined,
-            photoUrl: credential.user.photoURL ?? undefined,
+            photoUrl: "/profile-avatars/helena.webp",
           }),
         );
       } catch {
@@ -135,12 +127,14 @@ export function GoogleLogin({
               <PaperArrow />
             </button>
           </div>
-          <p className="login-page__local">Seus estudos ficam salvos neste dispositivo.</p>
+          <p className="login-page__local">Seus estudos ficam sincronizados na sua conta.</p>
           <div className="login-page__divider" />
-          <button className="login-page__back" type="button" disabled={busy} onClick={onBack}>
-            <PaperArrow back />
-            Voltar
-          </button>
+          {onBack && (
+            <button className="login-page__back" type="button" disabled={busy} onClick={onBack}>
+              <PaperArrow back />
+              Voltar
+            </button>
+          )}
         </section>
       </div>
       <footer className="login-page__footer">No seu tempo. Do seu jeito. Com a Helena.</footer>
