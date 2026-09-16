@@ -12,6 +12,12 @@ A fronteira segura da futura Helena inteligente já possui contrato e testes, ma
 provedor conectado. Consulte [`docs/AI_BACKEND.md`](docs/AI_BACKEND.md) para o fluxo de dados, o
 modelo de ameaça e as decisões necessárias antes da ativação.
 
+## Licença
+
+Software proprietário. Todos os direitos reservados — veja [`LICENSE`](LICENSE). O código está
+visível neste repositório para fins de desenvolvimento e revisão, mas nenhuma cópia, modificação,
+distribuição ou uso comercial é permitido sem autorização prévia e por escrito do titular.
+
 ## Desenvolvimento
 
 Requer Node.js 24 ou superior.
