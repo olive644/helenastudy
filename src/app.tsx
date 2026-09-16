@@ -90,8 +90,12 @@ function AppContent({ signedOut = false }: { signedOut?: boolean }) {
 }
 
 export function App() {
+  // Nunca bloqueia a primeira renderizacao esperando a sincronizacao com a
+  // nuvem: isso fazia todo mundo (logado ou nao) esperar o SDK de auth do
+  // Firebase baixar e responder antes de ver qualquer coisa. A tela renderiza
+  // com os dados locais na hora; quando a sincronizacao resolve, a troca de
+  // `key` remonta com os dados corretos (sincronizados ou anonimos).
   const cloud = useCloudSync();
-  if (!cloud.ready) return <HelenaLoading label="Sincronizando sua conta…" />;
   return (
     <AppContent key={cloud.revision} signedOut={cloud.enabled && cloud.authenticated === false} />
   );
