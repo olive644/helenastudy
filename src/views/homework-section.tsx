@@ -1,6 +1,6 @@
 import { useState, type Dispatch, type FormEvent } from "react";
 import type { HomeworkList, WorkspaceAction, WorkspaceState } from "../domain/workspace";
-import { OnboardingPaperIcon } from "../components/onboarding-paper-icon";
+import { PaperActionIcon } from "../components/paper-action-icon";
 
 type HomeworkSectionProps = {
   workspace: WorkspaceState;
@@ -122,7 +122,7 @@ export function HomeworkSection({ workspace, dispatch }: HomeworkSectionProps) {
           />
         </label>
         <button className="primary-button" type="submit">
-          <OnboardingPaperIcon name="plus" /> <span>Adicionar lista</span>
+          <PaperActionIcon name="plus" /> <span>Adicionar lista</span>
         </button>
       </form>
 

@@ -120,35 +120,6 @@ const art: Record<string, ReactNode> = {
       <path fill={gold} d="M9 31h8v4H9Zm22 0h7v4h-7Z" />
     </>
   ),
-  plus: (
-    <>
-      <path fill={ink} d="M8 10 14 5h24l5 6-2 27-6 5H11l-6-6Z" />
-      <path fill={facet} d="m8 10 6-5 4 7-5 24-8 1Z" />
-      <path fill={cream} d="M21 14h7v8h8v7h-8v8h-7v-8h-8v-7h8Z" />
-      <path fill={gold} d="m28 14 4 4-4 4Z" />
-    </>
-  ),
-  scan: (
-    <>
-      <path fill={ink} d="M7 11 13 5h22l6 6v26l-6 6H13l-6-6Z" />
-      <path fill={facet} d="m7 11 6-6 4 7-3 25H7Z" />
-      <path fill={cream} d="M14 15h20v22H14Z" />
-      <path
-        fill={gold}
-        d="M11 12h8v3h-5v5h-3Zm18 0h8v8h-3v-5h-5ZM11 29h3v5h5v3h-8Zm23 0h3v8h-8v-3h5Z"
-      />
-      <path fill={ink} d="M18 22h12v3H18Zm0 6h9v3h-9Z" />
-    </>
-  ),
-  handwriting: (
-    <>
-      <path fill={cream} d="M6 8 11 4h28l4 6-2 29-5 5H10l-5-6Z" />
-      <path fill={facet} d="m36 44 5-5 2-29-6 7Z" />
-      <path fill={ink} d="m11 35 4-11L33 6l8 8-18 18Z" />
-      <path fill="#7C3AED" d="m15 24 8 8-12 3Z" />
-      <path fill={gold} d="m33 6 8 8 3-6-5-5Z" />
-    </>
-  ),
 };
 
 export function OnboardingPaperIcon({ name }: { name: string }) {

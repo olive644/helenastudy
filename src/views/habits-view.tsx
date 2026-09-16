@@ -1,6 +1,6 @@
 import { useState, type Dispatch, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
-import { OnboardingPaperIcon } from "../components/onboarding-paper-icon";
+import { PaperActionIcon } from "../components/paper-action-icon";
 import { toDateKey, type WorkspaceAction, type WorkspaceState } from "../domain/workspace";
 
 type HabitsViewProps = {
@@ -45,7 +45,7 @@ export function HabitsView({ workspace, dispatch }: HabitsViewProps) {
               />
             </label>
             <button className="primary-button" type="submit">
-              <OnboardingPaperIcon name="plus" /> <span>Adicionar hábito</span>
+              <PaperActionIcon name="plus" /> <span>Adicionar hábito</span>
             </button>
           </form>
         </section>
