@@ -15,9 +15,13 @@ import {
   readCookie,
   setCookieHeader,
 } from "./google-session-cookie.js";
+import { checkRateLimit } from "./rate-limit.js";
+import type { KvStore } from "./kv-store.js";
 
 const EVENTS_WINDOW_DAYS = 14;
 const STATE_MAX_AGE_SECONDS = 600;
+const LOGIN_ATTEMPT_LIMIT = 10;
+const LOGIN_ATTEMPT_WINDOW_SECONDS = 60;
 
 export type GoogleCalendarHandlerDependencies = {
   config: GoogleOAuthConfig;
@@ -26,6 +30,8 @@ export type GoogleCalendarHandlerDependencies = {
   now?(): number;
   randomState?(): string;
   appUrl(request: Request): string;
+  rateLimitStore?: KvStore;
+  clientId?(request: Request): string;
 };
 
 function jsonResponse(status: number, body: unknown, extraHeaders: HeadersInit = {}): Response {
@@ -62,6 +68,23 @@ export function createGoogleCalendarHandler(dependencies: GoogleCalendarHandlerD
     const action = url.searchParams.get("action");
     const fetchImpl = dependencies.fetchImpl ?? fetch;
     const now = dependencies.now?.() ?? Date.now();
+
+    if ((action === "connect" || action === "callback") && dependencies.rateLimitStore) {
+      const clientId =
+        dependencies.clientId?.(request) ??
+        request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ??
+        "unknown";
+      const allowed = await checkRateLimit(
+        dependencies.rateLimitStore,
+        "google-login-attempts",
+        clientId,
+        LOGIN_ATTEMPT_LIMIT,
+        LOGIN_ATTEMPT_WINDOW_SECONDS,
+      );
+      if (!allowed) {
+        return jsonResponse(429, { error: "Muitas tentativas de login. Aguarde um minuto." });
+      }
+    }
 
     if (action === "connect" && request.method === "GET") {
       const state = dependencies.randomState?.() ?? crypto.randomUUID();
