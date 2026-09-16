@@ -69,14 +69,14 @@ describe("App", () => {
     });
   });
 
-  it("mantém as metas em Foco e deixa Praticar dedicado às atividades", () => {
+  it("mantém as metas em Foco e deixa Praticar dedicado às atividades", async () => {
     render(<App />);
 
     navigate("Praticar");
     expect(screen.queryByRole("heading", { name: /metas de estudo/i })).toBeNull();
 
     navigate("Foco");
-    expect(screen.getByRole("heading", { name: "Nova meta de foco" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Nova meta de foco" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Metas de foco" })).toBeTruthy();
   });
 
@@ -216,6 +216,15 @@ describe("App", () => {
 
     expect(await screen.findByRole("button", { name: "Digitalizar" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Escrever à mão" })).toBeTruthy();
+  });
+
+  it("mostra a rosa que cresce com o cronômetro de foco", async () => {
+    render(<App />);
+    navigate("Foco");
+
+    expect(await screen.findByRole("img", { name: /rosa de foco crescendo/i })).toBeTruthy();
+    expect(screen.getByText(/comece uma sessão hoje para manter a rosa viva/i)).toBeTruthy();
+    expect(screen.getByText(/0\/60 min até florescer por completo/i)).toBeTruthy();
   });
 
   it("cria e completa uma linha no bingo de estudos", async () => {
