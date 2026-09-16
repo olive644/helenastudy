@@ -77,6 +77,10 @@ export function GoogleLogin({
   }
   return (
     <main className="onboarding login-page" id="main-content" aria-label="Entrar na HelenaStudy">
+      <h1 className="sr-only">
+        HelenaStudy: agenda de estudos, pomodoro, flashcards e quizzes para ENEM, vestibular e
+        concursos
+      </h1>
       <header className="onboarding__header">
         <span className="onboarding__brand">
           Helena<span>Study</span>
@@ -108,7 +112,7 @@ export function GoogleLogin({
             fetchPriority="high"
           />
           <span className="login-page__eyebrow">BEM-VINDO AO SEU ESPAÇO</span>
-          <h1>Vamos começar?</h1>
+          <h2>Vamos começar?</h2>
           <p className="login-page__intro">
             A Helena já está por aqui.
             <br />
