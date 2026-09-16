@@ -62,9 +62,9 @@ function AppContent({ signedOut = false }: { signedOut?: boolean }) {
       <Sidebar view={view} onNavigate={setView} />
       <Suspense
         fallback={
-          <main className="main-content loading-view" id="main-content">
+          <div className="main-content loading-view">
             <HelenaLoading label="Abrindo módulo…" />
-          </main>
+          </div>
         }
       >
         {view === "today" && (
