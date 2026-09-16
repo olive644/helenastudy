@@ -28,13 +28,13 @@
   ) {
   min-height: 44px;
   min-width: 44px;
-  border: 1px solid #d7cbb7;
-  background-color: #fff9ef;
+  border: 1px solid #7433e0;
+  background-color: #7433e0;
   background-image:
-    linear-gradient(135deg, #e9ddc6 0 9%, transparent 9%),
-    linear-gradient(315deg, #eee5d5 0 12%, transparent 12%);
-  color: #292432;
-  box-shadow: 0 4px 0 #c8baa4;
+    linear-gradient(135deg, #8a4ce5 0 9%, transparent 9%),
+    linear-gradient(315deg, #5924b4 0 12%, transparent 12%);
+  color: #fff9ef;
+  box-shadow: 0 4px 0 #4b209b;
   font-weight: 800;
 }
 
@@ -188,13 +188,13 @@
 .app-shell .today-hero-actions .today-hero-primary,
 .app-shell .today-hero-actions button:hover,
 .app-shell .today-hero-actions .today-hero-primary:hover {
-  border-color: #d7cbb7;
-  color: #292432;
-  background-color: #fff;
+  border-color: #7433e0;
+  color: #fff9ef;
+  background-color: #7433e0;
   background-image:
-    linear-gradient(135deg, #eee5d5 0 10%, transparent 10%),
-    linear-gradient(315deg, #e9ddc6 0 13%, transparent 13%);
-  box-shadow: 0 4px 0 #c8baa4;
+    linear-gradient(135deg, #8a4ce5 0 10%, transparent 10%),
+    linear-gradient(315deg, #5924b4 0 13%, transparent 13%);
+  box-shadow: 0 4px 0 #4b209b;
 }
 
 .app-shell .today-hero-actions .navigation-icon__variant {
@@ -202,6 +202,10 @@
 }
 
 .app-shell .today-hero-actions .navigation-icon__variant--claro {
+  display: none;
+}
+
+.app-shell .today-hero-actions .navigation-icon__variant--escuro {
   display: block;
 }
 
@@ -664,6 +668,10 @@
 }
 
 /* Cabeçalho e gaveta móvel seguem a mesma peça de papel aprovada da barra inferior. */
+.mobile-more-edge-open {
+  display: none;
+}
+
 @media (max-width: 899px) {
   .app-shell .page-header,
   :root[data-theme="dark"] .app-shell .page-header {
@@ -779,6 +787,11 @@
     background: #fff9ef;
   }
 
+  :root[data-theme="dark"] .app-shell .mobile-more-sheet .more-item .navigation-icon {
+    border-color: #51465d;
+    background: #17151c;
+  }
+
   .mobile-more-edge-close {
     position: fixed;
     z-index: 32;
@@ -798,6 +811,45 @@
     place-items: center;
     transform: translateY(-50%);
   }
+
+  .mobile-more-edge-open {
+    position: fixed;
+    z-index: 44;
+    top: 50%;
+    left: 0;
+    display: block;
+    width: 18px;
+    height: min(52vh, 420px);
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    touch-action: none;
+    transform: translateY(-50%);
+  }
+}
+
+/* Cartões de notas seguem o mesmo papel roxo e não estouram no tema escuro. */
+.app-shell .note-list__item,
+.app-shell .note-list__item.is-active {
+  border-color: #7433e0;
+  color: #fff9ef;
+  background-color: #7433e0;
+  background-image:
+    linear-gradient(135deg, #8a4ce5 0 9%, transparent 9%),
+    linear-gradient(315deg, #5924b4 0 12%, transparent 12%);
+  box-shadow: 0 4px 0 #4b209b;
+}
+
+.app-shell .note-list__item span,
+.app-shell .note-list__item.is-active span {
+  color: #e8dcff;
+}
+
+.note-capture-actions .navigation-icon {
+  width: 30px;
+  height: 30px;
 }
 
 @media (max-width: 899px) {
