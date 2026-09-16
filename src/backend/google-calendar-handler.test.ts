@@ -6,6 +6,7 @@ import {
   GOOGLE_SESSION_COOKIE,
   GOOGLE_STATE_COOKIE,
 } from "./google-session-cookie";
+import { createMemoryRoomStore } from "./room-transaction";
 
 const origin = "https://helena.example";
 const sessionSecret = randomBytes(32).toString("base64");
@@ -109,5 +110,37 @@ describe("handler do Google Agenda", () => {
     const response = await handler(vi.fn())(post("?action=disconnect"));
     expect(response.status).toBe(200);
     expect(response.headers.get("Set-Cookie")).toContain("Max-Age=0");
+  });
+
+  it("limita tentativas de login por endereço quando um store e configurado", async () => {
+    const rateLimitStore = createMemoryRoomStore();
+    const login = createGoogleCalendarHandler({
+      config,
+      sessionSecret,
+      fetchImpl: vi.fn(),
+      now: () => Date.parse("2026-09-10T00:00:00Z"),
+      randomState: () => "fixed-state",
+      appUrl: () => origin,
+      rateLimitStore,
+      clientId: () => "1.2.3.4",
+    });
+    for (let i = 0; i < 10; i++) {
+      const response = await login(get("?action=connect"));
+      expect(response.status).toBe(302);
+    }
+    const blocked = await login(get("?action=connect"));
+    expect(blocked.status).toBe(429);
+
+    const otherAddress = await createGoogleCalendarHandler({
+      config,
+      sessionSecret,
+      fetchImpl: vi.fn(),
+      now: () => Date.parse("2026-09-10T00:00:00Z"),
+      randomState: () => "fixed-state",
+      appUrl: () => origin,
+      rateLimitStore,
+      clientId: () => "5.6.7.8",
+    })(get("?action=connect"));
+    expect(otherAddress.status).toBe(302);
   });
 });

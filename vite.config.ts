@@ -4,5 +4,7 @@ import { defineConfig } from "vite";
 export default defineConfig({
   plugins: [react()],
   resolve: { tsconfigPaths: true, dedupe: ["react", "react-dom"] },
-  build: { target: "es2022", sourcemap: true, manifest: true },
+  // sourcemap fica desligado no build de produção: um .map publicado exporia o
+  // código-fonte original (não só o bundle minificado) a qualquer visitante.
+  build: { target: "es2022", sourcemap: false, manifest: true },
 });

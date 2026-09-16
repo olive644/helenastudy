@@ -45,13 +45,10 @@
          atrase a primeira renderização da página. O <noscript> garante a
          fonte mesmo sem JavaScript. -->
     <link
+      id="google-fonts-preload"
       rel="preload"
       as="style"
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap"
-      onload="
-        this.onload = null;
-        this.rel = 'stylesheet';
-      "
     />
     <noscript>
       <link
@@ -76,18 +73,7 @@
         }
       }
     </script>
-    <script>
-      (function () {
-        try {
-          var stored = window.localStorage.getItem("helenastudy.theme");
-          if (stored === "light" || stored === "dark") {
-            document.documentElement.setAttribute("data-theme", stored);
-          }
-        } catch (error) {
-          // Sem localStorage disponível: a página segue o tema do sistema.
-        }
-      })();
-    </script>
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>
