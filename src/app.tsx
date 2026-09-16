@@ -4,7 +4,6 @@ import { HelenaLoading } from "./components/helena-loading";
 import { readLocalRoomCodeFromUrl, readLocalRoomProjectorCodeFromUrl } from "./domain/room-code";
 import { useWorkspace } from "./hooks/use-workspace";
 import { useCloudSync } from "./hooks/use-cloud-sync";
-import { FocusView } from "./views/focus-view";
 import { HabitsView } from "./views/habits-view";
 import { TodayView } from "./views/today-view";
 
@@ -16,6 +15,9 @@ const NotesView = lazy(() => import("./views/notes-view"));
 const ActivityBankView = lazy(() => import("./views/activity-bank-view"));
 const PlannerView = lazy(() =>
   import("./views/planner-view").then((module) => ({ default: module.PlannerView })),
+);
+const FocusView = lazy(() =>
+  import("./views/focus-view").then((module) => ({ default: module.FocusView })),
 );
 
 function hasCompletedOnboarding() {

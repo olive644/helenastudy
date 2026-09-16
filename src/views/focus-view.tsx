@@ -1,5 +1,5 @@
 import { Check, Plus } from "lucide-react";
-import { useEffect, useState, type Dispatch, type FormEvent } from "react";
+import { useEffect, useState, type CSSProperties, type Dispatch, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
 import {
   minutesFocusedOn,
@@ -15,11 +15,60 @@ type FocusViewProps = {
 };
 
 const PRESETS = [25, 50] as const;
+const FULL_BLOOM_MINUTES = 60;
 
 function formatTimer(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function FocusRose({ progress, wilted }: { progress: number; wilted: boolean }) {
+  return (
+    <svg
+      className={`focus-rose${wilted ? " is-wilted" : ""}`}
+      viewBox="0 0 240 250"
+      role="img"
+      aria-label={wilted ? "Rosa de foco murcha" : "Rosa de foco crescendo"}
+      style={{ "--rose-growth": String(0.5 + progress * 0.5) } as CSSProperties}
+    >
+      <path className="focus-rose__shadow" d="m54 226 69-18 67 20-67 16Z" />
+      <g className="focus-rose__plant">
+        <path className="focus-rose__stem-shadow" d="m118 211 15-116 13 3-13 116Z" />
+        <path className="focus-rose__stem" d="m111 211 14-118 12 4-13 117Z" />
+        <path className="focus-rose__leaf focus-rose__leaf--left" d="m119 164-56-39 10 48 45 17Z" />
+        <path
+          className="focus-rose__leaf-fold focus-rose__leaf-fold--left"
+          d="m63 125 56 39-46 9Z"
+        />
+        <path className="focus-rose__leaf focus-rose__leaf--right" d="m130 143 53-38-9 48-45 18Z" />
+        <path
+          className="focus-rose__leaf-fold focus-rose__leaf-fold--right"
+          d="m183 105-53 38 44 10Z"
+        />
+        <g className="focus-rose__bloom">
+          <path
+            className="focus-rose__petal focus-rose__petal--back"
+            d="m72 77 22-43 37 27 30-36 19 47-26 28-51 2Z"
+          />
+          <path
+            className="focus-rose__petal focus-rose__petal--left"
+            d="m67 74 45-18 12 47-35 25-28-29Z"
+          />
+          <path
+            className="focus-rose__petal focus-rose__petal--right"
+            d="m124 57 43 8 22 34-31 31-39-27Z"
+          />
+          <path
+            className="focus-rose__petal focus-rose__petal--front"
+            d="m89 82 37-24 35 27-7 42-47 5-25-28Z"
+          />
+          <path className="focus-rose__petal-fold" d="m89 82 37 20 35-17-35-27Z" />
+          <path className="focus-rose__center" d="m107 82 20-11 20 14-7 24-25-2Z" />
+        </g>
+      </g>
+    </svg>
+  );
 }
 
 export function FocusView({ workspace, dispatch }: FocusViewProps) {
@@ -73,6 +122,16 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   }
 
   const todayMinutes = minutesFocusedOn(workspace, toDateKey(new Date()));
+  const liveMinutes = elapsedSeconds / 60;
+  const bloomProgress = Math.min(1, (todayMinutes + liveMinutes) / FULL_BLOOM_MINUTES);
+  const lastSession = workspace.focusSessions.reduce<Date | null>((latest, session) => {
+    const completedAt = new Date(session.completedAt);
+    return !latest || completedAt > latest ? completedAt : latest;
+  }, null);
+  const caredToday = todayMinutes > 0;
+  const missedYesterday = Boolean(
+    lastSession && Date.now() - lastSession.getTime() >= 2 * 24 * 60 * 60 * 1000,
+  );
   const focusedMinutes = minutesFocusedForSubject(workspace, subject.id);
   const subjectGoals = workspace.goals.filter((goal) => goal.subjectId === subject.id);
 
@@ -117,6 +176,23 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                   {minutes} min
                 </button>
               ))}
+            </div>
+          </div>
+          <div className="focus-rose-stage">
+            <FocusRose progress={bloomProgress} wilted={missedYesterday && !caredToday} />
+            <div className="focus-rose-copy">
+              <span>{caredToday ? "Cuidada hoje" : "Sua flor de foco"}</span>
+              <strong>
+                {missedYesterday && !caredToday
+                  ? "Ela sentiu sua falta. Uma sessão faz a rosa florescer novamente."
+                  : caredToday
+                    ? "Ela está segura por hoje. Continue para vê-la crescer."
+                    : "Comece uma sessão hoje para manter a rosa viva."}
+              </strong>
+              <small>
+                {Math.min(FULL_BLOOM_MINUTES, Math.floor(todayMinutes + liveMinutes))}/
+                {FULL_BLOOM_MINUTES} min até florescer por completo
+              </small>
             </div>
           </div>
           <h2 id="focus-timer-title" className="timer" aria-live="polite">
