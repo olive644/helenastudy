@@ -225,6 +225,13 @@ describe("App", () => {
     expect(await screen.findByRole("img", { name: /rosa de foco crescendo/i })).toBeTruthy();
     expect(screen.getByText(/comece uma sessão hoje para manter a rosa viva/i)).toBeTruthy();
     expect(screen.getByText(/0\/60 min até florescer por completo/i)).toBeTruthy();
+    expect(screen.getByLabelText(/escolha o tempo/i)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Pomodoro" }));
+    expect(screen.getByRole("img", { name: /maçã pomodoro em papel recortado/i })).toBeTruthy();
+    expect(screen.getByText(/25 min de foco · 5 min de pausa/i)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /começar/i }));
+    expect(screen.getByRole("button", { name: /pausar/i })).toBeTruthy();
   });
 
   it("cria e completa uma linha no bingo de estudos", async () => {
