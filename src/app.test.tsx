@@ -230,6 +230,8 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: "Pomodoro" }));
     expect(screen.getByRole("img", { name: /maçã pomodoro em papel recortado/i })).toBeTruthy();
     expect(screen.getByText(/25 min de foco · 5 min de pausa/i)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /começar/i }));
+    expect(screen.getByRole("button", { name: /pausar/i })).toBeTruthy();
   });
 
   it("cria e completa uma linha no bingo de estudos", async () => {
