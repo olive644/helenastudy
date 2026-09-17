@@ -148,9 +148,9 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
           <span aria-hidden="true" />
         </button>
         {expanded && (
-          <div className="sidebar__brand" aria-label="NoteOLI">
+          <div className="sidebar__brand" aria-label="HOliStudy">
             <strong>
-              Note<span>OLI</span>
+              HOli<span>Study</span>
             </strong>
           </div>
         )}
@@ -267,7 +267,7 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
             <header>
               <div>
                 <span>
-                  Note<span>OLI</span>
+                  HOli<span>Study</span>
                 </span>
                 <h2 id="mobile-more-title">Mais ferramentas</h2>
               </div>
@@ -396,9 +396,9 @@ export function PageHeader() {
 
   return (
     <header className="page-header">
-      <div className="page-header__mobile-brand" aria-label="NoteOLI">
+      <div className="page-header__mobile-brand" aria-label="HOliStudy">
         <strong>
-          Note<span>OLI</span>
+          HOli<span>Study</span>
         </strong>
       </div>
       <div className="page-header__actions">

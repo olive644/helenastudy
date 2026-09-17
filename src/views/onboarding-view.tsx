@@ -107,11 +107,11 @@ export default function OnboardingView({
   return (
     <main className="onboarding" id="main-content">
       <h1 className="sr-only">
-        NoteOLI: agenda de estudos, pomodoro, flashcards e quizzes para ENEM, vestibular e concursos
+        HOliStudy: agenda de estudos, pomodoro, flashcards e quizzes para ENEM, vestibular e concursos
       </h1>
       <header className="onboarding__header">
         <span className="onboarding__brand">
-          Note<span>OLI</span>
+          HOli<span>Study</span>
         </span>
         <span className="onboarding__eyebrow">UM COMEÇO DO SEU JEITO</span>
       </header>
