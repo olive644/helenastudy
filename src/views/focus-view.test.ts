@@ -18,5 +18,15 @@ describe("ciclo Pomodoro", () => {
       duration: 25,
       completed: 4,
     });
+    expect(nextPomodoroStep("shortBreak", 2, false, 50)).toEqual({
+      phase: "focus",
+      duration: 50,
+      completed: 2,
+    });
+    expect(nextPomodoroStep("focus", 3, false)).toEqual({
+      phase: "shortBreak",
+      duration: 5,
+      completed: 4,
+    });
   });
 });

@@ -16,23 +16,57 @@ type FocusViewProps = {
 
 const PRESETS = [5, 15, 25, 45, 60] as const;
 const FULL_BLOOM_MINUTES = 60;
-const POMODORO_FOCUS_MINUTES = 25;
 const POMODORO_SHORT_BREAK_MINUTES = 5;
 const POMODORO_LONG_BREAK_MINUTES = 15;
+const MONTH_NAMES = [
+  "janeiro",
+  "fevereiro",
+  "março",
+  "abril",
+  "maio",
+  "junho",
+  "julho",
+  "agosto",
+  "setembro",
+  "outubro",
+  "novembro",
+  "dezembro",
+] as const;
 type TimerMode = "timer" | "pomodoro";
 type PomodoroPhase = "focus" | "shortBreak" | "longBreak";
 
-export function nextPomodoroStep(phase: PomodoroPhase, completed: number) {
+export function nextPomodoroStep(
+  phase: PomodoroPhase,
+  completed: number,
+  longBreaks = true,
+  focusMinutes: 25 | 50 = 25,
+) {
   if (phase === "focus") {
     const nextCompleted = completed + 1;
-    const longBreak = nextCompleted % 4 === 0;
+    const longBreak = longBreaks && nextCompleted % 4 === 0;
     return {
       phase: longBreak ? ("longBreak" as const) : ("shortBreak" as const),
       duration: longBreak ? POMODORO_LONG_BREAK_MINUTES : POMODORO_SHORT_BREAK_MINUTES,
       completed: nextCompleted,
     };
   }
-  return { phase: "focus" as const, duration: POMODORO_FOCUS_MINUTES, completed };
+  return { phase: "focus" as const, duration: focusMinutes, completed };
+}
+
+function dateFromKey(dateKey: string): Date {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(year ?? 0, (month ?? 1) - 1, day ?? 1);
+}
+
+function calendarDays(month: Date): Date[] {
+  const first = new Date(month.getFullYear(), month.getMonth(), 1);
+  const start = new Date(first);
+  start.setDate(1 - first.getDay());
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+    return date;
+  });
 }
 
 function formatTimer(totalSeconds: number): string {
@@ -119,7 +153,6 @@ function PomodoroApple({ progress }: { progress: number }) {
 
 export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const defaultSubject = workspace.subjects[0];
-  const [subjectId, setSubjectId] = useState(defaultSubject?.id ?? "");
   const [mode, setMode] = useState<TimerMode>("timer");
   const [pomodoroPhase, setPomodoroPhase] = useState<PomodoroPhase>("focus");
   const [completedPomodoros, setCompletedPomodoros] = useState(0);
@@ -127,8 +160,9 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const [secondsRemaining, setSecondsRemaining] = useState(duration * 60);
   const [running, setRunning] = useState(false);
   const [goalTitle, setGoalTitle] = useState("");
-  const [targetMinutes, setTargetMinutes] = useState(300);
+  const [goalAmount, setGoalAmount] = useState(300);
   const [deadline, setDeadline] = useState(toDateKey(new Date()));
+  const [calendarMonth, setCalendarMonth] = useState(() => dateFromKey(deadline));
   const [openedAt] = useState(() => Date.now());
   const elapsedSeconds = duration * 60 - secondsRemaining;
 
@@ -147,22 +181,37 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
       if (pomodoroPhase === "focus") {
         dispatch({
           type: "focus/recorded",
-          subjectId,
-          durationMinutes: 25,
+          subjectId: defaultSubject?.id ?? "",
+          durationMinutes: duration,
           completedAt: new Date().toISOString(),
         });
       }
-      const next = nextPomodoroStep(pomodoroPhase, completedPomodoros);
+      const next = nextPomodoroStep(
+        pomodoroPhase,
+        completedPomodoros,
+        workspace.focusPreferences.longBreaks,
+        workspace.focusPreferences.pomodoroMinutes,
+      );
       setPomodoroPhase(next.phase);
       setCompletedPomodoros(next.completed);
       setDuration(next.duration);
       setSecondsRemaining(next.duration * 60);
     }, 1000);
     return () => window.clearTimeout(timer);
-  }, [completedPomodoros, dispatch, mode, pomodoroPhase, running, secondsRemaining, subjectId]);
+  }, [
+    completedPomodoros,
+    defaultSubject?.id,
+    dispatch,
+    mode,
+    pomodoroPhase,
+    running,
+    secondsRemaining,
+    workspace.focusPreferences.longBreaks,
+    workspace.focusPreferences.pomodoroMinutes,
+  ]);
 
   if (!defaultSubject) return null;
-  const subject = workspace.subjects.find((item) => item.id === subjectId) ?? defaultSubject;
+  const subject = defaultSubject;
 
   function chooseDuration(minutes: number) {
     setDuration(minutes);
@@ -174,7 +223,26 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
     setMode(nextMode);
     setPomodoroPhase("focus");
     setCompletedPomodoros(0);
-    chooseDuration(25);
+    setGoalAmount(nextMode === "pomodoro" ? 4 : 300);
+    chooseDuration(nextMode === "pomodoro" ? workspace.focusPreferences.pomodoroMinutes : 25);
+  }
+
+  function updatePomodoroMinutes(minutes: 25 | 50) {
+    dispatch({
+      type: "focus/preferences-updated",
+      preferences: { ...workspace.focusPreferences, pomodoroMinutes: minutes },
+    });
+    if (!running && pomodoroPhase === "focus") chooseDuration(minutes);
+  }
+
+  function toggleLongBreaks() {
+    dispatch({
+      type: "focus/preferences-updated",
+      preferences: {
+        ...workspace.focusPreferences,
+        longBreaks: !workspace.focusPreferences.longBreaks,
+      },
+    });
   }
 
   function reset() {
@@ -187,7 +255,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
     if (mode === "timer" || pomodoroPhase === "focus") {
       dispatch({
         type: "focus/recorded",
-        subjectId,
+        subjectId: subject.id,
         durationMinutes: Math.max(1, Math.round(elapsedSeconds / 60)),
         completedAt: new Date().toISOString(),
       });
@@ -213,32 +281,22 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
     event.preventDefault();
     const title = goalTitle.trim();
     if (!title) return;
+    const targetMinutes =
+      mode === "pomodoro" ? goalAmount * workspace.focusPreferences.pomodoroMinutes : goalAmount;
     dispatch({ type: "goal/added", subjectId: subject.id, title, targetMinutes, deadline });
     setGoalTitle("");
   }
 
+  const todayKey = toDateKey(new Date());
+  const selectedDeadline = dateFromKey(deadline);
+  const days = calendarDays(calendarMonth);
+
   return (
     <main className="main-content" id="main-content">
       <PageHeader />
-      <header className="view-heading">
-        <span className="section-label">Foco</span>
-        <h1>Um período de cada vez.</h1>
-        <p>Registre o tempo dedicado a cada matéria sem sair da sua rotina.</p>
-      </header>
-
       <div className="focus-layout">
         <section className="focus-card" aria-labelledby="focus-timer-title">
           <div className="focus-card__topline">
-            <label className="focus-subject">
-              <span>Matéria</span>
-              <select value={subject.id} onChange={(event) => setSubjectId(event.target.value)}>
-                {workspace.subjects.map((item) => (
-                  <option value={item.id} key={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
             <div className="focus-mode-switch" aria-label="Modo do relógio">
               {(["timer", "pomodoro"] as const).map((item) => (
                 <button
@@ -283,7 +341,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
               <strong>
                 {mode === "pomodoro"
                   ? pomodoroPhase === "focus"
-                    ? "Uma maçã, 25 minutos e uma tarefa de cada vez."
+                    ? `Uma maçã, ${workspace.focusPreferences.pomodoroMinutes} minutos e uma tarefa de cada vez.`
                     : pomodoroPhase === "longBreak"
                       ? "Você completou quatro rodadas. Descanse por 15 minutos."
                       : "Respire por 5 minutos. O próximo ciclo começa sozinho."
@@ -316,11 +374,48 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                       />
                     ))}
                   </div>
-                  <small>25 min de foco · 5 min de pausa · 15 min após quatro rodadas</small>
+                  <small>
+                    {workspace.focusPreferences.pomodoroMinutes} min de foco · 5 min de pausa
+                    {workspace.focusPreferences.longBreaks
+                      ? " · 15 min após quatro rodadas"
+                      : " · sem pausa longa"}
+                  </small>
                 </div>
               )}
             </div>
           </div>
+          {mode === "pomodoro" && (
+            <div className="pomodoro-settings" aria-label="Configurações do Pomodoro">
+              <div>
+                <span>Tempo de foco</span>
+                {([25, 50] as const).map((minutes) => (
+                  <button
+                    className={
+                      workspace.focusPreferences.pomodoroMinutes === minutes
+                        ? "is-active"
+                        : undefined
+                    }
+                    type="button"
+                    disabled={running || elapsedSeconds > 0}
+                    onClick={() => updatePomodoroMinutes(minutes)}
+                    key={minutes}
+                  >
+                    {minutes} min
+                  </button>
+                ))}
+              </div>
+              <button
+                className={`pomodoro-long-break${workspace.focusPreferences.longBreaks ? " is-active" : ""}`}
+                type="button"
+                disabled={running || elapsedSeconds > 0}
+                aria-pressed={workspace.focusPreferences.longBreaks}
+                onClick={toggleLongBreaks}
+              >
+                <i aria-hidden="true" />
+                Pausa longa após 4 rodadas
+              </button>
+            </div>
+          )}
           {mode === "timer" && (
             <div className="timer-picker">
               <label htmlFor="focus-duration">Escolha o tempo</label>
@@ -423,27 +518,77 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                 required
               />
             </label>
-            <div className="field-row">
-              <label className="field">
-                <span>Meta em minutos</span>
+            <div className="focus-goal-grid">
+              <label className="field focus-goal-amount">
+                <span>{mode === "pomodoro" ? "Meta em pomodoros" : "Meta em minutos"}</span>
                 <input
                   type="number"
-                  min="10"
-                  step="10"
-                  value={targetMinutes}
-                  onChange={(event) => setTargetMinutes(Number(event.target.value))}
+                  min="1"
+                  step={mode === "pomodoro" ? 1 : 5}
+                  value={goalAmount}
+                  onChange={(event) => setGoalAmount(Number(event.target.value))}
                   required
                 />
               </label>
-              <label className="field">
-                <span>Prazo</span>
-                <input
-                  type="date"
-                  value={deadline}
-                  onChange={(event) => setDeadline(event.target.value)}
-                  required
-                />
-              </label>
+              <div className="paper-calendar" aria-label="Escolha o prazo">
+                <div className="paper-calendar__heading">
+                  <button
+                    type="button"
+                    aria-label="Mês anterior"
+                    onClick={() =>
+                      setCalendarMonth(
+                        new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1),
+                      )
+                    }
+                  >
+                    ‹
+                  </button>
+                  <strong>
+                    {MONTH_NAMES[calendarMonth.getMonth()]} de {calendarMonth.getFullYear()}
+                  </strong>
+                  <button
+                    type="button"
+                    aria-label="Próximo mês"
+                    onClick={() =>
+                      setCalendarMonth(
+                        new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1),
+                      )
+                    }
+                  >
+                    ›
+                  </button>
+                </div>
+                <div className="paper-calendar__week" aria-hidden="true">
+                  {["D", "S", "T", "Q", "Q", "S", "S"].map((day, index) => (
+                    <span key={`${day}-${index}`}>{day}</span>
+                  ))}
+                </div>
+                <div className="paper-calendar__days">
+                  {days.map((date) => {
+                    const dateKey = toDateKey(date);
+                    const outside = date.getMonth() !== calendarMonth.getMonth();
+                    const inRange = dateKey >= todayKey && dateKey <= deadline;
+                    return (
+                      <button
+                        className={`${outside ? "is-outside " : ""}${inRange ? "is-in-range " : ""}${dateKey === todayKey ? "is-start " : ""}${dateKey === deadline ? "is-end" : ""}`}
+                        type="button"
+                        disabled={dateKey < todayKey}
+                        aria-label={date.toLocaleDateString("pt-BR", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                        aria-pressed={dateKey === deadline}
+                        onClick={() => setDeadline(dateKey)}
+                        key={dateKey}
+                      >
+                        {date.getDate()}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p>De hoje até {selectedDeadline.toLocaleDateString("pt-BR")}</p>
+              </div>
             </div>
             <button className="secondary-button" type="submit">
               <Plus size={16} /> Criar meta

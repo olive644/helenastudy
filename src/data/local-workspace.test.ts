@@ -83,4 +83,16 @@ describe("local workspace", () => {
     expect(migrated.subjects).toEqual(current.subjects);
     expect(migrated.homeworkLists).toEqual([]);
   });
+
+  it("migra o workspace v4 adicionando preferências sincronizadas de foco", () => {
+    const current = createInitialWorkspace();
+    const workspaceV4: Record<string, unknown> = { ...current, version: 4 };
+    delete workspaceV4["focusPreferences"];
+    window.localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(workspaceV4));
+
+    expect(loadWorkspace(window.localStorage).focusPreferences).toEqual({
+      pomodoroMinutes: 25,
+      longBreaks: true,
+    });
+  });
 });

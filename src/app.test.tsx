@@ -230,6 +230,14 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: "Pomodoro" }));
     expect(screen.getByRole("img", { name: /maçã pomodoro em papel recortado/i })).toBeTruthy();
     expect(screen.getByText(/25 min de foco · 5 min de pausa/i)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "50 min" }));
+    expect(screen.getByRole("heading", { name: "50:00" })).toBeTruthy();
+    const longBreak = screen.getByRole("button", { name: /pausa longa após 4 rodadas/i });
+    expect(longBreak.getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(longBreak);
+    expect(longBreak.getAttribute("aria-pressed")).toBe("false");
+    expect(screen.getByLabelText(/escolha o prazo/i)).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: /um período de cada vez/i })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /começar/i }));
     expect(screen.getByRole("button", { name: /pausar/i })).toBeTruthy();
   });

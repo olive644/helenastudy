@@ -1,4 +1,9 @@
-export const WORKSPACE_VERSION = 4 as const;
+export const WORKSPACE_VERSION = 5 as const;
+
+export type FocusPreferences = {
+  pomodoroMinutes: 25 | 50;
+  longBreaks: boolean;
+};
 
 export type Subject = {
   id: string;
@@ -130,6 +135,7 @@ export type WorkspaceState = {
   quizAttempts: QuizAttempt[];
   bingoBoards: BingoBoard[];
   homeworkLists: HomeworkList[];
+  focusPreferences: FocusPreferences;
 };
 
 export type WorkspaceAction =
@@ -156,6 +162,7 @@ export type WorkspaceAction =
       durationMinutes: number;
       completedAt: string;
     }
+  | { type: "focus/preferences-updated"; preferences: FocusPreferences }
   | {
       type: "material/added";
       subjectId: string;
@@ -227,6 +234,7 @@ export function createInitialWorkspace(): WorkspaceState {
     quizAttempts: [],
     bingoBoards: [],
     homeworkLists: [],
+    focusPreferences: { pomodoroMinutes: 25, longBreaks: true },
   };
 }
 
@@ -382,6 +390,8 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
           },
         ],
       };
+    case "focus/preferences-updated":
+      return { ...state, focusPreferences: action.preferences };
     case "material/added":
       return {
         ...state,

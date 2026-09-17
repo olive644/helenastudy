@@ -28,7 +28,9 @@ const MAX_INITIAL_JS_BYTES = 253 * 1024;
 // habits and homework chunks; the planner itself remains loaded on demand.
 // The paper rose, interactive duration picker and Pomodoro apple live in the
 // lazy-loaded Focus route and add 3.4 KiB without growing the initial bundle.
-const MAX_TOTAL_JS_BYTES = 603 * 1024;
+// Synced Pomodoro preferences and the dependency-free paper calendar bring the
+// measured total to 605.4 KiB; keep a narrow 607 KiB ceiling.
+const MAX_TOTAL_JS_BYTES = 607 * 1024;
 const MAX_TTS_WORKER_BYTES = 2.25 * 1024 * 1024;
 const MAX_TTS_WASM_BYTES = 22 * 1024 * 1024;
 const manifest = JSON.parse(await readFile(new URL(".vite/manifest.json", distDirectory), "utf8"));
