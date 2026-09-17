@@ -116,7 +116,7 @@ test("troca os modos de foco pelas setas laterais", async ({ page }, testInfo) =
   });
   await navigation.getByRole("button", { name: "Foco", exact: true }).click();
 
-  await expect(page.getByText("Temporizador", { exact: true })).toBeVisible();
+  await expect(page.getByText("Cronômetro", { exact: true })).toBeVisible();
   await expect(page.locator(".focus-layout > .focus-card")).toHaveCSS(
     "background-color",
     "rgba(0, 0, 0, 0)",
@@ -124,10 +124,20 @@ test("troca os modos de foco pelas setas laterais", async ({ page }, testInfo) =
   await page.getByRole("button", { name: "Próximo modo" }).click();
   await expect(page.getByText("Pomodoro", { exact: true })).toBeVisible();
   await expect(page.locator(".focus-mode-slide")).toHaveCSS("animation-name", "focus-mode-arrive");
+  const bites = page.locator(".pomodoro-apple__bites");
+  await expect(bites).toHaveAttribute("stroke-dasharray", "0 100");
+  await page.getByRole("button", { name: "Começar" }).click();
+  await expect(bites).not.toHaveAttribute("stroke-dasharray", "0 100");
+  await page.getByRole("button", { name: "Pausar" }).click();
+  await page.getByRole("button", { name: "Reiniciar contador" }).click();
   await page.getByRole("button", { name: "Modo anterior" }).click();
-  await expect(page.getByText("Temporizador", { exact: true })).toBeVisible();
+  await expect(page.getByText("Cronômetro", { exact: true })).toBeVisible();
   await expect(page.locator(".focus-mode-slide")).toHaveClass(/is-backward/);
   await expect(page.locator(".focus-paper-control-icon")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "00:00:00" })).toBeVisible();
+  await page.getByRole("button", { name: "Começar" }).click();
+  await expect(page.getByRole("heading", { name: /00:00:0[1-9]/ })).toBeVisible();
+  await page.getByRole("button", { name: "Pausar" }).click();
 });
 
 test("concentra as ferramentas na navegação lateral", async ({ page }, testInfo) => {

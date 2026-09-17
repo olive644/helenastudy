@@ -8138,3 +8138,95 @@ select {
     transition: none;
   }
 }
+
+/* Cronômetro crescente e peças vivas do jardim de foco. */
+.focus-rose {
+  width: min(100%, 310px);
+}
+
+.focus-rose__dome-back {
+  fill: rgb(156 224 222 / 18%);
+}
+
+.focus-rose__dome-glass {
+  fill: none;
+  stroke: #9cdedc;
+  stroke-width: 9px;
+  stroke-linecap: round;
+  stroke-linejoin: bevel;
+  filter: drop-shadow(0 7px 0 rgb(37 86 91 / 32%));
+}
+
+.focus-rose__dome-shine {
+  fill: none;
+  stroke: rgb(255 255 255 / 72%);
+  stroke-width: 10px;
+  stroke-linecap: round;
+}
+
+.focus-rose__base-depth {
+  fill: #5c2d18;
+}
+
+.focus-rose__base {
+  fill: #b86d35;
+}
+
+.focus-rose__base-fold {
+  fill: #e4a35f;
+}
+
+.pomodoro-apple__bites {
+  fill: none;
+  stroke: black;
+  stroke-width: 35px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke-dasharray 420ms ease;
+}
+
+.pomodoro-apple > g[mask] {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pomodoro-apple-breathe 2.4s ease-in-out infinite;
+}
+
+.focus-rose-copy > :empty {
+  display: none;
+}
+
+.timer--stopwatch {
+  margin-top: 0.8rem;
+  font-size: clamp(3.1rem, 11vw, 7rem);
+  letter-spacing: -0.055em;
+}
+
+.focus-mode-slide > .timer-controls {
+  margin-top: 1.25rem;
+}
+
+@keyframes pomodoro-apple-breathe {
+  50% {
+    transform: scale(0.985);
+  }
+}
+
+@media (max-width: 640px) {
+  .focus-rose {
+    width: min(76vw, 290px);
+  }
+
+  .timer--stopwatch {
+    font-size: clamp(2.7rem, 14vw, 4.8rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pomodoro-apple > g[mask] {
+    animation: none;
+  }
+
+  .pomodoro-apple__bites {
+    transition: none;
+  }
+}

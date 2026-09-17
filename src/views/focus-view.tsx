@@ -1,5 +1,12 @@
 import { Check, Plus } from "lucide-react";
-import { useEffect, useState, type CSSProperties, type Dispatch, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type Dispatch,
+  type FormEvent,
+} from "react";
 import { PageHeader } from "../components/app-navigation";
 import {
   minutesFocusedOn,
@@ -14,7 +21,6 @@ type FocusViewProps = {
   dispatch: Dispatch<WorkspaceAction>;
 };
 
-const PRESETS = [5, 15, 25, 45, 60] as const;
 const FULL_BLOOM_MINUTES = 60;
 const POMODORO_SHORT_BREAK_MINUTES = 5;
 const POMODORO_LONG_BREAK_MINUTES = 15;
@@ -75,17 +81,28 @@ function formatTimer(totalSeconds: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
+function formatStopwatch(totalMilliseconds: number): string {
+  const minutes = Math.floor(totalMilliseconds / 60_000);
+  const seconds = Math.floor(totalMilliseconds / 1_000) % 60;
+  const centiseconds = Math.floor(totalMilliseconds / 10) % 100;
+  return [minutes, seconds, centiseconds].map((value) => String(value).padStart(2, "0")).join(":");
+}
+
 function FocusRose({ progress, wilted }: { progress: number; wilted: boolean }) {
   return (
     <svg
       className={`focus-rose${wilted ? " is-wilted" : ""}`}
-      viewBox="0 0 240 250"
+      viewBox="0 0 300 330"
       role="img"
       aria-label={wilted ? "Rosa de foco murcha" : "Rosa de foco crescendo"}
       style={{ "--rose-growth": String(0.5 + progress * 0.5) } as CSSProperties}
     >
-      <path className="focus-rose__shadow" d="m54 226 69-18 67 20-67 16Z" />
-      <g className="focus-rose__plant">
+      <path
+        className="focus-rose__dome-back"
+        d="M45 262V141C45 67 89 25 150 25s105 42 105 116v121Z"
+      />
+      <path className="focus-rose__shadow" d="m82 263 69-18 67 20-67 16Z" />
+      <g className="focus-rose__plant" transform="translate(29 35)">
         <path className="focus-rose__stem-shadow" d="m118 211 15-116 13 3-13 116Z" />
         <path className="focus-rose__stem" d="m111 211 14-118 12 4-13 117Z" />
         <path className="focus-rose__leaf focus-rose__leaf--left" d="m119 164-56-39 10 48 45 17Z" />
@@ -119,6 +136,14 @@ function FocusRose({ progress, wilted }: { progress: number; wilted: boolean }) 
           <path className="focus-rose__center" d="m107 82 20-11 20 14-7 24-25-2Z" />
         </g>
       </g>
+      <path
+        className="focus-rose__dome-glass"
+        d="M45 262V141C45 67 89 25 150 25s105 42 105 116v121"
+      />
+      <path className="focus-rose__dome-shine" d="M73 210v-66c0-47 18-79 49-94" />
+      <path className="focus-rose__base-depth" d="m29 272 19-18h205l19 18-18 31H48Z" />
+      <path className="focus-rose__base" d="m25 264 23-18h205l22 18-20 28H46Z" />
+      <path className="focus-rose__base-fold" d="m25 264 23-18h205l-19 18Z" />
     </svg>
   );
 }
@@ -126,6 +151,7 @@ function FocusRose({ progress, wilted }: { progress: number; wilted: boolean }) 
 function PomodoroApple({ progress }: { progress: number }) {
   const outline =
     "M 142 77 L 112 68 L 79 74 L 52 96 L 38 130 L 40 175 L 55 219 L 80 251 L 109 259 L 140 251 L 171 259 L 200 249 L 225 215 L 240 171 L 240 128 L 224 96 L 198 77 L 173 74";
+  const eaten = 1 - Math.max(0, Math.min(1, progress));
   return (
     <svg
       className="pomodoro-apple"
@@ -133,18 +159,26 @@ function PomodoroApple({ progress }: { progress: number }) {
       role="img"
       aria-label="Maçã Pomodoro em papel recortado"
     >
-      <path className="pomodoro-apple__depth" d={outline} transform="translate(0 7)" />
-      <path className="pomodoro-apple__track" d={outline} />
-      <path
-        className="pomodoro-apple__progress"
-        d={outline}
-        pathLength="100"
-        strokeDasharray={`${Math.max(0, Math.min(1, progress)) * 100} 100`}
-      />
-      <path
-        className="pomodoro-apple__facet"
-        d="m40 122 20-28 23-10-12 19Z M197 239l23-33 9-31 2 30-23 40Z"
-      />
+      <defs>
+        <mask id="pomodoro-bites">
+          <rect width="280" height="290" fill="white" />
+          <path
+            className="pomodoro-apple__bites"
+            d="m249 105-22 22 19 22-23 22 12 24-26 18-22 18-30 20"
+            pathLength="100"
+            strokeDasharray={`${eaten * 100} 100`}
+          />
+        </mask>
+      </defs>
+      <g mask="url(#pomodoro-bites)">
+        <path className="pomodoro-apple__depth" d={outline} transform="translate(0 7)" />
+        <path className="pomodoro-apple__track" d={outline} />
+        <path className="pomodoro-apple__progress" d={outline} />
+        <path
+          className="pomodoro-apple__facet"
+          d="m40 122 20-28 23-10-12 19Z M197 239l23-33 9-31 2 30-23 40Z"
+        />
+      </g>
       <path className="pomodoro-apple__leaf" d="m142 54 12-29 30-12 34 6-13 28-32 15Z" />
       <path className="pomodoro-apple__leaf-fold" d="m142 54 43-19 33-16-13 28-32 15Z" />
     </svg>
@@ -189,24 +223,34 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const [completedPomodoros, setCompletedPomodoros] = useState(0);
   const [duration, setDuration] = useState<number>(25);
   const [secondsRemaining, setSecondsRemaining] = useState(duration * 60);
+  const [stopwatchMs, setStopwatchMs] = useState(0);
   const [running, setRunning] = useState(false);
+  const stopwatchBase = useRef(0);
+  const stopwatchStartedAt = useRef(0);
   const [goalTitle, setGoalTitle] = useState("");
   const [goalAmount, setGoalAmount] = useState(300);
   const [deadline, setDeadline] = useState(toDateKey(new Date()));
   const [calendarMonth, setCalendarMonth] = useState(() => dateFromKey(deadline));
   const [openedAt] = useState(() => Date.now());
-  const elapsedSeconds = duration * 60 - secondsRemaining;
+  const pomodoroElapsedSeconds = duration * 60 - secondsRemaining;
+  const elapsedSeconds = mode === "timer" ? stopwatchMs / 1_000 : pomodoroElapsedSeconds;
 
   useEffect(() => {
-    if (!running) return;
+    if (!running || mode !== "timer") return;
+    let frame = 0;
+    const tick = (now: number) => {
+      setStopwatchMs(stopwatchBase.current + now - stopwatchStartedAt.current);
+      frame = window.requestAnimationFrame(tick);
+    };
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, [mode, running]);
+
+  useEffect(() => {
+    if (!running || mode !== "pomodoro") return;
     const timer = window.setTimeout(() => {
       if (secondsRemaining > 1) {
         setSecondsRemaining(secondsRemaining - 1);
-        return;
-      }
-      if (mode !== "pomodoro") {
-        setRunning(false);
-        setSecondsRemaining(0);
         return;
       }
       if (pomodoroPhase === "focus") {
@@ -255,7 +299,9 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
     setPomodoroPhase("focus");
     setCompletedPomodoros(0);
     setGoalAmount(nextMode === "pomodoro" ? 4 : 300);
-    chooseDuration(nextMode === "pomodoro" ? workspace.focusPreferences.pomodoroMinutes : 25);
+    chooseDuration(workspace.focusPreferences.pomodoroMinutes);
+    setStopwatchMs(0);
+    stopwatchBase.current = 0;
   }
 
   function slideMode(direction: -1 | 1) {
@@ -283,7 +329,20 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
 
   function reset() {
     setRunning(false);
-    setSecondsRemaining(duration * 60);
+    if (mode === "timer") {
+      setStopwatchMs(0);
+      stopwatchBase.current = 0;
+    } else {
+      setSecondsRemaining(duration * 60);
+    }
+  }
+
+  function toggleRunning() {
+    if (mode === "timer") {
+      if (running) stopwatchBase.current = stopwatchMs;
+      else stopwatchStartedAt.current = performance.now();
+    }
+    setRunning((current) => !current);
   }
 
   function finish() {
@@ -344,7 +403,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
             </button>
             <div className="focus-mode-viewport">
               <span className="focus-mode-name" aria-live="polite">
-                {mode === "timer" ? "Temporizador" : "Pomodoro"}
+                {mode === "timer" ? "Cronômetro" : "Pomodoro"}
               </span>
               <div
                 className={`focus-mode-slide${modeDirection < 0 ? " is-backward" : ""}`}
@@ -362,29 +421,29 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                         <h2 id="focus-timer-title" className="timer">
                           {formatTimer(secondsRemaining)}
                         </h2>
-                        <p>{pomodoroPhase === "focus" ? "Tempo de foco" : "Respire um pouco"}</p>
+                        {pomodoroPhase !== "focus" && <p>Respire um pouco</p>}
                       </div>
                     </div>
                   )}
                   <div className="focus-rose-copy">
                     <span>
                       {mode === "pomodoro"
-                        ? pomodoroPhase === "focus"
-                          ? "Hora de focar"
-                          : pomodoroPhase === "longBreak"
-                            ? "Pausa longa"
-                            : "Pausa curta"
+                        ? pomodoroPhase === "longBreak"
+                          ? "Pausa longa"
+                          : pomodoroPhase === "shortBreak"
+                            ? "Pausa curta"
+                            : ""
                         : caredToday
                           ? "Cuidada hoje"
                           : "Sua flor de foco"}
                     </span>
                     <strong>
                       {mode === "pomodoro"
-                        ? pomodoroPhase === "focus"
-                          ? `Uma maçã, ${workspace.focusPreferences.pomodoroMinutes} minutos e uma tarefa de cada vez.`
-                          : pomodoroPhase === "longBreak"
-                            ? "Você completou quatro rodadas. Descanse por 15 minutos."
-                            : "Respire por 5 minutos. O próximo ciclo começa sozinho."
+                        ? pomodoroPhase === "longBreak"
+                          ? "Você completou quatro rodadas. Descanse por 15 minutos."
+                          : pomodoroPhase === "shortBreak"
+                            ? "Respire por 5 minutos. O próximo ciclo começa sozinho."
+                            : ""
                         : missedYesterday && !caredToday
                           ? "Ela sentiu sua falta. Uma sessão faz a rosa florescer novamente."
                           : caredToday
@@ -458,50 +517,15 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                   </div>
                 )}
                 {mode === "timer" && (
-                  <div className="timer-picker">
-                    <label htmlFor="focus-duration">Escolha o tempo</label>
-                    <input
-                      id="focus-duration"
-                      type="range"
-                      min="1"
-                      max="120"
-                      value={duration}
-                      disabled={running || elapsedSeconds > 0}
-                      onChange={(event) => chooseDuration(Number(event.target.value))}
-                      style={{ "--timer-progress": `${(duration / 120) * 100}%` } as CSSProperties}
-                    />
-                    <div className="timer-presets" aria-label="Atalhos de duração">
-                      {PRESETS.map((minutes) => (
-                        <button
-                          className={duration === minutes ? "is-active" : undefined}
-                          type="button"
-                          disabled={running || elapsedSeconds > 0}
-                          onClick={() => chooseDuration(minutes)}
-                          key={minutes}
-                        >
-                          {minutes} min
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {mode === "timer" && (
-                  <h2 id="focus-timer-title" className="timer" aria-live="polite">
-                    {formatTimer(secondsRemaining)}
+                  <h2 id="focus-timer-title" className="timer timer--stopwatch" aria-live="off">
+                    {formatStopwatch(stopwatchMs)}
                   </h2>
                 )}
-                <p className="timer-status">
-                  {running
-                    ? "Sessão em andamento"
-                    : elapsedSeconds > 0
-                      ? "Sessão pausada"
-                      : "Pronto para começar"}
-                </p>
                 <div className="timer-controls">
                   <button
                     className="primary-button timer-primary"
                     type="button"
-                    onClick={() => setRunning((current) => !current)}
+                    onClick={toggleRunning}
                   >
                     <FocusPaperControlIcon paused={running} />
                     {running ? "Pausar" : elapsedSeconds > 0 ? "Continuar" : "Começar"}
@@ -510,7 +534,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                     className="icon-button"
                     type="button"
                     onClick={reset}
-                    aria-label="Reiniciar temporizador"
+                    aria-label="Reiniciar contador"
                   >
                     ↺
                   </button>
