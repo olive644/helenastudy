@@ -76,14 +76,14 @@ export function GoogleLogin({
     }
   }
   return (
-    <main className="onboarding login-page" id="main-content" aria-label="Entrar na HOliStudy">
+    <main className="onboarding login-page" id="main-content" aria-label="Entrar na Pepopsia">
       <h1 className="sr-only">
-        HOliStudy: agenda de estudos, pomodoro, flashcards e quizzes para ENEM, vestibular e
+        Pepopsia: agenda de estudos, pomodoro, flashcards e quizzes para ENEM, vestibular e
         concursos
       </h1>
       <header className="onboarding__header">
         <span className="onboarding__brand">
-          HOli<span>Study</span>
+          Pepo<span>psia</span>
         </span>
         <span className="onboarding__eyebrow">SEU PRÓXIMO PASSO COMEÇA AQUI</span>
       </header>

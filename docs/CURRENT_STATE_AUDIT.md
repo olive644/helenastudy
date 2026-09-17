@@ -406,6 +406,6 @@ Primeira visita abre onboarding e termina no login Google aprovado. A conclusão
 
 Temporizador e Pomodoro ocupam uma área aberta, sem cartão de fundo, e são escolhidos por setas laterais de papel recortado. A troca usa o mesmo deslocamento direcional de 550 ms dos mundos de Praticar, respeita redução de movimento e fica bloqueada durante uma sessão em andamento ou pausada. O temporizador permite escolher horas, minutos e segundos em três seletores, enquanto a rosa permanece ligada aos minutos registrados e protegida pela redoma facetada. No Pomodoro, mordidas animadas consomem a maçã conforme a sessão avança e sete maçãs cheias registram os dias da semana em que pelo menos um ciclo foi concluído. O botão de início também usa um ícone próprio de papel recortado.
 
-# Marca HOliStudy, setembro de 2026
+# Marca Pepopsia, setembro de 2026
 
-A marca exibida na interface, nos metadados e nos materiais públicos passou a ser HOliStudy. Helena continua sendo o nome da gatinha e da assistente; identificadores internos antigos foram preservados para não quebrar dados locais, links e integrações existentes.
+A marca exibida na interface, nos metadados e nos materiais públicos passou a ser Pepopsia. Helena continua sendo o nome da gatinha e da assistente; identificadores internos antigos foram preservados para não quebrar dados locais, links e integrações existentes.

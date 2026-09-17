@@ -175,7 +175,7 @@ test("concentra as ferramentas na navegação lateral", async ({ page }, testInf
   await page.getByRole("button", { name: "Expandir menu lateral" }).click();
   await expect(sidebar).toHaveClass(/sidebar--expanded/);
   await expect(sidebar).toHaveCSS("width", "260px");
-  await expect(sidebar.getByLabel("HOliStudy")).toBeVisible();
+  await expect(sidebar.getByLabel("Pepopsia")).toBeVisible();
   await expect(sidebar.getByText("Área do aluno", { exact: true })).toBeVisible();
   await expect(sidebar.getByText("Espaço do aluno", { exact: true })).toBeVisible();
 
@@ -228,9 +228,9 @@ test("anima o seletor entre os temas claro e escuro", async ({ page }, testInfo)
 test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }, testInfo) => {
   await expect(page.getByRole("heading", { name: "Espaço do aluno" })).toBeVisible();
   await expect(page.getByText("Dados salvos neste dispositivo")).toHaveCount(0);
-  await expect(page.getByLabel("HOliStudy")).toBeAttached();
+  await expect(page.getByLabel("Pepopsia")).toBeAttached();
   await expect(page.getByAltText(/rosto da helena/i)).toHaveCount(0);
-  await expect(page.getByAltText("Helena, a mascote do HOliStudy")).toHaveCount(0);
+  await expect(page.getByAltText("Helena, a mascote do Pepopsia")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Agenda", exact: true }).click();
   await page.getByLabel(/o que precisa ser feito/i).fill("Revisar Simple Past");
