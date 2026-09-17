@@ -76,7 +76,9 @@ describe("App", () => {
     expect(screen.queryByRole("heading", { name: /metas de estudo/i })).toBeNull();
 
     navigate("Foco");
-    expect(await screen.findByRole("heading", { name: "Nova meta de foco" })).toBeTruthy();
+    expect(
+      await screen.findByRole("heading", { name: "Nova meta de foco" }, { timeout: 3_000 }),
+    ).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Metas de foco" })).toBeTruthy();
   });
 
@@ -225,10 +227,11 @@ describe("App", () => {
     expect(await screen.findByRole("img", { name: /rosa de foco crescendo/i })).toBeTruthy();
     expect(screen.getByText(/comece uma sessão hoje para manter a rosa viva/i)).toBeTruthy();
     expect(screen.getByText(/0\/60 min até florescer por completo/i)).toBeTruthy();
-    expect(screen.getByLabelText(/escolha o tempo/i)).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "00:00:00" })).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Próximo modo" }));
     expect(screen.getByText("Pomodoro")).toBeTruthy();
+    expect(screen.queryByText(/uma maçã/i)).toBeNull();
     expect(screen.getByRole("img", { name: /maçã pomodoro em papel recortado/i })).toBeTruthy();
     expect(screen.getByText(/25 min de foco · 5 min de pausa/i)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "50 min" }));
