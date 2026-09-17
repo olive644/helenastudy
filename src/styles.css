@@ -4986,7 +4986,7 @@ body.local-room-active {
   }
 
   .focus-layout {
-    grid-template-columns: minmax(0, 1.65fr) minmax(250px, 0.6fr);
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .notes-layout {

@@ -95,45 +95,53 @@ function FocusRose({ progress, wilted }: { progress: number; wilted: boolean }) 
       viewBox="0 0 300 330"
       role="img"
       aria-label={wilted ? "Rosa de foco murcha" : "Rosa de foco crescendo"}
-      style={{ "--rose-growth": String(0.5 + progress * 0.5) } as CSSProperties}
+      style={{ "--rose-growth": String(0.85 + progress * 0.15) } as CSSProperties}
     >
       <path
         className="focus-rose__dome-back"
         d="M45 262V141C45 67 89 25 150 25s105 42 105 116v121Z"
       />
       <path className="focus-rose__shadow" d="m82 263 69-18 67 20-67 16Z" />
-      <g className="focus-rose__plant" transform="translate(29 35)">
-        <path className="focus-rose__stem-shadow" d="m118 211 15-116 13 3-13 116Z" />
-        <path className="focus-rose__stem" d="m111 211 14-118 12 4-13 117Z" />
-        <path className="focus-rose__leaf focus-rose__leaf--left" d="m119 164-56-39 10 48 45 17Z" />
-        <path
-          className="focus-rose__leaf-fold focus-rose__leaf-fold--left"
-          d="m63 125 56 39-46 9Z"
-        />
-        <path className="focus-rose__leaf focus-rose__leaf--right" d="m130 143 53-38-9 48-45 18Z" />
-        <path
-          className="focus-rose__leaf-fold focus-rose__leaf-fold--right"
-          d="m183 105-53 38 44 10Z"
-        />
-        <g className="focus-rose__bloom">
+      <g transform="translate(25 35)">
+        <g className="focus-rose__plant">
+          <path className="focus-rose__stem-shadow" d="m118 211 15-116 13 3-13 116Z" />
+          <path className="focus-rose__stem" d="m111 211 14-118 12 4-13 117Z" />
           <path
-            className="focus-rose__petal focus-rose__petal--back"
-            d="m72 77 22-43 37 27 30-36 19 47-26 28-51 2Z"
+            className="focus-rose__leaf focus-rose__leaf--left"
+            d="m119 164-56-39 10 48 45 17Z"
           />
           <path
-            className="focus-rose__petal focus-rose__petal--left"
-            d="m67 74 45-18 12 47-35 25-28-29Z"
+            className="focus-rose__leaf-fold focus-rose__leaf-fold--left"
+            d="m63 125 56 39-46 9Z"
           />
           <path
-            className="focus-rose__petal focus-rose__petal--right"
-            d="m124 57 43 8 22 34-31 31-39-27Z"
+            className="focus-rose__leaf focus-rose__leaf--right"
+            d="m130 143 53-38-9 48-45 18Z"
           />
           <path
-            className="focus-rose__petal focus-rose__petal--front"
-            d="m89 82 37-24 35 27-7 42-47 5-25-28Z"
+            className="focus-rose__leaf-fold focus-rose__leaf-fold--right"
+            d="m183 105-53 38 44 10Z"
           />
-          <path className="focus-rose__petal-fold" d="m89 82 37 20 35-17-35-27Z" />
-          <path className="focus-rose__center" d="m107 82 20-11 20 14-7 24-25-2Z" />
+          <g className="focus-rose__bloom">
+            <path
+              className="focus-rose__petal focus-rose__petal--back"
+              d="m72 77 22-43 37 27 30-36 19 47-26 28-51 2Z"
+            />
+            <path
+              className="focus-rose__petal focus-rose__petal--left"
+              d="m67 74 45-18 12 47-35 25-28-29Z"
+            />
+            <path
+              className="focus-rose__petal focus-rose__petal--right"
+              d="m124 57 43 8 22 34-31 31-39-27Z"
+            />
+            <path
+              className="focus-rose__petal focus-rose__petal--front"
+              d="m89 82 37-24 35 27-7 42-47 5-25-28Z"
+            />
+            <path className="focus-rose__petal-fold" d="m89 82 37 20 35-17-35-27Z" />
+            <path className="focus-rose__center" d="m107 82 20-11 20 14-7 24-25-2Z" />
+          </g>
         </g>
       </g>
       <path
@@ -487,7 +495,6 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                 {mode === "pomodoro" && (
                   <div className="pomodoro-settings" aria-label="Configurações do Pomodoro">
                     <div>
-                      <span>Tempo de foco</span>
                       {([25, 50] as const).map((minutes) => (
                         <button
                           className={
@@ -560,24 +567,6 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
             </button>
           </div>
         </section>
-
-        <aside className="focus-aside">
-          <article className="module-panel focus-summary">
-            <span className="section-label">Hoje</span>
-            <strong>{todayMinutes} min</strong>
-            <p>de foco registrados neste dispositivo</p>
-          </article>
-          <article className="module-panel native-notice">
-            <strong aria-hidden="true">+</strong>
-            <div>
-              <h2>Modo sem distrações</h2>
-              <p>
-                O bloqueio de outros aplicativos será ativado quando a versão mobile nativa estiver
-                pronta.
-              </p>
-            </div>
-          </article>
-        </aside>
       </div>
 
       <div className="learn-grid focus-goals">
