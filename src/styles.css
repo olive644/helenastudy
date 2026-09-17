@@ -7988,3 +7988,153 @@ select {
     animation: none;
   }
 }
+
+/* Foco: troca de modo com o mesmo movimento lateral dos mundos. */
+.focus-layout > .focus-card {
+  padding-inline: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.focus-mode-carousel {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 56px;
+  align-items: center;
+  gap: clamp(0.35rem, 2vw, 1rem);
+}
+
+.focus-mode-viewport {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.focus-mode-name {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--violet);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.focus-mode-slide {
+  animation: focus-mode-arrive 550ms ease-out both;
+}
+
+.focus-mode-slide.is-backward {
+  --focus-mode-from: -65px;
+}
+
+.focus-mode-arrow {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  place-items: center;
+}
+
+.focus-mode-arrow:hover:not(:disabled) .focus-paper-arrow {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.focus-mode-arrow--next:hover:not(:disabled) .focus-paper-arrow {
+  transform: rotate(180deg) translateY(2px) scale(1.04);
+}
+
+.focus-mode-arrow:focus-visible {
+  outline: 3px solid #facc15;
+  outline-offset: 3px;
+}
+
+.focus-mode-arrow:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.focus-paper-arrow {
+  width: 52px;
+  height: 52px;
+  overflow: visible;
+  filter: drop-shadow(0 5px 0 rgb(57 27 112 / 22%));
+  transition: transform 180ms ease;
+}
+
+.focus-mode-arrow--next .focus-paper-arrow {
+  transform: rotate(180deg);
+}
+
+.focus-paper-arrow__depth,
+.focus-paper-control-icon__depth {
+  fill: #4c1d95;
+}
+
+.focus-paper-arrow__face {
+  fill: #7c3aed;
+}
+
+.focus-paper-arrow__fold {
+  fill: #a779ef;
+}
+
+.focus-paper-control-icon {
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  overflow: visible;
+  filter: drop-shadow(0 2px 0 rgb(57 27 112 / 28%));
+}
+
+.focus-paper-control-icon__face {
+  fill: #fff9ef;
+}
+
+.focus-paper-control-icon__fold {
+  fill: #facc15;
+}
+
+@keyframes focus-mode-arrive {
+  from {
+    opacity: 0;
+    transform: translateX(var(--focus-mode-from, 65px));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .focus-mode-carousel {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 0.15rem;
+  }
+
+  .focus-mode-arrow {
+    width: 44px;
+    height: 52px;
+  }
+
+  .focus-paper-arrow {
+    width: 43px;
+    height: 43px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focus-mode-slide {
+    animation: none;
+  }
+
+  .focus-paper-arrow {
+    transition: none;
+  }
+}

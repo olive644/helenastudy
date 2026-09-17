@@ -227,7 +227,8 @@ describe("App", () => {
     expect(screen.getByText(/0\/60 min até florescer por completo/i)).toBeTruthy();
     expect(screen.getByLabelText(/escolha o tempo/i)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Pomodoro" }));
+    fireEvent.click(screen.getByRole("button", { name: "Próximo modo" }));
+    expect(screen.getByText("Pomodoro")).toBeTruthy();
     expect(screen.getByRole("img", { name: /maçã pomodoro em papel recortado/i })).toBeTruthy();
     expect(screen.getByText(/25 min de foco · 5 min de pausa/i)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "50 min" }));

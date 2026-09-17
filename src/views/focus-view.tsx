@@ -151,9 +151,40 @@ function PomodoroApple({ progress }: { progress: number }) {
   );
 }
 
+function FocusPaperArrow() {
+  return (
+    <svg className="focus-paper-arrow" viewBox="0 0 48 48" aria-hidden="true">
+      <path className="focus-paper-arrow__depth" d="m7 25 21-20 14 8-12 12 11 10-14 8Z" />
+      <path className="focus-paper-arrow__face" d="m5 21 23-18 12 8-13 11 12 10-13 8Z" />
+      <path className="focus-paper-arrow__fold" d="m5 21 22 1 13-11-12-8Z" />
+    </svg>
+  );
+}
+
+function FocusPaperControlIcon({ paused }: { paused: boolean }) {
+  return (
+    <svg className="focus-paper-control-icon" viewBox="0 0 48 48" aria-hidden="true">
+      <path className="focus-paper-control-icon__depth" d="M7 7 42 25 9 44Z" />
+      {paused ? (
+        <>
+          <path className="focus-paper-control-icon__face" d="m8 5 14 4-2 33-13-2Z" />
+          <path className="focus-paper-control-icon__face" d="m27 8 14-3-1 35-13 3Z" />
+          <path className="focus-paper-control-icon__fold" d="m8 5 14 4-6 6-8-2Z" />
+        </>
+      ) : (
+        <>
+          <path className="focus-paper-control-icon__face" d="M5 4 40 22 7 41Z" />
+          <path className="focus-paper-control-icon__fold" d="m5 4 35 18-21 1Z" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const defaultSubject = workspace.subjects[0];
   const [mode, setMode] = useState<TimerMode>("timer");
+  const [modeDirection, setModeDirection] = useState(1);
   const [pomodoroPhase, setPomodoroPhase] = useState<PomodoroPhase>("focus");
   const [completedPomodoros, setCompletedPomodoros] = useState(0);
   const [duration, setDuration] = useState<number>(25);
@@ -227,6 +258,11 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
     chooseDuration(nextMode === "pomodoro" ? workspace.focusPreferences.pomodoroMinutes : 25);
   }
 
+  function slideMode(direction: -1 | 1) {
+    setModeDirection(direction);
+    chooseMode(mode === "timer" ? "pomodoro" : "timer");
+  }
+
   function updatePomodoroMinutes(minutes: 25 | 50) {
     dispatch({
       type: "focus/preferences-updated",
@@ -296,190 +332,207 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
       <PageHeader />
       <div className="focus-layout">
         <section className="focus-card" aria-labelledby="focus-timer-title">
-          <div className="focus-card__topline">
-            <div className="focus-mode-switch" aria-label="Modo do relógio">
-              {(["timer", "pomodoro"] as const).map((item) => (
-                <button
-                  className={mode === item ? "is-active" : undefined}
-                  type="button"
-                  onClick={() => chooseMode(item)}
-                  key={item}
+          <div className="focus-mode-carousel">
+            <button
+              className="focus-mode-arrow focus-mode-arrow--previous"
+              type="button"
+              disabled={running || elapsedSeconds > 0}
+              onClick={() => slideMode(-1)}
+              aria-label="Modo anterior"
+            >
+              <FocusPaperArrow />
+            </button>
+            <div className="focus-mode-viewport">
+              <span className="focus-mode-name" aria-live="polite">
+                {mode === "timer" ? "Temporizador" : "Pomodoro"}
+              </span>
+              <div
+                className={`focus-mode-slide${modeDirection < 0 ? " is-backward" : ""}`}
+                key={mode}
+              >
+                <div
+                  className={`focus-rose-stage${mode === "pomodoro" ? " focus-rose-stage--pomodoro" : ""}`}
                 >
-                  {item === "timer" ? "Temporizador" : "Pomodoro"}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div
-            className={`focus-rose-stage${mode === "pomodoro" ? " focus-rose-stage--pomodoro" : ""}`}
-          >
-            {mode === "timer" ? (
-              <FocusRose progress={bloomProgress} wilted={missedYesterday && !caredToday} />
-            ) : (
-              <div className="pomodoro-dial">
-                <PomodoroApple progress={secondsRemaining / (duration * 60)} />
-                <div className="pomodoro-dial__time">
-                  <h2 id="focus-timer-title" className="timer">
+                  {mode === "timer" ? (
+                    <FocusRose progress={bloomProgress} wilted={missedYesterday && !caredToday} />
+                  ) : (
+                    <div className="pomodoro-dial">
+                      <PomodoroApple progress={secondsRemaining / (duration * 60)} />
+                      <div className="pomodoro-dial__time">
+                        <h2 id="focus-timer-title" className="timer">
+                          {formatTimer(secondsRemaining)}
+                        </h2>
+                        <p>{pomodoroPhase === "focus" ? "Tempo de foco" : "Respire um pouco"}</p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="focus-rose-copy">
+                    <span>
+                      {mode === "pomodoro"
+                        ? pomodoroPhase === "focus"
+                          ? "Hora de focar"
+                          : pomodoroPhase === "longBreak"
+                            ? "Pausa longa"
+                            : "Pausa curta"
+                        : caredToday
+                          ? "Cuidada hoje"
+                          : "Sua flor de foco"}
+                    </span>
+                    <strong>
+                      {mode === "pomodoro"
+                        ? pomodoroPhase === "focus"
+                          ? `Uma maçã, ${workspace.focusPreferences.pomodoroMinutes} minutos e uma tarefa de cada vez.`
+                          : pomodoroPhase === "longBreak"
+                            ? "Você completou quatro rodadas. Descanse por 15 minutos."
+                            : "Respire por 5 minutos. O próximo ciclo começa sozinho."
+                        : missedYesterday && !caredToday
+                          ? "Ela sentiu sua falta. Uma sessão faz a rosa florescer novamente."
+                          : caredToday
+                            ? "Ela está segura por hoje. Continue para vê-la crescer."
+                            : "Comece uma sessão hoje para manter a rosa viva."}
+                    </strong>
+                    {mode === "timer" ? (
+                      <small>
+                        {Math.min(FULL_BLOOM_MINUTES, Math.floor(todayMinutes + liveMinutes))}/
+                        {FULL_BLOOM_MINUTES} min até florescer por completo
+                      </small>
+                    ) : (
+                      <div
+                        className="pomodoro-progress"
+                        aria-label={`${completedPomodoros} pomodoros concluídos`}
+                      >
+                        <span>{completedPomodoros} pomodoros concluídos</span>
+                        <div aria-hidden="true">
+                          {[0, 1, 2, 3].map((step) => (
+                            <i
+                              className={
+                                step <
+                                (completedPomodoros % 4 || (pomodoroPhase === "longBreak" ? 4 : 0))
+                                  ? "is-complete"
+                                  : undefined
+                              }
+                              key={step}
+                            />
+                          ))}
+                        </div>
+                        <small>
+                          {workspace.focusPreferences.pomodoroMinutes} min de foco · 5 min de pausa
+                          {workspace.focusPreferences.longBreaks
+                            ? " · 15 min após quatro rodadas"
+                            : " · sem pausa longa"}
+                        </small>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {mode === "pomodoro" && (
+                  <div className="pomodoro-settings" aria-label="Configurações do Pomodoro">
+                    <div>
+                      <span>Tempo de foco</span>
+                      {([25, 50] as const).map((minutes) => (
+                        <button
+                          className={
+                            workspace.focusPreferences.pomodoroMinutes === minutes
+                              ? "is-active"
+                              : undefined
+                          }
+                          type="button"
+                          disabled={running || elapsedSeconds > 0}
+                          onClick={() => updatePomodoroMinutes(minutes)}
+                          key={minutes}
+                        >
+                          {minutes} min
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      className={`pomodoro-long-break${workspace.focusPreferences.longBreaks ? " is-active" : ""}`}
+                      type="button"
+                      disabled={running || elapsedSeconds > 0}
+                      aria-pressed={workspace.focusPreferences.longBreaks}
+                      onClick={toggleLongBreaks}
+                    >
+                      <i aria-hidden="true" />
+                      Pausa longa após 4 rodadas
+                    </button>
+                  </div>
+                )}
+                {mode === "timer" && (
+                  <div className="timer-picker">
+                    <label htmlFor="focus-duration">Escolha o tempo</label>
+                    <input
+                      id="focus-duration"
+                      type="range"
+                      min="1"
+                      max="120"
+                      value={duration}
+                      disabled={running || elapsedSeconds > 0}
+                      onChange={(event) => chooseDuration(Number(event.target.value))}
+                      style={{ "--timer-progress": `${(duration / 120) * 100}%` } as CSSProperties}
+                    />
+                    <div className="timer-presets" aria-label="Atalhos de duração">
+                      {PRESETS.map((minutes) => (
+                        <button
+                          className={duration === minutes ? "is-active" : undefined}
+                          type="button"
+                          disabled={running || elapsedSeconds > 0}
+                          onClick={() => chooseDuration(minutes)}
+                          key={minutes}
+                        >
+                          {minutes} min
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {mode === "timer" && (
+                  <h2 id="focus-timer-title" className="timer" aria-live="polite">
                     {formatTimer(secondsRemaining)}
                   </h2>
-                  <p>{pomodoroPhase === "focus" ? "Tempo de foco" : "Respire um pouco"}</p>
+                )}
+                <p className="timer-status">
+                  {running
+                    ? "Sessão em andamento"
+                    : elapsedSeconds > 0
+                      ? "Sessão pausada"
+                      : "Pronto para começar"}
+                </p>
+                <div className="timer-controls">
+                  <button
+                    className="primary-button timer-primary"
+                    type="button"
+                    onClick={() => setRunning((current) => !current)}
+                  >
+                    <FocusPaperControlIcon paused={running} />
+                    {running ? "Pausar" : elapsedSeconds > 0 ? "Continuar" : "Começar"}
+                  </button>
+                  <button
+                    className="icon-button"
+                    type="button"
+                    onClick={reset}
+                    aria-label="Reiniciar temporizador"
+                  >
+                    ↺
+                  </button>
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={finish}
+                    disabled={elapsedSeconds <= 0}
+                  >
+                    Encerrar e registrar
+                  </button>
                 </div>
               </div>
-            )}
-            <div className="focus-rose-copy">
-              <span>
-                {mode === "pomodoro"
-                  ? pomodoroPhase === "focus"
-                    ? "Hora de focar"
-                    : pomodoroPhase === "longBreak"
-                      ? "Pausa longa"
-                      : "Pausa curta"
-                  : caredToday
-                    ? "Cuidada hoje"
-                    : "Sua flor de foco"}
-              </span>
-              <strong>
-                {mode === "pomodoro"
-                  ? pomodoroPhase === "focus"
-                    ? `Uma maçã, ${workspace.focusPreferences.pomodoroMinutes} minutos e uma tarefa de cada vez.`
-                    : pomodoroPhase === "longBreak"
-                      ? "Você completou quatro rodadas. Descanse por 15 minutos."
-                      : "Respire por 5 minutos. O próximo ciclo começa sozinho."
-                  : missedYesterday && !caredToday
-                    ? "Ela sentiu sua falta. Uma sessão faz a rosa florescer novamente."
-                    : caredToday
-                      ? "Ela está segura por hoje. Continue para vê-la crescer."
-                      : "Comece uma sessão hoje para manter a rosa viva."}
-              </strong>
-              {mode === "timer" ? (
-                <small>
-                  {Math.min(FULL_BLOOM_MINUTES, Math.floor(todayMinutes + liveMinutes))}/
-                  {FULL_BLOOM_MINUTES} min até florescer por completo
-                </small>
-              ) : (
-                <div
-                  className="pomodoro-progress"
-                  aria-label={`${completedPomodoros} pomodoros concluídos`}
-                >
-                  <span>{completedPomodoros} pomodoros concluídos</span>
-                  <div aria-hidden="true">
-                    {[0, 1, 2, 3].map((step) => (
-                      <i
-                        className={
-                          step < (completedPomodoros % 4 || (pomodoroPhase === "longBreak" ? 4 : 0))
-                            ? "is-complete"
-                            : undefined
-                        }
-                        key={step}
-                      />
-                    ))}
-                  </div>
-                  <small>
-                    {workspace.focusPreferences.pomodoroMinutes} min de foco · 5 min de pausa
-                    {workspace.focusPreferences.longBreaks
-                      ? " · 15 min após quatro rodadas"
-                      : " · sem pausa longa"}
-                  </small>
-                </div>
-              )}
             </div>
-          </div>
-          {mode === "pomodoro" && (
-            <div className="pomodoro-settings" aria-label="Configurações do Pomodoro">
-              <div>
-                <span>Tempo de foco</span>
-                {([25, 50] as const).map((minutes) => (
-                  <button
-                    className={
-                      workspace.focusPreferences.pomodoroMinutes === minutes
-                        ? "is-active"
-                        : undefined
-                    }
-                    type="button"
-                    disabled={running || elapsedSeconds > 0}
-                    onClick={() => updatePomodoroMinutes(minutes)}
-                    key={minutes}
-                  >
-                    {minutes} min
-                  </button>
-                ))}
-              </div>
-              <button
-                className={`pomodoro-long-break${workspace.focusPreferences.longBreaks ? " is-active" : ""}`}
-                type="button"
-                disabled={running || elapsedSeconds > 0}
-                aria-pressed={workspace.focusPreferences.longBreaks}
-                onClick={toggleLongBreaks}
-              >
-                <i aria-hidden="true" />
-                Pausa longa após 4 rodadas
-              </button>
-            </div>
-          )}
-          {mode === "timer" && (
-            <div className="timer-picker">
-              <label htmlFor="focus-duration">Escolha o tempo</label>
-              <input
-                id="focus-duration"
-                type="range"
-                min="1"
-                max="120"
-                value={duration}
-                disabled={running || elapsedSeconds > 0}
-                onChange={(event) => chooseDuration(Number(event.target.value))}
-                style={{ "--timer-progress": `${(duration / 120) * 100}%` } as CSSProperties}
-              />
-              <div className="timer-presets" aria-label="Atalhos de duração">
-                {PRESETS.map((minutes) => (
-                  <button
-                    className={duration === minutes ? "is-active" : undefined}
-                    type="button"
-                    disabled={running || elapsedSeconds > 0}
-                    onClick={() => chooseDuration(minutes)}
-                    key={minutes}
-                  >
-                    {minutes} min
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-          {mode === "timer" && (
-            <h2 id="focus-timer-title" className="timer" aria-live="polite">
-              {formatTimer(secondsRemaining)}
-            </h2>
-          )}
-          <p className="timer-status">
-            {running
-              ? "Sessão em andamento"
-              : elapsedSeconds > 0
-                ? "Sessão pausada"
-                : "Pronto para começar"}
-          </p>
-          <div className="timer-controls">
             <button
-              className="primary-button timer-primary"
+              className="focus-mode-arrow focus-mode-arrow--next"
               type="button"
-              onClick={() => setRunning((current) => !current)}
+              disabled={running || elapsedSeconds > 0}
+              onClick={() => slideMode(1)}
+              aria-label="Próximo modo"
             >
-              <span aria-hidden="true">{running ? "Ⅱ" : "▶"}</span>
-              {running ? "Pausar" : elapsedSeconds > 0 ? "Continuar" : "Começar"}
-            </button>
-            <button
-              className="icon-button"
-              type="button"
-              onClick={reset}
-              aria-label="Reiniciar temporizador"
-            >
-              ↺
-            </button>
-            <button
-              className="secondary-button"
-              type="button"
-              onClick={finish}
-              disabled={elapsedSeconds <= 0}
-            >
-              Encerrar e registrar
+              <FocusPaperArrow />
             </button>
           </div>
         </section>
