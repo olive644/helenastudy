@@ -1,5 +1,9 @@
 # Auditoria do estado atual
 
+## Mostrador Pomodoro em maçã, 16/09/2026
+
+O contador fica no centro da silhueta vazada de uma maçã em papel recortado. O contorno roxo acompanha o tempo restante e muda para verde durante a pausa. Facetas, folha dobrada e base deslocada seguem a identidade HelenaStudy. A lógica de ciclos permanece igual.
+
 ## Barra desktop e Espaço do aluno, 15/09/2026
 
 O rail desktop usa fundo grafite e ícones claros no tema claro. No tema escuro, usa fundo branco e ícones grafite em todos os estados. O cartão inicial do Espaço do aluno não mostra a antiga mascote 2D. A identidade aprovada da Helena permanece nos fluxos de onboarding, login e mundos.

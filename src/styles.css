@@ -4152,18 +4152,72 @@ body.local-room-active {
 }
 
 .pomodoro-apple {
-  width: min(100%, 230px);
-  justify-self: center;
+  width: 100%;
+  display: block;
   overflow: visible;
-  filter: drop-shadow(0 12px 0 rgb(41 36 50 / 12%));
 }
 
-.pomodoro-apple__shadow {
-  fill: rgb(41 36 50 / 15%);
+.focus-rose-stage--pomodoro {
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  text-align: center;
 }
 
-.pomodoro-apple__stem {
-  fill: #4a3030;
+.pomodoro-dial {
+  position: relative;
+  width: min(100%, 360px);
+  justify-self: center;
+  --apple-color: #7c3aed;
+  --apple-depth: #51259b;
+}
+
+.pomodoro-dial.is-break {
+  --apple-color: #62bd67;
+  --apple-depth: #287543;
+}
+
+.pomodoro-dial__time {
+  position: absolute;
+  inset: 39% 19% auto;
+  text-align: center;
+}
+
+.pomodoro-dial__time .timer {
+  margin: 0;
+  font-size: clamp(2.5rem, 8vw, 3.75rem);
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.pomodoro-dial__time p {
+  margin: 0.7rem 0 0;
+  font-size: 0.85rem;
+}
+
+.pomodoro-apple__depth,
+.pomodoro-apple__track,
+.pomodoro-apple__progress {
+  fill: none;
+  stroke-width: 22px;
+  stroke-linejoin: bevel;
+  stroke-linecap: butt;
+}
+
+.pomodoro-apple__depth {
+  stroke: var(--apple-depth);
+}
+
+.pomodoro-apple__track {
+  stroke: #51465d;
+}
+
+.pomodoro-apple__progress {
+  stroke: var(--apple-color);
+  transition: stroke-dasharray 0.5s linear;
+}
+
+.pomodoro-apple__facet {
+  fill: #a779ef;
 }
 
 .pomodoro-apple__leaf {
@@ -4174,33 +4228,9 @@ body.local-room-active {
   fill: #287543;
 }
 
-.pomodoro-apple__body {
-  fill: #ef4562;
-}
-
-.pomodoro-apple__side {
-  fill: #bc284f;
-}
-
-.pomodoro-apple__light {
-  fill: #ff6d78;
-}
-
-.pomodoro-apple__center {
-  fill: #df3457;
-}
-
-.pomodoro-apple__shine {
-  fill: #ffb1b5;
-}
-
-.pomodoro-apple.is-active {
-  animation: pomodoro-breathe 2.4s ease-in-out infinite;
-}
-
-@keyframes pomodoro-breathe {
-  50% {
-    transform: scale(1.035) rotate(-1deg);
+@media (prefers-reduced-motion: reduce) {
+  .pomodoro-apple__progress {
+    transition: none;
   }
 }
 
@@ -4388,10 +4418,6 @@ body.local-room-active {
   }
 
   .focus-rose {
-    width: min(58vw, 210px);
-  }
-
-  .pomodoro-apple {
     width: min(58vw, 210px);
   }
 
