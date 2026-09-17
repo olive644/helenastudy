@@ -236,8 +236,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const [completedPomodoros, setCompletedPomodoros] = useState(0);
   const [duration, setDuration] = useState<number>(25);
   const [secondsRemaining, setSecondsRemaining] = useState(duration * 60);
-  const [timerDurationSeconds, setTimerDurationSeconds] = useState(25 * 60);
-  const [timerRemaining, setTimerRemaining] = useState(25 * 60);
+  const [timerElapsedSeconds, setTimerElapsedSeconds] = useState(0);
   const [running, setRunning] = useState(false);
   const [pomodoroDays, setPomodoroDays] = useState<string[]>(() => {
     try {
@@ -252,21 +251,15 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const [calendarMonth, setCalendarMonth] = useState(() => dateFromKey(deadline));
   const [openedAt] = useState(() => Date.now());
   const pomodoroElapsedSeconds = duration * 60 - secondsRemaining;
-  const elapsedSeconds =
-    mode === "timer" ? timerDurationSeconds - timerRemaining : pomodoroElapsedSeconds;
+  const elapsedSeconds = mode === "timer" ? timerElapsedSeconds : pomodoroElapsedSeconds;
 
   useEffect(() => {
     if (!running || mode !== "timer") return;
     const timer = window.setTimeout(() => {
-      if (timerRemaining <= 1) {
-        setTimerRemaining(0);
-        setRunning(false);
-        return;
-      }
-      setTimerRemaining(timerRemaining - 1);
+      setTimerElapsedSeconds((current) => current + 1);
     }, 1000);
     return () => window.clearTimeout(timer);
-  }, [mode, running, timerRemaining]);
+  }, [mode, running, timerElapsedSeconds]);
 
   useEffect(() => {
     if (!running || mode !== "pomodoro") return;
@@ -329,7 +322,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
     setCompletedPomodoros(0);
     setGoalAmount(nextMode === "pomodoro" ? 4 : 300);
     chooseDuration(workspace.focusPreferences.pomodoroMinutes);
-    setTimerRemaining(timerDurationSeconds);
+    setTimerElapsedSeconds(0);
   }
 
   function slideMode(direction: -1 | 1) {
@@ -358,7 +351,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   function reset() {
     setRunning(false);
     if (mode === "timer") {
-      setTimerRemaining(timerDurationSeconds);
+      setTimerElapsedSeconds(0);
     } else {
       setSecondsRemaining(duration * 60);
     }
@@ -366,19 +359,6 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
 
   function toggleRunning() {
     setRunning((current) => !current);
-  }
-
-  function updateTimerPart(part: "hours" | "minutes" | "seconds", value: number) {
-    const hours = Math.floor(timerDurationSeconds / 3600);
-    const minutes = Math.floor(timerDurationSeconds / 60) % 60;
-    const seconds = timerDurationSeconds % 60;
-    const next =
-      (part === "hours" ? value : hours) * 3600 +
-      (part === "minutes" ? value : minutes) * 60 +
-      (part === "seconds" ? value : seconds);
-    const safeNext = Math.max(1, next);
-    setTimerDurationSeconds(safeNext);
-    setTimerRemaining(safeNext);
   }
 
   function finish() {
@@ -547,41 +527,9 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                   </div>
                 )}
                 {mode === "timer" && (
-                  <>
-                    {!running && elapsedSeconds === 0 && (
-                      <div className="timer-wheel" aria-label="Escolha a duração do temporizador">
-                        {(["hours", "minutes", "seconds"] as const).map((part, index) => {
-                          const value =
-                            part === "hours"
-                              ? Math.floor(timerDurationSeconds / 3600)
-                              : part === "minutes"
-                                ? Math.floor(timerDurationSeconds / 60) % 60
-                                : timerDurationSeconds % 60;
-                          const limit = part === "hours" ? 24 : 60;
-                          return (
-                            <label key={part}>
-                              <select
-                                value={value}
-                                onChange={(event) =>
-                                  updateTimerPart(part, Number(event.target.value))
-                                }
-                              >
-                                {Array.from({ length: limit }, (_, option) => (
-                                  <option value={option} key={option}>
-                                    {String(option).padStart(2, "0")}
-                                  </option>
-                                ))}
-                              </select>
-                              <span>{["horas", "min", "seg"][index]}</span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    )}
-                    <h2 id="focus-timer-title" className="timer timer--stopwatch" aria-live="off">
-                      {formatLongTimer(timerRemaining)}
-                    </h2>
-                  </>
+                  <h2 id="focus-timer-title" className="timer timer--stopwatch" aria-live="off">
+                    {formatLongTimer(timerElapsedSeconds)}
+                  </h2>
                 )}
                 <div className="timer-controls">
                   <button

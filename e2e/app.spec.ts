@@ -134,9 +134,9 @@ test("troca os modos de foco pelas setas laterais", async ({ page }, testInfo) =
   await expect(page.getByText("Temporizador", { exact: true })).toBeVisible();
   await expect(page.locator(".focus-mode-slide")).toHaveClass(/is-backward/);
   await expect(page.locator(".focus-paper-control-icon")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "00:25:00" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "00:00:00" })).toBeVisible();
   await page.getByRole("button", { name: "Começar" }).click();
-  await expect(page.getByRole("heading", { name: /00:24:5[0-9]/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /00:00:0[1-9]/ })).toBeVisible();
   await page.getByRole("button", { name: "Pausar" }).click();
 });
 
