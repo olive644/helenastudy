@@ -1,12 +1,5 @@
 import { Check, Plus } from "lucide-react";
-import {
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type Dispatch,
-  type FormEvent,
-} from "react";
+import { useEffect, useState, type CSSProperties, type Dispatch, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
 import {
   minutesFocusedOn,
@@ -24,6 +17,7 @@ type FocusViewProps = {
 const FULL_BLOOM_MINUTES = 60;
 const POMODORO_SHORT_BREAK_MINUTES = 5;
 const POMODORO_LONG_BREAK_MINUTES = 15;
+const POMODORO_STREAK_KEY = "noteoli.pomodoro-streak.v1";
 const MONTH_NAMES = [
   "janeiro",
   "fevereiro",
@@ -81,11 +75,22 @@ function formatTimer(totalSeconds: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-function formatStopwatch(totalMilliseconds: number): string {
-  const minutes = Math.floor(totalMilliseconds / 60_000);
-  const seconds = Math.floor(totalMilliseconds / 1_000) % 60;
-  const centiseconds = Math.floor(totalMilliseconds / 10) % 100;
-  return [minutes, seconds, centiseconds].map((value) => String(value).padStart(2, "0")).join(":");
+function formatLongTimer(totalSeconds: number): string {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor(totalSeconds / 60) % 60;
+  const seconds = totalSeconds % 60;
+  return [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":");
+}
+
+function weekDays(reference = new Date()) {
+  const monday = new Date(reference);
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(reference.getDate() - ((reference.getDay() + 6) % 7));
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + index);
+    return { key: toDateKey(date), label: "STQQSSD"[index] };
+  });
 }
 
 function FocusRose({ progress, wilted }: { progress: number; wilted: boolean }) {
@@ -231,28 +236,30 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const [completedPomodoros, setCompletedPomodoros] = useState(0);
   const [duration, setDuration] = useState<number>(25);
   const [secondsRemaining, setSecondsRemaining] = useState(duration * 60);
-  const [stopwatchMs, setStopwatchMs] = useState(0);
+  const [timerElapsedSeconds, setTimerElapsedSeconds] = useState(0);
   const [running, setRunning] = useState(false);
-  const stopwatchBase = useRef(0);
-  const stopwatchStartedAt = useRef(0);
+  const [pomodoroDays, setPomodoroDays] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(POMODORO_STREAK_KEY) ?? "[]") as string[];
+    } catch {
+      return [];
+    }
+  });
   const [goalTitle, setGoalTitle] = useState("");
   const [goalAmount, setGoalAmount] = useState(300);
   const [deadline, setDeadline] = useState(toDateKey(new Date()));
   const [calendarMonth, setCalendarMonth] = useState(() => dateFromKey(deadline));
   const [openedAt] = useState(() => Date.now());
   const pomodoroElapsedSeconds = duration * 60 - secondsRemaining;
-  const elapsedSeconds = mode === "timer" ? stopwatchMs / 1_000 : pomodoroElapsedSeconds;
+  const elapsedSeconds = mode === "timer" ? timerElapsedSeconds : pomodoroElapsedSeconds;
 
   useEffect(() => {
     if (!running || mode !== "timer") return;
-    let frame = 0;
-    const tick = (now: number) => {
-      setStopwatchMs(stopwatchBase.current + now - stopwatchStartedAt.current);
-      frame = window.requestAnimationFrame(tick);
-    };
-    frame = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(frame);
-  }, [mode, running]);
+    const timer = window.setTimeout(() => {
+      setTimerElapsedSeconds((current) => current + 1);
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [mode, running, timerElapsedSeconds]);
 
   useEffect(() => {
     if (!running || mode !== "pomodoro") return;
@@ -267,6 +274,12 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
           subjectId: defaultSubject?.id ?? "",
           durationMinutes: duration,
           completedAt: new Date().toISOString(),
+        });
+        const today = toDateKey(new Date());
+        setPomodoroDays((current) => {
+          const nextDays = current.includes(today) ? current : [...current, today];
+          localStorage.setItem(POMODORO_STREAK_KEY, JSON.stringify(nextDays));
+          return nextDays;
         });
       }
       const next = nextPomodoroStep(
@@ -285,6 +298,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
     completedPomodoros,
     defaultSubject?.id,
     dispatch,
+    duration,
     mode,
     pomodoroPhase,
     running,
@@ -308,8 +322,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
     setCompletedPomodoros(0);
     setGoalAmount(nextMode === "pomodoro" ? 4 : 300);
     chooseDuration(workspace.focusPreferences.pomodoroMinutes);
-    setStopwatchMs(0);
-    stopwatchBase.current = 0;
+    setTimerElapsedSeconds(0);
   }
 
   function slideMode(direction: -1 | 1) {
@@ -338,18 +351,13 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   function reset() {
     setRunning(false);
     if (mode === "timer") {
-      setStopwatchMs(0);
-      stopwatchBase.current = 0;
+      setTimerElapsedSeconds(0);
     } else {
       setSecondsRemaining(duration * 60);
     }
   }
 
   function toggleRunning() {
-    if (mode === "timer") {
-      if (running) stopwatchBase.current = stopwatchMs;
-      else stopwatchStartedAt.current = performance.now();
-    }
     setRunning((current) => !current);
   }
 
@@ -411,7 +419,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
             </button>
             <div className="focus-mode-viewport">
               <span className="focus-mode-name" aria-live="polite">
-                {mode === "timer" ? "Cronômetro" : "Pomodoro"}
+                {mode === "timer" ? "Temporizador" : "Pomodoro"}
               </span>
               <div
                 className={`focus-mode-slide${modeDirection < 0 ? " is-backward" : ""}`}
@@ -464,22 +472,17 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                         {FULL_BLOOM_MINUTES} min até florescer por completo
                       </small>
                     ) : (
-                      <div
-                        className="pomodoro-progress"
-                        aria-label={`${completedPomodoros} pomodoros concluídos`}
-                      >
-                        <span>{completedPomodoros} pomodoros concluídos</span>
-                        <div aria-hidden="true">
-                          {[0, 1, 2, 3].map((step) => (
-                            <i
-                              className={
-                                step <
-                                (completedPomodoros % 4 || (pomodoroPhase === "longBreak" ? 4 : 0))
-                                  ? "is-complete"
-                                  : undefined
-                              }
-                              key={step}
-                            />
+                      <div className="pomodoro-progress">
+                        <span>Pomodoros concluídos nesta semana</span>
+                        <div className="pomodoro-week">
+                          {weekDays().map((day) => (
+                            <span className="pomodoro-week__day" key={day.key}>
+                              <i
+                                className={`streak-apple${pomodoroDays.includes(day.key) ? " is-active" : ""}`}
+                                aria-hidden="true"
+                              />
+                              <small>{day.label}</small>
+                            </span>
                           ))}
                         </div>
                         <small>
@@ -525,7 +528,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                 )}
                 {mode === "timer" && (
                   <h2 id="focus-timer-title" className="timer timer--stopwatch" aria-live="off">
-                    {formatStopwatch(stopwatchMs)}
+                    {formatLongTimer(timerElapsedSeconds)}
                   </h2>
                 )}
                 <div className="timer-controls">

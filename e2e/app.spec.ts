@@ -116,7 +116,7 @@ test("troca os modos de foco pelas setas laterais", async ({ page }, testInfo) =
   });
   await navigation.getByRole("button", { name: "Foco", exact: true }).click();
 
-  await expect(page.getByText("Cronômetro", { exact: true })).toBeVisible();
+  await expect(page.getByText("Temporizador", { exact: true })).toBeVisible();
   await expect(page.locator(".focus-layout > .focus-card")).toHaveCSS(
     "background-color",
     "rgba(0, 0, 0, 0)",
@@ -131,7 +131,7 @@ test("troca os modos de foco pelas setas laterais", async ({ page }, testInfo) =
   await page.getByRole("button", { name: "Pausar" }).click();
   await page.getByRole("button", { name: "Reiniciar contador" }).click();
   await page.getByRole("button", { name: "Modo anterior" }).click();
-  await expect(page.getByText("Cronômetro", { exact: true })).toBeVisible();
+  await expect(page.getByText("Temporizador", { exact: true })).toBeVisible();
   await expect(page.locator(".focus-mode-slide")).toHaveClass(/is-backward/);
   await expect(page.locator(".focus-paper-control-icon")).toBeVisible();
   await expect(page.getByRole("heading", { name: "00:00:00" })).toBeVisible();
@@ -175,7 +175,7 @@ test("concentra as ferramentas na navegação lateral", async ({ page }, testInf
   await page.getByRole("button", { name: "Expandir menu lateral" }).click();
   await expect(sidebar).toHaveClass(/sidebar--expanded/);
   await expect(sidebar).toHaveCSS("width", "260px");
-  await expect(sidebar.getByLabel("HelenaStudy")).toBeVisible();
+  await expect(sidebar.getByLabel("Pepopsia")).toBeVisible();
   await expect(sidebar.getByText("Área do aluno", { exact: true })).toBeVisible();
   await expect(sidebar.getByText("Espaço do aluno", { exact: true })).toBeVisible();
 
@@ -228,9 +228,9 @@ test("anima o seletor entre os temas claro e escuro", async ({ page }, testInfo)
 test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }, testInfo) => {
   await expect(page.getByRole("heading", { name: "Espaço do aluno" })).toBeVisible();
   await expect(page.getByText("Dados salvos neste dispositivo")).toHaveCount(0);
-  await expect(page.getByLabel("HelenaStudy")).toBeAttached();
+  await expect(page.getByLabel("Pepopsia")).toBeAttached();
   await expect(page.getByAltText(/rosto da helena/i)).toHaveCount(0);
-  await expect(page.getByAltText("Helena, a mascote do HelenaStudy")).toHaveCount(0);
+  await expect(page.getByAltText("Helena, a mascote do Pepopsia")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Agenda", exact: true }).click();
   await page.getByLabel(/o que precisa ser feito/i).fill("Revisar Simple Past");

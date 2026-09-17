@@ -4234,16 +4234,77 @@ body.local-room-active {
   gap: 0.4rem;
 }
 
-.pomodoro-progress i {
-  width: 0.72rem;
-  height: 0.72rem;
-  background: var(--border);
-  border-radius: 35% 55% 45% 50%;
-  transform: rotate(45deg);
+.pomodoro-progress .pomodoro-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(34px, 1fr));
+  width: min(100%, 390px);
+  gap: clamp(0.2rem, 1vw, 0.55rem);
 }
 
-.pomodoro-progress i.is-complete {
-  background: #ef4562;
+.pomodoro-week__day {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+}
+
+.pomodoro-week__day > small {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.streak-apple {
+  position: relative;
+  width: 34px;
+  height: 36px;
+  margin-top: 8px;
+  border-radius: 42% 45% 48% 46% / 36% 38% 58% 60%;
+  background: linear-gradient(135deg, #4b4254 0 27%, #312b39 28% 100%);
+  box-shadow: 0 5px 0 #17131d;
+  filter: drop-shadow(0 4px 0 rgb(15 11 20 / 22%));
+  opacity: 0.5;
+  transition:
+    transform 220ms ease,
+    opacity 220ms ease,
+    filter 220ms ease;
+}
+
+.streak-apple::before {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 12px;
+  top: -9px;
+  left: 17px;
+  background: #211927;
+  transform: rotate(12deg);
+}
+
+.streak-apple::after {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 9px;
+  top: -7px;
+  left: 21px;
+  border-radius: 80% 15% 75% 20%;
+  background: #34423b;
+  transform: rotate(-17deg);
+}
+
+.streak-apple.is-active {
+  background: linear-gradient(135deg, #ff8b98 0 27%, #ef4562 28% 100%);
+  box-shadow: 0 5px 0 #9f2144;
+  opacity: 1;
+  filter: drop-shadow(0 4px 0 rgb(111 24 51 / 32%));
+  transform: translateY(-2px);
+}
+
+.streak-apple.is-active::before {
+  background: #5c2d18;
+}
+.streak-apple.is-active::after {
+  background: #62bd67;
 }
 
 .pomodoro-apple__leaf {
@@ -8199,6 +8260,44 @@ select {
   margin-top: 0.8rem;
   font-size: clamp(3.1rem, 11vw, 7rem);
   letter-spacing: -0.055em;
+}
+
+.timer-wheel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(72px, 110px));
+  justify-content: center;
+  margin: 1rem auto 0.25rem;
+  gap: 0.45rem;
+}
+
+.timer-wheel label {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+}
+
+.timer-wheel select {
+  width: 100%;
+  min-height: 68px;
+  padding: 0.35rem;
+  border: 2px solid #7433e0;
+  border-radius: 13px 8px 14px 9px;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 5px 0 #4c1d95;
+  font: inherit;
+  font-size: 1.55rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  text-align: center;
+  text-align-last: center;
+}
+
+.timer-wheel span {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .focus-mode-slide > .timer-controls {
