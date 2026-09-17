@@ -110,6 +110,26 @@ test("explora mundos com a Helena e abre a trilha de níveis", async ({ page }, 
   await expect(page.locator(".solo-level-path")).toHaveCSS("animation-name", "none");
 });
 
+test("troca os modos de foco pelas setas laterais", async ({ page }, testInfo) => {
+  const navigation = page.getByRole("navigation", {
+    name: testInfo.project.name === "mobile" ? "Navegação móvel" : "Navegação principal",
+  });
+  await navigation.getByRole("button", { name: "Foco", exact: true }).click();
+
+  await expect(page.getByText("Temporizador", { exact: true })).toBeVisible();
+  await expect(page.locator(".focus-layout > .focus-card")).toHaveCSS(
+    "background-color",
+    "rgba(0, 0, 0, 0)",
+  );
+  await page.getByRole("button", { name: "Próximo modo" }).click();
+  await expect(page.getByText("Pomodoro", { exact: true })).toBeVisible();
+  await expect(page.locator(".focus-mode-slide")).toHaveCSS("animation-name", "focus-mode-arrive");
+  await page.getByRole("button", { name: "Modo anterior" }).click();
+  await expect(page.getByText("Temporizador", { exact: true })).toBeVisible();
+  await expect(page.locator(".focus-mode-slide")).toHaveClass(/is-backward/);
+  await expect(page.locator(".focus-paper-control-icon")).toBeVisible();
+});
+
 test("concentra as ferramentas na navegação lateral", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "Contrato visual da página inicial desktop.");
   const navigation = page.getByRole("navigation", { name: "Navegação principal" });

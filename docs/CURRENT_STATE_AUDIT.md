@@ -401,3 +401,7 @@ o endereço codificado continua sendo gerado a partir da sala atual.
 # Entrada e navegação, setembro de 2026
 
 Primeira visita abre onboarding e termina no login Google aprovado. A conclusão é guardada na chave helena.onboarding.v1 após autenticação bem-sucedida. Convites de sala mantêm entrada direta. Mais no mobile fica no canto superior esquerdo; a barra inferior mantém quatro destinos. Menus desktop e mobile usam tiras facetadas com transição para X.
+
+# Foco, setembro de 2026
+
+Temporizador e Pomodoro ocupam uma área aberta, sem cartão de fundo, e são escolhidos por setas laterais de papel recortado. A troca usa o mesmo deslocamento direcional de 550 ms dos mundos de Praticar, respeita redução de movimento e fica bloqueada durante uma sessão em andamento ou pausada. O botão de início também usa um ícone próprio de papel recortado.
