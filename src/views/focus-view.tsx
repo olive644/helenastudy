@@ -14,8 +14,10 @@ type FocusViewProps = {
   dispatch: Dispatch<WorkspaceAction>;
 };
 
-const PRESETS = [25, 50] as const;
+const PRESETS = [5, 15, 25, 45, 60] as const;
 const FULL_BLOOM_MINUTES = 60;
+type TimerMode = "timer" | "pomodoro";
+type PomodoroPhase = "focus" | "break";
 
 function formatTimer(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
@@ -71,9 +73,35 @@ function FocusRose({ progress, wilted }: { progress: number; wilted: boolean }) 
   );
 }
 
+function PomodoroApple({ active }: { active: boolean }) {
+  return (
+    <svg
+      className={`pomodoro-apple${active ? " is-active" : ""}`}
+      viewBox="0 0 240 250"
+      role="img"
+      aria-label="Maçã Pomodoro em papel recortado"
+    >
+      <path className="pomodoro-apple__shadow" d="m42 219 79-18 79 19-78 22Z" />
+      <path className="pomodoro-apple__stem" d="m119 53 9-40 17 5-15 40Z" />
+      <path className="pomodoro-apple__leaf" d="m130 42 51-23-18 38-36 10Z" />
+      <path className="pomodoro-apple__leaf-fold" d="m181 19-51 23 33 15Z" />
+      <path
+        className="pomodoro-apple__body"
+        d="m46 102 30-42 45 10 38-12 38 35 3 62-31 55-49 15-51-19-28-50Z"
+      />
+      <path className="pomodoro-apple__side" d="m159 58 38 35 3 62-31 55-14-72Z" />
+      <path className="pomodoro-apple__light" d="m76 60 45 10-20 57-60 29 5-54Z" />
+      <path className="pomodoro-apple__center" d="m101 85 38-2 25 35-10 45-36 24-39-27-5-40Z" />
+      <path className="pomodoro-apple__shine" d="m76 92 16-13 11 9-15 27Z" />
+    </svg>
+  );
+}
+
 export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const defaultSubject = workspace.subjects[0];
   const [subjectId, setSubjectId] = useState(defaultSubject?.id ?? "");
+  const [mode, setMode] = useState<TimerMode>("timer");
+  const [pomodoroPhase, setPomodoroPhase] = useState<PomodoroPhase>("focus");
   const [duration, setDuration] = useState<number>(25);
   const [secondsRemaining, setSecondsRemaining] = useState(duration * 60);
   const [running, setRunning] = useState(false);
@@ -96,6 +124,25 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
     return () => window.clearInterval(timer);
   }, [running]);
 
+  useEffect(() => {
+    if (secondsRemaining !== 0 || mode !== "pomodoro") return;
+    if (pomodoroPhase === "focus") {
+      dispatch({
+        type: "focus/recorded",
+        subjectId,
+        durationMinutes: 25,
+        completedAt: new Date().toISOString(),
+      });
+      setPomodoroPhase("break");
+      setDuration(5);
+      setSecondsRemaining(5 * 60);
+    } else {
+      setPomodoroPhase("focus");
+      setDuration(25);
+      setSecondsRemaining(25 * 60);
+    }
+  }, [dispatch, mode, pomodoroPhase, secondsRemaining, subjectId]);
+
   if (!defaultSubject) return null;
   const subject = workspace.subjects.find((item) => item.id === subjectId) ?? defaultSubject;
 
@@ -105,6 +152,12 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
     setRunning(false);
   }
 
+  function chooseMode(nextMode: TimerMode) {
+    setMode(nextMode);
+    setPomodoroPhase("focus");
+    chooseDuration(25);
+  }
+
   function reset() {
     setRunning(false);
     setSecondsRemaining(duration * 60);
@@ -112,12 +165,14 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
 
   function finish() {
     if (elapsedSeconds <= 0) return;
-    dispatch({
-      type: "focus/recorded",
-      subjectId,
-      durationMinutes: Math.max(1, Math.round(elapsedSeconds / 60)),
-      completedAt: new Date().toISOString(),
-    });
+    if (mode === "timer" || pomodoroPhase === "focus") {
+      dispatch({
+        type: "focus/recorded",
+        subjectId,
+        durationMinutes: Math.max(1, Math.round(elapsedSeconds / 60)),
+        completedAt: new Date().toISOString(),
+      });
+    }
     reset();
   }
 
@@ -165,36 +220,84 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                 ))}
               </select>
             </label>
-            <div className="preset-switch" aria-label="Duração da sessão">
-              {PRESETS.map((minutes) => (
+            <div className="focus-mode-switch" aria-label="Modo do relógio">
+              {(["timer", "pomodoro"] as const).map((item) => (
                 <button
-                  className={duration === minutes ? "is-active" : undefined}
+                  className={mode === item ? "is-active" : undefined}
                   type="button"
-                  onClick={() => chooseDuration(minutes)}
-                  key={minutes}
+                  onClick={() => chooseMode(item)}
+                  key={item}
                 >
-                  {minutes} min
+                  {item === "timer" ? "Temporizador" : "Pomodoro"}
                 </button>
               ))}
             </div>
           </div>
           <div className="focus-rose-stage">
-            <FocusRose progress={bloomProgress} wilted={missedYesterday && !caredToday} />
+            {mode === "timer" ? (
+              <FocusRose progress={bloomProgress} wilted={missedYesterday && !caredToday} />
+            ) : (
+              <PomodoroApple active={running} />
+            )}
             <div className="focus-rose-copy">
-              <span>{caredToday ? "Cuidada hoje" : "Sua flor de foco"}</span>
-              <strong>
-                {missedYesterday && !caredToday
-                  ? "Ela sentiu sua falta. Uma sessão faz a rosa florescer novamente."
+              <span>
+                {mode === "pomodoro"
+                  ? pomodoroPhase === "focus"
+                    ? "Hora de focar"
+                    : "Pausa curta"
                   : caredToday
-                    ? "Ela está segura por hoje. Continue para vê-la crescer."
-                    : "Comece uma sessão hoje para manter a rosa viva."}
+                    ? "Cuidada hoje"
+                    : "Sua flor de foco"}
+              </span>
+              <strong>
+                {mode === "pomodoro"
+                  ? pomodoroPhase === "focus"
+                    ? "Uma maçã, 25 minutos e uma tarefa de cada vez."
+                    : "Respire por 5 minutos. O próximo ciclo já está preparado."
+                  : missedYesterday && !caredToday
+                    ? "Ela sentiu sua falta. Uma sessão faz a rosa florescer novamente."
+                    : caredToday
+                      ? "Ela está segura por hoje. Continue para vê-la crescer."
+                      : "Comece uma sessão hoje para manter a rosa viva."}
               </strong>
-              <small>
-                {Math.min(FULL_BLOOM_MINUTES, Math.floor(todayMinutes + liveMinutes))}/
-                {FULL_BLOOM_MINUTES} min até florescer por completo
-              </small>
+              {mode === "timer" ? (
+                <small>
+                  {Math.min(FULL_BLOOM_MINUTES, Math.floor(todayMinutes + liveMinutes))}/
+                  {FULL_BLOOM_MINUTES} min até florescer por completo
+                </small>
+              ) : (
+                <small>25 min de foco · 5 min de pausa · avanço automático</small>
+              )}
             </div>
           </div>
+          {mode === "timer" && (
+            <div className="timer-picker">
+              <label htmlFor="focus-duration">Escolha o tempo</label>
+              <input
+                id="focus-duration"
+                type="range"
+                min="1"
+                max="120"
+                value={duration}
+                disabled={running || elapsedSeconds > 0}
+                onChange={(event) => chooseDuration(Number(event.target.value))}
+                style={{ "--timer-progress": `${(duration / 120) * 100}%` } as CSSProperties}
+              />
+              <div className="timer-presets" aria-label="Atalhos de duração">
+                {PRESETS.map((minutes) => (
+                  <button
+                    className={duration === minutes ? "is-active" : undefined}
+                    type="button"
+                    disabled={running || elapsedSeconds > 0}
+                    onClick={() => chooseDuration(minutes)}
+                    key={minutes}
+                  >
+                    {minutes} min
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <h2 id="focus-timer-title" className="timer" aria-live="polite">
             {formatTimer(secondsRemaining)}
           </h2>
@@ -218,7 +321,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
               className="icon-button"
               type="button"
               onClick={reset}
-              aria-label="Reiniciar cronômetro"
+              aria-label="Reiniciar temporizador"
             >
               ↺
             </button>

@@ -26,8 +26,9 @@ const MAX_INITIAL_JS_BYTES = 253 * 1024;
 // measured total at 564.9 KiB.
 // The reusable paper action icon set adds 1.3 KiB across the planner, notes,
 // habits and homework chunks; the planner itself remains loaded on demand.
-// The paper rose adds 1.2 KiB and lives in the lazy-loaded Focus route.
-const MAX_TOTAL_JS_BYTES = 600 * 1024;
+// The paper rose, interactive duration picker and Pomodoro apple live in the
+// lazy-loaded Focus route and add 3.4 KiB without growing the initial bundle.
+const MAX_TOTAL_JS_BYTES = 603 * 1024;
 const MAX_TTS_WORKER_BYTES = 2.25 * 1024 * 1024;
 const MAX_TTS_WASM_BYTES = 22 * 1024 * 1024;
 const manifest = JSON.parse(await readFile(new URL(".vite/manifest.json", distDirectory), "utf8"));
