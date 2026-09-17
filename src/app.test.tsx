@@ -228,9 +228,13 @@ describe("App", () => {
     expect(screen.getByText(/comece uma sessão hoje para manter a rosa viva/i)).toBeTruthy();
     expect(screen.getByText(/0\/60 min até florescer por completo/i)).toBeTruthy();
     expect(screen.getByRole("heading", { name: "00:00:00" })).toBeTruthy();
+    expect(screen.queryByText("Modo sem distrações")).toBeNull();
+    expect(screen.queryByText("de foco registrados neste dispositivo")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "Próximo modo" }));
     expect(screen.getByText("Pomodoro")).toBeTruthy();
+    expect(screen.queryByText("Tempo de foco", { exact: true })).toBeNull();
+    expect(screen.queryByText("Modo sem distrações")).toBeNull();
     expect(screen.queryByText(/uma maçã/i)).toBeNull();
     expect(screen.getByRole("img", { name: /maçã pomodoro em papel recortado/i })).toBeTruthy();
     expect(screen.getByText(/25 min de foco · 5 min de pausa/i)).toBeTruthy();
