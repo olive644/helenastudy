@@ -3,6 +3,7 @@ import {
   createInitialWorkspace,
   type Flashcard,
   type FocusSession,
+  type FocusPreferences,
   type Habit,
   type QuizAttempt,
   type StudyGoal,
@@ -225,6 +226,16 @@ type WorkspaceV3 = Omit<WorkspaceState, "version" | "notes" | "homeworkLists"> &
   notes: StudyNote[];
 };
 
+type WorkspaceV4 = Omit<WorkspaceState, "version" | "focusPreferences"> & { version: 4 };
+
+function isFocusPreferences(value: unknown): value is FocusPreferences {
+  return (
+    isRecord(value) &&
+    (value["pomodoroMinutes"] === 25 || value["pomodoroMinutes"] === 50) &&
+    typeof value["longBreaks"] === "boolean"
+  );
+}
+
 function hasCoreCollections(
   value: Record<string, unknown>,
   noteValidator: (note: unknown) => boolean,
@@ -298,6 +309,26 @@ export function isWorkspaceState(value: unknown): value is WorkspaceState {
     Array.isArray(value["bingoBoards"]) &&
     value["bingoBoards"].every(isBingoBoard) &&
     Array.isArray(value["homeworkLists"]) &&
+    value["homeworkLists"].every(isHomeworkList) &&
+    isFocusPreferences(value["focusPreferences"])
+  );
+}
+
+function isWorkspaceV4(value: unknown): value is WorkspaceV4 {
+  if (!isRecord(value) || value["version"] !== 4) return false;
+  return (
+    hasCoreCollections(value, isNote) &&
+    Array.isArray(value["materials"]) &&
+    value["materials"].every(isMaterial) &&
+    Array.isArray(value["flashcards"]) &&
+    value["flashcards"].every(isFlashcard) &&
+    Array.isArray(value["goals"]) &&
+    value["goals"].every(isGoal) &&
+    Array.isArray(value["quizAttempts"]) &&
+    value["quizAttempts"].every(isQuizAttempt) &&
+    Array.isArray(value["bingoBoards"]) &&
+    value["bingoBoards"].every(isBingoBoard) &&
+    Array.isArray(value["homeworkLists"]) &&
     value["homeworkLists"].every(isHomeworkList)
   );
 }
@@ -317,6 +348,7 @@ function migrateLegacyWorkspace(legacy: LegacyWorkspace): WorkspaceState {
     quizAttempts: [],
     bingoBoards: [],
     homeworkLists: [],
+    focusPreferences: { pomodoroMinutes: 25, longBreaks: true },
   };
 }
 
@@ -327,6 +359,7 @@ function migrateWorkspaceV2(workspace: WorkspaceV2): WorkspaceState {
     notes: migrateNotes(workspace.notes),
     bingoBoards: [],
     homeworkLists: [],
+    focusPreferences: { pomodoroMinutes: 25, longBreaks: true },
   };
 }
 
@@ -335,6 +368,15 @@ function migrateWorkspaceV3(workspace: WorkspaceV3): WorkspaceState {
     ...workspace,
     version: WORKSPACE_VERSION,
     homeworkLists: [],
+    focusPreferences: { pomodoroMinutes: 25, longBreaks: true },
+  };
+}
+
+function migrateWorkspaceV4(workspace: WorkspaceV4): WorkspaceState {
+  return {
+    ...workspace,
+    version: WORKSPACE_VERSION,
+    focusPreferences: { pomodoroMinutes: 25, longBreaks: true },
   };
 }
 
@@ -345,6 +387,7 @@ export function loadWorkspace(storage: Pick<Storage, "getItem">): WorkspaceState
   try {
     const parsed: unknown = JSON.parse(serialized);
     if (isWorkspaceState(parsed)) return parsed;
+    if (isWorkspaceV4(parsed)) return migrateWorkspaceV4(parsed);
     if (isWorkspaceV3(parsed)) return migrateWorkspaceV3(parsed);
     if (isWorkspaceV2(parsed)) return migrateWorkspaceV2(parsed);
     if (isLegacyWorkspace(parsed)) return migrateLegacyWorkspace(parsed);

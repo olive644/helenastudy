@@ -9,6 +9,14 @@ import {
 } from "./workspace";
 
 describe("workspaceReducer", () => {
+  it("salva preferências do Pomodoro no workspace sincronizado", () => {
+    const updated = workspaceReducer(createInitialWorkspace(), {
+      type: "focus/preferences-updated",
+      preferences: { pomodoroMinutes: 50, longBreaks: false },
+    });
+    expect(updated.focusPreferences).toEqual({ pomodoroMinutes: 50, longBreaks: false });
+  });
+
   it("conecta tarefas e sessões de foco ao espaço de estudos", () => {
     const initial = createInitialWorkspace();
     const withTask = workspaceReducer(initial, {
