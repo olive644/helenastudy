@@ -4167,13 +4167,8 @@ body.local-room-active {
   position: relative;
   width: min(100%, 360px);
   justify-self: center;
-  --apple-color: #7c3aed;
-  --apple-depth: #51259b;
-}
-
-.pomodoro-dial.is-break {
-  --apple-color: #62bd67;
-  --apple-depth: #287543;
+  --apple-color: #ef4562;
+  --apple-depth: #9f2144;
 }
 
 .pomodoro-dial__time {
@@ -4208,7 +4203,7 @@ body.local-room-active {
 }
 
 .pomodoro-apple__track {
-  stroke: #51465d;
+  stroke: #64263a;
 }
 
 .pomodoro-apple__progress {
@@ -4217,7 +4212,34 @@ body.local-room-active {
 }
 
 .pomodoro-apple__facet {
-  fill: #a779ef;
+  fill: #ff8b98;
+}
+
+.pomodoro-progress {
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+}
+
+.pomodoro-progress > span {
+  font-weight: 750;
+}
+
+.pomodoro-progress > div {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.pomodoro-progress i {
+  width: 0.72rem;
+  height: 0.72rem;
+  background: var(--border);
+  border-radius: 35% 55% 45% 50%;
+  transform: rotate(45deg);
+}
+
+.pomodoro-progress i.is-complete {
+  background: #ef4562;
 }
 
 .pomodoro-apple__leaf {

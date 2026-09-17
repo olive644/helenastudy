@@ -1,5 +1,9 @@
 # Auditoria do estado atual
 
+## Ciclo Pomodoro completo, 16/09/2026
+
+O Pomodoro executa automaticamente 25 minutos de foco e 5 minutos de pausa. A cada quatro focos concluídos, inicia uma pausa longa de 15 minutos. A interface conta os pomodoros concluídos e mostra o avanço da rodada atual. A maçã usa vermelho facetado, folha verde e acabamento de papel recortado.
+
 ## Mostrador Pomodoro em maçã, 16/09/2026
 
 O contador fica no centro da silhueta vazada de uma maçã em papel recortado. O contorno roxo acompanha o tempo restante e muda para verde durante a pausa. Facetas, folha dobrada e base deslocada seguem a identidade HelenaStudy. A lógica de ciclos permanece igual.

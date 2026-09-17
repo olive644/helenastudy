@@ -16,8 +16,24 @@ type FocusViewProps = {
 
 const PRESETS = [5, 15, 25, 45, 60] as const;
 const FULL_BLOOM_MINUTES = 60;
+const POMODORO_FOCUS_MINUTES = 25;
+const POMODORO_SHORT_BREAK_MINUTES = 5;
+const POMODORO_LONG_BREAK_MINUTES = 15;
 type TimerMode = "timer" | "pomodoro";
-type PomodoroPhase = "focus" | "break";
+type PomodoroPhase = "focus" | "shortBreak" | "longBreak";
+
+export function nextPomodoroStep(phase: PomodoroPhase, completed: number) {
+  if (phase === "focus") {
+    const nextCompleted = completed + 1;
+    const longBreak = nextCompleted % 4 === 0;
+    return {
+      phase: longBreak ? ("longBreak" as const) : ("shortBreak" as const),
+      duration: longBreak ? POMODORO_LONG_BREAK_MINUTES : POMODORO_SHORT_BREAK_MINUTES,
+      completed: nextCompleted,
+    };
+  }
+  return { phase: "focus" as const, duration: POMODORO_FOCUS_MINUTES, completed };
+}
 
 function formatTimer(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
@@ -106,6 +122,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const [subjectId, setSubjectId] = useState(defaultSubject?.id ?? "");
   const [mode, setMode] = useState<TimerMode>("timer");
   const [pomodoroPhase, setPomodoroPhase] = useState<PomodoroPhase>("focus");
+  const [completedPomodoros, setCompletedPomodoros] = useState(0);
   const [duration, setDuration] = useState<number>(25);
   const [secondsRemaining, setSecondsRemaining] = useState(duration * 60);
   const [running, setRunning] = useState(false);
@@ -122,8 +139,8 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
         setSecondsRemaining(secondsRemaining - 1);
         return;
       }
-      setRunning(false);
       if (mode !== "pomodoro") {
+        setRunning(false);
         setSecondsRemaining(0);
         return;
       }
@@ -134,17 +151,15 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
           durationMinutes: 25,
           completedAt: new Date().toISOString(),
         });
-        setPomodoroPhase("break");
-        setDuration(5);
-        setSecondsRemaining(5 * 60);
-      } else {
-        setPomodoroPhase("focus");
-        setDuration(25);
-        setSecondsRemaining(25 * 60);
       }
+      const next = nextPomodoroStep(pomodoroPhase, completedPomodoros);
+      setPomodoroPhase(next.phase);
+      setCompletedPomodoros(next.completed);
+      setDuration(next.duration);
+      setSecondsRemaining(next.duration * 60);
     }, 1000);
     return () => window.clearTimeout(timer);
-  }, [dispatch, mode, pomodoroPhase, running, secondsRemaining, subjectId]);
+  }, [completedPomodoros, dispatch, mode, pomodoroPhase, running, secondsRemaining, subjectId]);
 
   if (!defaultSubject) return null;
   const subject = workspace.subjects.find((item) => item.id === subjectId) ?? defaultSubject;
@@ -158,6 +173,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   function chooseMode(nextMode: TimerMode) {
     setMode(nextMode);
     setPomodoroPhase("focus");
+    setCompletedPomodoros(0);
     chooseDuration(25);
   }
 
@@ -242,7 +258,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
             {mode === "timer" ? (
               <FocusRose progress={bloomProgress} wilted={missedYesterday && !caredToday} />
             ) : (
-              <div className={`pomodoro-dial${pomodoroPhase === "break" ? " is-break" : ""}`}>
+              <div className="pomodoro-dial">
                 <PomodoroApple progress={secondsRemaining / (duration * 60)} />
                 <div className="pomodoro-dial__time">
                   <h2 id="focus-timer-title" className="timer">
@@ -257,7 +273,9 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                 {mode === "pomodoro"
                   ? pomodoroPhase === "focus"
                     ? "Hora de focar"
-                    : "Pausa curta"
+                    : pomodoroPhase === "longBreak"
+                      ? "Pausa longa"
+                      : "Pausa curta"
                   : caredToday
                     ? "Cuidada hoje"
                     : "Sua flor de foco"}
@@ -266,7 +284,9 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                 {mode === "pomodoro"
                   ? pomodoroPhase === "focus"
                     ? "Uma maçã, 25 minutos e uma tarefa de cada vez."
-                    : "Respire por 5 minutos. O próximo ciclo já está preparado."
+                    : pomodoroPhase === "longBreak"
+                      ? "Você completou quatro rodadas. Descanse por 15 minutos."
+                      : "Respire por 5 minutos. O próximo ciclo começa sozinho."
                   : missedYesterday && !caredToday
                     ? "Ela sentiu sua falta. Uma sessão faz a rosa florescer novamente."
                     : caredToday
@@ -279,7 +299,25 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                   {FULL_BLOOM_MINUTES} min até florescer por completo
                 </small>
               ) : (
-                <small>25 min de foco · 5 min de pausa · avanço automático</small>
+                <div
+                  className="pomodoro-progress"
+                  aria-label={`${completedPomodoros} pomodoros concluídos`}
+                >
+                  <span>{completedPomodoros} pomodoros concluídos</span>
+                  <div aria-hidden="true">
+                    {[0, 1, 2, 3].map((step) => (
+                      <i
+                        className={
+                          step < (completedPomodoros % 4 || (pomodoroPhase === "longBreak" ? 4 : 0))
+                            ? "is-complete"
+                            : undefined
+                        }
+                        key={step}
+                      />
+                    ))}
+                  </div>
+                  <small>25 min de foco · 5 min de pausa · 15 min após quatro rodadas</small>
+                </div>
               )}
             </div>
           </div>
