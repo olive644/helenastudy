@@ -108,40 +108,39 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const [goalTitle, setGoalTitle] = useState("");
   const [targetMinutes, setTargetMinutes] = useState(300);
   const [deadline, setDeadline] = useState(toDateKey(new Date()));
+  const [openedAt] = useState(() => Date.now());
   const elapsedSeconds = duration * 60 - secondsRemaining;
 
   useEffect(() => {
     if (!running) return;
-    const timer = window.setInterval(() => {
-      setSecondsRemaining((current) => {
-        if (current <= 1) {
-          setRunning(false);
-          return 0;
-        }
-        return current - 1;
-      });
+    const timer = window.setTimeout(() => {
+      if (secondsRemaining > 1) {
+        setSecondsRemaining(secondsRemaining - 1);
+        return;
+      }
+      setRunning(false);
+      if (mode !== "pomodoro") {
+        setSecondsRemaining(0);
+        return;
+      }
+      if (pomodoroPhase === "focus") {
+        dispatch({
+          type: "focus/recorded",
+          subjectId,
+          durationMinutes: 25,
+          completedAt: new Date().toISOString(),
+        });
+        setPomodoroPhase("break");
+        setDuration(5);
+        setSecondsRemaining(5 * 60);
+      } else {
+        setPomodoroPhase("focus");
+        setDuration(25);
+        setSecondsRemaining(25 * 60);
+      }
     }, 1000);
-    return () => window.clearInterval(timer);
-  }, [running]);
-
-  useEffect(() => {
-    if (secondsRemaining !== 0 || mode !== "pomodoro") return;
-    if (pomodoroPhase === "focus") {
-      dispatch({
-        type: "focus/recorded",
-        subjectId,
-        durationMinutes: 25,
-        completedAt: new Date().toISOString(),
-      });
-      setPomodoroPhase("break");
-      setDuration(5);
-      setSecondsRemaining(5 * 60);
-    } else {
-      setPomodoroPhase("focus");
-      setDuration(25);
-      setSecondsRemaining(25 * 60);
-    }
-  }, [dispatch, mode, pomodoroPhase, secondsRemaining, subjectId]);
+    return () => window.clearTimeout(timer);
+  }, [dispatch, mode, pomodoroPhase, running, secondsRemaining, subjectId]);
 
   if (!defaultSubject) return null;
   const subject = workspace.subjects.find((item) => item.id === subjectId) ?? defaultSubject;
@@ -185,7 +184,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   }, null);
   const caredToday = todayMinutes > 0;
   const missedYesterday = Boolean(
-    lastSession && Date.now() - lastSession.getTime() >= 2 * 24 * 60 * 60 * 1000,
+    lastSession && openedAt - lastSession.getTime() >= 2 * 24 * 60 * 60 * 1000,
   );
   const focusedMinutes = minutesFocusedForSubject(workspace, subject.id);
   const subjectGoals = workspace.goals.filter((goal) => goal.subjectId === subject.id);
