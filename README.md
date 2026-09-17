@@ -1,8 +1,8 @@
-# HelenaStudy
+# NoteOLI
 
 Central de estudos, foco e rotina da marca Oli.
 
-O HelenaStudy reúne agenda, tarefas, hábitos, cronômetro, anotações, digitalizações, escrita à mão,
+O NoteOLI reúne agenda, tarefas, hábitos, temporizador, anotações, digitalizações, escrita à mão,
 materiais, flashcards, quizzes, bingo e planejamento de aulas em um único espaço. O workspace fica
 no dispositivo por padrão; com login opcional pelo Google, o progresso e as preferências sincronizam
 entre dispositivos via Firebase. O Modo Sala usa Firebase Realtime Database para sincronizar

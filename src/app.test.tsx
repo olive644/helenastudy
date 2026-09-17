@@ -25,7 +25,7 @@ describe("App", () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: "Espaço do aluno" })).toBeTruthy();
     expect(screen.queryByText(/dados salvos neste dispositivo/i)).toBeNull();
-    expect(screen.getByLabelText("HelenaStudy")).toBeTruthy();
+    expect(screen.getByLabelText("NoteOLI")).toBeTruthy();
     expect(screen.queryByAltText(/rosto da helena/i)).toBeNull();
     expect(screen.queryByAltText("Helena, a mascote do HelenaStudy")).toBeNull();
     expect(screen.queryByText(/by oli/i)).toBeNull();
@@ -40,7 +40,7 @@ describe("App", () => {
     fireEvent.click(toggle);
     expect(within(sidebar).getByRole("button", { name: "Recolher menu lateral" })).toBeTruthy();
     expect(sidebar.classList.contains("sidebar--expanded")).toBe(true);
-    expect(within(sidebar).getByLabelText("HelenaStudy")).toBeTruthy();
+    expect(within(sidebar).getByLabelText("NoteOLI")).toBeTruthy();
     expect(within(sidebar).getByText("Área do aluno")).toBeTruthy();
     expect(within(sidebar).getByText("Meus materiais")).toBeTruthy();
     expect(within(sidebar).getByText("Área do professor")).toBeTruthy();
@@ -220,14 +220,15 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Escrever à mão" })).toBeTruthy();
   });
 
-  it("mostra a rosa que cresce com o cronômetro de foco", async () => {
+  it("mostra a rosa que cresce com o temporizador de foco", async () => {
     render(<App />);
     navigate("Foco");
 
     expect(await screen.findByRole("img", { name: /rosa de foco crescendo/i })).toBeTruthy();
     expect(screen.getByText(/comece uma sessão hoje para manter a rosa viva/i)).toBeTruthy();
     expect(screen.getByText(/0\/60 min até florescer por completo/i)).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "00:00:00" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "00:25:00" })).toBeTruthy();
+    expect(screen.getByLabelText("Escolha a duração do temporizador")).toBeTruthy();
     expect(screen.queryByText("Modo sem distrações")).toBeNull();
     expect(screen.queryByText("de foco registrados neste dispositivo")).toBeNull();
 
@@ -237,6 +238,7 @@ describe("App", () => {
     expect(screen.queryByText("Modo sem distrações")).toBeNull();
     expect(screen.queryByText(/uma maçã/i)).toBeNull();
     expect(screen.getByRole("img", { name: /maçã pomodoro em papel recortado/i })).toBeTruthy();
+    expect(document.querySelectorAll(".streak-apple")).toHaveLength(7);
     expect(screen.getByText(/25 min de foco · 5 min de pausa/i)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "50 min" }));
     expect(screen.getByRole("heading", { name: "50:00" })).toBeTruthy();

@@ -76,14 +76,13 @@ export function GoogleLogin({
     }
   }
   return (
-    <main className="onboarding login-page" id="main-content" aria-label="Entrar na HelenaStudy">
+    <main className="onboarding login-page" id="main-content" aria-label="Entrar na NoteOLI">
       <h1 className="sr-only">
-        HelenaStudy: agenda de estudos, pomodoro, flashcards e quizzes para ENEM, vestibular e
-        concursos
+        NoteOLI: agenda de estudos, pomodoro, flashcards e quizzes para ENEM, vestibular e concursos
       </h1>
       <header className="onboarding__header">
         <span className="onboarding__brand">
-          Helena<span>Study</span>
+          Note<span>OLI</span>
         </span>
         <span className="onboarding__eyebrow">SEU PRÓXIMO PASSO COMEÇA AQUI</span>
       </header>
