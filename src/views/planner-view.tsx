@@ -38,6 +38,9 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
   const [eventDate, setEventDate] = useState(today);
   const [eventTime, setEventTime] = useState("18:00");
   const [eventSubjectId, setEventSubjectId] = useState(defaultSubject?.id ?? "");
+  const [goalTitle, setGoalTitle] = useState("");
+  const [goalMinutes, setGoalMinutes] = useState(300);
+  const [goalDeadline, setGoalDeadline] = useState(today);
 
   if (!defaultSubject) return null;
 
@@ -71,6 +74,14 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
       time: eventTime,
     });
     setEventTitle("");
+  }
+
+  function addFocusGoal(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const title = goalTitle.trim();
+    if (!title) return;
+    dispatch({ type: "goal/added", subjectId: defaultSubject?.id ?? "", title, targetMinutes: goalMinutes, deadline: goalDeadline });
+    setGoalTitle("");
   }
 
   const orderedTasks = [...workspace.tasks].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
@@ -210,6 +221,24 @@ export function PlannerView({ workspace, dispatch }: PlannerViewProps) {
               <PaperActionIcon name="plus" /> <span>Adicionar compromisso</span>
             </button>
           </form>
+        </section>
+      </div>
+
+      <div className="learn-grid focus-goals">
+        <section className="module-panel" aria-labelledby="new-goal-title">
+          <div className="module-heading"><h2 id="new-goal-title">Nova meta de foco</h2></div>
+          <form className="compact-form" onSubmit={addFocusGoal}>
+            <label className="field"><span>Objetivo</span><input value={goalTitle} onChange={(event) => setGoalTitle(event.target.value)} placeholder="Ex.: Preparar prova final" required /></label>
+            <div className="field-row">
+              <label className="field"><span>Meta em minutos</span><input type="number" min="1" step="5" value={goalMinutes} onChange={(event) => setGoalMinutes(Number(event.target.value))} required /></label>
+              <label className="field"><span>Prazo</span><input type="date" value={goalDeadline} onChange={(event) => setGoalDeadline(event.target.value)} required /></label>
+            </div>
+            <button className="secondary-button" type="submit"><PaperActionIcon name="plus" /> Criar meta</button>
+          </form>
+        </section>
+        <section className="module-panel goals-panel" aria-labelledby="goal-list-title">
+          <div className="module-heading"><h2 id="goal-list-title">Metas de foco</h2><span>{workspace.focusSessions.reduce((sum, session) => sum + session.durationMinutes, 0)} min registrados</span></div>
+          {workspace.goals.length === 0 ? <div className="empty-state"><p>Crie uma meta para acompanhar seu tempo de foco.</p></div> : <ul className="goal-list">{workspace.goals.map((goal) => <li className={goal.completed ? "is-complete" : undefined} key={goal.id}><button type="button" aria-label={`${goal.completed ? "Reabrir" : "Concluir"} ${goal.title}`} onClick={() => dispatch({ type: "goal/toggled", id: goal.id })}><span aria-hidden="true">✓</span></button><div><strong>{goal.title}</strong><small>Meta de {goal.targetMinutes} min · até {goal.deadline}</small></div></li>)}</ul>}
         </section>
       </div>
 

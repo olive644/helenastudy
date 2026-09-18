@@ -148,9 +148,9 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
           <span aria-hidden="true" />
         </button>
         {expanded && (
-          <div className="sidebar__brand" aria-label="Pepopsia">
+          <div className="sidebar__brand" aria-label="Olena Study">
             <strong>
-              Pepo<span>psia</span>
+              Olena <span>Study</span>
             </strong>
           </div>
         )}
@@ -396,9 +396,9 @@ export function PageHeader() {
 
   return (
     <header className="page-header">
-      <div className="page-header__mobile-brand" aria-label="Pepopsia">
+      <div className="page-header__mobile-brand" aria-label="Olena Study">
         <strong>
-          Pepo<span>psia</span>
+          Olena <span>Study</span>
         </strong>
       </div>
       <div className="page-header__actions">

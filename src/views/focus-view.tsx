@@ -477,12 +477,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                             ? "Ela está segura por hoje. Continue para vê-la crescer."
                             : "Comece uma sessão hoje para manter a rosa viva."}
                     </strong>
-                    {mode === "timer" ? (
-                      <small>
-                        {Math.min(FULL_BLOOM_MINUTES, Math.floor(todayMinutes + liveMinutes))}/
-                        {FULL_BLOOM_MINUTES} min até florescer por completo
-                      </small>
-                    ) : (
+                    {mode === "timer" ? null : (
                       <div className="pomodoro-progress">
                         <span>Pomodoros concluídos nesta semana</span>
                         <div className="pomodoro-week">
@@ -583,7 +578,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
         </section>
       </div>
 
-      <div className="learn-grid focus-goals">
+      <div className="learn-grid focus-goals focus-goals--hidden">
         <section className="module-panel" aria-labelledby="new-goal-title">
           <div className="module-heading">
             <h2 id="new-goal-title">Nova meta de foco</h2>
