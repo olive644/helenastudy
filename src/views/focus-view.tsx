@@ -588,7 +588,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
         </section>
       </div>
 
-      <div className="learn-grid focus-goals focus-goals--hidden">
+      <div className="learn-grid focus-goals focus-goals--hidden" style={{ display: "none" }}>
         <section className="module-panel" aria-labelledby="new-goal-title">
           <div className="module-heading">
             <h2 id="new-goal-title">Nova meta de foco</h2>
