@@ -76,11 +76,10 @@ function formatTimer(totalSeconds: number): string {
 }
 
 function formatStopwatch(totalMilliseconds: number): string {
-  const centiseconds = Math.floor(totalMilliseconds / 10) % 100;
   const seconds = Math.floor(totalMilliseconds / 1000) % 60;
   const minutes = Math.floor(totalMilliseconds / 60000) % 60;
   const hours = Math.floor(totalMilliseconds / 3600000);
-  return [hours, minutes, seconds, centiseconds]
+  return [hours, minutes, seconds]
     .map((value) => String(value).padStart(2, "0"))
     .join(":");
 }
@@ -477,7 +476,12 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                             ? "Ela está segura por hoje. Continue para vê-la crescer."
                             : "Comece uma sessão hoje para manter a rosa viva."}
                     </strong>
-                    {mode === "timer" ? null : (
+                    {mode === "timer" ? (
+                      <small>
+                        {Math.min(FULL_BLOOM_MINUTES, Math.floor(todayMinutes + liveMinutes))}/
+                        {FULL_BLOOM_MINUTES} min até florescer por completo
+                      </small>
+                    ) : (
                       <div className="pomodoro-progress">
                         <span>Pomodoros concluídos nesta semana</span>
                         <div className="pomodoro-week">
