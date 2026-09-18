@@ -1,5 +1,12 @@
 import { Check, Plus } from "lucide-react";
-import { useEffect, useRef, useState, type CSSProperties, type Dispatch, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type Dispatch,
+  type FormEvent,
+} from "react";
 import { PageHeader } from "../components/app-navigation";
 import {
   minutesFocusedOn,
@@ -79,9 +86,7 @@ function formatStopwatch(totalMilliseconds: number): string {
   const seconds = Math.floor(totalMilliseconds / 1000) % 60;
   const minutes = Math.floor(totalMilliseconds / 60000) % 60;
   const hours = Math.floor(totalMilliseconds / 3600000);
-  return [hours, minutes, seconds]
-    .map((value) => String(value).padStart(2, "0"))
-    .join(":");
+  return [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":");
 }
 
 function weekDays(reference = new Date()) {
@@ -254,7 +259,8 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const [calendarMonth, setCalendarMonth] = useState(() => dateFromKey(deadline));
   const [openedAt] = useState(() => Date.now());
   const pomodoroElapsedSeconds = duration * 60 - secondsRemaining;
-  const elapsedSeconds = mode === "timer" ? Math.floor(timerElapsedMilliseconds / 1000) : pomodoroElapsedSeconds;
+  const elapsedSeconds =
+    mode === "timer" ? Math.floor(timerElapsedMilliseconds / 1000) : pomodoroElapsedSeconds;
 
   useEffect(() => {
     if (!running || mode !== "timer") return;
