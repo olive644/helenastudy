@@ -1,5 +1,5 @@
 import { Check, Plus } from "lucide-react";
-import { useEffect, useState, type CSSProperties, type Dispatch, type FormEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type Dispatch, type FormEvent } from "react";
 import { PageHeader } from "../components/app-navigation";
 import {
   minutesFocusedOn,
@@ -75,11 +75,14 @@ function formatTimer(totalSeconds: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-function formatLongTimer(totalSeconds: number): string {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor(totalSeconds / 60) % 60;
-  const seconds = totalSeconds % 60;
-  return [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":");
+function formatStopwatch(totalMilliseconds: number): string {
+  const centiseconds = Math.floor(totalMilliseconds / 10) % 100;
+  const seconds = Math.floor(totalMilliseconds / 1000) % 60;
+  const minutes = Math.floor(totalMilliseconds / 60000) % 60;
+  const hours = Math.floor(totalMilliseconds / 3600000);
+  return [hours, minutes, seconds, centiseconds]
+    .map((value) => String(value).padStart(2, "0"))
+    .join(":");
 }
 
 function weekDays(reference = new Date()) {
@@ -236,7 +239,8 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const [completedPomodoros, setCompletedPomodoros] = useState(0);
   const [duration, setDuration] = useState<number>(25);
   const [secondsRemaining, setSecondsRemaining] = useState(duration * 60);
-  const [timerElapsedSeconds, setTimerElapsedSeconds] = useState(0);
+  const [timerElapsedMilliseconds, setTimerElapsedMilliseconds] = useState(0);
+  const timerStartedAt = useRef<number | null>(null);
   const [running, setRunning] = useState(false);
   const [pomodoroDays, setPomodoroDays] = useState<string[]>(() => {
     try {
@@ -251,15 +255,16 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const [calendarMonth, setCalendarMonth] = useState(() => dateFromKey(deadline));
   const [openedAt] = useState(() => Date.now());
   const pomodoroElapsedSeconds = duration * 60 - secondsRemaining;
-  const elapsedSeconds = mode === "timer" ? timerElapsedSeconds : pomodoroElapsedSeconds;
+  const elapsedSeconds = mode === "timer" ? Math.floor(timerElapsedMilliseconds / 1000) : pomodoroElapsedSeconds;
 
   useEffect(() => {
     if (!running || mode !== "timer") return;
-    const timer = window.setTimeout(() => {
-      setTimerElapsedSeconds((current) => current + 1);
-    }, 1000);
-    return () => window.clearTimeout(timer);
-  }, [mode, running, timerElapsedSeconds]);
+    timerStartedAt.current ??= Date.now() - timerElapsedMilliseconds;
+    const timer = window.setInterval(() => {
+      setTimerElapsedMilliseconds(Date.now() - (timerStartedAt.current ?? Date.now()));
+    }, 10);
+    return () => window.clearInterval(timer);
+  }, [mode, running, timerElapsedMilliseconds]);
 
   useEffect(() => {
     if (!running || mode !== "pomodoro") return;
@@ -322,7 +327,8 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
     setCompletedPomodoros(0);
     setGoalAmount(nextMode === "pomodoro" ? 4 : 300);
     chooseDuration(workspace.focusPreferences.pomodoroMinutes);
-    setTimerElapsedSeconds(0);
+    setTimerElapsedMilliseconds(0);
+    timerStartedAt.current = null;
   }
 
   function slideMode(direction: -1 | 1) {
@@ -351,14 +357,19 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   function reset() {
     setRunning(false);
     if (mode === "timer") {
-      setTimerElapsedSeconds(0);
+      setTimerElapsedMilliseconds(0);
+      timerStartedAt.current = null;
     } else {
       setSecondsRemaining(duration * 60);
     }
   }
 
   function toggleRunning() {
-    setRunning((current) => !current);
+    setRunning((current) => {
+      const next = !current;
+      timerStartedAt.current = next ? Date.now() - timerElapsedMilliseconds : null;
+      return next;
+    });
   }
 
   function finish() {
@@ -419,7 +430,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
             </button>
             <div className="focus-mode-viewport">
               <span className="focus-mode-name" aria-live="polite">
-                {mode === "timer" ? "Temporizador" : "Pomodoro"}
+                {mode === "timer" ? "Cronômetro" : "Pomodoro"}
               </span>
               <div
                 className={`focus-mode-slide${modeDirection < 0 ? " is-backward" : ""}`}
@@ -528,7 +539,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
                 )}
                 {mode === "timer" && (
                   <h2 id="focus-timer-title" className="timer timer--stopwatch" aria-live="off">
-                    {formatLongTimer(timerElapsedSeconds)}
+                    {formatStopwatch(timerElapsedMilliseconds)}
                   </h2>
                 )}
                 <div className="timer-controls">

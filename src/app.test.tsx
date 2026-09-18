@@ -227,7 +227,8 @@ describe("App", () => {
     expect(await screen.findByRole("img", { name: /rosa de foco crescendo/i })).toBeTruthy();
     expect(screen.getByText(/comece uma sessão hoje para manter a rosa viva/i)).toBeTruthy();
     expect(screen.getByText(/0\/60 min até florescer por completo/i)).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "00:00:00" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "00:00:00:00" })).toBeTruthy();
+    expect(screen.getByText("Cronômetro")).toBeTruthy();
     expect(screen.queryByText("Modo sem distrações")).toBeNull();
     expect(screen.queryByText("de foco registrados neste dispositivo")).toBeNull();
 
