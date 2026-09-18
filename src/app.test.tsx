@@ -25,7 +25,7 @@ describe("App", () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: "Espaço do aluno" })).toBeTruthy();
     expect(screen.queryByText(/dados salvos neste dispositivo/i)).toBeNull();
-    expect(screen.getByLabelText("Olena Study")).toBeTruthy();
+    expect(screen.getByLabelText("Olena")).toBeTruthy();
     expect(screen.queryByAltText(/rosto da helena/i)).toBeNull();
     expect(screen.queryByAltText("Helena, a mascote do HelenaStudy")).toBeNull();
     expect(screen.queryByText(/by oli/i)).toBeNull();
@@ -40,7 +40,7 @@ describe("App", () => {
     fireEvent.click(toggle);
     expect(within(sidebar).getByRole("button", { name: "Recolher menu lateral" })).toBeTruthy();
     expect(sidebar.classList.contains("sidebar--expanded")).toBe(true);
-    expect(within(sidebar).getByLabelText("Olena Study")).toBeTruthy();
+    expect(within(sidebar).getByLabelText("Olena")).toBeTruthy();
     expect(within(sidebar).getByText("Área do aluno")).toBeTruthy();
     expect(within(sidebar).getByText("Meus materiais")).toBeTruthy();
     expect(within(sidebar).getByText("Área do professor")).toBeTruthy();
