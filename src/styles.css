@@ -4145,6 +4145,7 @@ body.local-room-active {
   max-width: 680px;
   margin: 0.5rem auto 0;
   gap: clamp(0.5rem, 3vw, 2rem);
+  overflow: visible;
 }
 
 .focus-rose {
@@ -4177,7 +4178,8 @@ body.local-room-active {
 
 .pomodoro-dial__time {
   position: absolute;
-  inset: 39% 19% auto;
+  inset: 50% 15% auto;
+  transform: translateY(-50%);
   text-align: center;
 }
 
@@ -8257,9 +8259,12 @@ select {
 }
 
 .timer--stopwatch {
-  margin-top: 0.8rem;
-  font-size: clamp(3.1rem, 11vw, 7rem);
-  letter-spacing: -0.055em;
+  margin: 1rem auto 0;
+  max-width: 100%;
+  overflow: visible;
+  font-size: clamp(2.5rem, 10vw, 7rem);
+  letter-spacing: -0.045em;
+  white-space: nowrap;
 }
 
 .timer-wheel {
@@ -8311,12 +8316,24 @@ select {
 }
 
 @media (max-width: 640px) {
+  .focus-mode-viewport {
+    overflow: visible;
+  }
+
   .focus-rose {
     width: min(76vw, 290px);
   }
 
   .timer--stopwatch {
-    font-size: clamp(2.7rem, 14vw, 4.8rem);
+    font-size: clamp(2.15rem, 12.5vw, 4.8rem);
+  }
+
+  .pomodoro-dial {
+    width: min(92vw, 360px);
+  }
+
+  .pomodoro-dial__time .timer {
+    font-size: clamp(2.2rem, 10vw, 3.75rem);
   }
 }
 
