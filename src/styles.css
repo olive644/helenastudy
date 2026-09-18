@@ -1398,6 +1398,10 @@ body {
   box-shadow: var(--shadow-soft);
 }
 
+.focus-goals--hidden {
+  display: none;
+}
+
 .module-panel {
   transition:
     transform 180ms ease,
