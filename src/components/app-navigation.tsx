@@ -149,9 +149,7 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
         </button>
         {expanded && (
           <div className="sidebar__brand" aria-label="Olena">
-            <strong>
-              Olena
-            </strong>
+            <strong>Olena</strong>
           </div>
         )}
       </div>
@@ -397,9 +395,7 @@ export function PageHeader() {
   return (
     <header className="page-header">
       <div className="page-header__mobile-brand" aria-label="Olena">
-        <strong>
-          Olena
-        </strong>
+        <strong>Olena</strong>
       </div>
       <div className="page-header__actions">
         <div className="page-header__theme">
