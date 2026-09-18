@@ -131,7 +131,7 @@ test("troca os modos de foco pelas setas laterais", async ({ page }, testInfo) =
   await page.getByRole("button", { name: "Pausar" }).click();
   await page.getByRole("button", { name: "Reiniciar contador" }).click();
   await page.getByRole("button", { name: "Modo anterior" }).click();
-  await expect(page.getByText("Temporizador", { exact: true })).toBeVisible();
+  await expect(page.getByText("Cronômetro", { exact: true })).toBeVisible();
   await expect(page.locator(".focus-mode-slide")).toHaveClass(/is-backward/);
   await expect(page.locator(".focus-paper-control-icon")).toBeVisible();
   await expect(page.getByRole("heading", { name: "00:00:00" })).toBeVisible();
