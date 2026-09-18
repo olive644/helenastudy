@@ -116,7 +116,7 @@ test("troca os modos de foco pelas setas laterais", async ({ page }, testInfo) =
   });
   await navigation.getByRole("button", { name: "Foco", exact: true }).click();
 
-  await expect(page.getByText("Temporizador", { exact: true })).toBeVisible();
+  await expect(page.getByText("Cronômetro", { exact: true })).toBeVisible();
   await expect(page.locator(".focus-layout > .focus-card")).toHaveCSS(
     "background-color",
     "rgba(0, 0, 0, 0)",
