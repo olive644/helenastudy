@@ -69,13 +69,13 @@ describe("App", () => {
     });
   });
 
-  it("mantém as metas em Foco e deixa Praticar dedicado às atividades", async () => {
+  it("mantém as metas em Agenda e deixa Foco dedicado ao timer", async () => {
     render(<App />);
 
     navigate("Praticar");
     expect(screen.queryByRole("heading", { name: /metas de estudo/i })).toBeNull();
 
-    navigate("Foco");
+    navigate("Agenda");
     expect(
       await screen.findByRole("heading", { name: "Nova meta de foco" }, { timeout: 3_000 }),
     ).toBeTruthy();
