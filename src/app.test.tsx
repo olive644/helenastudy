@@ -97,7 +97,12 @@ describe("App", () => {
     render(<App />);
     const mobileNavigation = screen.getByRole("navigation", { name: "Navegação móvel" });
     expect(within(mobileNavigation).getAllByRole("button")).toHaveLength(5);
-    fireEvent.click(screen.getByRole("button", { name: "Perfil" }));
+    expect(
+      within(mobileNavigation)
+        .getByRole("button", { name: "Perfil, em breve" })
+        .hasAttribute("disabled"),
+    ).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Mais" }));
 
     const moreMenu = screen.getByRole("dialog", { name: "Mais ferramentas" });
     fireEvent.click(within(moreMenu).getByLabelText("Trocar foto de perfil"));
@@ -141,23 +146,23 @@ describe("App", () => {
 
   it("usa a iconografia própria da Helena no seletor de tema", () => {
     render(<App />);
-    const lightThemeButton = screen.getByRole("button", { name: /tema claro/i });
-    expect(lightThemeButton.getAttribute("data-theme")).toBe("light");
-    const lightArtwork = lightThemeButton.querySelector('[data-icon="theme-light"]');
+    const lightThemeButton = screen.getByLabelText(/Aparência: tema claro/i);
+    const lightArtwork = lightThemeButton.querySelector('[data-icon="theme-dark"]');
     expect(lightArtwork?.classList.contains("navigation-icon--brand")).toBe(true);
     expect(lightArtwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
     expect(
-      lightArtwork?.querySelector('img[src="/navigation-icons/paper/claro/theme-light.svg"]'),
+      lightArtwork?.querySelector('img[src="/navigation-icons/paper/claro/theme-dark.svg"]'),
     ).toBeTruthy();
 
     fireEvent.click(lightThemeButton);
-    const darkThemeButton = screen.getByRole("button", { name: /tema escuro/i });
-    expect(darkThemeButton.getAttribute("data-theme")).toBe("dark");
-    const darkArtwork = darkThemeButton.querySelector('[data-icon="theme-dark"]');
+    fireEvent.click(screen.getByRole("button", { name: "Escuro" }));
+    const darkThemeButton = screen.getByLabelText(/Aparência: tema escuro/i);
+    expect(document.documentElement.dataset["theme"]).toBe("dark");
+    const darkArtwork = darkThemeButton.querySelector('[data-icon="theme-light"]');
     expect(darkArtwork?.classList.contains("navigation-icon--brand")).toBe(true);
     expect(darkArtwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
     expect(
-      darkArtwork?.querySelector('img[src="/navigation-icons/paper/escuro/theme-dark.svg"]'),
+      darkArtwork?.querySelector('img[src="/navigation-icons/paper/escuro/theme-light.svg"]'),
     ).toBeTruthy();
   });
 
