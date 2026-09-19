@@ -213,9 +213,17 @@ test("compartilha o seletor de aparência no desktop e celular", async ({ page }
       "color",
       "rgb(15, 15, 20)",
     );
-    const rail = await sidebar.boundingBox();
-    const main = await page.locator("main").boundingBox();
-    expect(main!.x).toBe(rail!.x + rail!.width);
+    await expect(sidebar).toHaveCSS("width", "260px");
+    await expect(page.locator("main")).toHaveCSS("margin-left", "260px");
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const rail = document.querySelector(".sidebar")!.getBoundingClientRect();
+          const main = document.querySelector("main")!.getBoundingClientRect();
+          return main.x - rail.right;
+        }),
+      )
+      .toBe(0);
   }
 });
 
