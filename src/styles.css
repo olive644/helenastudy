@@ -8320,12 +8320,8 @@ select {
 }
 
 @media (max-width: 640px) {
-  .focus-mode-viewport {
-    overflow: visible;
-  }
-
   .focus-rose {
-    width: min(76vw, 290px);
+    width: min(100%, 290px);
   }
 
   .timer--stopwatch {
@@ -8333,7 +8329,7 @@ select {
   }
 
   .pomodoro-dial {
-    width: min(92vw, 360px);
+    width: min(100%, 360px);
   }
 
   .pomodoro-dial__time .timer {

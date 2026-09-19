@@ -107,12 +107,12 @@ export default function OnboardingView({
   return (
     <main className="onboarding" id="main-content">
       <h1 className="sr-only">
-        Olistudy: agenda de estudos, pomodoro, flashcards e quizzes para ENEM, vestibular e
+        OliStudy: agenda de estudos, pomodoro, flashcards e quizzes para ENEM, vestibular e
         concursos
       </h1>
       <header className="onboarding__header">
         <span className="onboarding__brand">
-          Pepo<span>psia</span>
+          Oli<span>Study</span>
         </span>
         <span className="onboarding__eyebrow">UM COMEÇO DO SEU JEITO</span>
       </header>
