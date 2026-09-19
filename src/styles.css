@@ -1596,7 +1596,7 @@ body {
     width: 276px;
     padding: 1.2rem 0.9rem;
     background:
-      radial-gradient(circle at 10% 0%, rgb(114 87 232 / 24%), transparent 14rem), var(--ink);
+      radial-gradient(circle at 10% 0%, rgb(114 87 232 / 12%), transparent 14rem), var(--surface);
   }
 
   .sidebar__nav {
@@ -5952,10 +5952,12 @@ body.local-room-active {
   color-scheme: light;
 }
 
-/* --ink fica intocado nos dois temas: várias superfícies (sidebar, botão
-   primário, chips ativos) usam var(--ink) como fundo escuro fixo com texto
-   branco por cima, independente do tema. Só --text (cor de leitura do corpo
-   do texto sobre var(--page)/var(--surface)) precisa clarear no escuro. */
+/* --ink fica intocado nos dois temas: algumas superfícies (botão primário,
+   chips ativos) usam var(--ink) como fundo escuro fixo com texto branco por
+   cima, independente do tema. A sidebar e a barra de navegação móvel seguem
+   var(--surface)/var(--text), acompanhando o tema claro/escuro. Só --text
+   (cor de leitura do corpo do texto sobre var(--page)/var(--surface)) precisa
+   clarear no escuro. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --text: #f4f2ee;
@@ -6715,15 +6717,15 @@ select {
   .sidebar {
     width: 264px;
     padding: 1.35rem 1rem 1rem;
-    border-right: 0;
-    color: #fff;
-    background: var(--ink);
+    border-right: 1px solid var(--line);
+    color: var(--text);
+    background: var(--surface);
   }
 
   .sidebar > .brand {
     min-height: 68px;
     padding: 0.55rem 0.65rem;
-    border-bottom: 1px solid rgb(255 255 255 / 12%);
+    border-bottom: 1px solid var(--line);
   }
 
   .sidebar .brand__mark {
@@ -6732,22 +6734,22 @@ select {
   }
 
   .sidebar .brand__copy strong {
-    color: #fff;
+    color: var(--text);
   }
 
   .sidebar .brand__copy strong span {
-    color: var(--yellow);
+    color: var(--violet);
   }
 
   .sidebar .nav-section__label {
-    color: rgb(255 255 255 / 48%);
+    color: var(--muted);
   }
 
   .sidebar .nav-item {
     width: 100%;
     min-height: 48px;
     padding: 0.65rem 0.75rem;
-    color: rgb(255 255 255 / 86%);
+    color: var(--text);
     font-weight: 720;
   }
 
@@ -6808,15 +6810,15 @@ select {
   }
 
   .sidebar__footer {
-    border-top-color: rgb(255 255 255 / 12%);
+    border-top-color: var(--line);
   }
 
   .sidebar__footer strong {
-    color: #fff;
+    color: var(--text);
   }
 
   .sidebar__footer small {
-    color: rgb(255 255 255 / 52%);
+    color: var(--muted);
   }
 
   .main-content {
@@ -7411,13 +7413,11 @@ select {
   display: block;
 }
 
-:root[data-theme="dark"] .navigation-icon__variant,
-.sidebar .navigation-icon__variant {
+:root[data-theme="dark"] .navigation-icon__variant {
   display: none;
 }
 
-:root[data-theme="dark"] .navigation-icon__variant--escuro,
-.sidebar .navigation-icon__variant--escuro {
+:root[data-theme="dark"] .navigation-icon__variant--escuro {
   display: block;
 }
 
@@ -7427,9 +7427,9 @@ select {
     width: 84px;
     padding: 14px 12px 12px;
     overflow: visible;
-    border-right: 0;
-    background: #0f0f14;
-    box-shadow: 10px 0 30px rgb(15 15 20 / 8%);
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+    box-shadow: 10px 0 30px rgb(15 15 20 / 4%);
   }
 
   .sidebar > .brand {
@@ -7475,15 +7475,15 @@ select {
     padding: 0;
     border: 1px solid transparent;
     border-radius: 16px;
-    color: #fff9ef;
+    color: var(--text);
     background: transparent;
   }
 
   .sidebar .nav-item:not(:disabled):hover,
   .sidebar .nav-item:focus-visible {
-    color: #fff9ef;
-    border-color: rgb(255 255 255 / 10%);
-    background: rgb(255 255 255 / 8%);
+    color: var(--text);
+    border-color: var(--line);
+    background: var(--soft);
   }
 
   .sidebar .nav-item--active,
@@ -7537,7 +7537,7 @@ select {
   .sidebar__footer {
     justify-content: center;
     padding: 13px 0 4px;
-    border-top-color: rgb(255 255 255 / 10%);
+    border-top-color: var(--line);
   }
 
   .sidebar__footer > div {
@@ -7955,24 +7955,19 @@ select {
 @media (max-width: 899px) {
   .mobile-nav {
     padding: 0.38rem 0.42rem env(safe-area-inset-bottom);
-    border: 1px solid rgb(255 255 255 / 10%);
+    border: 1px solid var(--line);
     border-radius: 24px;
-    color: #fff;
-    background: #17151c;
-    box-shadow: 0 14px 36px rgb(23 21 28 / 28%);
+    color: var(--text);
+    background: var(--surface);
+    box-shadow: 0 14px 36px rgb(23 21 28 / 14%);
     transition:
       background-color 240ms ease,
       box-shadow 240ms ease;
   }
 
-  :root[data-theme="dark"] .mobile-nav {
-    background: #fff;
-    box-shadow: 0 14px 36px rgb(75 32 160 / 34%);
-  }
-
   .mobile-nav__item,
   .mobile-nav__item--active {
-    color: #fff;
+    color: var(--text);
     transition:
       transform 180ms ease,
       color 180ms ease;
@@ -7992,30 +7987,20 @@ select {
   }
 
   .mobile-nav__item--active .mobile-nav__icon {
-    background: #7c3aed;
+    background: var(--violet);
     animation: mobile-tab-pop 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
-  :root[data-theme="dark"] .mobile-nav__item--active .mobile-nav__icon {
-    background: #facc15;
-  }
-
-  .mobile-nav .navigation-icon__variant {
-    display: none;
-  }
-
-  .mobile-nav .navigation-icon__variant--escuro {
-    display: block;
-  }
-
-  :root[data-theme="dark"] .mobile-nav__item {
-    color: #0f0f14;
-  }
-
+  /* A barra móvel mantém o papel creme fixo (ver paper-buttons.css), então o
+     ícone claro (tom escuro, legível sobre fundo claro) permanece o padrão
+     nos dois temas, mesmo quando o tema escuro esconde os ícones claros
+     globalmente. */
+  .mobile-nav .navigation-icon__variant,
   :root[data-theme="dark"] .mobile-nav .navigation-icon__variant {
     display: none;
   }
 
+  .mobile-nav .navigation-icon__variant--claro,
   :root[data-theme="dark"] .mobile-nav .navigation-icon__variant--claro {
     display: block;
   }
@@ -8321,7 +8306,7 @@ select {
 
 @media (max-width: 640px) {
   .focus-rose {
-    width: min(100%, 290px);
+    width: min(62%, 220px);
   }
 
   .timer--stopwatch {
@@ -8329,11 +8314,15 @@ select {
   }
 
   .pomodoro-dial {
-    width: min(100%, 360px);
+    width: min(68%, 250px);
   }
 
   .pomodoro-dial__time .timer {
     font-size: clamp(2.2rem, 10vw, 3.75rem);
+  }
+
+  .focus-mode-slide > .timer-controls {
+    margin-top: 0.75rem;
   }
 }
 

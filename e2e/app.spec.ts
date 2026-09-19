@@ -199,12 +199,12 @@ test("anima o seletor entre os temas claro e escuro", async ({ page }, testInfo)
   await expect(toggle.locator('[data-icon="theme-light"]')).toBeVisible();
   await expect(toggle.locator('[data-icon="theme-dark"]')).toBeVisible();
   const sidebar = page.locator(".sidebar");
-  await expect(sidebar).toHaveCSS("background-color", "rgb(23, 21, 28)");
+  await expect(sidebar).toHaveCSS("background-color", "rgb(255, 249, 239)");
 
   await toggle.click();
   await expect(toggle).toHaveAttribute("data-theme", "dark");
   await expect(toggle).toHaveAccessibleName(/tema escuro/i);
-  await expect(sidebar).toHaveCSS("background-color", "rgb(255, 249, 239)");
+  await expect(sidebar).toHaveCSS("background-color", "rgb(23, 21, 28)");
   await expect(
     sidebar.locator('.nav-item [data-icon="today"] .navigation-icon__variant--claro'),
   ).toBeHidden();
@@ -214,11 +214,11 @@ test("anima o seletor entre os temas claro e escuro", async ({ page }, testInfo)
   await sidebar.getByRole("button", { name: "Expandir menu lateral" }).click();
   await expect(sidebar.getByText("Área do aluno", { exact: true })).toHaveCSS(
     "color",
-    "rgb(41, 36, 50)",
+    "rgb(169, 163, 173)",
   );
   await expect(sidebar.getByRole("button", { name: "Agenda" })).toHaveCSS(
     "color",
-    "rgb(41, 36, 50)",
+    "rgb(244, 242, 238)",
   );
   await expect
     .poll(async () => (await thumb.boundingBox())?.x)
