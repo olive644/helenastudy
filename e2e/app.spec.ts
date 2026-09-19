@@ -82,6 +82,23 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
 
+test("usa o ícone grafite original em Começar prática", async ({ page }) => {
+  for (const theme of ["light", "dark"]) {
+    const action = page.getByRole("button", { name: "Começar prática", exact: true });
+    await expect(
+      action.locator('[data-icon="learn"] .navigation-icon__variant--claro'),
+    ).toBeVisible();
+    await expect(
+      action.locator('[data-icon="learn"] .navigation-icon__variant--escuro'),
+    ).toBeHidden();
+
+    if (theme === "light") {
+      await page.locator(".appearance-picker__trigger").click();
+      await page.getByRole("button", { name: "Escuro", exact: true }).click();
+    }
+  }
+});
+
 test("explora mundos com a Helena e abre a trilha de níveis", async ({ page }, testInfo) => {
   await page
     .getByRole("navigation", {

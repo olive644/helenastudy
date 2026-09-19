@@ -1,5 +1,9 @@
 # Auditoria do estado atual
 
+## Ícone grafite na ação de prática, 19/09/2026
+
+O botão Começar prática no Espaço do aluno usa a variante grafite original do ícone Praticar sobre o papel roxo, nos temas claro e escuro.
+
 ## Navegação e foco responsivos, 19/09/2026
 
 O cabeçalho móvel volta a reunir Mais, aparência e foto circular. Mais abre a gaveta de ferramentas; Perfil ocupa a quinta posição inferior com uma silhueta autoral inteiramente em papel grafite, sem elementos decorativos. Não usa a foto do usuário e fica desabilitado até a implementação das configurações de perfil, conta e aplicativo. O estado da gaveta é compartilhado por contexto e o perfil acompanha alterações locais sincronizadas. Desktop e celular usam o mesmo seletor Claro, Escuro e Sistema.

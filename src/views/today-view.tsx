@@ -54,7 +54,7 @@ export function TodayView({ workspace, dispatch, onNavigate }: TodayViewProps) {
               type="button"
               onClick={() => onNavigate("learn")}
             >
-              <NavigationIcon name="learn" /> Começar prática
+              <NavigationIcon name="learn" paperVariant="claro" /> Começar prática
             </button>
             <button type="button" onClick={() => onNavigate("planner")}>
               Ver meu dia <PaperArrow />

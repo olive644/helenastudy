@@ -174,18 +174,6 @@
   box-shadow: 0 4px 0 #4b209b;
 }
 
-.app-shell .today-hero-actions .navigation-icon__variant {
-  display: none;
-}
-
-.app-shell .today-hero-actions .navigation-icon__variant--claro {
-  display: none;
-}
-
-.app-shell .today-hero-actions .navigation-icon__variant--escuro {
-  display: block;
-}
-
 .app-shell .onboarding-paper-arrow {
   width: 22px;
   height: 22px;

@@ -21,6 +21,7 @@ export type NavigationIconName =
 
 type NavigationIconProps = {
   name: NavigationIconName;
+  paperVariant?: "claro" | "roxo" | "escuro";
 };
 
 const BRAND_ICON_NAMES = new Set<NavigationIconName>([
@@ -38,7 +39,7 @@ const BRAND_ICON_NAMES = new Set<NavigationIconName>([
   "theme-dark",
 ]);
 
-export function NavigationIcon({ name }: NavigationIconProps) {
+export function NavigationIcon({ name, paperVariant }: NavigationIconProps) {
   if (name === "profile") {
     return (
       <span
@@ -51,14 +52,16 @@ export function NavigationIcon({ name }: NavigationIconProps) {
     );
   }
   if (BRAND_ICON_NAMES.has(name)) {
+    const variants = paperVariant ? [paperVariant] : (["claro", "roxo", "escuro"] as const);
     return (
       <span className="navigation-icon navigation-icon--brand" data-icon={name} aria-hidden="true">
-        {(["claro", "roxo", "escuro"] as const).map((variant) => (
+        {variants.map((variant) => (
           <img
             className={`navigation-icon__variant navigation-icon__variant--${variant}`}
             src={`/navigation-icons/paper/${variant}/${name}.svg`}
             alt=""
             decoding="async"
+            style={paperVariant ? { display: "block" } : undefined}
             // "claro" e "escuro" podem ser a variante visível por padrão
             // dependendo do contexto (tema claro/escuro, sidebar vs. navegação
             // móvel), ver styles.css, então seguem carregamento normal.
