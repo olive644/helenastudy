@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useTheme } from "../hooks/use-theme";
 import { writeSyncedStorage } from "../data/synced-storage";
+import { AppearanceToggle } from "./appearance-picker";
 import { NavigationIcon, type NavigationIconName } from "./navigation-icon";
 
 export type AppView =
@@ -74,8 +75,8 @@ const NAVIGATION_SECTIONS: readonly { label: string; items: readonly NavigationI
 const MOBILE_ITEMS: readonly NavigationItem[] = [
   { view: "today", label: "Espaço do aluno", mobileLabel: "Espaço", icon: "today" },
   { view: "planner", label: "Agenda", icon: "planner" },
-  { view: "focus", label: "Foco", icon: "focus" },
   { view: "learn", label: "Praticar", mobileLabel: "Praticar", icon: "learn" },
+  { view: "focus", label: "Foco", icon: "focus" },
 ];
 
 const MORE_ITEMS = NAVIGATION_SECTIONS.flatMap((section) => section.items).filter(
@@ -180,7 +181,6 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
   const [dragX, setDragX] = useState(0);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dragStartX = useRef<number | null>(null);
-  const openDragStartX = useRef<number | null>(null);
   const moreActive = MORE_ITEMS.some((item) => item.view === view);
 
   useEffect(() => {
@@ -223,23 +223,6 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
     dragStartX.current = null;
     if (dragX < -80) setMoreOpen(false);
     setDragX(0);
-  }
-
-  function startOpenDrag(event: ReactPointerEvent<HTMLButtonElement>) {
-    openDragStartX.current = event.clientX;
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-  }
-
-  function openDrag(event: ReactPointerEvent<HTMLButtonElement>) {
-    if (openDragStartX.current === null) return;
-    if (event.clientX - openDragStartX.current > 48) {
-      openDragStartX.current = null;
-      setMoreOpen(true);
-    }
-  }
-
-  function finishOpenDrag() {
-    openDragStartX.current = null;
   }
 
   return (
@@ -330,9 +313,16 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
       <nav className="mobile-nav" aria-label="Navegação móvel">
         {MOBILE_ITEMS.map((item) => {
           const active = view === item.view;
+          const featured = item.view === "learn";
           return (
             <button
-              className={active ? "mobile-nav__item mobile-nav__item--active" : "mobile-nav__item"}
+              className={[
+                "mobile-nav__item",
+                active ? "mobile-nav__item--active" : "",
+                featured ? "mobile-nav__item--featured" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
               type="button"
               onClick={() => navigate(item.view)}
               aria-current={active ? "page" : undefined}
@@ -345,39 +335,30 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
             </button>
           );
         })}
-      </nav>
-      <button
-        className={
-          moreOpen || moreActive
-            ? "mobile-nav__item mobile-more-trigger mobile-nav__item--active"
-            : "mobile-nav__item mobile-more-trigger"
-        }
-        type="button"
-        aria-label="Mais"
-        aria-expanded={moreOpen}
-        aria-controls="mobile-more-panel"
-        onClick={() => setMoreOpen((open) => !open)}
-      >
-        <img
-          className="mobile-more-avatar"
-          src={profile.photoUrl ?? "/profile-avatars/helena.webp"}
-          alt=""
-          width="48"
-          height="48"
-        />
-      </button>
-      {!moreOpen && (
         <button
-          className="mobile-more-edge-open"
+          className={
+            moreOpen || moreActive
+              ? "mobile-nav__item mobile-more-trigger mobile-nav__item--active"
+              : "mobile-nav__item mobile-more-trigger"
+          }
           type="button"
-          aria-label="Arraste para abrir as ferramentas"
-          onClick={() => setMoreOpen(true)}
-          onPointerDown={startOpenDrag}
-          onPointerMove={openDrag}
-          onPointerUp={finishOpenDrag}
-          onPointerCancel={finishOpenDrag}
-        ></button>
-      )}
+          aria-label="Perfil"
+          aria-expanded={moreOpen}
+          aria-controls="mobile-more-panel"
+          onClick={() => setMoreOpen((open) => !open)}
+        >
+          <span className="mobile-nav__icon">
+            <img
+              className="mobile-more-avatar"
+              src={profile.photoUrl ?? "/profile-avatars/helena.webp"}
+              alt=""
+              width="34"
+              height="34"
+            />
+          </span>
+          <span>Perfil</span>
+        </button>
+      </nav>
     </>
   );
 }
@@ -396,10 +377,8 @@ export function PageHeader() {
 
   return (
     <header className="page-header">
-      <div className="page-header__mobile-brand" aria-label="OliStudy">
-        <strong>
-          Oli<span>Study</span>
-        </strong>
+      <div className="page-header__mobile-appearance">
+        <AppearanceToggle />
       </div>
       <div className="page-header__actions">
         <div className="page-header__theme">

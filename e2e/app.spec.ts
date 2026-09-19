@@ -20,7 +20,7 @@ test("carrega os ícones de papel no desktop e mobile em ambos os temas", async 
         .toBe(true);
     }
     if (mobile) {
-      await page.getByRole("button", { name: "Mais", exact: true }).click();
+      await page.getByRole("button", { name: "Perfil", exact: true }).click();
       const menu = page.getByRole("dialog", { name: "Mais ferramentas" });
       const secondary = menu.locator(".navigation-icon__variant:visible");
       await expect(secondary).toHaveCount(5);
@@ -35,7 +35,12 @@ test("carrega os ícones de papel no desktop e mobile em ambos os temas", async 
       await menu.getByRole("button", { name: "Fechar menu" }).click();
     }
     if (theme === "light") {
-      await page.getByRole("button", { name: /tema claro/i }).click();
+      if (mobile) {
+        await page.locator(".appearance-picker__trigger").click();
+        await page.getByRole("button", { name: "Escuro", exact: true }).click();
+      } else {
+        await page.getByRole("button", { name: /tema claro/i }).click();
+      }
     }
   }
   await page.screenshot({ path: testInfo.outputPath("paper-icons.png"), fullPage: true });
@@ -60,7 +65,7 @@ async function navigateToTool(
   mobileLabel: string,
 ) {
   if (projectName === "mobile") {
-    await page.getByRole("button", { name: "Mais", exact: true }).click();
+    await page.getByRole("button", { name: "Perfil", exact: true }).click();
     await page
       .getByRole("dialog", { name: "Mais ferramentas" })
       .getByRole("button", { name: mobileLabel, exact: true })
@@ -228,7 +233,6 @@ test("anima o seletor entre os temas claro e escuro", async ({ page }, testInfo)
 test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }, testInfo) => {
   await expect(page.getByRole("heading", { name: "Espaço do aluno" })).toBeVisible();
   await expect(page.getByText("Dados salvos neste dispositivo")).toHaveCount(0);
-  await expect(page.getByLabel("OliStudy")).toBeAttached();
   await expect(page.getByAltText(/rosto da helena/i)).toHaveCount(0);
   await expect(page.getByAltText("Helena, a mascote do OliStudy")).toHaveCount(0);
 
@@ -297,7 +301,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
   test.skip(testInfo.project.name !== "mobile", "Contrato específico da navegação móvel.");
   const navigation = page.getByRole("navigation", { name: "Navegação móvel" });
   await expect(navigation).toBeVisible();
-  await expect(navigation.getByRole("button")).toHaveCount(4);
+  await expect(navigation.getByRole("button")).toHaveCount(5);
 
   for (const label of ["Agenda", "Foco", "Praticar", "Espaço"]) {
     await navigation.getByRole("button", { name: label, exact: true }).click();
@@ -305,7 +309,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
     expect(overflow).toBe(false);
   }
 
-  await page.getByRole("button", { name: "Mais", exact: true }).click();
+  await page.getByRole("button", { name: "Perfil", exact: true }).click();
   const toolsDialog = page.getByRole("dialog", { name: "Mais ferramentas" });
   await expect(toolsDialog).toBeVisible();
   await page.waitForTimeout(350);
@@ -327,7 +331,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
   await expect(toolsDialog).toBeHidden();
 
   for (const label of ["Hábitos", "Notas", "Biblioteca", "Planos de aula"]) {
-    await page.getByRole("button", { name: "Mais", exact: true }).click();
+    await page.getByRole("button", { name: "Perfil", exact: true }).click();
     const more = page.getByRole("dialog", { name: "Mais ferramentas" });
     await expect(more).toBeVisible();
     await more.getByRole("button", { name: label, exact: true }).click();
@@ -362,7 +366,10 @@ test("adapta a barra móvel ao tema e anima a troca de aba", async ({ page }, te
 
   await expect(navigation).toHaveCSS("background-color", "rgb(255, 249, 239)");
   await expect(navigation).toHaveCSS("color", "rgb(41, 36, 50)");
-  await expect(navigation.locator(".navigation-icon__variant--escuro").first()).toBeVisible();
+  const agendaIcon = navigation
+    .getByRole("button", { name: "Agenda", exact: true })
+    .locator(".navigation-icon__variant--claro");
+  await expect(agendaIcon).toBeVisible();
 
   await navigation.getByRole("button", { name: "Agenda", exact: true }).click();
   await expect(navigation.getByRole("button", { name: "Agenda", exact: true })).toHaveAttribute(
@@ -375,10 +382,14 @@ test("adapta a barra móvel ao tema e anima a troca de aba", async ({ page }, te
   );
   await expect(page.locator("main")).toHaveCSS("animation-name", "mobile-view-arrive");
 
-  await page.getByRole("button", { name: /tema claro/i }).click();
+  await page.locator(".appearance-picker__trigger").click();
+  await page.getByRole("button", { name: "Escuro", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(navigation).toHaveCSS("background-color", "rgb(255, 255, 255)");
-  await expect(navigation.locator(".navigation-icon__variant--claro").first()).toBeVisible();
+  const focusIcon = navigation
+    .getByRole("button", { name: "Foco", exact: true })
+    .locator(".navigation-icon__variant--claro");
+  await expect(focusIcon).toBeVisible();
   await expect(navigation).toHaveCSS("color", "rgb(41, 36, 50)");
 });
 
