@@ -1,5 +1,9 @@
 # Auditoria do estado atual
 
+## Navegação e Perfil em produção, 19/09/2026
+
+A navegação desktop encosta no conteúdo sem sombra ou faixa vazia nos temas claro e escuro. No celular, o cabeçalho não exibe foto de perfil, o seletor de aparência permanece dentro da tela e mostra sol e lua com contraste. Praticar usa o ícone grafite original sobre papel roxo sem recorte circular. Perfil é uma aba funcional, troca para a versão clara do ícone quando ativa e abre a tela de recurso em produção.
+
 ## Ícone grafite na ação de prática, 19/09/2026
 
 O botão Começar prática no Espaço do aluno usa a variante grafite original do ícone Praticar sobre o papel roxo, nos temas claro e escuro.

@@ -20,7 +20,8 @@ export type AppView =
   | "lesson-builder"
   | "learn"
   | "library"
-  | "activity-bank";
+  | "activity-bank"
+  | "profile";
 
 type NavigationProps = {
   view: AppView;
@@ -194,7 +195,6 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
 
 export function MobileNavigation({ view, onNavigate }: NavigationProps) {
   const { open: moreOpen, setOpen: setMoreOpen } = useContext(MobileMenuContext);
-  const [profile, setProfile] = useStoredProfile();
   const [dragX, setDragX] = useState(0);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dragStartX = useRef<number | null>(null);
@@ -219,11 +219,6 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
   function navigate(itemView: AppView) {
     onNavigate(itemView);
     setMoreOpen(false);
-  }
-
-  function chooseProfile(nextProfile: StoredProfile) {
-    setProfile(nextProfile);
-    writeSyncedStorage("helena.profile.v1", JSON.stringify(nextProfile));
   }
 
   function startDrag(event: ReactPointerEvent<HTMLElement>) {
@@ -272,34 +267,6 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
                 </span>
                 <h2 id="mobile-more-title">Mais ferramentas</h2>
               </div>
-              <details className="mobile-drawer-profile">
-                <summary className="user-profile" aria-label="Trocar foto de perfil">
-                  <img
-                    src={profile.photoUrl ?? "/profile-avatars/helena.webp"}
-                    alt=""
-                    width="54"
-                    height="54"
-                  />
-                </summary>
-                <section className="profile-picker">
-                  <strong>Quem está estudando?</strong>
-                  <div className="profile-picker__options">
-                    {PROFILE_AVATARS.map((avatar) => (
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          chooseProfile(avatar);
-                          event.currentTarget.closest("details")?.removeAttribute("open");
-                        }}
-                        key={avatar.name}
-                      >
-                        <img src={avatar.photoUrl} alt="" width="64" height="64" />
-                        <span>{avatar.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              </details>
             </header>
             <div className="mobile-more-grid">
               {MORE_ITEMS.map((item) => (
@@ -347,21 +314,29 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
               key={item.view}
             >
               <span className="mobile-nav__icon">
-                <NavigationIcon name={item.icon} />
+                {item.view === "learn" ? (
+                  <NavigationIcon name={item.icon} paperVariant="claro" />
+                ) : (
+                  <NavigationIcon name={item.icon} />
+                )}
               </span>
               <span>{item.mobileLabel ?? item.label}</span>
             </button>
           );
         })}
         <button
-          className="mobile-nav__item mobile-nav__profile"
+          className={
+            view === "profile"
+              ? "mobile-nav__item mobile-nav__profile mobile-nav__item--active"
+              : "mobile-nav__item mobile-nav__profile"
+          }
           type="button"
-          aria-label="Perfil, em breve"
-          title="Configurações de perfil, conta e aplicativo em breve"
-          disabled
+          aria-label="Perfil"
+          aria-current={view === "profile" ? "page" : undefined}
+          onClick={() => navigate("profile")}
         >
           <span className="mobile-nav__icon">
-            <NavigationIcon name="profile" />
+            <NavigationIcon name="profile" profileActive={view === "profile"} />
           </span>
           <span>Perfil</span>
         </button>

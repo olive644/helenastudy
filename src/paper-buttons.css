@@ -139,6 +139,84 @@
   }
 }
 
+.profile-coming-soon {
+  display: grid;
+  width: min(100%, 680px);
+  min-height: 420px;
+  margin: clamp(2rem, 8vh, 6rem) auto 0;
+  padding: clamp(2rem, 7vw, 4.5rem);
+  place-items: center;
+  align-content: center;
+  border: 1px solid var(--line);
+  border-radius: 14px 28px 18px 24px;
+  color: var(--text);
+  background-color: var(--surface);
+  background-image:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--lavender) 42%, transparent) 0 8%,
+      transparent 8%
+    ),
+    linear-gradient(
+      315deg,
+      color-mix(in srgb, var(--lavender) 34%, transparent) 0 9%,
+      transparent 9%
+    );
+  box-shadow: var(--shadow-float);
+  text-align: center;
+}
+
+.profile-coming-soon__icon {
+  display: grid;
+  width: 88px;
+  height: 88px;
+  margin-bottom: 1.25rem;
+  place-items: center;
+  border: 1px solid #7433e0;
+  border-radius: 14px 26px 16px 22px;
+  background-color: #7433e0;
+  background-image:
+    linear-gradient(135deg, #8a4ce5 0 13%, transparent 13%),
+    linear-gradient(315deg, #5924b4 0 16%, transparent 16%);
+  box-shadow: 0 6px 0 #4b209b;
+}
+
+.profile-coming-soon__icon .navigation-icon,
+.profile-coming-soon__icon img {
+  width: 58px;
+  height: 58px;
+}
+
+.profile-coming-soon h1 {
+  margin: 0.35rem 0 0.5rem;
+  font-size: clamp(2rem, 8vw, 4rem);
+  letter-spacing: -0.055em;
+  text-transform: uppercase;
+}
+
+.profile-coming-soon p {
+  margin: 0;
+  color: var(--violet);
+  font-size: clamp(1.05rem, 3vw, 1.35rem);
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.profile-coming-soon small {
+  max-width: 420px;
+  margin-top: 0.8rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 899px) {
+  .profile-coming-soon {
+    min-height: min(480px, calc(100vh - 230px));
+    margin-top: 1rem;
+    padding: 2rem 1.25rem;
+  }
+}
+
 /* Espaço do aluno sem painel roxo e com ações claras em ambos os temas. */
 .app-shell .view-heading--today {
   border: 1px solid var(--line);
@@ -930,5 +1008,93 @@
 
   .pomodoro-long-break i {
     flex-shrink: 0;
+  }
+}
+
+/* Esta camada precisa permanecer por último: neutraliza contratos legados da
+   navegação sem alterar os demais componentes de papel. */
+@media (min-width: 900px) {
+  :root:not([data-theme="dark"]) .app-shell > .sidebar,
+  :root[data-theme="dark"] .app-shell > .sidebar {
+    border-right: 1px solid var(--line);
+    box-shadow: none;
+  }
+
+  .app-shell > .sidebar.sidebar--expanded ~ .main-content {
+    width: calc(100% - 260px);
+    margin-left: 260px;
+  }
+
+  .app-shell > .sidebar:not(.sidebar--expanded) ~ .main-content {
+    width: calc(100% - 84px);
+    margin-left: 84px;
+  }
+}
+
+.appearance-picker__trigger {
+  width: 58px;
+  overflow: hidden;
+}
+
+.appearance-picker__trigger-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.appearance-picker__trigger-icons .navigation-icon {
+  width: 22px;
+  height: 22px;
+}
+
+@media (max-width: 899px) {
+  .app-shell .page-header .profile-menu {
+    display: none;
+  }
+
+  .app-shell .page-header__actions {
+    margin-left: auto;
+  }
+
+  .appearance-picker__sheet {
+    position: fixed;
+    top: calc(72px + env(safe-area-inset-top));
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-width: none;
+    border-radius: 12px 22px 14px 18px;
+  }
+
+  .appearance-picker__option,
+  .appearance-picker__option.is-active {
+    min-height: 88px;
+    border-radius: 9px 15px 10px 13px;
+    transform: none;
+  }
+
+  .app-shell .mobile-nav__item--featured .mobile-nav__icon,
+  :root[data-theme="dark"] .app-shell .mobile-nav__item--featured .mobile-nav__icon {
+    width: 52px;
+    height: 48px;
+    margin-top: -18px;
+    border: 2px solid #fff9ef;
+    border-radius: 8px 16px 10px 13px;
+    background-color: #7433e0;
+    background-image:
+      linear-gradient(135deg, #8a4ce5 0 13%, transparent 13%),
+      linear-gradient(315deg, #5924b4 0 16%, transparent 16%);
+    box-shadow: 0 4px 0 #4b209b;
+  }
+
+  .app-shell .mobile-nav__item--featured .navigation-icon__variant,
+  :root[data-theme="dark"] .app-shell .mobile-nav__item--featured .navigation-icon__variant {
+    display: none;
+  }
+
+  .app-shell .mobile-nav__item--featured .navigation-icon__variant--claro,
+  :root[data-theme="dark"] .app-shell .mobile-nav__item--featured .navigation-icon__variant--claro {
+    display: block;
   }
 }

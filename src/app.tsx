@@ -7,6 +7,7 @@ import { useWorkspace } from "./hooks/use-workspace";
 import { useCloudSync } from "./hooks/use-cloud-sync";
 import { HabitsView } from "./views/habits-view";
 import { TodayView } from "./views/today-view";
+import { ProfileView } from "./views/profile-view";
 
 const LearnView = lazy(() => import("./views/learn-view"));
 const OnboardingView = lazy(() => import("./views/onboarding-view"));
@@ -90,6 +91,7 @@ function AppContent({ signedOut = false }: { signedOut?: boolean }) {
           )}
           {view === "library" && <LibraryView workspace={workspace} dispatch={dispatch} />}
           {view === "activity-bank" && <ActivityBankView onBack={() => setView("today")} />}
+          {view === "profile" && <ProfileView />}
         </Suspense>
         <MobileNavigation view={view} onNavigate={setView} />
       </div>

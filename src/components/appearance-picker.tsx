@@ -28,7 +28,10 @@ export function AppearanceToggle() {
         className="appearance-picker__trigger"
         aria-label={`Aparência: tema ${theme === "dark" ? "escuro" : "claro"}. Toque para escolher.`}
       >
-        <NavigationIcon name={theme === "dark" ? "theme-light" : "theme-dark"} />
+        <span className="appearance-picker__trigger-icons" aria-hidden="true">
+          <NavigationIcon name="theme-light" paperVariant="claro" />
+          <NavigationIcon name="theme-dark" paperVariant="claro" />
+        </span>
       </summary>
       <section className="appearance-picker__sheet" aria-label="Escolher aparência">
         <strong>Aparência</strong>
@@ -49,8 +52,12 @@ export function AppearanceToggle() {
               key={option.value}
             >
               <span className="appearance-picker__option-icons">
-                {option.value !== "dark" && <NavigationIcon name="theme-light" />}
-                {option.value !== "light" && <NavigationIcon name="theme-dark" />}
+                {option.value !== "dark" && (
+                  <NavigationIcon name="theme-light" paperVariant="claro" />
+                )}
+                {option.value !== "light" && (
+                  <NavigationIcon name="theme-dark" paperVariant="claro" />
+                )}
               </span>
               <span>{option.label}</span>
             </button>

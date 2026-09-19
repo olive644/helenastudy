@@ -21,13 +21,12 @@ for (const width of [320, 360, 390, 768, 1280]) {
       name: mobile ? "Navegação móvel" : "Navegação principal",
     });
     const profile = page.locator(".page-header .user-profile");
-    await expect(profile).toBeVisible();
-    await expect(profile).toHaveCSS("border-radius", "50%");
     if (mobile) {
+      await expect(profile).toBeHidden();
       const more = page.getByRole("button", { name: "Mais", exact: true });
       await expect(more).toBeVisible();
-      const profileTab = navigation.getByRole("button", { name: "Perfil, em breve" });
-      await expect(profileTab).toBeDisabled();
+      const profileTab = navigation.getByRole("button", { name: "Perfil", exact: true });
+      await expect(profileTab).toBeEnabled();
       await expect(profileTab.locator("img")).toHaveAttribute(
         "src",
         "/navigation-icons/paper/profile.svg",
@@ -42,8 +41,24 @@ for (const width of [320, 360, 390, 768, 1280]) {
         "rgb(116, 51, 224)",
       );
       await expect(
-        navigation.locator(".mobile-nav__item--featured .navigation-icon__variant--escuro"),
+        navigation.locator(".mobile-nav__item--featured .navigation-icon__variant--claro"),
       ).toBeVisible();
+      await expect(
+        navigation.locator(".mobile-nav__item--featured .mobile-nav__icon"),
+      ).not.toHaveCSS("border-radius", "50%");
+      await profileTab.click();
+      await expect(page.getByRole("heading", { name: "Em produção" })).toBeVisible();
+      await expect(profileTab.locator("img")).toHaveAttribute(
+        "src",
+        "/navigation-icons/paper/profile-active.svg",
+      );
+    } else {
+      await expect(profile).toBeVisible();
+      await expect(profile).toHaveCSS("border-radius", "50%");
+      const sidebarBox = await page.getByRole("complementary").boundingBox();
+      const mainBox = await page.getByRole("main").boundingBox();
+      expect(mainBox!.x).toBeCloseTo(sidebarBox!.x + sidebarBox!.width, 0);
+      await expect(page.getByRole("complementary")).toHaveCSS("box-shadow", "none");
     }
     await navigation.getByRole("button", { name: "Foco", exact: true }).click();
     for (const mode of ["Cronômetro", "Pomodoro"]) {
@@ -81,8 +96,19 @@ for (const width of [320, 360, 390, 768, 1280]) {
       if (mode === "Cronômetro") await page.getByRole("button", { name: "Próximo modo" }).click();
     }
     await page.locator(".appearance-picker__trigger").click();
+    if (mobile) {
+      const appearanceBox = await page.locator(".appearance-picker__sheet").boundingBox();
+      expect(appearanceBox!.x).toBeGreaterThanOrEqual(0);
+      expect(appearanceBox!.x + appearanceBox!.width).toBeLessThanOrEqual(width);
+    }
+    await expect(
+      page.locator('.appearance-picker__sheet [data-icon="theme-light"] img').first(),
+    ).toBeVisible();
     await page.getByRole("button", { name: "Escuro", exact: true }).click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await expect(
+      page.locator('.appearance-picker__trigger [data-icon="theme-light"] img'),
+    ).toBeVisible();
     await page.screenshot({
       path: testInfo.outputPath(`Pomodoro-${width}-dark.png`),
       fullPage: true,
