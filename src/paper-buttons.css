@@ -318,7 +318,7 @@
   min-height: 52px;
   border: 1px solid transparent;
   background: transparent;
-  color: #fff9ef;
+  color: var(--text);
   box-shadow: none;
 }
 
@@ -423,84 +423,10 @@
   }
 }
 
-/* Desktop segue o contraste da barra mobile: escuro no claro, branco no escuro. */
 @media (min-width: 900px) {
   .view-heading--today {
     align-items: center;
     min-height: 210px;
-  }
-
-  :root[data-theme="dark"] .app-shell > .sidebar {
-    background: #fff;
-    color: #292432;
-    border-right: 1px solid #e9ddc6;
-    box-shadow: 10px 0 30px rgb(41 36 50 / 10%);
-  }
-
-  :root[data-theme="dark"] .sidebar .nav-section__label,
-  :root[data-theme="dark"] .sidebar__brand,
-  :root[data-theme="dark"] .app-shell > .sidebar.sidebar--expanded .nav-item > span:last-child {
-    color: #292432;
-  }
-
-  :root[data-theme="dark"] .sidebar__brand strong span {
-    color: #7c3aed;
-  }
-
-  :root[data-theme="dark"] .sidebar .nav-item,
-  :root[data-theme="dark"] .sidebar .nav-item:not(:disabled):hover,
-  :root[data-theme="dark"] .sidebar .nav-item:focus-visible {
-    color: #292432;
-  }
-
-  :root[data-theme="dark"] .sidebar .nav-item:not(:disabled):hover,
-  :root[data-theme="dark"] .sidebar .nav-item:focus-visible {
-    border-color: #e9ddc6;
-    background: #f4efe7;
-  }
-
-  :root[data-theme="dark"] .sidebar .nav-item--active,
-  :root[data-theme="dark"] .sidebar .nav-item--active:not(:disabled):hover {
-    border-color: #7433e0;
-    background-color: #7433e0;
-    background-image:
-      linear-gradient(135deg, #8a4ce5 0 9%, transparent 9%),
-      linear-gradient(315deg, #5924b4 0 12%, transparent 12%);
-    color: #fff9ef;
-    box-shadow: 0 4px 0 #4b209b;
-  }
-
-  :root[data-theme="dark"] .sidebar .navigation-icon__variant {
-    display: none;
-  }
-
-  :root[data-theme="dark"] .sidebar .navigation-icon__variant--claro {
-    display: block;
-  }
-
-  :root[data-theme="dark"] .sidebar__toggle {
-    color: #292432;
-    border-color: transparent;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  :root[data-theme="dark"] .sidebar__toggle[aria-expanded="true"] {
-    color: #fff9ef;
-    border-color: #7433e0;
-    background-color: #7433e0;
-    background-image:
-      linear-gradient(135deg, #8a4ce5 0 9%, transparent 9%),
-      linear-gradient(315deg, #5924b4 0 12%, transparent 12%);
-    box-shadow: 0 4px 0 #4b209b;
-  }
-
-  :root[data-theme="dark"] .sidebar .nav-item--active .navigation-icon__variant {
-    display: none;
-  }
-
-  :root[data-theme="dark"] .sidebar .nav-item--active .navigation-icon__variant--escuro {
-    display: block;
   }
 }
 
@@ -893,7 +819,7 @@
 /* O rail desktop recebe as mesmas dobras de papel das barras móveis. */
 @media (min-width: 900px) {
   .app-shell > .sidebar,
-  :root[data-theme="dark"] .app-shell > .sidebar {
+  :root:not([data-theme="dark"]) .app-shell > .sidebar {
     border-right-color: #d7cbb7;
     background-color: #fff9ef;
     background-image:
@@ -904,7 +830,7 @@
       18px 0 34px rgb(23 21 28 / 14%);
   }
 
-  :root:not([data-theme="dark"]) .app-shell > .sidebar {
+  :root[data-theme="dark"] .app-shell > .sidebar {
     border-right-color: #302b38;
     color: #fff9ef;
     background-color: #17151c;
