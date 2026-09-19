@@ -315,7 +315,7 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
             >
               <span className="mobile-nav__icon">
                 {item.view === "learn" ? (
-                  <NavigationIcon name={item.icon} paperVariant="claro" />
+                  <NavigationIcon name={item.icon} paperVariant={active ? "escuro" : "claro"} />
                 ) : (
                   <NavigationIcon name={item.icon} />
                 )}

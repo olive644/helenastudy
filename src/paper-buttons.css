@@ -1049,10 +1049,6 @@
 }
 
 @media (max-width: 899px) {
-  .app-shell .page-header .profile-menu {
-    display: none;
-  }
-
   .app-shell .page-header__actions {
     margin-left: auto;
   }
@@ -1094,7 +1090,33 @@
   }
 
   .app-shell .mobile-nav__item--featured .navigation-icon__variant--claro,
-  :root[data-theme="dark"] .app-shell .mobile-nav__item--featured .navigation-icon__variant--claro {
+  :root[data-theme="dark"]
+    .app-shell
+    .mobile-nav__item--featured:not(.mobile-nav__item--active)
+    .navigation-icon__variant--claro {
     display: block;
+  }
+
+  .app-shell .mobile-nav__item--featured.mobile-nav__item--active .navigation-icon__variant--escuro,
+  :root[data-theme="dark"]
+    .app-shell
+    .mobile-nav__item--featured.mobile-nav__item--active
+    .navigation-icon__variant--escuro {
+    display: block;
+  }
+
+  body.focus-page-active {
+    overscroll-behavior-y: none;
+  }
+
+  .focus-page {
+    min-height: 100dvh;
+    padding-bottom: calc(112px + env(safe-area-inset-bottom));
+    overscroll-behavior-y: none;
+  }
+
+  .focus-page .focus-layout {
+    min-height: calc(100dvh - 196px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    align-items: center;
   }
 }

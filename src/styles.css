@@ -8191,6 +8191,18 @@ select {
   fill: #facc15;
 }
 
+.focus-paper-control-icon.is-play .focus-paper-control-icon__depth {
+  fill: #17131d;
+}
+
+.focus-paper-control-icon.is-play .focus-paper-control-icon__face {
+  fill: #292432;
+}
+
+.focus-paper-control-icon.is-play .focus-paper-control-icon__fold {
+  fill: #51465d;
+}
+
 @keyframes focus-mode-arrive {
   from {
     opacity: 0;

@@ -22,7 +22,8 @@ for (const width of [320, 360, 390, 768, 1280]) {
     });
     const profile = page.locator(".page-header .user-profile");
     if (mobile) {
-      await expect(profile).toBeHidden();
+      await expect(profile).toBeVisible();
+      await expect(profile).toHaveCSS("border-radius", "50%");
       const more = page.getByRole("button", { name: "Mais", exact: true });
       await expect(more).toBeVisible();
       const profileTab = navigation.getByRole("button", { name: "Perfil", exact: true });
@@ -32,7 +33,9 @@ for (const width of [320, 360, 390, 768, 1280]) {
         "/navigation-icons/paper/profile.svg",
       );
       await more.click();
-      await expect(page.getByRole("dialog", { name: "Mais ferramentas" })).toBeVisible();
+      const moreDialog = page.getByRole("dialog", { name: "Mais ferramentas" });
+      await expect(moreDialog).toBeVisible();
+      await expect(moreDialog.locator(".user-profile")).toHaveCount(0);
       await page.keyboard.press("Escape");
       await expect(more).toBeFocused();
       await navigation.getByRole("button", { name: "Praticar", exact: true }).click();
@@ -41,7 +44,7 @@ for (const width of [320, 360, 390, 768, 1280]) {
         "rgb(116, 51, 224)",
       );
       await expect(
-        navigation.locator(".mobile-nav__item--featured .navigation-icon__variant--claro"),
+        navigation.locator(".mobile-nav__item--featured .navigation-icon__variant--escuro"),
       ).toBeVisible();
       await expect(
         navigation.locator(".mobile-nav__item--featured .mobile-nav__icon"),
@@ -61,8 +64,17 @@ for (const width of [320, 360, 390, 768, 1280]) {
       await expect(page.getByRole("complementary")).toHaveCSS("box-shadow", "none");
     }
     await navigation.getByRole("button", { name: "Foco", exact: true }).click();
+    if (mobile) {
+      await expect(page.locator("body")).toHaveCSS("overscroll-behavior-y", "none");
+    }
     for (const mode of ["Cronômetro", "Pomodoro"]) {
       await expect(page.locator(".focus-mode-name")).toHaveText(mode);
+      const startButton = page.getByRole("button", { name: "Começar", exact: true });
+      await expect(startButton.locator(".focus-paper-control-icon.is-play")).toBeVisible();
+      await expect(startButton.locator(".focus-paper-control-icon__face")).toHaveCSS(
+        "fill",
+        "rgb(41, 36, 50)",
+      );
       if (mode === "Pomodoro") {
         const apples = page.locator(".streak-apple");
         await expect(apples).toHaveCount(7);

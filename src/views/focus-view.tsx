@@ -217,7 +217,11 @@ function FocusPaperArrow() {
 
 function FocusPaperControlIcon({ paused }: { paused: boolean }) {
   return (
-    <svg className="focus-paper-control-icon" viewBox="0 0 48 48" aria-hidden="true">
+    <svg
+      className={`focus-paper-control-icon ${paused ? "is-pause" : "is-play"}`}
+      viewBox="0 0 48 48"
+      aria-hidden="true"
+    >
       <path className="focus-paper-control-icon__depth" d="M7 7 42 25 9 44Z" />
       {paused ? (
         <>
@@ -253,6 +257,11 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
       return [];
     }
   });
+
+  useEffect(() => {
+    document.body.classList.add("focus-page-active");
+    return () => document.body.classList.remove("focus-page-active");
+  }, []);
   const [goalTitle, setGoalTitle] = useState("");
   const [goalAmount, setGoalAmount] = useState(300);
   const [deadline, setDeadline] = useState(toDateKey(new Date()));
@@ -419,7 +428,7 @@ export function FocusView({ workspace, dispatch }: FocusViewProps) {
   const days = calendarDays(calendarMonth);
 
   return (
-    <main className="main-content" id="main-content">
+    <main className="main-content focus-page" id="main-content">
       <PageHeader />
       <div className="focus-layout">
         <section className="focus-card" aria-labelledby="focus-timer-title">
