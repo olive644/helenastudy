@@ -76,14 +76,14 @@ export function GoogleLogin({
     }
   }
   return (
-    <main className="onboarding login-page" id="main-content" aria-label="Entrar na Olistudy">
+    <main className="onboarding login-page" id="main-content" aria-label="Entrar na OliStudy">
       <h1 className="sr-only">
-        Olistudy: agenda de estudos, pomodoro, flashcards e quizzes para ENEM, vestibular e
+        OliStudy: agenda de estudos, pomodoro, flashcards e quizzes para ENEM, vestibular e
         concursos
       </h1>
       <header className="onboarding__header">
         <span className="onboarding__brand">
-          Pepo<span>psia</span>
+          Oli<span>Study</span>
         </span>
         <span className="onboarding__eyebrow">SEU PRÓXIMO PASSO COMEÇA AQUI</span>
       </header>
