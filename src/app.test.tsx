@@ -25,7 +25,9 @@ describe("App", () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: "Espaço do aluno" })).toBeTruthy();
     expect(screen.queryByText(/dados salvos neste dispositivo/i)).toBeNull();
-    expect(screen.getByLabelText("OliStudy")).toBeTruthy();
+    const sidebar = screen.getByRole("complementary");
+    fireEvent.click(within(sidebar).getByRole("button", { name: "Expandir menu lateral" }));
+    expect(within(sidebar).getByLabelText("OliStudy")).toBeTruthy();
     expect(screen.queryByAltText(/rosto da helena/i)).toBeNull();
     expect(screen.queryByAltText("Helena, a mascote do HelenaStudy")).toBeNull();
     expect(screen.queryByText(/by oli/i)).toBeNull();
@@ -94,8 +96,8 @@ describe("App", () => {
   it("organiza as ferramentas secundárias no menu móvel", () => {
     render(<App />);
     const mobileNavigation = screen.getByRole("navigation", { name: "Navegação móvel" });
-    expect(within(mobileNavigation).getAllByRole("button")).toHaveLength(4);
-    fireEvent.click(screen.getByRole("button", { name: "Mais" }));
+    expect(within(mobileNavigation).getAllByRole("button")).toHaveLength(5);
+    fireEvent.click(screen.getByRole("button", { name: "Perfil" }));
 
     const moreMenu = screen.getByRole("dialog", { name: "Mais ferramentas" });
     fireEvent.click(within(moreMenu).getByLabelText("Trocar foto de perfil"));
@@ -106,15 +108,6 @@ describe("App", () => {
       screen.getByRole("heading", { name: /consistência antes de intensidade/i }),
     ).toBeTruthy();
     expect(screen.queryByRole("dialog", { name: "Mais ferramentas" })).toBeNull();
-  });
-
-  it("abre as ferramentas ao arrastar da borda esquerda", () => {
-    render(<App />);
-    const edge = screen.getByRole("button", { name: "Arraste para abrir as ferramentas" });
-    fireEvent.pointerDown(edge, { clientX: 0, pointerId: 1 });
-    fireEvent.pointerMove(edge, { clientX: 64, pointerId: 1 });
-
-    expect(screen.getByRole("dialog", { name: "Mais ferramentas" })).toBeTruthy();
   });
 
   it("usa a iconografia própria da Helena em todas as abas", () => {

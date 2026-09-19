@@ -2,34 +2,55 @@ import { useEffect, useState } from "react";
 import { writeSyncedStorage } from "../data/synced-storage";
 
 export type Theme = "light" | "dark";
+export type ThemePreference = Theme | "system";
 
 export const THEME_STORAGE_KEY = "helenastudy.theme";
 
-function readInitialTheme(): Theme {
+function systemPrefersDark(): boolean {
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+}
+
+function readInitialPreference(): ThemePreference {
   try {
     const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-    if (stored === "light" || stored === "dark") return stored;
+    if (stored === "light" || stored === "dark" || stored === "system") return stored;
   } catch {
-    // localStorage indisponível: cai para a preferência do sistema abaixo.
+    // localStorage indisponível: cai para acompanhar o sistema abaixo.
   }
-  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return "system";
 }
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(readInitialTheme);
+  const [preference, setPreference] = useState<ThemePreference>(readInitialPreference);
+  const [systemDark, setSystemDark] = useState(systemPrefersDark);
+
+  useEffect(() => {
+    const media = window.matchMedia?.("(prefers-color-scheme: dark)");
+    if (!media) return;
+    function handleChange(event: MediaQueryListEvent) {
+      setSystemDark(event.matches);
+    }
+    media.addEventListener("change", handleChange);
+    return () => media.removeEventListener("change", handleChange);
+  }, []);
+
+  const theme: Theme = preference === "system" ? (systemDark ? "dark" : "light") : preference;
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     try {
-      writeSyncedStorage(THEME_STORAGE_KEY, theme);
+      writeSyncedStorage(THEME_STORAGE_KEY, preference);
     } catch {
       // Preferência vale só para esta sessão se não der para salvar.
     }
-  }, [theme]);
+  }, [theme, preference]);
 
   function toggleTheme() {
-    setTheme((current) => (current === "dark" ? "light" : "dark"));
+    setPreference((current) => {
+      const effective = current === "system" ? (systemDark ? "dark" : "light") : current;
+      return effective === "dark" ? "light" : "dark";
+    });
   }
 
-  return { theme, toggleTheme };
+  return { theme, preference, setThemePreference: setPreference, toggleTheme };
 }
