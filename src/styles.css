@@ -6471,7 +6471,7 @@ select {
   border: 3px solid var(--surface);
   border-radius: 50%;
   background: var(--violet);
-  box-shadow: 0 6px 16px rgb(124 58 237 / 38%);
+  box-shadow: 0 4px 0 var(--violet-dark);
 }
 
 .mobile-nav__item--featured .navigation-icon {
