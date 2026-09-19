@@ -278,6 +278,9 @@
   outline: 3px solid #6c29d1;
   outline-offset: 5px;
 }
+.onboarding__bubble h2:focus-visible {
+  outline: none;
+}
 .onboarding__privacy {
   color: #726579;
   font-size: 11px;
