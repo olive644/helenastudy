@@ -11,6 +11,7 @@ export type NavigationIconName =
   | "theme-light"
   | "theme-dark"
   | "more"
+  | "profile"
   | "close"
   | "timer"
   | "xp"
@@ -38,6 +39,17 @@ const BRAND_ICON_NAMES = new Set<NavigationIconName>([
 ]);
 
 export function NavigationIcon({ name }: NavigationIconProps) {
+  if (name === "profile") {
+    return (
+      <span
+        className="navigation-icon navigation-icon--profile"
+        data-icon={name}
+        aria-hidden="true"
+      >
+        <img src="/navigation-icons/paper/profile.svg" alt="" width="34" height="34" />
+      </span>
+    );
+  }
   if (BRAND_ICON_NAMES.has(name)) {
     return (
       <span className="navigation-icon navigation-icon--brand" data-icon={name} aria-hidden="true">

@@ -20,7 +20,7 @@ test("carrega os ícones de papel no desktop e mobile em ambos os temas", async 
         .toBe(true);
     }
     if (mobile) {
-      await page.getByRole("button", { name: "Perfil", exact: true }).click();
+      await page.getByRole("button", { name: "Mais", exact: true }).click();
       const menu = page.getByRole("dialog", { name: "Mais ferramentas" });
       const secondary = menu.locator(".navigation-icon__variant:visible");
       await expect(secondary).toHaveCount(5);
@@ -35,12 +35,8 @@ test("carrega os ícones de papel no desktop e mobile em ambos os temas", async 
       await menu.getByRole("button", { name: "Fechar menu" }).click();
     }
     if (theme === "light") {
-      if (mobile) {
-        await page.locator(".appearance-picker__trigger").click();
-        await page.getByRole("button", { name: "Escuro", exact: true }).click();
-      } else {
-        await page.getByRole("button", { name: /tema claro/i }).click();
-      }
+      await page.locator(".appearance-picker__trigger").click();
+      await page.getByRole("button", { name: "Escuro", exact: true }).click();
     }
   }
   await page.screenshot({ path: testInfo.outputPath("paper-icons.png"), fullPage: true });
@@ -65,7 +61,7 @@ async function navigateToTool(
   mobileLabel: string,
 ) {
   if (projectName === "mobile") {
-    await page.getByRole("button", { name: "Perfil", exact: true }).click();
+    await page.getByRole("button", { name: "Mais", exact: true }).click();
     await page
       .getByRole("dialog", { name: "Mais ferramentas" })
       .getByRole("button", { name: mobileLabel, exact: true })
@@ -194,40 +190,41 @@ test("concentra as ferramentas na navegação lateral", async ({ page }, testInf
   );
 });
 
-test("anima o seletor entre os temas claro e escuro", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "Contrato visual do seletor desktop.");
-  const toggle = page.locator(".page-header__theme .theme-toggle");
-  const thumb = toggle.locator(".theme-toggle__thumb");
+test("compartilha o seletor de aparência no desktop e celular", async ({ page }, testInfo) => {
+  const toggle = page.locator(".appearance-picker__trigger");
   await expect(toggle).toHaveAccessibleName(/tema claro/i);
-  const initialThumbBox = await thumb.boundingBox();
-  expect(initialThumbBox).not.toBeNull();
-  await expect(toggle.locator('[data-icon="theme-light"]')).toBeVisible();
   await expect(toggle.locator('[data-icon="theme-dark"]')).toBeVisible();
-  const sidebar = page.locator(".sidebar");
-  await expect(sidebar).toHaveCSS("background-color", "rgb(255, 249, 239)");
-
   await toggle.click();
-  await expect(toggle).toHaveAttribute("data-theme", "dark");
+  await page.getByRole("button", { name: "Escuro", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(toggle).toHaveAccessibleName(/tema escuro/i);
-  await expect(sidebar).toHaveCSS("background-color", "rgb(23, 21, 28)");
-  await expect(
-    sidebar.locator('.nav-item [data-icon="today"] .navigation-icon__variant--claro'),
-  ).toBeHidden();
-  await expect(
-    sidebar.locator('.nav-item [data-icon="today"] .navigation-icon__variant--escuro'),
-  ).toBeVisible();
-  await sidebar.getByRole("button", { name: "Expandir menu lateral" }).click();
-  await expect(sidebar.getByText("Área do aluno", { exact: true })).toHaveCSS(
-    "color",
-    "rgb(169, 163, 173)",
-  );
-  await expect(sidebar.getByRole("button", { name: "Agenda" })).toHaveCSS(
-    "color",
-    "rgb(244, 242, 238)",
-  );
-  await expect
-    .poll(async () => (await thumb.boundingBox())?.x)
-    .toBeGreaterThan(initialThumbBox!.x + 20);
+  await expect(toggle.locator('[data-icon="theme-light"]')).toBeVisible();
+  if (testInfo.project.name === "desktop") {
+    const sidebar = page.locator(".sidebar");
+    await expect(sidebar).toHaveCSS("background-color", "rgb(23, 21, 28)");
+    await sidebar.getByRole("button", { name: "Expandir menu lateral" }).click();
+    await expect(sidebar.getByRole("button", { name: "Agenda" })).toHaveCSS(
+      "color",
+      "rgb(255, 249, 239)",
+    );
+    await toggle.click();
+    await page.getByRole("button", { name: "Claro", exact: true }).click();
+    await expect(sidebar.getByRole("button", { name: "Agenda" }).locator("span").last()).toHaveCSS(
+      "color",
+      "rgb(15, 15, 20)",
+    );
+    await expect(sidebar).toHaveCSS("width", "260px");
+    await expect(page.locator("main")).toHaveCSS("margin-left", "260px");
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const rail = document.querySelector(".sidebar")!.getBoundingClientRect();
+          const main = document.querySelector("main")!.getBoundingClientRect();
+          return main.x - rail.right;
+        }),
+      )
+      .toBe(0);
+  }
 });
 
 test("organiza uma tarefa e mantém o dado após recarregar", async ({ page }, testInfo) => {
@@ -309,7 +306,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
     expect(overflow).toBe(false);
   }
 
-  await page.getByRole("button", { name: "Perfil", exact: true }).click();
+  await page.getByRole("button", { name: "Mais", exact: true }).click();
   const toolsDialog = page.getByRole("dialog", { name: "Mais ferramentas" });
   await expect(toolsDialog).toBeVisible();
   await page.waitForTimeout(350);
@@ -331,7 +328,7 @@ test("mantém os módulos acessíveis e sem rolagem horizontal no celular", asyn
   await expect(toolsDialog).toBeHidden();
 
   for (const label of ["Hábitos", "Notas", "Biblioteca", "Planos de aula"]) {
-    await page.getByRole("button", { name: "Perfil", exact: true }).click();
+    await page.getByRole("button", { name: "Mais", exact: true }).click();
     const more = page.getByRole("dialog", { name: "Mais ferramentas" });
     await expect(more).toBeVisible();
     await more.getByRole("button", { name: label, exact: true }).click();

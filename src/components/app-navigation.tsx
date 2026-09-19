@@ -1,6 +1,13 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
+import { MobileMenuContext } from "./mobile-menu-context";
 import { useTheme } from "../hooks/use-theme";
-import { writeSyncedStorage } from "../data/synced-storage";
+import { SYNCED_STORAGE_EVENT, writeSyncedStorage } from "../data/synced-storage";
 import { AppearanceToggle } from "./appearance-picker";
 import { NavigationIcon, type NavigationIconName } from "./navigation-icon";
 
@@ -43,6 +50,16 @@ function readStoredProfile(): StoredProfile {
   } catch {
     return {};
   }
+}
+
+function useStoredProfile() {
+  const [profile, setProfile] = useState(readStoredProfile);
+  useEffect(() => {
+    const refresh = () => setProfile(readStoredProfile());
+    window.addEventListener(SYNCED_STORAGE_EVENT, refresh);
+    return () => window.removeEventListener(SYNCED_STORAGE_EVENT, refresh);
+  }, []);
+  return [profile, setProfile] as const;
 }
 
 const NAVIGATION_SECTIONS: readonly { label: string; items: readonly NavigationItem[] }[] = [
@@ -176,15 +193,15 @@ export function Sidebar({ view, onNavigate }: NavigationProps) {
 }
 
 export function MobileNavigation({ view, onNavigate }: NavigationProps) {
-  const [moreOpen, setMoreOpen] = useState(false);
-  const [profile, setProfile] = useState(readStoredProfile);
+  const { open: moreOpen, setOpen: setMoreOpen } = useContext(MobileMenuContext);
+  const [profile, setProfile] = useStoredProfile();
   const [dragX, setDragX] = useState(0);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dragStartX = useRef<number | null>(null);
-  const moreActive = MORE_ITEMS.some((item) => item.view === view);
 
   useEffect(() => {
     if (!moreOpen) return;
+    const previousFocus = document.activeElement;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     closeButtonRef.current?.focus();
@@ -195,8 +212,9 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", closeOnEscape);
+      if (previousFocus instanceof HTMLElement) previousFocus.focus();
     };
-  }, [moreOpen]);
+  }, [moreOpen, setMoreOpen]);
 
   function navigate(itemView: AppView) {
     onNavigate(itemView);
@@ -336,25 +354,14 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
           );
         })}
         <button
-          className={
-            moreOpen || moreActive
-              ? "mobile-nav__item mobile-more-trigger mobile-nav__item--active"
-              : "mobile-nav__item mobile-more-trigger"
-          }
+          className="mobile-nav__item mobile-nav__profile"
           type="button"
-          aria-label="Perfil"
-          aria-expanded={moreOpen}
-          aria-controls="mobile-more-panel"
-          onClick={() => setMoreOpen((open) => !open)}
+          aria-label="Perfil, em breve"
+          title="Configurações de perfil, conta e aplicativo em breve"
+          disabled
         >
           <span className="mobile-nav__icon">
-            <img
-              className="mobile-more-avatar"
-              src={profile.photoUrl ?? "/profile-avatars/helena.webp"}
-              alt=""
-              width="34"
-              height="34"
-            />
+            <NavigationIcon name="profile" />
           </span>
           <span>Perfil</span>
         </button>
@@ -364,7 +371,8 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
 }
 
 export function PageHeader() {
-  const [profile, setProfile] = useState(readStoredProfile);
+  const [profile, setProfile] = useStoredProfile();
+  const { open: moreOpen, setOpen: setMoreOpen } = useContext(MobileMenuContext);
 
   function chooseProfile(nextProfile: StoredProfile) {
     setProfile(nextProfile);
@@ -377,13 +385,21 @@ export function PageHeader() {
 
   return (
     <header className="page-header">
-      <div className="page-header__mobile-appearance">
-        <AppearanceToggle />
-      </div>
+      <button
+        className="mobile-more-trigger paper-menu"
+        type="button"
+        aria-label="Mais"
+        aria-expanded={moreOpen}
+        aria-controls="mobile-more-panel"
+        data-open={moreOpen}
+        onClick={() => setMoreOpen((open) => !open)}
+      >
+        <span aria-hidden="true" />
+        <span aria-hidden="true" />
+        <span aria-hidden="true" />
+      </button>
       <div className="page-header__actions">
-        <div className="page-header__theme">
-          <ThemeToggle />
-        </div>
+        <AppearanceToggle />
         <details className="profile-menu">
           <summary
             className="user-profile"

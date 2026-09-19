@@ -1,5 +1,11 @@
 # Auditoria do estado atual
 
+## Navegação e foco responsivos, 19/09/2026
+
+O cabeçalho móvel volta a reunir Mais, aparência e foto circular. Mais abre a gaveta de ferramentas; Perfil ocupa a quinta posição inferior com uma silhueta autoral inteiramente em papel grafite, sem elementos decorativos. Não usa a foto do usuário e fica desabilitado até a implementação das configurações de perfil, conta e aplicativo. O estado da gaveta é compartilhado por contexto e o perfil acompanha alterações locais sincronizadas. Desktop e celular usam o mesmo seletor Claro, Escuro e Sistema.
+
+O rail acompanha o tema com texto grafite sobre creme no claro e creme sobre grafite no escuro. A área principal começa na borda do rail, com margem interna de 24px no desktop. O destaque de Praticar mantém facetas roxas e arte creme nos dois temas. O carrossel reserva espaço para sombras e foco dos botões; as sete maçãs usam colunas flexíveis e os controles móveis aproveitam a largura disponível. Testes de navegador cobrem 320, 360, 390, 768 e 1280px, aparência e alcance dos botões acima da barra inferior.
+
 ## Preferências e metas de foco sincronizadas, 17/09/2026
 
 O Pomodoro permite escolher 25 ou 50 minutos e ativar ou desativar a pausa longa. Essas preferências fazem parte do workspace v5 e usam a sincronização da conta. O formulário de meta mostra minutos no temporizador e pomodoros no modo Pomodoro. O prazo usa calendário próprio em papel recortado, com o intervalo entre hoje e a data final marcado como um caminho de dias.

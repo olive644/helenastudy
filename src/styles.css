@@ -4166,7 +4166,7 @@ body.local-room-active {
 }
 
 .focus-rose-stage--pomodoro {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.75rem;
   text-align: center;
 }
@@ -4225,6 +4225,7 @@ body.local-room-active {
 }
 
 .pomodoro-progress {
+  min-width: 0;
   display: grid;
   justify-items: center;
   gap: 0.45rem;
@@ -4241,13 +4242,14 @@ body.local-room-active {
 
 .pomodoro-progress .pomodoro-week {
   display: grid;
-  grid-template-columns: repeat(7, minmax(34px, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   width: min(100%, 390px);
   gap: clamp(0.2rem, 1vw, 0.55rem);
 }
 
 .pomodoro-week__day {
   display: grid;
+  min-width: 0;
   justify-items: center;
   gap: 0.15rem;
 }
@@ -4260,8 +4262,8 @@ body.local-room-active {
 
 .streak-apple {
   position: relative;
-  width: 34px;
-  height: 36px;
+  width: min(34px, 100%);
+  aspect-ratio: 34 / 36;
   margin-top: 8px;
   border-radius: 42% 45% 48% 46% / 36% 38% 58% 60%;
   background: linear-gradient(135deg, #4b4254 0 27%, #312b39 28% 100%);
@@ -4383,6 +4385,7 @@ body.local-room-active {
 }
 
 .focus-rose-copy {
+  min-width: 0;
   display: grid;
   gap: 0.35rem;
 }
@@ -7583,7 +7586,7 @@ select {
     width: calc(100% - 84px);
     max-width: none;
     margin-left: 84px;
-    padding: 1rem clamp(1.75rem, 4vw, 4.75rem) 3.5rem;
+    padding: 1rem 24px 3.5rem;
   }
 
   .page-header {
@@ -7762,7 +7765,7 @@ select {
     max-width: none;
     padding: 0;
     border: 0;
-    color: rgb(255 255 255 / 86%);
+    color: inherit;
     background: transparent;
     box-shadow: none;
     opacity: 1;
@@ -8094,6 +8097,7 @@ select {
 .focus-mode-viewport {
   min-width: 0;
   overflow: hidden;
+  padding: 8px 8px 16px;
 }
 
 .focus-mode-name {
