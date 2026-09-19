@@ -335,30 +335,36 @@ export function MobileNavigation({ view, onNavigate }: NavigationProps) {
             </button>
           );
         })}
+        <AppearanceToggle variant="nav" />
+      </nav>
+
+      <div className="mobile-top-bar">
         <button
           className={
-            moreOpen || moreActive
-              ? "mobile-nav__item mobile-more-trigger mobile-nav__item--active"
-              : "mobile-nav__item mobile-more-trigger"
+            moreOpen || moreActive ? "mobile-more-trigger is-active" : "mobile-more-trigger"
           }
           type="button"
-          aria-label="Perfil"
+          aria-label="Mais ferramentas"
           aria-expanded={moreOpen}
           aria-controls="mobile-more-panel"
           onClick={() => setMoreOpen((open) => !open)}
         >
-          <span className="mobile-nav__icon">
-            <img
-              className="mobile-more-avatar"
-              src={profile.photoUrl ?? "/profile-avatars/helena.webp"}
-              alt=""
-              width="34"
-              height="34"
-            />
-          </span>
-          <span>Perfil</span>
+          <NavigationIcon name="more" />
         </button>
-      </nav>
+        <button
+          className="mobile-top-bar__profile"
+          type="button"
+          aria-label={profile.name ? `Perfil de ${profile.name}` : "Escolher perfil"}
+          onClick={() => setMoreOpen((open) => !open)}
+        >
+          <img
+            src={profile.photoUrl ?? "/profile-avatars/helena.webp"}
+            alt=""
+            width="34"
+            height="34"
+          />
+        </button>
+      </div>
     </>
   );
 }
@@ -377,12 +383,9 @@ export function PageHeader() {
 
   return (
     <header className="page-header">
-      <div className="page-header__mobile-appearance">
-        <AppearanceToggle />
-      </div>
       <div className="page-header__actions">
         <div className="page-header__theme">
-          <ThemeToggle />
+          <AppearanceToggle />
         </div>
         <details className="profile-menu">
           <summary

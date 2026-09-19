@@ -55,8 +55,10 @@ describe("App", () => {
     );
     render(<App />);
 
-    const profile = screen.getByLabelText("Perfil de Ana");
-    expect(profile.querySelector("img")?.getAttribute("src")).toBe("https://example.com/ana.png");
+    const profiles = screen.getAllByLabelText("Perfil de Ana");
+    for (const profile of profiles) {
+      expect(profile.querySelector("img")?.getAttribute("src")).toBe("https://example.com/ana.png");
+    }
   });
 
   it("permite escolher um avatar oficial para o perfil", () => {
@@ -96,8 +98,12 @@ describe("App", () => {
   it("organiza as ferramentas secundárias no menu móvel", () => {
     render(<App />);
     const mobileNavigation = screen.getByRole("navigation", { name: "Navegação móvel" });
-    expect(within(mobileNavigation).getAllByRole("button")).toHaveLength(5);
-    fireEvent.click(screen.getByRole("button", { name: "Perfil" }));
+    expect(
+      mobileNavigation.querySelectorAll(
+        ":scope > .mobile-nav__item, :scope > .appearance-picker > .mobile-nav__item",
+      ),
+    ).toHaveLength(5);
+    fireEvent.click(screen.getByRole("button", { name: "Mais ferramentas" }));
 
     const moreMenu = screen.getByRole("dialog", { name: "Mais ferramentas" });
     fireEvent.click(within(moreMenu).getByLabelText("Trocar foto de perfil"));
@@ -139,25 +145,27 @@ describe("App", () => {
     });
   });
 
-  it("usa a iconografia própria da Helena no seletor de tema", () => {
+  it("usa a iconografia própria da Helena no seletor de aparência", () => {
     render(<App />);
-    const lightThemeButton = screen.getByRole("button", { name: /tema claro/i });
-    expect(lightThemeButton.getAttribute("data-theme")).toBe("light");
-    const lightArtwork = lightThemeButton.querySelector('[data-icon="theme-light"]');
+    const header = document.querySelector(".page-header__theme") as HTMLElement;
+    const appearanceTrigger = header.querySelector(".appearance-picker__trigger") as HTMLElement;
+    const lightArtwork = appearanceTrigger.querySelector('[data-icon="theme-dark"]');
     expect(lightArtwork?.classList.contains("navigation-icon--brand")).toBe(true);
     expect(lightArtwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
     expect(
-      lightArtwork?.querySelector('img[src="/navigation-icons/paper/claro/theme-light.svg"]'),
+      lightArtwork?.querySelector('img[src="/navigation-icons/paper/claro/theme-dark.svg"]'),
     ).toBeTruthy();
 
-    fireEvent.click(lightThemeButton);
-    const darkThemeButton = screen.getByRole("button", { name: /tema escuro/i });
-    expect(darkThemeButton.getAttribute("data-theme")).toBe("dark");
-    const darkArtwork = darkThemeButton.querySelector('[data-icon="theme-dark"]');
+    fireEvent.click(appearanceTrigger);
+    fireEvent.click(within(header).getByRole("button", { name: "Escuro" }));
+    expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+    const darkArtwork = (
+      header.querySelector(".appearance-picker__trigger") as HTMLElement
+    ).querySelector('[data-icon="theme-light"]');
     expect(darkArtwork?.classList.contains("navigation-icon--brand")).toBe(true);
     expect(darkArtwork?.querySelectorAll(".navigation-icon__variant")).toHaveLength(3);
     expect(
-      darkArtwork?.querySelector('img[src="/navigation-icons/paper/escuro/theme-dark.svg"]'),
+      darkArtwork?.querySelector('img[src="/navigation-icons/paper/escuro/theme-light.svg"]'),
     ).toBeTruthy();
   });
 

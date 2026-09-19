@@ -270,15 +270,14 @@
   object-fit: cover;
 }
 
-/* Botão único de aparência da barra móvel: mesma peça de papel do avatar de
-   perfil, só que abrindo as três opções de tema em vez do seletor de foto. */
-.page-header__mobile-appearance {
-  position: relative;
-  margin-left: auto;
-}
-
 .appearance-picker {
   position: relative;
+}
+
+.appearance-picker--nav .appearance-picker__sheet {
+  top: auto;
+  right: -6px;
+  bottom: calc(100% + 14px);
 }
 
 .appearance-picker > summary {
@@ -373,10 +372,75 @@
   height: 20px;
 }
 
+/* Cabeçalho móvel: só o botão de "mais" e a bolinha do perfil ficam visíveis,
+   flutuando sobre o conteúdo já que a barra superior completa some. */
+.mobile-top-bar {
+  position: fixed;
+  z-index: 50;
+  top: calc(10px + env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  display: flex;
+  gap: 8px;
+}
+
+.mobile-more-trigger {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #d7cbb7;
+  border-radius: 9px 15px 10px 13px;
+  color: #292432;
+  background-color: #fff9ef;
+  background-image:
+    linear-gradient(135deg, #e9ddc6 0 12%, transparent 12%),
+    linear-gradient(315deg, #eee5d5 0 14%, transparent 14%);
+  box-shadow: 0 3px 0 #c8baa4;
+  place-items: center;
+}
+
+.mobile-more-trigger .navigation-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.mobile-top-bar__profile {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid #d7cbb7;
+  border-radius: 8px 17px 9px 15px;
+  background-color: #fff9ef;
+  background-image:
+    linear-gradient(135deg, #e9ddc6 0 12%, transparent 12%),
+    linear-gradient(315deg, #eee5d5 0 14%, transparent 14%);
+  box-shadow: 0 3px 0 #c8baa4;
+}
+
+.mobile-top-bar__profile img {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 @media (min-width: 900px) {
-  .page-header__mobile-appearance {
+  .mobile-top-bar {
     display: none;
   }
+}
+
+:root[data-theme="dark"] .mobile-more-trigger,
+:root[data-theme="dark"] .mobile-top-bar__profile {
+  border-color: #51465d;
+  color: #fff9ef;
+  background-color: #292432;
+  background-image:
+    linear-gradient(135deg, #342c42 0 12%, transparent 12%),
+    linear-gradient(315deg, #201b29 0 14%, transparent 14%);
+  box-shadow: 0 3px 0 #17151c;
 }
 
 /* Campos escuros deixam de usar blocos brancos saturados. */
@@ -815,24 +879,9 @@
     padding-top: 0;
   }
 
-  /* A barra superior some no celular: sobra só o botão de aparência,
-     ver .page-header__mobile-appearance mais abaixo. */
-  .app-shell .page-header,
-  :root[data-theme="dark"] .app-shell .page-header {
-    top: 0;
-    width: 100%;
-    min-height: 0;
-    margin: 0;
-    padding: calc(10px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 0.4rem
-      max(12px, env(safe-area-inset-left));
-    justify-content: flex-end;
-    border: 0;
-    border-radius: 0;
-    background: none;
-    box-shadow: none;
-  }
-
-  .app-shell .page-header__actions {
+  /* A barra superior completa some no celular: o botão de "mais" e a
+     bolinha de perfil ficam em .mobile-top-bar, fora do cabeçalho. */
+  .app-shell .page-header {
     display: none;
   }
 }
